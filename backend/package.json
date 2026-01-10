@@ -1,0 +1,33 @@
+{
+  "name": "hcm-datascanner-backend",
+  "version": "1.0.0",
+  "description": "Backend Express.js pour HCM Data Scanner - Extraction intelligente avec Gemini AI",
+  "main": "dist/server.js",
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "build": "tsc",
+    "start": "node dist/server.js",
+    "test": "echo \"Tests à implémenter\" && exit 0"
+  },
+  "keywords": ["hcm", "datascanner", "gemini", "express", "supabase"],
+  "author": "LELE HCM",
+  "license": "MIT",
+  "dependencies": {
+    "@google/generative-ai": "^0.24.1",
+    "@supabase/supabase-js": "^2.76.1",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
+    "express": "^4.21.2",
+    "helmet": "^8.0.0",
+    "xlsx": "^0.18.5",
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.17",
+    "@types/express": "^5.0.0",
+    "@types/node": "^22.16.5",
+    "tsx": "^4.20.6",
+    "typescript": "^5.8.3"
+  }
+}

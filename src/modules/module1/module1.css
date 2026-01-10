@@ -1,0 +1,367 @@
+/* Module 1 - CFO's SAF FinTech Platform Styles */
+/* Import Inter font */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+/* Custom CSS Variables - Theme-aware using HCM Design Tokens */
+.module1-wrapper {
+  /* Use HCM brand colors with theme support */
+  --cfo-bg: hsl(var(--background));
+  --cfo-card: hsl(var(--card));
+  --cfo-border: hsl(var(--border));
+  --cfo-text: hsl(var(--foreground));
+  --cfo-muted: hsl(var(--muted-foreground));
+  --cfo-accent: rgb(var(--brand-cyan));
+  --cfo-primary: hsl(var(--primary));
+}
+
+/* Base styles matching original application */
+.module1-wrapper {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif !important;
+  color: var(--cfo-text) !important;
+  scroll-behavior: smooth;
+  padding: 1.5rem;
+}
+
+.module1-wrapper * {
+  @apply border-border;
+}
+
+/* Component styles matching original design */
+.module1-wrapper .form-container {
+  @apply bg-card rounded-2xl p-8 max-w-6xl mx-auto border border-border;
+  box-shadow: var(--shadow-lg);
+}
+
+.module1-wrapper .form-header {
+  @apply text-center mb-8;
+}
+
+.module1-wrapper .form-title {
+  @apply text-3xl font-bold mb-4 text-foreground;
+}
+
+.module1-wrapper .form-subtitle {
+  @apply text-lg font-medium;
+  color: var(--cfo-accent);
+}
+
+.module1-wrapper .form-section {
+  @apply mb-8 p-6 rounded-xl border border-border bg-card/50;
+}
+
+.module1-wrapper .form-section-title {
+  @apply text-xl font-semibold mb-4;
+  color: var(--cfo-text);
+}
+
+.module1-wrapper .form-field {
+  @apply mb-4;
+}
+
+.module1-wrapper .form-label {
+  @apply block text-sm font-medium mb-2;
+  color: var(--cfo-text);
+}
+
+.module1-wrapper .form-input {
+  @apply w-full px-4 py-3 rounded-lg bg-input border border-input text-foreground;
+  @apply transition-all duration-200;
+  @apply placeholder:text-muted-foreground;
+  @apply focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent;
+}
+
+.module1-wrapper .form-select {
+  @apply w-full px-4 py-3 rounded-lg bg-input border border-input text-foreground;
+  @apply transition-all duration-200;
+  @apply focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent;
+}
+
+.module1-wrapper .form-button {
+  @apply px-6 py-3 rounded-lg font-medium transition-all duration-200;
+  @apply focus:outline-none focus:ring-2 focus:ring-offset-2;
+}
+
+.module1-wrapper .form-button-primary {
+  @apply bg-primary text-primary-foreground;
+  @apply hover:opacity-90;
+}
+
+.module1-wrapper .form-button-primary:focus {
+  @apply ring-primary;
+}
+
+.module1-wrapper .form-button-secondary {
+  @apply bg-secondary text-secondary-foreground;
+}
+
+.module1-wrapper .form-button-secondary:hover {
+  @apply opacity-90;
+}
+
+.module1-wrapper .form-button-secondary:focus {
+  @apply ring-secondary;
+}
+
+.module1-wrapper .form-grid {
+  @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4;
+}
+
+.module1-wrapper .form-grid-full {
+  @apply col-span-full;
+}
+
+.module1-wrapper .generate-data-button {
+  @apply inline-flex mb-4 mr-4;
+  @apply px-4 py-2 rounded-lg;
+  @apply bg-primary text-primary-foreground shadow-lg;
+  @apply transition-all duration-200;
+  @apply hover:opacity-90 hover:shadow-xl;
+}
+
+.module1-wrapper .loading-overlay {
+  @apply fixed inset-0 flex items-center justify-center z-50 bg-background/50 backdrop-blur-sm;
+}
+
+.module1-wrapper .loading-spinner {
+  @apply animate-spin rounded-full h-12 w-12 border-2 border-transparent border-b-primary;
+}
+
+.module1-wrapper .progress-bar {
+  @apply w-full rounded-full h-2 mb-4 bg-muted;
+}
+
+.module1-wrapper .progress-fill {
+  @apply h-2 rounded-full transition-all duration-300 bg-primary;
+}
+
+.module1-wrapper .step-indicator {
+  @apply flex items-center justify-center w-8 h-8 rounded-full;
+  @apply text-sm font-medium border-2 border-border text-muted-foreground;
+}
+
+.module1-wrapper .step-indicator.active {
+  @apply bg-primary border-primary text-primary-foreground;
+}
+
+.module1-wrapper .step-indicator.completed {
+  @apply bg-primary/80 border-primary/80 text-primary-foreground;
+}
+
+.module1-wrapper .calculation-field {
+  @apply border-2 border-dashed border-border font-mono bg-muted text-primary;
+}
+
+.module1-wrapper .error-message {
+  @apply text-destructive text-sm mt-1;
+}
+
+.module1-wrapper .success-message {
+  @apply text-primary text-sm mt-1;
+}
+
+.module1-wrapper .info-tooltip {
+  @apply absolute z-10 px-3 py-2 text-xs rounded-lg shadow-lg;
+  @apply bg-popover text-popover-foreground border border-border;
+  @apply opacity-0 transition-all duration-200;
+  visibility: hidden;
+}
+
+.module1-wrapper .info-tooltip.visible {
+  @apply opacity-100;
+  visibility: visible;
+}
+
+/* Utility classes */
+.module1-wrapper .text-gradient {
+  @apply bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent;
+}
+
+.module1-wrapper .bg-gradient-cfo {
+  @apply bg-gradient-to-br from-background to-card;
+}
+
+.module1-wrapper .shadow-cfo {
+  box-shadow: var(--shadow-lg);
+}
+
+/* Animation keyframes */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(10px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes pulse-slow {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+@keyframes slideInFromLeft {
+  from {
+    transform: translateX(-20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideInFromRight {
+  from {
+    transform: translateX(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    transform: scale(0.95);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% center;
+  }
+  100% {
+    background-position: 200% center;
+  }
+}
+
+/* Apply smooth animations to components */
+.module1-wrapper .form-container {
+  animation: scaleIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.module1-wrapper .form-section {
+  animation: slideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.module1-wrapper .form-section:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 24px -10px rgba(93, 211, 243, 0.15);
+}
+
+.module1-wrapper .form-input:hover,
+.module1-wrapper .form-select:hover {
+  border-color: hsl(var(--primary) / 0.5);
+}
+
+.module1-wrapper .step-indicator {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.module1-wrapper .step-indicator:hover {
+  transform: scale(1.1);
+}
+
+/* Responsive design */
+
+/* Mobile - Small screens (< 640px) */
+@media (max-width: 640px) {
+  .module1-wrapper {
+    @apply p-3;
+  }
+
+  .module1-wrapper .form-container {
+    @apply p-4 mx-2 rounded-xl;
+  }
+
+  .module1-wrapper .form-title {
+    @apply text-2xl;
+  }
+
+  .module1-wrapper .form-subtitle {
+    @apply text-base;
+  }
+
+  .module1-wrapper .form-grid {
+    @apply grid-cols-1 gap-3;
+  }
+
+  .module1-wrapper .form-section {
+    @apply p-4 mb-6;
+  }
+
+  .module1-wrapper .form-section-title {
+    @apply text-lg;
+  }
+
+  .module1-wrapper .form-input,
+  .module1-wrapper .form-select {
+    @apply px-3 py-2 text-sm;
+  }
+
+  .module1-wrapper .form-button {
+    @apply px-4 py-2 text-sm;
+  }
+
+  .module1-wrapper .generate-data-button {
+    @apply px-3 py-2 text-sm w-full mb-3 mr-0;
+  }
+
+  .module1-wrapper .form-label {
+    @apply text-xs;
+  }
+
+  /* Stack navigation on mobile */
+  .module1-wrapper .step-indicator {
+    @apply w-6 h-6 text-xs;
+  }
+}
+
+/* Tablet - Medium screens (641px - 1024px) */
+@media (min-width: 641px) and (max-width: 1024px) {
+  .module1-wrapper .form-container {
+    @apply p-6 mx-6;
+  }
+
+  .module1-wrapper .form-grid {
+    @apply grid-cols-2 gap-4;
+  }
+
+  .module1-wrapper .form-title {
+    @apply text-2xl;
+  }
+}
+
+/* Desktop - Large screens (> 1024px) */
+@media (min-width: 1025px) {
+  .module1-wrapper .form-grid {
+    @apply lg:grid-cols-3;
+  }
+}
+
+/* Force black text on all primary/cyan buttons in Module 1 */
+.module1-wrapper button {
+  color: #0f172a !important; /* Slate-900 noir profond pour tous les boutons */
+}
+
+.module1-wrapper button * {
+  color: #0f172a !important; /* Force aussi pour les enfants (span, svg, icônes) */
+}
+
+.module1-wrapper button svg {
+  color: #0f172a !important; /* Force pour les SVG/icônes */
+}

@@ -1,0 +1,363 @@
+{
+  "version": "1.0.0",
+  "last_updated": "2025-11-12T20:30:00Z",
+  "total_docs": 2,
+  "project": {
+    "name": "LELE HCM Portal",
+    "type": "SaaS B2B - HCM + Finance Durable + Conformité ESG",
+    "recognition": "Lauréat World Finance Innovation Awards 2025",
+    "stack": {
+      "frontend": "React 18 + TypeScript + Vite + React Router",
+      "ui": "Tailwind CSS + shadcn/ui + Radix UI",
+      "state": "React Query + Context API",
+      "backend": "Supabase (PostgreSQL + Auth + Storage)",
+      "deployment": "Vercel / AWS Amplify"
+    },
+    "personas": ["dev", "admin", "employee", "banker"]
+  },
+  "documents": [
+    {
+      "id": "adr-002",
+      "title": "ADR-002 : Lazy Loading des Sections de la Landing Page",
+      "type": "adr",
+      "personas": ["dev"],
+      "tags": ["performance", "lazy-loading", "react", "landing-page", "optimization"],
+      "path": "/docs/adr/ADR-002-lazy-loading-landing-page.md",
+      "keywords": [
+        "lazy-loading",
+        "performance",
+        "code-splitting",
+        "react-lazy",
+        "suspense",
+        "landing-page",
+        "optimization",
+        "bundle-size",
+        "TTI",
+        "FCP"
+      ],
+      "related": ["pattern-001"],
+      "summary": "Décision d'implémenter lazy loading sur Landing page pour réduire bundle initial de 60% et améliorer TTI. Above-the-fold charge immédiatement, below-the-fold lazy loaded avec React.lazy() + Suspense.",
+      "created": "2025-11-12",
+      "status": "accepted",
+      "ai_response_short": "Lazy loading implémenté sur Landing page pour réduire bundle initial de 60% et améliorer TTI. Above-the-fold charge immédiatement, below-the-fold lazy loaded avec React.lazy() + Suspense.",
+      "ai_actions": [
+        "Pour ajouter une nouvelle section : Créer composant dans /src/components/sections/, memoiser avec memo(), lazy loader dans Landing.tsx",
+        "Pour mesurer l'impact : Lighthouse audit AVANT/APRÈS, comparer FCP, TTI, bundle size",
+        "Pour améliorer loading : Remplacer LoadingSection par skeleton screens"
+      ]
+    },
+    {
+      "id": "pattern-001",
+      "title": "Pattern : Créer une Section Lazy-Loaded pour Landing Page",
+      "type": "pattern",
+      "personas": ["dev"],
+      "tags": ["code", "react", "typescript", "lazy-loading", "components", "how-to"],
+      "path": "/docs/patterns/creer-section-lazy-loaded.md",
+      "keywords": [
+        "pattern",
+        "lazy-loading",
+        "react-lazy",
+        "suspense",
+        "memo",
+        "code-splitting",
+        "components",
+        "sections",
+        "performance",
+        "how-to"
+      ],
+      "related": ["adr-002"],
+      "summary": "Pattern réutilisable pour créer une section de landing page optimisée avec lazy loading, memoization et TypeScript strict. Guide étape par étape avec exemples réels.",
+      "created": "2025-11-12",
+      "status": "published",
+      "ai_response_short": "Pattern en 3 étapes : 1) Créer composant section memoized dans /src/components/sections/, 2) Lazy import avec lazy(() => import()), 3) Wrapper dans <Suspense fallback={<Loading />}>.",
+      "ai_code_minimal": "const Ma = memo(() => <section>...</section>); Ma.displayName = 'Ma'; export default Ma;\n\nconst Ma = lazy(() => import('@/components/sections/Ma')); <Suspense fallback={<Loading />}><Ma /></Suspense>",
+      "ai_actions": [
+        "Créer fichier /src/components/sections/NomSection.tsx",
+        "Copier template avec memo() + TypeScript",
+        "Lazy import dans page parent",
+        "Tester avec Lighthouse"
+      ]
+    }
+  ],
+  "tags_index": {
+    "performance": ["adr-002", "pattern-001"],
+    "lazy-loading": ["adr-002", "pattern-001"],
+    "react": ["adr-002", "pattern-001"],
+    "landing-page": ["adr-002", "pattern-001"],
+    "optimization": ["adr-002", "pattern-001"],
+    "code-splitting": ["adr-002", "pattern-001"],
+    "react-lazy": ["adr-002", "pattern-001"],
+    "suspense": ["adr-002", "pattern-001"],
+    "typescript": ["pattern-001"],
+    "components": ["pattern-001"],
+    "how-to": ["pattern-001"],
+    "code": ["pattern-001"],
+    "memo": ["pattern-001"]
+  },
+  "personas_index": {
+    "dev": ["adr-002", "pattern-001"],
+    "admin": [],
+    "employee": [],
+    "banker": []
+  },
+  "types_index": {
+    "adr": ["adr-002"],
+    "pattern": ["pattern-001"],
+    "architecture": [],
+    "workflow": [],
+    "module": [],
+    "security": [],
+    "troubleshooting": []
+  },
+  "pending_documentation": {
+    "high_priority": [
+      {
+        "title": "Stack Technique Complet",
+        "type": "architecture",
+        "description": "Documentation exhaustive du stack (React, Supabase, Tailwind, etc.)",
+        "deadline": "Après intégration modules"
+      },
+      {
+        "title": "Modules 1-4 Business Logic",
+        "type": "module",
+        "description": "Documentation complète des 4 modules métier (Paie, Congés, Formation, ESG)",
+        "deadline": "Après intégration modules"
+      },
+      {
+        "title": "Matrice de Permissions",
+        "type": "security",
+        "description": "Permissions par rôle (Admin, Employee, Banker) + RLS policies Supabase",
+        "deadline": "Après intégration modules"
+      }
+    ],
+    "medium_priority": [
+      {
+        "title": "Workflow Onboarding Utilisateur",
+        "type": "workflow",
+        "description": "Parcours complet inscription → dashboard",
+        "deadline": "Après intégration modules"
+      },
+      {
+        "title": "Troubleshooting FAQ",
+        "type": "troubleshooting",
+        "description": "Erreurs courantes et solutions",
+        "deadline": "Après tests utilisateurs"
+      }
+    ],
+    "low_priority": [
+      {
+        "title": "Guide Contribution Dev",
+        "type": "architecture",
+        "description": "Comment contribuer au projet (git flow, conventions, tests)",
+        "deadline": "Quand équipe s'agrandit"
+      }
+    ]
+  },
+  "audit_frontend_correctifs": {
+    "title": "Correctifs Audit Frontend Elite (Post-Intégration Modules)",
+    "date_audit": "2025-11-12",
+    "status": "en_attente",
+    "priority": "high",
+    "description": "Correctifs identifiés par elite-frontend-auditor à appliquer après intégration des modules",
+    "phases": [
+      {
+        "phase": "Phase 1 : Brancher l'Infrastructure",
+        "deadline": "2 jours après intégration modules",
+        "tasks": [
+          {
+            "id": "frontend-fix-001",
+            "title": "Intégrer VRAIES analytics (Google Analytics ou PostHog)",
+            "duration": "4h",
+            "priority": "URGENT",
+            "description": "Créer compte GA/PostHog, intégrer script dans App.tsx, vérifier événements en temps réel",
+            "acceptance_criteria": [
+              "Measurement ID configuré",
+              "Script chargé dans App.tsx",
+              "Événements cta_click visibles dans GA Real-Time",
+              "trackCTAClick() fonctionnel"
+            ],
+            "files_to_modify": [
+              "src/lib/analytics-provider.ts (créer)",
+              "src/App.tsx (ajouter init)",
+              "src/lib/utils/analytics.ts (update)"
+            ]
+          },
+          {
+            "id": "frontend-fix-002",
+            "title": "Valider SEO meta tags",
+            "duration": "1h",
+            "priority": "URGENT",
+            "description": "Vérifier View Source, tester Twitter Card, Open Graph",
+            "acceptance_criteria": [
+              "Meta tags visibles dans View Source HTML",
+              "Twitter Card preview OK (cards-dev.twitter.com)",
+              "Open Graph preview OK (opengraph.xyz)",
+              "Screenshot documentation"
+            ],
+            "files_to_check": [
+              "src/pages/Landing.tsx (Helmet tags)",
+              "src/App.tsx (HelmetProvider)"
+            ]
+          },
+          {
+            "id": "frontend-fix-003",
+            "title": "Mesurer performance AVANT/APRÈS (Lighthouse)",
+            "duration": "2h",
+            "priority": "URGENT",
+            "description": "Lighthouse audit, documenter gains réels",
+            "acceptance_criteria": [
+              "Lighthouse score AVANT documenté",
+              "Lighthouse score APRÈS documenté",
+              "Gain de performance mesuré (FCP, TTI, LCP)",
+              "Screenshots sauvegardés dans /docs/performance/"
+            ],
+            "tools": ["Lighthouse CLI", "Chrome DevTools"]
+          }
+        ]
+      },
+      {
+        "phase": "Phase 2 : Sécuriser la Qualité",
+        "deadline": "1 semaine après intégration modules",
+        "tasks": [
+          {
+            "id": "frontend-fix-004",
+            "title": "Ajouter Error Boundaries",
+            "duration": "2h",
+            "priority": "IMPORTANT",
+            "description": "Créer ErrorBoundary component, wrapper chaque Suspense",
+            "acceptance_criteria": [
+              "ErrorBoundary component créé",
+              "Chaque Suspense wrappé",
+              "Test error case fonctionnel",
+              "Logs envoyés à Sentry (futur)"
+            ],
+            "files_to_create": [
+              "src/components/ErrorBoundary.tsx"
+            ],
+            "files_to_modify": [
+              "src/pages/Landing.tsx"
+            ]
+          },
+          {
+            "id": "frontend-fix-005",
+            "title": "Tests critiques (HeroSection, WhyLeleHCM, CTATransformation)",
+            "duration": "4h",
+            "priority": "IMPORTANT",
+            "description": "Tests unitaires avec Vitest + React Testing Library",
+            "acceptance_criteria": [
+              "Tests HeroSection (CTA click, render)",
+              "Tests WhyLeleHCM (4 cards render)",
+              "Tests CTATransformation (tracking, trust badges)",
+              "Coverage > 70% sur composants critiques"
+            ],
+            "files_to_create": [
+              "src/components/sections/__tests__/HeroSection.test.tsx",
+              "src/components/sections/__tests__/WhyLeleHCM.test.tsx",
+              "src/components/sections/__tests__/CTATransformation.test.tsx"
+            ]
+          },
+          {
+            "id": "frontend-fix-006",
+            "title": "Accessibilité WCAG 2.1 AA",
+            "duration": "3h",
+            "priority": "IMPORTANT",
+            "description": "Audit axe DevTools, fix problèmes critiques, test navigation clavier",
+            "acceptance_criteria": [
+              "Audit axe DevTools passé",
+              "ARIA labels sur tous les CTAs",
+              "Contraste WCAG AA OK",
+              "Navigation clavier fonctionnelle",
+              "Focus visible sur tous les éléments interactifs"
+            ],
+            "files_to_modify": [
+              "src/components/sections/HeroSection.tsx",
+              "src/components/sections/CTATransformation.tsx",
+              "src/index.css (focus styles)"
+            ]
+          }
+        ]
+      },
+      {
+        "phase": "Phase 3 : Optimiser Conversion",
+        "deadline": "2 semaines après intégration modules",
+        "tasks": [
+          {
+            "id": "frontend-fix-007",
+            "title": "Améliorer Loading States (skeleton screens)",
+            "duration": "2h",
+            "priority": "MOYEN",
+            "description": "Remplacer LoadingSection basique par skeletons réalistes",
+            "acceptance_criteria": [
+              "LoadingSkeleton component créé",
+              "Skeleton adapté à chaque section",
+              "Animation pulse fluide",
+              "UX loading améliorée"
+            ],
+            "files_to_create": [
+              "src/components/LoadingSkeleton.tsx"
+            ],
+            "files_to_modify": [
+              "src/pages/Landing.tsx"
+            ]
+          },
+          {
+            "id": "frontend-fix-008",
+            "title": "A/B Testing Infrastructure",
+            "duration": "4h",
+            "priority": "MOYEN",
+            "description": "Créer système A/B testing pour tester variants de CTAs",
+            "acceptance_criteria": [
+              "Module ab-testing.ts créé",
+              "localStorage pour persist variants",
+              "Tracking variant dans analytics",
+              "Exemple test sur CTA text"
+            ],
+            "files_to_create": [
+              "src/lib/ab-testing.ts"
+            ],
+            "files_to_modify": [
+              "src/components/sections/CTATransformation.tsx"
+            ]
+          },
+          {
+            "id": "frontend-fix-009",
+            "title": "Tracking avancé (scroll depth, time on page)",
+            "duration": "3h",
+            "priority": "MOYEN",
+            "description": "Ajouter tracking scroll depth, time on page, exit intent",
+            "acceptance_criteria": [
+              "Scroll depth tracking (25%, 50%, 75%, 100%)",
+              "Time on page tracking",
+              "Exit intent detection (futur)",
+              "Événements dans GA"
+            ],
+            "files_to_modify": [
+              "src/pages/Landing.tsx",
+              "src/lib/utils/analytics.ts"
+            ]
+          }
+        ]
+      }
+    ],
+    "total_estimated_time": "25h",
+    "notes": [
+      "À faire APRÈS intégration des modules",
+      "User doit être rappelé de ces correctifs",
+      "Priority: Phase 1 URGENT (analytics + SEO + perf)",
+      "Phase 2-3 peuvent être étalées sur 2-3 semaines"
+    ]
+  },
+  "changelog": [
+    {
+      "date": "2025-11-12",
+      "author": "Claude (lele-hcm-knowledge-base skill)",
+      "changes": [
+        "Création knowledge base structure",
+        "ADR-002 : Lazy loading Landing page",
+        "Pattern-001 : Créer section lazy-loaded",
+        "knowledge-index.json initialisé",
+        "Correctifs audit frontend sauvegardés"
+      ]
+    }
+  ]
+}

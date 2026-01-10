@@ -1,0 +1,19 @@
+{
+  "files": [],
+  "references": [{ "path": "./tsconfig.app.json" }, { "path": "./tsconfig.node.json" }],
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"]
+    },
+    // ✅ CONFIGURATION STRICTE PROFESSIONNELLE
+    "strict": true,                   // ✅ Active TOUT le mode strict
+    "noImplicitAny": true,           // ✅ Force le typage explicite
+    "strictNullChecks": true,        // ✅ Évite les erreurs null/undefined
+    "noUnusedLocals": true,          // ✅ Détecte le code mort
+    "noUnusedParameters": true,      // ✅ Paramètres inutilisés interdits
+    "skipLibCheck": false,           // ✅ Vérifie les types des librairies
+    "allowJs": false,                // ✅ Force l'utilisation de TypeScript
+    "noUncheckedIndexedAccess": true // ✅ Sécurise les accès array/object
+  }
+}

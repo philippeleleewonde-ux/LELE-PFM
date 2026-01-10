@@ -1,0 +1,62 @@
+# Dependencies
+node_modules
+npm-debug.log
+yarn-error.log
+package-lock.json
+yarn.lock
+
+# Build outputs
+dist
+build
+.vite
+.cache
+
+# Environment files (will be provided by Dokploy)
+.env
+.env.local
+.env.*.local
+
+# Git
+.git
+.gitignore
+.gitattributes
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# Testing
+coverage
+.nyc_output
+*.test.ts
+*.test.tsx
+*.spec.ts
+*.spec.tsx
+test
+tests
+__tests__
+
+# Documentation
+README.md
+docs
+*.md
+!package.md
+
+# Misc
+.DS_Store
+Thumbs.db
+.eslintcache
+.prettierrc
+.editorconfig
+
+# Backups
+backups
+*.backup
+*.bak
+
+# Logs
+logs
+*.log

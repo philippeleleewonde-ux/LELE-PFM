@@ -1,0 +1,271 @@
+/* ============================================
+   HCM DATA SCANNER - Theme-Aware Styles
+   ============================================ */
+
+/* Main wrapper with theme support */
+.datascanner-wrapper {
+  min-height: 100vh;
+  background: hsl(var(--background));
+  color: hsl(var(--foreground));
+}
+
+/* Gradient backgrounds using theme colors */
+.datascanner-gradient-bg {
+  background: linear-gradient(
+    135deg,
+    hsl(var(--background)) 0%,
+    hsl(var(--card)) 50%,
+    hsl(var(--background)) 100%
+  );
+}
+
+/* Landing screen specific */
+.datascanner-landing {
+  min-height: calc(100vh - 4rem);
+  background: linear-gradient(
+    135deg,
+    hsl(var(--primary) / 0.05) 0%,
+    hsl(var(--card)) 50%,
+    hsl(var(--accent) / 0.05) 100%
+  );
+}
+
+/* Card styles with theme */
+.datascanner-card {
+  background: hsl(var(--card));
+  border: 1px solid hsl(var(--border));
+  color: hsl(var(--card-foreground));
+  border-radius: var(--radius);
+}
+
+.datascanner-card-gradient {
+  background: linear-gradient(
+    135deg,
+    hsl(var(--card)) 0%,
+    hsl(var(--muted)) 100%
+  );
+  border: 1px solid hsl(var(--border));
+  border-radius: var(--radius);
+}
+
+/* Primary buttons with cyan theme */
+.datascanner-btn-primary {
+  background: linear-gradient(
+    90deg,
+    hsl(var(--primary)) 0%,
+    hsl(var(--primary-glow)) 100%
+  );
+  color: hsl(var(--primary-foreground));
+  font-weight: 600;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.datascanner-btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 30px hsl(var(--primary) / 0.3);
+}
+
+/* Secondary accent buttons (orange accent) */
+.datascanner-btn-accent {
+  background: linear-gradient(
+    90deg,
+    hsl(25 95% 53%) 0%,
+    hsl(30 100% 60%) 100%
+  );
+  color: hsl(220 13% 9%);
+  font-weight: 600;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.datascanner-btn-accent:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 30px hsl(25 95% 53% / 0.3);
+}
+
+/* Validation buttons - Oui (Cyan) / Non (Orange) */
+.datascanner-btn-yes {
+  background: linear-gradient(
+    90deg,
+    hsl(var(--primary)) 0%,
+    hsl(var(--primary-glow)) 100%
+  );
+  color: hsl(var(--primary-foreground));
+}
+
+.datascanner-btn-no {
+  background: linear-gradient(
+    90deg,
+    hsl(25 95% 53%) 0%,
+    hsl(30 100% 60%) 100%
+  );
+  color: hsl(220 13% 9%);
+}
+
+/* Icon containers with theme colors */
+.datascanner-icon-cyan {
+  background: hsl(var(--primary) / 0.2);
+  color: hsl(var(--primary));
+}
+
+.datascanner-icon-orange {
+  background: hsl(25 95% 53% / 0.2);
+  color: hsl(25 95% 53%);
+}
+
+/* Text colors */
+.datascanner-text-primary {
+  color: hsl(var(--foreground));
+}
+
+.datascanner-text-muted {
+  color: hsl(var(--muted-foreground));
+}
+
+.datascanner-text-cyan {
+  color: hsl(var(--primary));
+}
+
+.datascanner-text-orange {
+  color: hsl(25 95% 53%);
+}
+
+/* Badge styles */
+.datascanner-badge-cyan {
+  background: hsl(var(--primary) / 0.2);
+  color: hsl(var(--primary));
+  border: 1px solid hsl(var(--primary) / 0.3);
+}
+
+.datascanner-badge-orange {
+  background: hsl(25 95% 53% / 0.2);
+  color: hsl(25 95% 53%);
+  border: 1px solid hsl(25 95% 53% / 0.3);
+}
+
+/* Progress bar */
+.datascanner-progress {
+  background: hsl(var(--muted));
+}
+
+.datascanner-progress-fill {
+  background: linear-gradient(
+    90deg,
+    hsl(var(--primary)) 0%,
+    hsl(var(--primary-glow)) 100%
+  );
+}
+
+/* Stats cards */
+.datascanner-stat-revenue {
+  background: hsl(142 76% 36% / 0.1);
+  border-color: hsl(142 76% 36% / 0.3);
+}
+
+.datascanner-stat-expense {
+  background: hsl(0 72% 45% / 0.1);
+  border-color: hsl(0 72% 45% / 0.3);
+}
+
+/* Animation classes */
+@keyframes datascanner-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.datascanner-animate-fade-in {
+  animation: datascanner-fade-in 0.5s ease-out;
+}
+
+@keyframes datascanner-slide-in {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.datascanner-animate-slide-in {
+  animation: datascanner-slide-in 0.5s ease-out;
+}
+
+/* Pulse animation for scanning */
+@keyframes datascanner-pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.datascanner-animate-pulse {
+  animation: datascanner-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Upload zone */
+.datascanner-upload-zone {
+  border: 2px dashed hsl(var(--border));
+  background: hsl(var(--card));
+  transition: all 0.3s ease;
+}
+
+.datascanner-upload-zone:hover {
+  border-color: hsl(var(--primary));
+  background: hsl(var(--primary) / 0.05);
+}
+
+.datascanner-upload-zone-active {
+  border-color: hsl(var(--primary));
+  background: hsl(var(--primary) / 0.1);
+  transform: scale(1.02);
+}
+
+/* Results table */
+.datascanner-table-header {
+  background: hsl(var(--muted));
+  color: hsl(var(--foreground));
+  font-weight: 600;
+}
+
+.datascanner-table-row {
+  border-bottom: 1px solid hsl(var(--border));
+  transition: background 0.2s;
+}
+
+.datascanner-table-row:hover {
+  background: hsl(var(--muted) / 0.5);
+}
+
+/* Dark mode specific adjustments */
+.dark .datascanner-landing {
+  background: linear-gradient(
+    135deg,
+    hsl(var(--background)) 0%,
+    hsl(var(--card)) 50%,
+    hsl(var(--background)) 100%
+  );
+}
+
+.dark .datascanner-card-gradient {
+  background: linear-gradient(
+    135deg,
+    hsl(var(--card)) 0%,
+    hsl(var(--muted) / 0.5) 100%
+  );
+}
+
+/* Responsive padding */
+@media (max-width: 640px) {
+  .datascanner-wrapper {
+    padding: 1rem;
+  }
+}

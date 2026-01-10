@@ -1,0 +1,28 @@
+{
+  "timestamp": "2025-11-15T19-33-15",
+  "date": "2025-11-15T19:33:17.747Z",
+  "tables": [
+    {
+      "tableName": "profiles",
+      "count": 0,
+      "filepath": "/Users/onclephilbasket/Documents/Sauvergarde docs Macbookair15/Projet Modules HCM ACCOUNTING/HCM-PORTAL V2/backups/2025-11-15T19-33-15_profiles.json"
+    },
+    {
+      "tableName": "companies",
+      "count": 0,
+      "filepath": "/Users/onclephilbasket/Documents/Sauvergarde docs Macbookair15/Projet Modules HCM ACCOUNTING/HCM-PORTAL V2/backups/2025-11-15T19-33-15_companies.json"
+    },
+    {
+      "tableName": "user_roles",
+      "count": 0,
+      "filepath": "/Users/onclephilbasket/Documents/Sauvergarde docs Macbookair15/Projet Modules HCM ACCOUNTING/HCM-PORTAL V2/backups/2025-11-15T19-33-15_user_roles.json"
+    },
+    {
+      "tableName": "banker_access_grants",
+      "count": 0,
+      "filepath": "/Users/onclephilbasket/Documents/Sauvergarde docs Macbookair15/Projet Modules HCM ACCOUNTING/HCM-PORTAL V2/backups/2025-11-15T19-33-15_banker_access_grants.json"
+    }
+  ],
+  "totalRecords": 0,
+  "backupDir": "/Users/onclephilbasket/Documents/Sauvergarde docs Macbookair15/Projet Modules HCM ACCOUNTING/HCM-PORTAL V2/backups"
+}

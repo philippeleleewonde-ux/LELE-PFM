@@ -1,0 +1,13 @@
+project_id = "oglitlcyktesjsntjgco"
+
+[functions.analyze-performance]
+verify_jwt = true
+
+[functions.analyze-satisfaction]
+verify_jwt = true
+
+[functions.calculate-savings]
+verify_jwt = true
+
+[functions.generate-performance-cards]
+verify_jwt = true

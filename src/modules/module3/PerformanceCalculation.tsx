@@ -292,10 +292,11 @@ export default function PerformanceCalculation() {
         // Get Recettes and Dépenses from Financial History (N-1)
         if (factors.employeeEngagement?.financialHistory?.length > 0) {
           const financialHistory = factors.employeeEngagement.financialHistory;
-          const lastYear = financialHistory[financialHistory.length - 1];
-          if (lastYear) {
-            recettesN1 = lastYear.sales || 0;
-            depensesN1 = lastYear.spending || 0;
+          // CORRECTION BUG: N-1 est à l'INDEX 0, pas à la fin du tableau
+          const yearN1 = financialHistory.find((y: any) => y.year === 'N-1') || financialHistory[0];
+          if (yearN1) {
+            recettesN1 = yearN1.sales || 0;
+            depensesN1 = yearN1.spending || 0;
           }
         }
 

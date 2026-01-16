@@ -17,6 +17,21 @@ import type {
   KPIType,
 } from '../types/performance';
 
+// Import des fonctions du calculationEngine pour usage LOCAL
+import {
+  calculateScoreFinancier,
+  calculatePertesConstateesBrut,
+  calculatePertesConstateesAvecIncapacite,
+  calculatePPRPrevues,
+  calculatePPRPerPersonFromSources,
+  calculateScoreFinancierN2,
+  calculatePertesConstateesN2,
+  // Import des fonctions N2 agrégées
+  type TempsN2Map,
+  getTempsN2FromMap,
+  getFeesN2FromMap,
+} from '../engine/calculationEngine';
+
 // ============================================
 // HELPER FUNCTIONS - FORMULES EXCEL CONFORMES
 // ============================================
@@ -56,65 +71,32 @@ export const calculateTempsCalcul = (tempsCollecte: number): number => {
   return tempsCollecte + 0;
 };
 
-/**
- * FORMULE EXCEL: Score financier
- * =(('2-Tri-TB Fixe-Données Risko M1'!L3-'2-Tri-TB Fixe-Données Risko M1'!M3)/'2-Tri-TB Fixe-Données Risko M1'!K3)*E6
- */
-export const calculateScoreFinancier = (
-  tempsCalcul: number,
-  recettesN1: number,
-  depensesN1: number,
-  volumeHoraireN1: number
-): number => {
-  if (volumeHoraireN1 === 0) return 0;
-  const tauxMargeHoraire = (recettesN1 - depensesN1) / volumeHoraireN1;
-  return tauxMargeHoraire * tempsCalcul;
-};
+// Re-export depuis calculationEngine (SOURCE UNIQUE)
+export {
+  calculateScoreFinancier,
+  calculatePertesConstateesBrut,
+  calculatePertesConstateesAvecIncapacite,
+  calculatePPRPrevues,
+  // Fonctions PPR dynamique par période sélectionnée
+  getPeriodInfoFromSelectedWeek,
+  getPPRPerPersonForPeriod,
+  calculatePPRPrevuesFromPeriod,
+  getCurrentPeriodInfo,
+  // 🆕 Recalcul PPR depuis les sources (évite drift avec DB)
+  calculatePPRPerPersonFromSources,
+} from '../engine/calculationEngine';
 
-/**
- * FORMULE EXCEL: Pertes constatées avec prise en compte du taux d'incapacité (semaine)
- * =SI(M6<0;0;SI(M6=0;0;SI(M6>0;M6)))
- */
-export const calculatePertesConstateesAvecIncapacite = (pertesConstateesBrut: number): number => {
-  if (pertesConstateesBrut < 0) return 0;
-  if (pertesConstateesBrut === 0) return 0;
-  if (pertesConstateesBrut > 0) return pertesConstateesBrut;
-  return 0;
-};
-
-/**
- * FORMULE EXCEL: Pertes Constatées (brut)
- * =SI((H6+G6)=0;0;SI((H6+G6)>0;(H6+G6)-D6))
- */
-export const calculatePertesConstateesBrut = (
-  scoreFinancier: number,
-  fraisCollectes: number,
-  tauxIncapacite: number
-): number => {
-  const total = scoreFinancier + fraisCollectes;
-  if (total === 0) return 0;
-  if (total > 0) {
-    return total - tauxIncapacite;
-  }
-  return 0;
-};
-
-/**
- * FORMULE EXCEL: PPR PREVUES (semaine)
- * =SI(B6<>0;('2-Tri-TB Fixe-Données Risko M1'!O3/3)/4;SI(B6=0;0))
- * Conversion k€ → €
- */
-export const calculatePPRPrevues = (
-  salariéExiste: boolean,
-  pprParPersonneParIndicateur: number
-): number => {
-  if (!salariéExiste) return 0;
-  if (pprParPersonneParIndicateur === 0) return 0;
-
-  const pprEnUnites = pprParPersonneParIndicateur * 1000;
-  const pprSemaine = (pprEnUnites / 3) / 4;
-  return pprSemaine;
-};
+// Re-export types PPR dynamique
+export type {
+  SelectedPeriodInfo,
+  PPRPerPersonData,
+  PriorityActionData,
+  PriorityActionDistribution,
+  QuarterlyPPRData,
+  // 🆕 Types pour recalcul PPR
+  IndicatorRatesModule3,
+  Module1BusinessLineData,
+} from '../engine/calculationEngine';
 
 /**
  * FORMULE EXCEL: ECONOMIES REALISEES (semaine) - Version 1
@@ -201,33 +183,8 @@ export const calculateEconomiesRealiseesN2 = (
   return 0;
 };
 
-/**
- * FORMULE EXCEL: Score Financier NIVEAU 2
- */
-export const calculateScoreFinancierN2 = (
-  tempsPrisEnCompte: number,
-  recettesN1: number,
-  depensesN1: number,
-  volumeHoraireN1: number
-): number => {
-  if (volumeHoraireN1 === 0) return 0;
-  const tauxMargeHoraire = (recettesN1 - depensesN1) / volumeHoraireN1;
-  return tauxMargeHoraire * tempsPrisEnCompte;
-};
-
-/**
- * FORMULE EXCEL: Pertes Constatées NIVEAU 2
- */
-export const calculatePertesConstateesN2 = (
-  scoreFinancierN2: number,
-  fraisPrisEnCompte: number,
-  tauxIncapacite: number
-): number => {
-  const total = scoreFinancierN2 + fraisPrisEnCompte;
-  if (total === 0) return 0;
-  if (total > 0) return total - tauxIncapacite;
-  return 0;
-};
+// Re-export depuis calculationEngine (SOURCE UNIQUE)
+export { calculateScoreFinancierN2, calculatePertesConstateesN2 } from '../engine/calculationEngine';
 
 /**
  * FORMULE EXCEL: ECONOMIES REALISEES 2 (semaine) NIVEAU 2
@@ -279,7 +236,10 @@ export const calculateIndicatorData = (
   coefficientCompetence: number,
   params: FinancialParams,
   memberBusinessLineName: string,
-  salariéExiste: boolean
+  salariéExiste: boolean,
+  // 🆕 Paramètres optionnels pour données N2 agrégées (Option B - Audit DK6)
+  tempsN2Map?: TempsN2Map,
+  businessLineId?: string
 ): IndicatorData => {
   // Aggregate data from all entries for this KPI
   let totalHours = 0;
@@ -303,9 +263,14 @@ export const calculateIndicatorData = (
   const tempsCalculN1 = calculateTempsCalcul(tempsCollecte);
   const fraisCollectes = totalFrais;
 
-  // NIVEAU 2: Données collectées identiques au N1
-  const tempsCollecteN2 = tempsCollecte;
-  const tempsCalculN2 = calculateTempsCalcul(tempsCollecte);
+  // NIVEAU 2: Données agrégées par ligne d'activité (Option B - Audit DK6)
+  // Équivalent Excel: =SI(ESTERREUR('20-Tri-NIVEAU2-LIGNES'!$S$37>0);0;(...))
+  // Si tempsN2Map fourni et businessLineId présent, utiliser les données agrégées
+  // Sinon fallback sur tempsCollecte (comportement précédent)
+  const tempsCollecteN2 = (tempsN2Map && businessLineId)
+    ? getTempsN2FromMap(tempsN2Map, businessLineId, kpiType, tempsCollecte)
+    : tempsCollecte;
+  const tempsCalculN2 = calculateTempsCalcul(tempsCollecteN2);
 
   // Score Financier
   let scoreFinancier: number;
@@ -321,31 +286,36 @@ export const calculateIndicatorData = (
     );
   }
 
-  // Pertes Constatées
+  // PPR PREVUES (calculé AVANT Pertes car nécessaire pour la formule Excel)
+  // 🆕 RECALCUL PPR DEPUIS LES SOURCES (évite drift avec données stockées en DB)
+  // Même logique que Module 1 Page14PriorityActionsN1.tsx
+  const indicatorId = getIndicatorId(kpiType);
+
+  const pprParPersonneParIndicateur = calculatePPRPerPersonFromSources(
+    memberBusinessLineName,
+    indicatorId,
+    params.gainsN1 || 0,
+    params.indicatorRates,
+    params.module1BusinessLines
+  );
+
+  const pprPrevues = calculatePPRPrevues(salariéExiste, pprParPersonneParIndicateur);
+
+  // Pertes Constatées N1 (APRÈS calcul PPR car formule Excel utilise PPR)
+  // FORMULE EXCEL M6: =SI((H6+G6)=0;0;SI((H6+G6)>0;(H6+G6)-D6))
+  // Où: H6=Score Financier, G6=Frais, D6=PPR Prévues
+  // ÉTAPE 1: Calcul des pertes brutes (Score + Frais - PPR)
   const pertesConstateesBrut = calculatePertesConstateesBrut(
     scoreFinancier,
     fraisCollectes,
+    pprPrevues  // D6 = PPR Prévues (corrigé: était member.incapacity_rate)
+  );
+  // ÉTAPE 2: Application du taux d'incapacité (Logique B validée)
+  // Pertes avec incapacité = Pertes brutes × (TauxIncapacité / 100)
+  const pertesConstatees = calculatePertesConstateesAvecIncapacite(
+    pertesConstateesBrut,
     member.incapacity_rate
   );
-  const pertesConstatees = calculatePertesConstateesAvecIncapacite(pertesConstateesBrut);
-
-  // PPR PREVUES
-  const priorityActionsN1 = params.priorityActionsN1 || [];
-  const indicatorId = getIndicatorId(kpiType);
-
-  let pprParPersonneParIndicateur = 0;
-  const blData = priorityActionsN1.find((bl) =>
-    bl.businessLine && bl.businessLine.toLowerCase() === memberBusinessLineName.toLowerCase()
-  );
-
-  if (blData && blData.distributions) {
-    const indicatorDist = blData.distributions.find((d) => d.indicator === indicatorId);
-    if (indicatorDist) {
-      pprParPersonneParIndicateur = indicatorDist.perPerson || 0;
-    }
-  }
-
-  const pprPrevues = calculatePPRPrevues(salariéExiste, pprParPersonneParIndicateur);
 
   // Économies
   const economiesBrut = calculateEconomiesRealiseesBrut(pprPrevues, pertesConstatees);
@@ -356,10 +326,11 @@ export const calculateIndicatorData = (
     economiesBrut
   ) + totalSavedExpenses;
 
-  const pertesEnPourcentage = calculatePertesEnPourcentage(
-    pertesConstatees,
-    pprPrevues > 0 ? pprPrevues : 1
-  );
+  // PASSE 1: pertesEnPourcentage = 0 (placeholder)
+  // La vraie valeur sera calculée en PASSE 2 après avoir le total des pertes ($E$3)
+  // Formule Excel L6: =SI(M6<0;0;SI(M6=0;0;SI(M6>0;M6/$E$3)))
+  // $E$3 = Total pertes N1 + N2 de tous les salariés (inconnu à ce stade)
+  const pertesEnPourcentage = 0; // Sera recalculé par recalculatePertesEnPourcentage
 
   // NIVEAU 2: Code PRC
   const codePRCValue = calculateCodePRC(tempsCollecteN2);
@@ -385,27 +356,40 @@ export const calculateIndicatorData = (
     );
   }
 
+  // NIVEAU 2: PPR Prévues (identique à N1)
+  const pprPrevuesN2 = pprPrevues;
+
+  // NIVEAU 2: Pertes Constatées (APRÈS pprPrevuesN2)
+  // FORMULE EXCEL AC6: =SI((X6+W6)=0;0;SI((X6+W6)>0;(X6+W6)-R6))
+  // Où: X6=Score Financier N2, W6=Frais N2, R6=PPR Prévues N2
   const pertesConstateesN2Raw = calculatePertesConstateesN2(
     scoreFinancierN2,
     fraisPrisEnCompte,
+    pprPrevuesN2  // R6 = PPR Prévues N2 (corrigé: était member.incapacity_rate)
+  );
+  // Application du taux d'incapacité (Logique B) pour NIVEAU 2
+  const pertesConstateesN2Final = calculatePertesConstateesAvecIncapacite(
+    pertesConstateesN2Raw,
     member.incapacity_rate
   );
-  const pertesConstateesN2Final = calculatePertesConstateesAvecIncapacite(pertesConstateesN2Raw);
 
-  const pprPrevuesN2 = pprPrevues;
-
+  // FORMULE EXCEL AA6: =SI(ET(F6=0;U6=0);0;SI(ET(F6>0;U6=0);0;SI(ET(F6=0;U6>0);AD6)))
+  // AD6 = PPR Prévues N2 (pas economiesRealisees2N2)
   const economiesRealiseesN2 = calculateEconomiesRealiseesN2(
     tempsCalculN1,
     tempsPrisEnCompte,
-    calculateEconomiesRealisees2N2(pprPrevuesN2, pertesConstateesN2Final)
+    pprPrevuesN2  // AD6 = PPR Prévues N2
   );
 
-  const economiesRealisees2N2 = calculateEconomiesRealisees2N2(pprPrevuesN2, pertesConstateesN2Final);
+  // FORMULE EXCEL: Z6-AC6 (PPR N2 - Pertes N2 brutes)
+  // AC6 = pertesConstateesN2Raw (avant incapacité), pas pertesConstateesN2Final
+  const economiesRealisees2N2 = calculateEconomiesRealisees2N2(pprPrevuesN2, pertesConstateesN2Raw);
 
-  const pertesEnPourcentageN2 = calculatePertesEnPourcentageN2(
-    pertesConstateesN2Final,
-    pprPrevuesN2 > 0 ? pprPrevuesN2 : 1
-  );
+  // PASSE 1: pertesEnPourcentageN2 = 0 (placeholder)
+  // La vraie valeur sera calculée en PASSE 2 après avoir le total des pertes ($E$3)
+  // Formule Excel AB6: =SI(AC6<0;0;SI(AC6=0;0;SI(AC6>0;AC6/$E$3)))
+  // $E$3 = Total pertes N1 + N2 de tous les salariés (inconnu à ce stade)
+  const pertesEnPourcentageN2 = 0; // Sera recalculé par recalculatePertesEnPourcentageN2
 
   return {
     tempsCollecte,
@@ -548,16 +532,18 @@ export const calculateIndicatorTotals = (
     pertesEnPourcentageTotalCombine: 0
   });
 
-  // Calculate percentages
+  // Calculate percentages avec $E$3 = Total pertes N1 + N2
+  // Formule Excel: L6 = M6/$E$3 et AB6 = AC6/$E$3
+  const totalPertesE3 = totals.pertesConstateesTotal + totals.pertesConstateesTotalN2;
+
   totals.pertesEnPourcentageTotal = calculatePertesEnPourcentage(
     totals.pertesConstateesTotal,
-    totals.pprPrevuesTotal > 0 ? totals.pprPrevuesTotal : 1
+    totalPertesE3 > 0 ? totalPertesE3 : 1  // $E$3
   );
 
-  const totalPertesReference = totals.pertesConstateesTotal + totals.pertesConstateesTotalN2;
   totals.pertesEnPourcentageTotalN2 = calculatePertesEnPourcentageN2(
     totals.pertesConstateesTotalN2,
-    totalPertesReference > 0 ? totalPertesReference : 1
+    totalPertesE3 > 0 ? totalPertesE3 : 1  // $E$3
   );
 
   // NIVEAU TOTAL
@@ -579,3 +565,53 @@ export const calculateIndicatorTotals = (
 
   return totals;
 };
+
+/**
+ * PASSE 2: Recalcule pertesEnPourcentage (N1) et pertesEnPourcentageN2 (N2) pour tous les salariés
+ *
+ * Formule Excel L6 (N1): =SI(M6<0;0;SI(M6=0;0;SI(M6>0;M6/$E$3)))
+ * Formule Excel AB6 (N2): =SI(AC6<0;0;SI(AC6=0;0;SI(AC6>0;AC6/$E$3)))
+ *
+ * $E$3 = Total des pertes N1 + N2 de TOUS les salariés (même dénominateur pour N1 et N2)
+ *
+ * @param performances - Les performances calculées en PASSE 1
+ * @param kpiType - Le type d'indicateur
+ * @param totals - Les totaux calculés (contient $E$3 = pertesConstateesTotal + pertesConstateesTotalN2)
+ * @returns Les performances avec pertesEnPourcentage et pertesEnPourcentageN2 recalculés
+ */
+export const recalculatePertesEnPourcentage = (
+  performances: EmployeePerformance[],
+  kpiType: KPIType,
+  totals: IndicatorTotals
+): EmployeePerformance[] => {
+  // $E$3 = Total des pertes N1 + N2 de tous les salariés pour cet indicateur
+  const totalPertesE3 = totals.pertesConstateesTotal + totals.pertesConstateesTotalN2;
+
+  return performances.map(perf => {
+    const data = perf[kpiType];
+
+    // Formule Excel L6 (N1): =SI(M6<0;0;SI(M6=0;0;SI(M6>0;M6/$E$3)))
+    const pertesEnPourcentageRecalcule = calculatePertesEnPourcentage(
+      data.pertesConstatees,
+      totalPertesE3 > 0 ? totalPertesE3 : 1
+    );
+
+    // Formule Excel AB6 (N2): =SI(AC6<0;0;SI(AC6=0;0;SI(AC6>0;AC6/$E$3)))
+    const pertesEnPourcentageN2Recalcule = calculatePertesEnPourcentageN2(
+      data.pertesConstateesN2,
+      totalPertesE3 > 0 ? totalPertesE3 : 1
+    );
+
+    return {
+      ...perf,
+      [kpiType]: {
+        ...data,
+        pertesEnPourcentage: pertesEnPourcentageRecalcule,
+        pertesEnPourcentageN2: pertesEnPourcentageN2Recalcule
+      }
+    };
+  });
+};
+
+// Alias pour compatibilité (ancien nom)
+export const recalculatePertesEnPourcentageN2 = recalculatePertesEnPourcentage;

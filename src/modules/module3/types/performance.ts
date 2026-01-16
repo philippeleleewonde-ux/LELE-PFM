@@ -116,6 +116,9 @@ export interface FinancialParams {
   volumeHoraireN1: number;
   pprAnnuelReference: number;
   gainsN1?: number;
+  gainsN2?: number;  // PPR annuelle N+2 pour sélection dynamique
+  gainsN3?: number;  // PPR annuelle N+3 pour sélection dynamique
+  launchDate?: Date; // Date de lancement pour détection période courante
   indicatorRates?: {
     abs: number;
     qd: number;

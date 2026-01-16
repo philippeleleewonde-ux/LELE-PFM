@@ -265,6 +265,39 @@ const calculatePertesEnPourcentage = (
 
 ## 3. Formules de Calcul - NIVEAU 2 (Prises en Compte)
 
+### 3.0 M3-Données de temps N2 (DK6) - Source Agrégée
+
+> **🆕 Correction Audit du 13/01/2026**
+> **Écart corrigé**: Le code copiait N1 au lieu d'utiliser une source séparée
+
+**Formule Excel (feuille L1, colonne DK6)**:
+```
+=SI(ESTERREUR('20-Tri-NIVEAU2-LIGNES'!$S$37>0);0;('20-Tri-NIVEAU2-LIGNES'!$S$37))
+```
+
+**Source Excel**: Feuille `20-Tri-NIVEAU2-LIGNES`, cellule S37 = SOMME(S29:S36)
+
+**Implémentation TypeScript (Option B - Agrégation automatique)**:
+
+```typescript
+// Vue SQL: v_niveau2_temps_aggregated
+// Agrège automatiquement les données N1 par business_line + kpi + période
+
+// Fonction pour récupérer les données N2 agrégées
+const tempsCollecteN2 = (tempsN2Map && businessLineId)
+  ? getTempsN2FromMap(tempsN2Map, businessLineId, kpiType, tempsCollecte)
+  : tempsCollecte; // Fallback sur N1 si pas de données N2
+```
+
+**Fichiers concernés**:
+- `supabase/migrations/20260113_niveau2_temps_aggregated.sql` - Vue et fonctions RPC
+- `src/modules/module3/engine/calculationEngine.ts` - `getAllTempsN2Aggregated()`, `getTempsN2FromMap()`
+- `src/modules/module3/hooks/usePerformanceCalculations.ts` - Ligne ~270
+
+**Logique de fallback**: Si pas de données N2 agrégées → retourner 0 (comme `ESTERREUR` dans Excel)
+
+---
+
 ### 3.1 Code P.R.C (Pris en Compte)
 
 **Formule Excel**: `=SI(O6=0;0;SI(O6>0;1))`

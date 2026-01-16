@@ -27,6 +27,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useCompany } from '@/contexts/CompanyContext';
 import { toast } from 'sonner';
 import { createMetricsService } from '@/lib/fiscal';
+import { launchDateService } from '@/lib/fiscal/LaunchDateService';
 import type { Currency } from '@/modules/module1/types';
 
 import type {
@@ -284,10 +285,11 @@ export function PerformanceDataProvider({ children }: PerformanceDataProviderPro
         // Extract financial parameters
         if (factors.employeeEngagement?.financialHistory?.length > 0) {
           const financialHistory = factors.employeeEngagement.financialHistory;
-          const lastYear = financialHistory[financialHistory.length - 1];
-          if (lastYear) {
-            fetchedFinancialParams.recettesN1 = lastYear.sales || 0;
-            fetchedFinancialParams.depensesN1 = lastYear.spending || 0;
+          // CORRECTION BUG: N-1 est à l'INDEX 0, pas à la fin du tableau
+          const yearN1 = financialHistory.find((y: any) => y.year === 'N-1') || financialHistory[0];
+          if (yearN1) {
+            fetchedFinancialParams.recettesN1 = yearN1.sales || 0;
+            fetchedFinancialParams.depensesN1 = yearN1.spending || 0;
           }
         }
 
@@ -299,9 +301,10 @@ export function PerformanceDataProvider({ children }: PerformanceDataProviderPro
           fetchedFinancialParams.pprAnnuelReference = factors.finalScore.breakdown.totalPotentialLoss;
         } else if (factors.employeeEngagement?.financialHistory?.length > 0) {
           const financialHistory = factors.employeeEngagement.financialHistory;
-          const lastYear = financialHistory[financialHistory.length - 1];
-          if (lastYear) {
-            const marge = (lastYear.sales || 0) - (lastYear.spending || 0);
+          // CORRECTION BUG: N-1 est à l'INDEX 0, pas à la fin du tableau
+          const yearN1 = financialHistory.find((y: any) => y.year === 'N-1') || financialHistory[0];
+          if (yearN1) {
+            const marge = (yearN1.sales || 0) - (yearN1.spending || 0);
             fetchedFinancialParams.pprAnnuelReference = Math.abs(marge) * 0.05;
           }
         }
@@ -310,6 +313,8 @@ export function PerformanceDataProvider({ children }: PerformanceDataProviderPro
         if (factors.calculatedFields) {
           const calc = factors.calculatedFields;
           fetchedFinancialParams.gainsN1 = calc.gainsN1 || 0;
+          fetchedFinancialParams.gainsN2 = calc.gainsN2 || 0;  // PPR N+2 pour sélection dynamique
+          fetchedFinancialParams.gainsN3 = calc.gainsN3 || 0;  // PPR N+3 pour sélection dynamique
           fetchedFinancialParams.indicatorRates = {
             abs: calc.indicator_absenteeism_rate || 0,
             qd: calc.indicator_quality_rate || 0,
@@ -344,6 +349,41 @@ export function PerformanceDataProvider({ children }: PerformanceDataProviderPro
             } catch (dbError) {
               console.error('Error fetching Gains from DB:', dbError);
             }
+          }
+
+          // Fetch gainsN2 and gainsN3 from DB if missing (pour sélection dynamique PPR)
+          if (!fetchedFinancialParams.gainsN2 || fetchedFinancialParams.gainsN2 === 0) {
+            try {
+              const metricsService = createMetricsService(companyId);
+              const gainsN2FromDB = await metricsService.getGains(2);
+              if (gainsN2FromDB > 0) {
+                fetchedFinancialParams.gainsN2 = gainsN2FromDB;
+              }
+            } catch (dbError) {
+              console.error('Error fetching GainsN2 from DB:', dbError);
+            }
+          }
+          if (!fetchedFinancialParams.gainsN3 || fetchedFinancialParams.gainsN3 === 0) {
+            try {
+              const metricsService = createMetricsService(companyId);
+              const gainsN3FromDB = await metricsService.getGains(3);
+              if (gainsN3FromDB > 0) {
+                fetchedFinancialParams.gainsN3 = gainsN3FromDB;
+              }
+            } catch (dbError) {
+              console.error('Error fetching GainsN3 from DB:', dbError);
+            }
+          }
+
+          // Fetch launchDate from LaunchDateService (pour détection période courante)
+          try {
+            const launchConfig = await launchDateService.loadConfig(companyId);
+            if (launchConfig?.platformLaunchDate) {
+              fetchedFinancialParams.launchDate = launchConfig.platformLaunchDate;
+              console.log('[PerformanceDataContext] 📅 Launch date loaded:', launchConfig.platformLaunchDate.toLocaleDateString('fr-FR'));
+            }
+          } catch (launchError) {
+            console.error('Error fetching Launch Date:', launchError);
           }
 
           // Fetch indicator rates from DB if missing

@@ -101,6 +101,21 @@ import { VirtualizedSynthesisTable, EmployeeScore, EligibilityStats, GlobalTotal
 // PHASE 2: Import du service de cache (optionnel, fallback sur calcul si échec)
 import { createPerformanceCacheService, PerformanceCacheEntry, PerformanceTotalsCache } from './services/PerformanceCacheService';
 
+// SOURCE UNIQUE: Fonctions de calcul depuis calculationEngine
+import {
+  calculateScoreFinancier,
+  calculateScoreFinancierN2,
+  calculatePertesConstateesBrut,
+  calculatePertesConstateesAvecIncapacite,
+  calculatePertesConstateesN2,
+  calculatePertesConstateesN2AvecLogiqueCroisee,
+  calculatePPRPrevues,
+  // 🆕 Recalcul PPR depuis les sources (évite drift avec DB)
+  calculatePPRPerPersonFromSources,
+  // 🆕 Colonnes spécifiques DDP
+  calculatePertesAvecIncapaciteDDP,
+  calculatePertesEnPourcentageDDP
+} from './engine/calculationEngine';
 
 // ============================================
 // MOTEUR DE CALCUL TYPESCRIPT - 100% CONFORME EXCEL
@@ -179,6 +194,7 @@ interface IndicatorData {
   tempsCalcul: number;
   fraisCollectes: number;
   scoreFinancier: number;
+  pertesConstateesBrut: number;   // Pertes Constatées (brut) = SI((H6+G6)=0;0;SI((H6+G6)>0;(H6+G6)-D6))
   pertesConstatees: number;
   pprPrevues: number;
   economiesRealisees: number;      // ECONOMIES REALISEES 1 (N1)
@@ -204,6 +220,7 @@ interface IndicatorTotals {
   tempsTotal: number;
   fraisTotal: number;
   scoreFinancierTotal: number;
+  pertesConstateesBrutTotal: number;  // 🆕 Total Pertes Constatées (brut)
   pertesConstateesTotal: number;
   pprPrevuesTotal: number;
   economiesRealiseesTotal: number;
@@ -321,139 +338,10 @@ const calculateTempsCalcul = (tempsCollecte: number): number => {
   return tempsCollecte + 0; // Équivalent à =E6+0 ou =S6+0
 };
 
-/**
- * FORMULE EXCEL: Score financier
- * =(('2-Tri-TB Fixe-Données Risko M1'!L3-'2-Tri-TB Fixe-Données Risko M1'!M3)/'2-Tri-TB Fixe-Données Risko M1'!K3)*E6
- *
- * Où (depuis la feuille '2-Tri-TB Fixe-Données Risko M1'):
- * - L3 = Recettes N-1 (Sales/Turnover) - valeurs brutes
- * - M3 = Dépenses N-1 (Total Spending) - valeurs brutes
- * - K3 = Volume Horaire N-1 (Annual Hours Total)
- * - E6 = Temps-Calcul du salarié (heures décimales)
- *
- * CORRECTION: Pas de multiplication par 1000 - on garde les montants bruts
- */
-const calculateScoreFinancier = (
-  tempsCalcul: number,
-  recettesN1: number,
-  depensesN1: number,
-  volumeHoraireN1: number
-): number => {
-  // Éviter la division par zéro
-  if (volumeHoraireN1 === 0) return 0;
-
-  // Formule Excel: ((L3 - M3) / K3) * E6 - SANS multiplication par 1000
-  const tauxMargeHoraire = (recettesN1 - depensesN1) / volumeHoraireN1;
-  return tauxMargeHoraire * tempsCalcul;
-};
-
-/**
- * FORMULE EXCEL: Pertes constatées avec prise en compte du taux d'incapacité (semaine)
- * =SI(M6<0;0;SI(M6=0;0;SI(M6>0;M6)))
- *
- * Interprétation: Si pertesConstateesBrut < 0 → 0, si = 0 → 0, si > 0 → valeur
- * En pratique: MAX(0, pertesConstateesBrut)
- *
- * Note: M6 = Pertes Constatées (brut) = (Score Financier + Frais) - Taux Incapacité ajusté
- */
-const calculatePertesConstateesAvecIncapacite = (pertesConstateesBrut: number): number => {
-  if (pertesConstateesBrut < 0) return 0;
-  if (pertesConstateesBrut === 0) return 0;
-  if (pertesConstateesBrut > 0) return pertesConstateesBrut;
-  return 0;
-};
-
-/**
- * FORMULE EXCEL: Pertes Constatées (brut)
- * =SI((H6+G6)=0;0;SI((H6+G6)>0;(H6+G6)-D6))
- *
- * Où:
- * - H6 = Score Financier
- * - G6 = M3-Les frais (frais collectés)
- * - D6 = Taux d'incapacité du salarié (valeur de référence pour ajustement)
- *
- * CORRECTION: D6 est le taux d'incapacité qui est utilisé directement dans la formule
- * La formule soustrait D6 du total (scoreFinancier + frais)
- *
- * Simplification: Si (scoreFinancier + frais) = 0 → 0, sinon (scoreFinancier + frais) - tauxIncapacité
- */
-const calculatePertesConstateesBrut = (
-  scoreFinancier: number,
-  fraisCollectes: number,
-  tauxIncapacite: number
-): number => {
-  const total = scoreFinancier + fraisCollectes;
-  if (total === 0) return 0;
-  if (total > 0) {
-    // CORRECTION: On soustrait directement le taux d'incapacité (D6 dans Excel)
-    // La formule Excel est: (H6+G6)-D6
-    return total - tauxIncapacite;
-  }
-  return 0;
-};
-
-/**
- * FORMULE EXCEL: PPR PREVUES (semaine) - VERSION CORRIGÉE AUDIT
- * =SI(B6<>0;('2-Tri-TB Fixe-Données Risko M1'!O3/3)/4;SI(B6=0;0))
- *
- * DÉCLINAISON POUR LA PLATEFORME LELE HCM:
- * PPR PRÉVUES (semaine) = PPR par personne par indicateur / 3 mois / 4 semaines
- *
- * Source des données:
- * - Module: HCM PERFORMANCE PLAN
- * - Page: "14 - PRIORITY ACTIONS - N+1"
- * - Section: TRIMESTRE 1 - ANNÉE N+1
- * - Champ: Indicateur // par personne
- *
- * Formule Page 14 - Priority Actions N+1:
- * 1. perLine = pprN1 × (indicatorRate / 100) × lineBudgetRate
- * 2. perPerson = perLine / lineStaffCount
- * 3. PPR semaine = perPerson / 3 mois / 4 semaines
- *
- * IMPORTANT: La valeur PPR par personne par indicateur est DÉJÀ calculée dans Page 14
- * en tenant compte du budgetRate de la ligne d'activité. Cette fonction reproduit
- * exactement ce calcul.
- *
- * ============================================
- * CORRECTION CRITIQUE AUDIT - UNITÉS DE MESURE
- * ============================================
- * Les valeurs PPR de Page 14 (priorityActionsN1) sont stockées en k€ (milliers)
- * car gainsN1 et toutes les valeurs financières du Module 1 sont en k€.
- *
- * Cependant, les Pertes Constatées sont calculées en € (unités absolues)
- * via la formule: ((recettesN1 - depensesN1) / volumeHoraire) × tempsCalcul
- *
- * CONVERSION OBLIGATOIRE: PPR k€ × 1000 → PPR €
- * Cette conversion garantit la cohérence des unités pour le calcul:
- * ÉCONOMIES = PPR (€) - Pertes Constatées (€)
- * ============================================
- *
- * @param salariéExiste - Si le salarié existe (B6 <> 0)
- * @param pprParPersonneParIndicateur - PPR par personne par indicateur en k€ (perPerson de Page 14)
- *        Cette valeur = gainsN1 × indicatorRate × budgetRate / staffCount (en k€)
- */
-const calculatePPRPrevues = (
-  salariéExiste: boolean,
-  pprParPersonneParIndicateur: number
-): number => {
-  if (!salariéExiste) return 0;
-  if (pprParPersonneParIndicateur === 0) return 0;
-
-  // ============================================
-  // CONVERSION k€ → € (× 1000)
-  // ============================================
-  // Les valeurs PPR de Page 14 sont en k€ (milliers d'euros/yens/etc.)
-  // Les Pertes Constatées sont en € absolus
-  // Pour que l'équation ÉCONOMIES = PPR - Pertes soit correcte,
-  // il faut convertir PPR de k€ vers €
-  const pprEnUnites = pprParPersonneParIndicateur * 1000;
-
-  // PPR semaine = (PPR par personne en € / 3 mois) / 4 semaines
-  // Cette formule correspond à: PPR trimestriel par personne / 12 semaines
-  const pprSemaine = (pprEnUnites / 3) / 4;
-
-  return pprSemaine;
-};
+// NOTE: Fonctions importées depuis ./engine/calculationEngine (SOURCE UNIQUE):
+// - calculateScoreFinancier, calculateScoreFinancierN2
+// - calculatePertesConstateesBrut, calculatePertesConstateesAvecIncapacite
+// - calculatePPRPrevues
 
 /**
  * FORMULE EXCEL: ECONOMIES REALISEES (semaine) - Version 1
@@ -611,44 +499,7 @@ const determineCodePRC = (hasEntries: boolean): boolean => {
   return hasEntries;
 };
 
-/**
- * FORMULE EXCEL: Score Financier NIVEAU 2
- * =(('2-Tri-TB Fixe-Données Risko M1'!L3-'2-Tri-TB Fixe-Données Risko M1'!M3)/'2-Tri-TB Fixe-Données Risko M1'!K3)*U6
- *
- * Où U6 = M3-Temps-Pris en compte (NIVEAU 2)
- *
- * Note: Même formule que N1 mais avec temps pris en compte au lieu de temps calculé
- */
-const calculateScoreFinancierN2 = (
-  tempsPrisEnCompte: number,
-  recettesN1: number,
-  depensesN1: number,
-  volumeHoraireN1: number
-): number => {
-  if (volumeHoraireN1 === 0) return 0;
-  const tauxMargeHoraire = (recettesN1 - depensesN1) / volumeHoraireN1;
-  return tauxMargeHoraire * tempsPrisEnCompte;
-};
-
-/**
- * FORMULE EXCEL: Pertes Constatées NIVEAU 2
- * =SI((X6+W6)=0;0;SI((X6+W6)>0;(X6+W6)-R6))
- *
- * Où:
- * - X6 = Score financier NIVEAU 2
- * - W6 = M3-Les frais-Pris en compte NIVEAU 2
- * - R6 = Taux d'incapacité NIVEAU 2
- */
-const calculatePertesConstateesN2 = (
-  scoreFinancierN2: number,
-  fraisPrisEnCompte: number,
-  tauxIncapacite: number
-): number => {
-  const total = scoreFinancierN2 + fraisPrisEnCompte;
-  if (total === 0) return 0;
-  if (total > 0) return total - tauxIncapacite;
-  return 0;
-};
+// NOTE: calculateScoreFinancierN2 et calculatePertesConstateesN2 importés depuis ./engine/calculationEngine
 
 /**
  * FORMULE EXCEL: ECONOMIES REALISEES 2 (semaine) NIVEAU 2
@@ -849,7 +700,9 @@ function IndicatorTable({ kpiType, performances, totals, currencySymbol, level, 
               <th className="text-right py-3 px-2 font-semibold whitespace-nowrap">ECONOMIES REALISEES 1</th>
               {/* COL 11 */}
               <th className="text-center py-3 px-2 font-semibold whitespace-nowrap">Pertes en %</th>
-              {/* COL 12 */}
+              {/* COL 12 - 🆕 Pertes Constatées (brut) après Pertes en % */}
+              <th className="text-right py-3 px-2 font-semibold whitespace-nowrap">Pertes Constatées</th>
+              {/* COL 13 */}
               <th className="text-right py-3 px-2 font-semibold whitespace-nowrap">ECONOMIES REALISEES 2</th>
             </tr>
           </thead>
@@ -875,7 +728,7 @@ function IndicatorTable({ kpiType, performances, totals, currencySymbol, level, 
                     className={cn("bg-gradient-to-r cursor-pointer transition-all hover:opacity-90", kpiConfig.gradient, "text-white")}
                     onClick={() => toggleTeam(bl.id)}
                   >
-                    <td colSpan={12} className="py-3 px-3">
+                    <td colSpan={13} className="py-3 px-3">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
                           <motion.div animate={{ rotate: isTeamExpanded ? 180 : 0 }} transition={{ duration: 0.2 }}>
@@ -961,7 +814,9 @@ function IndicatorTable({ kpiType, performances, totals, currencySymbol, level, 
                               </td>
                             );
                           })()}
-                          {/* COL 12: ECONOMIES REALISEES 2 */}
+                          {/* COL 12: 🆕 Pertes Constatées (brut) = SI((H6+G6)=0;0;SI((H6+G6)>0;(H6+G6)-D6)) */}
+                          <td className="py-2 px-2 text-right font-medium text-orange-600">{data.pertesConstateesBrut.toLocaleString('fr-FR', {minimumFractionDigits: 2, maximumFractionDigits: 2})} {currencySymbol}</td>
+                          {/* COL 13: ECONOMIES REALISEES 2 */}
                           <td className="py-2 px-2 text-right font-bold text-emerald-600">{data.economiesRealisees2.toLocaleString('fr-FR', {minimumFractionDigits: 2, maximumFractionDigits: 2})} {currencySymbol}</td>
                         </motion.tr>
                       );
@@ -988,6 +843,9 @@ function IndicatorTable({ kpiType, performances, totals, currencySymbol, level, 
                   {totals.pertesEnPourcentageTotal.toFixed(1)}%
                 </Badge>
               </td>
+              {/* 🆕 COL 12: Pertes Constatées (brut) TOTAL */}
+              <td className="py-4 px-2 text-right text-orange-600">{totals.pertesConstateesBrutTotal.toLocaleString('fr-FR')} {currencySymbol}</td>
+              {/* COL 13: ECONOMIES REALISEES 2 TOTAL */}
               <td className="py-4 px-2 text-right text-emerald-600">{(totals.pprPrevuesTotal - totals.pertesConstateesTotal).toLocaleString('fr-FR')} {currencySymbol}</td>
             </tr>
           </tfoot>
@@ -1035,8 +893,16 @@ function IndicatorTable({ kpiType, performances, totals, currencySymbol, level, 
             <th className="text-center py-3 px-2 font-semibold whitespace-nowrap">Pertes en %</th>
             {/* COL 15 */}
             <th className="text-right py-3 px-2 font-semibold whitespace-nowrap">Pertes Constatées</th>
-            {/* COL 16 */}
+            {/* COL 16 - DDP ONLY: Pertes avec incapacité (DD6) - ENTRE Pertes Constatées et ECONOMIES REALISEES 2 */}
+            {kpiType === 'ddp' && (
+              <th className="text-right py-3 px-2 font-semibold whitespace-nowrap bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-300">Pertes avec incapacité (DDP)</th>
+            )}
+            {/* COL 17 */}
             <th className="text-right py-3 px-2 font-semibold whitespace-nowrap">ECONOMIES REALISEES 2</th>
+            {/* COL 18 - DDP ONLY: Pertes en % (DF6) */}
+            {kpiType === 'ddp' && (
+              <th className="text-center py-3 px-2 font-semibold whitespace-nowrap bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-300">Pertes en % (DDP)</th>
+            )}
           </tr>
         </thead>
         <tbody>
@@ -1061,7 +927,7 @@ function IndicatorTable({ kpiType, performances, totals, currencySymbol, level, 
                   className={cn("bg-gradient-to-r cursor-pointer transition-all hover:opacity-90", kpiConfig.gradient, "text-white")}
                   onClick={() => toggleTeam(bl.id)}
                 >
-                  <td colSpan={16} className="py-3 px-3">
+                  <td colSpan={kpiType === 'ddp' ? 18 : 16} className="py-3 px-3">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
                         <motion.div animate={{ rotate: isTeamExpanded ? 180 : 0 }} transition={{ duration: 0.2 }}>
@@ -1163,8 +1029,27 @@ function IndicatorTable({ kpiType, performances, totals, currencySymbol, level, 
                         })()}
                         {/* COL 15: Pertes Constatées N2 (brut avant incapacité) */}
                         <td className="py-2 px-2 text-right text-orange-500">{(data.scoreFinancierN2 + data.fraisPrisEnCompte - perf.incapacityRate).toLocaleString('fr-FR', {minimumFractionDigits: 2, maximumFractionDigits: 2})} {currencySymbol}</td>
-                        {/* COL 16: ECONOMIES REALISEES 2 N2 */}
+                        {/* COL 16 - DDP ONLY: Pertes avec incapacité N2 (DD6) - ENTRE Pertes Constatées et ECONOMIES REALISEES 2 */}
+                        {kpiType === 'ddp' && (
+                          <td className="py-2 px-2 text-right font-medium text-purple-700 dark:text-purple-300 bg-purple-100 dark:bg-purple-900/30">
+                            {calculatePertesAvecIncapaciteDDP(data.pprPrevuesN2, data.pertesConstateesN2).toLocaleString('fr-FR', {minimumFractionDigits: 2, maximumFractionDigits: 2})} {currencySymbol}
+                          </td>
+                        )}
+                        {/* COL 17: ECONOMIES REALISEES 2 N2 */}
                         <td className="py-2 px-2 text-right font-bold text-emerald-600">{data.economiesRealisees2N2.toLocaleString('fr-FR', {minimumFractionDigits: 2, maximumFractionDigits: 2})} {currencySymbol}</td>
+                        {/* COL 18 - DDP ONLY: Pertes en % N2 (DF6) = (PPR N2 - Pertes N2) / Total */}
+                        {kpiType === 'ddp' && (() => {
+                          const pertesAvecIncapaciteN2 = calculatePertesAvecIncapaciteDDP(data.pprPrevuesN2, data.pertesConstateesN2);
+                          const totalPertesRef = totals.pertesConstateesTotal + totals.pertesConstateesTotalN2;
+                          const pertesEnPctDDPN2 = calculatePertesEnPourcentageDDP(pertesAvecIncapaciteN2, totalPertesRef) * 100;
+                          return (
+                            <td className="py-2 px-2 text-center bg-purple-100 dark:bg-purple-900/30">
+                              <Badge variant="outline" className="bg-purple-500/20 text-purple-700 dark:text-purple-300 border-purple-500/30">
+                                {pertesEnPctDDPN2.toFixed(1)}%
+                              </Badge>
+                            </td>
+                          );
+                        })()}
                       </motion.tr>
                     );
                   })}
@@ -1191,7 +1076,27 @@ function IndicatorTable({ kpiType, performances, totals, currencySymbol, level, 
               </Badge>
             </td>
             <td className="py-4 px-2 text-right text-orange-500">{totals.pertesConstateesTotalN2.toLocaleString('fr-FR')} {currencySymbol}</td>
+            {/* COL 16 - DDP ONLY: Total Pertes avec incapacité N2 - ENTRE Pertes Constatées et ECONOMIES REALISEES 2 */}
+            {kpiType === 'ddp' && (
+              <td className="py-4 px-2 text-right text-purple-700 dark:text-purple-300 bg-purple-100 dark:bg-purple-900/30 font-bold">
+                {calculatePertesAvecIncapaciteDDP(totals.pprPrevuesTotal, totals.pertesConstateesTotalN2).toLocaleString('fr-FR')} {currencySymbol}
+              </td>
+            )}
+            {/* COL 17: ECONOMIES REALISEES 2 Total N2 */}
             <td className="py-4 px-2 text-right text-emerald-600">{(totals.pprPrevuesTotal - totals.pertesConstateesTotalN2).toLocaleString('fr-FR')} {currencySymbol}</td>
+            {/* COL 18 - DDP ONLY: Total Pertes en % N2 */}
+            {kpiType === 'ddp' && (() => {
+              const totalPertesAvecIncapN2 = calculatePertesAvecIncapaciteDDP(totals.pprPrevuesTotal, totals.pertesConstateesTotalN2);
+              const totalPertesRef = totals.pertesConstateesTotal + totals.pertesConstateesTotalN2;
+              const totalPertesEnPctDDPN2 = calculatePertesEnPourcentageDDP(totalPertesAvecIncapN2, totalPertesRef) * 100;
+              return (
+                <td className="py-4 px-2 text-center bg-purple-100 dark:bg-purple-900/30">
+                  <Badge className="bg-purple-600 dark:bg-purple-500 text-white">
+                    {totalPertesEnPctDDPN2.toFixed(1)}%
+                  </Badge>
+                </td>
+              );
+            })()}
           </tr>
         </tfoot>
       </table>
@@ -1235,9 +1140,11 @@ function IndicatorTable({ kpiType, performances, totals, currencySymbol, level, 
                 <th className="text-right py-3 px-4 font-semibold whitespace-nowrap">Score financier</th>
                 {/* COL 4 */}
                 <th className="text-right py-3 px-4 font-semibold whitespace-nowrap">Pertes constatées</th>
-                {/* COL 5 */}
-                <th className="text-right py-3 px-4 font-semibold whitespace-nowrap">ECONOMIES REALISEES</th>
+                {/* COL 5 - PPR PREVUES = SOMME(J6:J1705) */}
+                <th className="text-right py-3 px-4 font-semibold whitespace-nowrap">PPR PREVUES</th>
                 {/* COL 6 */}
+                <th className="text-right py-3 px-4 font-semibold whitespace-nowrap">ECONOMIES REALISEES</th>
+                {/* COL 7 */}
                 <th className="text-center py-3 px-4 font-semibold whitespace-nowrap">Pertes en %</th>
               </tr>
             </thead>
@@ -1259,11 +1166,15 @@ function IndicatorTable({ kpiType, performances, totals, currencySymbol, level, 
                 <td className="py-4 px-4 text-right font-bold text-lg text-orange-600">
                   {totals.pertesConstateesTotalCombine.toLocaleString('fr-FR', {minimumFractionDigits: 2, maximumFractionDigits: 2})} {currencySymbol}
                 </td>
-                {/* COL 5: ECONOMIES REALISEES TOTAL */}
+                {/* COL 5: PPR PREVUES TOTAL = SOMME(J6:J1705) */}
+                <td className="py-4 px-4 text-right font-bold text-lg text-purple-600">
+                  {(totals.pprPrevuesTotal ?? 0).toLocaleString('fr-FR', {minimumFractionDigits: 2, maximumFractionDigits: 2})} {currencySymbol}
+                </td>
+                {/* COL 6: ECONOMIES REALISEES TOTAL */}
                 <td className="py-4 px-4 text-right font-bold text-xl text-green-600">
                   {totals.economiesRealiseesTotalCombine.toLocaleString('fr-FR', {minimumFractionDigits: 2, maximumFractionDigits: 2})} {currencySymbol}
                 </td>
-                {/* COL 6: Pertes en % TOTAL */}
+                {/* COL 7: Pertes en % TOTAL */}
                 <td className="py-4 px-4 text-center">
                   <Badge className={cn(
                     "text-lg px-4 py-2",
@@ -1294,6 +1205,11 @@ function IndicatorTable({ kpiType, performances, totals, currencySymbol, level, 
                 <td className="py-2 px-4 text-right">
                   <span className="block">N1: {totals.pertesConstateesTotal.toLocaleString('fr-FR')}</span>
                   <span className="block">N2: {totals.pertesConstateesTotalN2.toLocaleString('fr-FR')}</span>
+                </td>
+                {/* COL 5: PPR PREVUES footer - N1/N2 breakdown */}
+                <td className="py-2 px-4 text-right">
+                  <span className="block">N1: {(totals.pprPrevuesTotal ?? 0).toLocaleString('fr-FR')}</span>
+                  <span className="block">N2: {(totals.pprPrevuesTotalN2 ?? 0).toLocaleString('fr-FR')}</span>
                 </td>
                 <td className="py-2 px-4 text-right">
                   <span className="block">N1: {totals.economiesRealiseesTotal.toLocaleString('fr-FR')}</span>
@@ -1595,7 +1511,10 @@ export default function PerformanceRecapPage() {
           const cacheService = createPerformanceCacheService(companyId);
           const cacheStatus = await cacheService.getCacheStatus(currentFiscalWeek, currentFiscalYear);
 
-          if (cacheStatus.exists && !cacheStatus.isStale && cacheStatus.entryCount > 0) {
+          // 🚫 CACHE DÉSACTIVÉ TEMPORAIREMENT - PPR doivent être recalculées depuis les sources
+          // Raison: Le cache stocke des PPR obsolètes qui ne reflètent pas les paramètres actuels
+          // TODO: Refactoriser pour recalculer les PPR même avec le cache
+          if (false && cacheStatus.exists && !cacheStatus.isStale && cacheStatus.entryCount > 0) {
             // Cache valide - charger les données essentielles en parallèle avec le cache
             // IMPORTANT: Inclure team_members pour récupérer les noms des salariés
             const [cachedData, blResult, membersResult] = await Promise.all([
@@ -1856,12 +1775,13 @@ export default function PerformanceRecapPage() {
           // CORRECTION: On garde les valeurs brutes, pas de conversion
           if (factors.employeeEngagement?.financialHistory?.length > 0) {
             const financialHistory = factors.employeeEngagement.financialHistory;
-            // Prendre la dernière année (N-1)
-            const lastYear = financialHistory[financialHistory.length - 1];
-            if (lastYear) {
+            // CORRECTION BUG: N-1 est à l'INDEX 0, pas à la fin du tableau
+            // L'array est ordonné: [N-1, N-2, N-3, N-4, N-5]
+            const yearN1 = financialHistory.find((y: any) => y.year === 'N-1') || financialHistory[0];
+            if (yearN1) {
               // Valeurs brutes - pas de multiplication par 1000
-              fetchedFinancialParams.recettesN1 = lastYear.sales || 0;
-              fetchedFinancialParams.depensesN1 = lastYear.spending || 0;
+              fetchedFinancialParams.recettesN1 = yearN1.sales || 0;
+              fetchedFinancialParams.depensesN1 = yearN1.spending || 0;
             }
           }
 
@@ -1883,10 +1803,11 @@ export default function PerformanceRecapPage() {
             // Sinon, estimer le PPR à partir de l'historique financier
             // PPR estimé = (Recettes - Dépenses) * 5% (taux de pertes estimé)
             const financialHistory = factors.employeeEngagement.financialHistory;
-            const lastYear = financialHistory[financialHistory.length - 1];
-            if (lastYear) {
+            // CORRECTION BUG: N-1 est à l'INDEX 0, pas à la fin du tableau
+            const yearN1 = financialHistory.find((y: any) => y.year === 'N-1') || financialHistory[0];
+            if (yearN1) {
               // Valeurs brutes - pas de multiplication par 1000
-              const marge = (lastYear.sales || 0) - (lastYear.spending || 0);
+              const marge = (yearN1.sales || 0) - (yearN1.spending || 0);
               // Estimer 5% de la marge comme PPR de référence
               fetchedFinancialParams.pprAnnuelReference = Math.abs(marge) * 0.05;
             }
@@ -2079,6 +2000,34 @@ export default function PerformanceRecapPage() {
     });
 
     // ============================================
+    // 🆕 MÉMORISATION PPR: Pré-calcul O(BL × 5) au lieu de O(membres × 5)
+    // ============================================
+    // Calcule une fois toutes les PPR par business line et indicateur
+    // Évite les recalculs redondants pour chaque membre de la même BL
+    const memoizedPPRByBusinessLine = new Map<string, Map<string, number>>();
+    const indicators = ['absenteeism', 'quality', 'accidents', 'productivity', 'knowhow'];
+
+    for (const bl of params.module1BusinessLines || []) {
+      const indicatorMap = new Map<string, number>();
+      for (const indicator of indicators) {
+        // 🔧 FIX: calculatePPRPerPersonFromSources retourne la valeur ANNUELLE
+        // Mais calculatePPRPrevues() attend une valeur TRIMESTRIELLE
+        // Donc on divise par 4 pour convertir ANNUEL → TRIMESTRIEL
+        const pprAnnuel = calculatePPRPerPersonFromSources(
+          bl.activityName,
+          indicator,
+          params.gainsN1 || 0,
+          params.indicatorRates,
+          params.module1BusinessLines
+        );
+        const pprTrimestriel = pprAnnuel / 4; // 🔧 Conversion ANNUEL → TRIMESTRIEL
+        indicatorMap.set(indicator, pprTrimestriel);
+      }
+      // Stocker avec clé lowercase pour lookup insensible à la casse
+      memoizedPPRByBusinessLine.set(bl.activityName.toLowerCase(), indicatorMap);
+    }
+
+    // ============================================
     // OPTIMISATION 10K: Fonction interne pour traiter un membre
     // ============================================
     const processSingleMember = (member: TeamMember): EmployeePerformance => {
@@ -2121,10 +2070,13 @@ export default function PerformanceRecapPage() {
         const tempsCalculN1 = calculateTempsCalcul(tempsCollecte);
         const fraisCollectes = totalFrais;
 
-        // NIVEAU 2: Données collectées identiques au N1 (transfert des lignes d'activité)
-        const tempsCollecteN2 = tempsCollecte; // Mêmes données que N1
-        // Formule Excel: =S6+0 (Temps-Calcul N2 = Temps collecté identique à N1)
-        const tempsCalculN2 = calculateTempsCalcul(tempsCollecte);
+        // NIVEAU 2: Données collectées
+        // 🔧 FIX 2026-01-14: Correction bug tempsCalculN2 hardcodé à 0
+        // Formule Excel DK6: =SI(ESTERREUR('20-Tri-NIVEAU2-LIGNES'!$S$37>0);0;(...))
+        // Les données N2 utilisent les mêmes entrées que N1 pour l'affichage individuel
+        const tempsCollecteN2 = tempsCollecte; // Utiliser les données réelles des entrées
+        // Formule Excel DL6: =DK6+0 (M3-Temps-Calcul N2)
+        const tempsCalculN2 = calculateTempsCalcul(tempsCollecteN2); // = tempsCollecteN2 + 0
 
         // For EKH, calculations are based on coefficient de compétence
         let scoreFinancier: number;
@@ -2142,18 +2094,7 @@ export default function PerformanceRecapPage() {
           );
         }
 
-        // Formule Excel: Pertes Constatées (brut) = SI((H6+G6)=0;0;SI((H6+G6)>0;(H6+G6)-D6))
-        // Où H6 = Score Financier, G6 = Frais, D6 = ajustement incapacité
-        const pertesConstateesBrut = calculatePertesConstateesBrut(
-          scoreFinancier,
-          fraisCollectes,
-          member.incapacity_rate
-        );
-
-        // Formule Excel: Pertes constatées = SI(M6<0;0;SI(M6=0;0;SI(M6>0;M6)))
-        const pertesConstatees = calculatePertesConstateesAvecIncapacite(pertesConstateesBrut);
-
-        // 🆕 PPR PREVUES - UTILISATION DIRECTE DES DONNÉES SAUVEGARDÉES DE PAGE 14
+        // 🆕 PPR PREVUES - CALCULÉ AVANT PERTES (nécessaire pour formule Excel)
         // Source: priorityActionsN1 depuis calculatedFields (Module 1)
         // Structure: { businessLine, staffCount, budgetRate, distributions: [{ indicator, perLine, perPerson }] }
         const priorityActionsN1 = (params as any).priorityActionsN1 || [];
@@ -2173,21 +2114,25 @@ export default function PerformanceRecapPage() {
         const indicatorId = getIndicatorId(kpiType);
         const memberBLName = memberBusinessLine?.activity_name || '';
 
-        // 🔑 Chercher la valeur perPerson DÉJÀ CALCULÉE dans priorityActionsN1
-        let pprParPersonneParIndicateur = 0;
-        const blData = priorityActionsN1.find((bl: any) =>
-          bl.businessLine && bl.businessLine.toLowerCase() === memberBLName.toLowerCase()
-        );
-
-        if (blData && blData.distributions) {
-          const indicatorDist = blData.distributions.find((d: any) => d.indicator === indicatorId);
-          if (indicatorDist) {
-            pprParPersonneParIndicateur = indicatorDist.perPerson || 0;
-          }
-        }
+        // 🆕 LOOKUP O(1) depuis le Map pré-calculé (au lieu de recalculer pour chaque membre)
+        // Les PPR ont été pré-calculées une seule fois pour toutes les BL × indicateurs
+        const pprParPersonneParIndicateur = memoizedPPRByBusinessLine
+          .get(memberBLName.toLowerCase())
+          ?.get(indicatorId) || 0;
 
         // PPR semaine = perPerson / 3 mois / 4 semaines
         const pprPrevues = calculatePPRPrevues(salariéExiste, pprParPersonneParIndicateur);
+
+        // Formule Excel M6: Pertes Constatées (brut) = SI((H6+G6)=0;0;SI((H6+G6)>0;(H6+G6)-D6))
+        // Où H6 = Score Financier, G6 = Frais, D6 = PPR Prévues
+        const pertesConstateesBrut = calculatePertesConstateesBrut(
+          scoreFinancier,
+          fraisCollectes,
+          pprPrevues  // D6 = PPR Prévues (corrigé: était member.incapacity_rate)
+        );
+
+        // Application du taux d'incapacité (Logique B)
+        const pertesConstatees = calculatePertesConstateesAvecIncapacite(pertesConstateesBrut, member.incapacity_rate);
 
         // Formule Excel: ECONOMIES (brut) = SI(M6<0;J6-0;SI(M6>0;J6-M6;SI(M6=0;J6-M6)))
         const economiesBrut = calculateEconomiesRealiseesBrut(pprPrevues, pertesConstatees);
@@ -2200,12 +2145,11 @@ export default function PerformanceRecapPage() {
           economiesBrut
         ) + totalSavedExpenses;
 
-        // Formule Excel: Pertes en % = SI(M6<0;0;SI(M6=0;0;SI(M6>0;M6/$E$3)))
-        // Note: $E$3 sera calculé plus tard comme référence totale
-        const pertesEnPourcentage = calculatePertesEnPourcentage(
-          pertesConstatees,
-          pprPrevues > 0 ? pprPrevues : 1 // Éviter division par zéro
-        );
+        // PASSE 1: pertesEnPourcentage = 0 (placeholder)
+        // La vraie valeur sera calculée en PASSE 2 après avoir le total des pertes ($E$3)
+        // Formule Excel L6: =SI(M6<0;0;SI(M6=0;0;SI(M6>0;M6/$E$3)))
+        // $E$3 = Total pertes N1 + N2 de tous les salariés (inconnu à ce stade)
+        const pertesEnPourcentage = 0; // Recalculé à l'affichage avec le bon $E$3
 
         // NIVEAU 2: Code PRC et données prises en compte
         const hasEntries = kpiEntries.length > 0 && tempsCollecteN2 > 0;
@@ -2242,34 +2186,47 @@ export default function PerformanceRecapPage() {
           );
         }
 
-        // Pertes Constatées NIVEAU 2: =SI((X6+W6)=0;0;SI((X6+W6)>0;(X6+W6)-R6))
-        const pertesConstateesN2 = calculatePertesConstateesN2(
-          scoreFinancierN2,
-          fraisPrisEnCompte,
-          member.incapacity_rate
-        );
-        const pertesConstateesN2Final = calculatePertesConstateesAvecIncapacite(pertesConstateesN2);
-
-        // PPR PREVUES NIVEAU 2 = J6 (même que N1)
+        // PPR PREVUES NIVEAU 2 = J6 (même que N1, calculé AVANT pertes)
         const pprPrevuesN2 = pprPrevues;
 
-        // ECONOMIES REALISEES 1 NIVEAU 2
+        // Pertes Constatées NIVEAU 2 BRUTES (AC6): =SI((X6+W6)=0;0;SI((X6+W6)>0;(X6+W6)-R6))
+        // Où X6 = Score Financier N2, W6 = Frais N2, R6 = PPR Prévues N2
+        const pertesConstateesN2Brut = calculatePertesConstateesN2(
+          scoreFinancierN2,
+          fraisPrisEnCompte,
+          pprPrevuesN2  // R6 = PPR Prévues N2 (corrigé: était member.incapacity_rate)
+        );
+
+        // ECONOMIES REALISEES 2 NIVEAU 2 = Z6-AC6 (calculé d'abord car nécessaire pour économies N2)
+        const economiesRealisees2N2 = calculateEconomiesRealisees2N2(pprPrevuesN2, pertesConstateesN2Brut);
+
+        // ECONOMIES REALISEES 1 NIVEAU 2 (DW6)
         // =SI(ET(F6=0;U6=0);0;SI(ET(F6>0;U6=0);0;SI(ET(F6=0;U6>0);AD6)))
+        // AD6 = PPR Prévues N2 (pas economiesRealisees2N2)
         const economiesRealiseesN2 = calculateEconomiesRealiseesN2(
           tempsCalculN1,
           tempsPrisEnCompte,
-          calculateEconomiesRealisees2N2(pprPrevuesN2, pertesConstateesN2Final)
+          pprPrevuesN2  // AD6 = PPR Prévues N2
         );
 
-        // ECONOMIES REALISEES 2 NIVEAU 2 = Z6-AC6
-        const economiesRealisees2N2 = calculateEconomiesRealisees2N2(pprPrevuesN2, pertesConstateesN2Final);
+        // 🆕 PERTES CONSTATÉES AVEC LOGIQUE CROISÉE N1/N2 (DQ6)
+        // Formule Excel: =IF(AND(DE6=0,DW6=0,DG6<>0),0,IF(AND(DE6=0,DW6=0,DG6=0),0,
+        //   IF(AND(DE6>0,DW6=0),0,IF(AND(DE6=0,DW6>0,DG6<>0),DV6,IF(AND(DE6=0,DW6>0,DG6=0),0)))))
+        // Logique: Évite le double-comptage des pertes entre N1 et N2
+        const pertesConstateesN2Final = calculatePertesConstateesN2AvecLogiqueCroisee(
+          economiesRealisees,      // DE6 = Économies Réalisées N1
+          economiesRealiseesN2,    // DW6 = Économies Réalisées N2
+          salariéExiste,           // DG6 = Salarié existe
+          pertesConstateesN2Brut   // DV6 = Pertes N2 brutes
+        );
 
         // Pertes en % NIVEAU 2 (sera recalculé avec total reference)
         // Pour l'instant, utiliser pprPrevues comme référence temporaire
-        const pertesEnPourcentageN2 = calculatePertesEnPourcentageN2(
-          pertesConstateesN2Final,
-          pprPrevuesN2 > 0 ? pprPrevuesN2 : 1
-        );
+        // PASSE 1: pertesEnPourcentageN2 = 0 (placeholder)
+        // La vraie valeur sera calculée en PASSE 2 après avoir le total des pertes ($E$3)
+        // Formule Excel AB6: =SI(AC6<0;0;SI(AC6=0;0;SI(AC6>0;AC6/$E$3)))
+        // $E$3 = Total pertes N1 + N2 de tous les salariés (inconnu à ce stade)
+        const pertesEnPourcentageN2 = 0; // Recalculé à l'affichage avec le bon $E$3
 
         return {
           // NIVEAU 1
@@ -2277,6 +2234,7 @@ export default function PerformanceRecapPage() {
           tempsCalcul: tempsCalculN1,
           fraisCollectes,
           scoreFinancier,
+          pertesConstateesBrut,  // 🆕 Pertes Constatées (brut) = SI((H6+G6)=0;0;SI((H6+G6)>0;(H6+G6)-D6))
           pertesConstatees,
           pprPrevues,
           economiesRealisees,
@@ -2397,6 +2355,7 @@ export default function PerformanceRecapPage() {
         tempsTotal: acc.tempsTotal + data.tempsCalcul,
         fraisTotal: acc.fraisTotal + data.fraisCollectes,
         scoreFinancierTotal: acc.scoreFinancierTotal + data.scoreFinancier,
+        pertesConstateesBrutTotal: acc.pertesConstateesBrutTotal + data.pertesConstateesBrut,  // 🆕
         pertesConstateesTotal: acc.pertesConstateesTotal + data.pertesConstatees,
         pprPrevuesTotal: acc.pprPrevuesTotal + data.pprPrevues,
         economiesRealiseesTotal: acc.economiesRealiseesTotal + economiesRealisees,
@@ -2421,6 +2380,7 @@ export default function PerformanceRecapPage() {
       tempsTotal: 0,
       fraisTotal: 0,
       scoreFinancierTotal: 0,
+      pertesConstateesBrutTotal: 0,  // 🆕
       pertesConstateesTotal: 0,
       pprPrevuesTotal: 0,
       economiesRealiseesTotal: 0,
@@ -2441,16 +2401,19 @@ export default function PerformanceRecapPage() {
       pertesEnPourcentageTotalCombine: 0
     });
 
-    // NIVEAU 1: Pertes en % = Pertes Constatées / Référence ($E$3)
+    // 🔧 FIX: $E$3 = Pertes constatées TOTAL (N1 + N2) - CALCULÉ EN PREMIER
+    // Formule Excel: =SI(M6<0;0;SI(M6=0;0;SI(M6>0;M6/$E$3)))
+    const totalPertesReference = totals.pertesConstateesTotal + totals.pertesConstateesTotalN2;
+
+    // NIVEAU 1: Pertes en % = Pertes Constatées N1 / $E$3
+    // Résultat: Contribution du N1 aux pertes totales
     totals.pertesEnPourcentageTotal = calculatePertesEnPourcentage(
       totals.pertesConstateesTotal,
-      totals.pprPrevuesTotal > 0 ? totals.pprPrevuesTotal : 1
+      totalPertesReference > 0 ? totalPertesReference : 1
     );
 
-    // NIVEAU 2: Pertes en % N2 = Pertes Constatées N2 / Référence totale
-    // Formule Excel: =SOMME(AB6:AB1705) où AB = AC6/$E$3 pour chaque ligne
-    // $E$3 = Total pertes constatées (N1 + N2)
-    const totalPertesReference = totals.pertesConstateesTotal + totals.pertesConstateesTotalN2;
+    // NIVEAU 2: Pertes en % N2 = Pertes Constatées N2 / $E$3
+    // Résultat: Contribution du N2 aux pertes totales
     totals.pertesEnPourcentageTotalN2 = calculatePertesEnPourcentageN2(
       totals.pertesConstateesTotalN2,
       totalPertesReference > 0 ? totalPertesReference : 1
@@ -3716,10 +3679,10 @@ export default function PerformanceRecapPage() {
                       {!isExpanded && totals && (
                         <div className="hidden md:flex items-center gap-4 text-white/90 text-sm">
                           <span className="px-2 py-1 bg-white/20 rounded">
-                            Économies: {(totals.economiesRealisees ?? 0).toLocaleString('fr-FR')} {currencyConfig.symbol}
+                            Économies: {(totals.economiesRealiseesTotal ?? 0).toLocaleString('fr-FR')} {currencyConfig.symbol}
                           </span>
                           <span className="px-2 py-1 bg-white/20 rounded">
-                            PPR: {(totals.pprPrevues ?? 0).toLocaleString('fr-FR')} {currencyConfig.symbol}
+                            PPR: {(totals.pprPrevuesTotal ?? 0).toLocaleString('fr-FR')} {currencyConfig.symbol}
                           </span>
                         </div>
                       )}

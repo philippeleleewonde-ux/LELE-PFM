@@ -285,6 +285,16 @@ export class CFOCalculationEngine {
       { id: 'knowhow', rate: calculated.indicator_knowhow_rate || 0 }
     ];
 
+    // 🆕 Distribution PROGRESSIVE des PPR trimestrielles
+    // Logique: Performance croissante au fil de l'année (montée en compétence)
+    // Total = 100% (0.20 + 0.23 + 0.27 + 0.30 = 1.00)
+    const QUARTERLY_DISTRIBUTION = {
+      T1: 0.20,  // Trimestre 1: 20% (phase d'apprentissage)
+      T2: 0.23,  // Trimestre 2: 23% (montée en compétence)
+      T3: 0.27,  // Trimestre 3: 27% (performance croissante)
+      T4: 0.30,  // Trimestre 4: 30% (performance maximale)
+    };
+
     // Fonction helper pour calculer les distributions pour une année donnée
     const calculateDistributionsForYear = (pprTotal: number) => {
       return businessLines.map(line => {
@@ -299,10 +309,29 @@ export class CFOCalculationEngine {
           const perLine = pprTotal * (indicator.rate / 100) * lineBudgetRate;
           const perPerson = perLine / lineStaffCount;
 
+          // 🆕 Calcul des PPR par trimestre (valeurs DIFFÉRENCIÉES)
+          // Utilise la distribution configurée (par défaut 25% par trimestre)
+          const perPersonByQuarter = {
+            T1: perPerson * QUARTERLY_DISTRIBUTION.T1,
+            T2: perPerson * QUARTERLY_DISTRIBUTION.T2,
+            T3: perPerson * QUARTERLY_DISTRIBUTION.T3,
+            T4: perPerson * QUARTERLY_DISTRIBUTION.T4,
+          };
+
+          const perLineByQuarter = {
+            T1: perLine * QUARTERLY_DISTRIBUTION.T1,
+            T2: perLine * QUARTERLY_DISTRIBUTION.T2,
+            T3: perLine * QUARTERLY_DISTRIBUTION.T3,
+            T4: perLine * QUARTERLY_DISTRIBUTION.T4,
+          };
+
           return {
             indicator: indicator.id,
             perLine: perLine,
-            perPerson: perPerson
+            perPerson: perPerson,
+            // 🆕 Données trimestrielles pour sélection dynamique Module 3
+            perPersonByQuarter: perPersonByQuarter,
+            perLineByQuarter: perLineByQuarter,
           };
         });
 

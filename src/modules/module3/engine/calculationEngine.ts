@@ -455,33 +455,639 @@ export function calculateFinancialScoreCorrect(
   if (volumeHoraireN1 === 0) return 0;
 
   // Formule: ((Recettes N-1 - Dépenses N-1) / Volume Horaire N-1) × Temps Collecté
+  // Conversion k¥ → ¥ (×1000) pour cohérence avec PPR Prévues
   const tauxMargeHoraire = (recettesN1 - depensesN1) / volumeHoraireN1;
-  return tauxMargeHoraire * tempsCollecte;
+  return tauxMargeHoraire * tempsCollecte * 1000;
 }
 
 /**
- * Calcule les pertes constatées
- * Formule Excel M6: =IF((H6+G6)=0,0,IF((H6+G6)>0,(H6+G6)-D6))
+ * SCORE FINANCIER - NIVEAU 1 (Signature simplifiée)
+ * ============================================
+ * Formule Excel: =(('2-Tri-TB Fixe-Données Risko M1'!L3-M3)/K3)*E6
+ *
+ * @param tempsCalcul - Temps calculé en heures décimales
+ * @param recettesN1 - Recettes N-1 en k¥
+ * @param depensesN1 - Dépenses N-1 en k¥
+ * @param volumeHoraireN1 - Volume horaire N-1
+ * @returns Score financier en ¥ (converti depuis k¥)
+ */
+export function calculateScoreFinancier(
+  tempsCalcul: number,
+  recettesN1: number,
+  depensesN1: number,
+  volumeHoraireN1: number
+): number {
+  if (volumeHoraireN1 === 0) return 0;
+  const tauxMargeHoraire = (recettesN1 - depensesN1) / volumeHoraireN1;
+  // Conversion k¥ → ¥ (×1000) pour cohérence avec PPR Prévues
+  return tauxMargeHoraire * tempsCalcul * 1000;
+}
+
+/**
+ * SCORE FINANCIER - NIVEAU 2 (Temps pris en compte)
+ * ============================================
+ * Même formule que N1 mais avec temps pris en compte au lieu de temps calculé
+ *
+ * @param tempsPrisEnCompte - Temps pris en compte NIVEAU 2
+ * @param recettesN1 - Recettes N-1 en k¥
+ * @param depensesN1 - Dépenses N-1 en k¥
+ * @param volumeHoraireN1 - Volume horaire N-1
+ * @returns Score financier N2 en ¥ (converti depuis k¥)
+ */
+export function calculateScoreFinancierN2(
+  tempsPrisEnCompte: number,
+  recettesN1: number,
+  depensesN1: number,
+  volumeHoraireN1: number
+): number {
+  if (volumeHoraireN1 === 0) return 0;
+  const tauxMargeHoraire = (recettesN1 - depensesN1) / volumeHoraireN1;
+  // Conversion k¥ → ¥ (×1000) pour cohérence avec PPR Prévues
+  return tauxMargeHoraire * tempsPrisEnCompte * 1000;
+}
+
+/**
+ * Calcule les pertes constatées BRUTES (avant application du taux d'incapacité)
+ *
+ * FORMULE EXCEL M6: =SI((H6+G6)=0;0;SI((H6+G6)>0;(H6+G6)-D6))
+ *
+ * Où:
+ * - H6 = Score Financier
+ * - G6 = Frais collectés
+ * - D6 = PPR Prévues (Score de Budgétisation)
+ *
+ * @param scoreFinancier - Score financier calculé (H6)
+ * @param frais - Frais collectés (G6)
+ * @param pprPrevues - PPR Prévues / Score de Budgétisation (D6)
+ * @returns Pertes brutes = (Score + Frais) - PPR, ou 0 si (Score + Frais) <= 0
  */
 export function calculatePertesConstatees(
   scoreFinancier: number,
   frais: number,
-  tauxIncapacite: number
+  pprPrevues: number = 0
 ): number {
   const total = scoreFinancier + frais;
+  // Formule Excel: SI((H6+G6)=0;0;SI((H6+G6)>0;(H6+G6)-D6))
   if (total === 0) return 0;
-  if (total > 0) return total - tauxIncapacite;
+  if (total > 0) return total - pprPrevues;
   return 0;
 }
 
 /**
- * Calcule les pertes avec prise en compte du taux d'incapacité
- * Formule Excel I6: =IF(M6<0,0,IF(M6=0,0,IF(M6>0,M6)))
+ * PERTES CONSTATÉES AVEC PRISE EN COMPTE DU TAUX D'INCAPACITÉ
+ * ============================================================
+ *
+ * LOGIQUE FINANCIÈRE VALIDÉE (Logique B):
+ * - Le taux d'incapacité représente le % de handicap du salarié
+ * - Les pertes "avec incapacité" = part des pertes CAUSÉES par le handicap
+ * - Un salarié avec 30% d'incapacité → 30% des pertes lui sont attribuées
+ *
+ * FORMULE: Pertes avec incapacité = Pertes brutes × (TauxIncapacité / 100)
+ *
+ * EXEMPLES:
+ * - Taux 0%  → Pertes × 0%   = 0 ¥ (salarié valide, pas de pertes liées au handicap)
+ * - Taux 30% → Pertes × 30%  = 30% des pertes attribuées au handicap
+ * - Taux 100% → Pertes × 100% = 100% des pertes attribuées au handicap
+ *
+ * @param pertesConstatees - Pertes brutes (Score + Frais)
+ * @param tauxIncapacite - Taux d'incapacité en % (0-100)
+ * @returns Pertes attribuables au handicap du salarié
  */
-export function calculatePertesAvecIncapacite(pertesConstatees: number): number {
-  if (pertesConstatees < 0) return 0;
-  if (pertesConstatees === 0) return 0;
-  return pertesConstatees;
+export function calculatePertesAvecIncapacite(
+  pertesConstatees: number,
+  tauxIncapacite: number = 0
+): number {
+  if (pertesConstatees <= 0) return 0;
+  if (tauxIncapacite <= 0) return 0;
+  if (tauxIncapacite > 100) return pertesConstatees; // Plafond à 100%
+
+  // Logique B: Pertes × (TauxIncapacité / 100)
+  return pertesConstatees * (tauxIncapacite / 100);
+}
+
+// ALIAS pour compatibilité avec le code existant
+export const calculatePertesConstateesBrut = calculatePertesConstatees;
+export const calculatePertesConstateesAvecIncapacite = calculatePertesAvecIncapacite;
+
+/**
+ * PERTES CONSTATÉES BRUTES - NIVEAU 2 (AC6)
+ *
+ * FORMULE EXCEL AC6: =SI((X6+W6)=0;0;SI((X6+W6)>0;(X6+W6)-R6))
+ *
+ * Où:
+ * - X6 = Score Financier N2
+ * - W6 = Frais-Pris en compte N2
+ * - R6 = PPR Prévues N2 (Score de Budgétisation)
+ *
+ * @param scoreFinancierN2 - Score financier NIVEAU 2 (X6)
+ * @param fraisPrisEnCompte - Frais pris en compte NIVEAU 2 (W6)
+ * @param pprPrevuesN2 - PPR Prévues N2 / Score de Budgétisation (R6)
+ * @returns Pertes brutes N2 = (Score + Frais) - PPR, ou 0 si (Score + Frais) <= 0
+ */
+export function calculatePertesConstateesN2(
+  scoreFinancierN2: number,
+  fraisPrisEnCompte: number,
+  pprPrevuesN2: number = 0
+): number {
+  const total = scoreFinancierN2 + fraisPrisEnCompte;
+  // Formule Excel: SI((X6+W6)=0;0;SI((X6+W6)>0;(X6+W6)-R6))
+  if (total === 0) return 0;
+  if (total > 0) return total - pprPrevuesN2;
+  return 0;
+}
+
+/**
+ * PERTES CONSTATÉES AVEC LOGIQUE CROISÉE N1/N2 (DQ6)
+ * ============================================
+ *
+ * Formule Excel (DQ6):
+ * =IF(AND(DE6=0,DW6=0,DG6<>0),0,
+ *  IF(AND(DE6=0,DW6=0,DG6=0),0,
+ *   IF(AND(DE6>0,DW6=0),0,
+ *    IF(AND(DE6=0,DW6>0,DG6<>0),DV6,
+ *     IF(AND(DE6=0,DW6>0,DG6=0),0)))))
+ *
+ * Où:
+ * - DE6 = ECONOMIES REALISEES N1
+ * - DW6 = ECONOMIES REALISEES N2
+ * - DG6 = Nom salarié N2 (salarié existe)
+ * - DV6 = Pertes constatées N2 (calculées précédemment)
+ *
+ * Logique métier: Éviter le double-comptage des pertes entre N1 et N2
+ * - Retourne DV6 UNIQUEMENT si N1 n'a pas d'économies ET N2 a des économies ET salarié existe
+ * - Retourne 0 dans tous les autres cas
+ *
+ * @param economiesRealiseesN1 - Économies réalisées NIVEAU 1 (DE6)
+ * @param economiesRealiseesN2 - Économies réalisées NIVEAU 2 (DW6)
+ * @param salariéExiste - Le salarié existe (DG6 <> 0)
+ * @param pertesConstateesN2Brut - Pertes constatées N2 brutes (DV6)
+ * @returns Pertes N2 filtrées selon logique croisée (DQ6)
+ */
+export function calculatePertesConstateesN2AvecLogiqueCroisee(
+  economiesRealiseesN1: number,
+  economiesRealiseesN2: number,
+  salariéExiste: boolean,
+  pertesConstateesN2Brut: number
+): number {
+  // Condition 1: DE6=0, DW6=0, DG6<>0 → 0
+  if (economiesRealiseesN1 === 0 && economiesRealiseesN2 === 0 && salariéExiste) {
+    return 0;
+  }
+
+  // Condition 2: DE6=0, DW6=0, DG6=0 → 0
+  if (economiesRealiseesN1 === 0 && economiesRealiseesN2 === 0 && !salariéExiste) {
+    return 0;
+  }
+
+  // Condition 3: DE6>0, DW6=0 → 0
+  if (economiesRealiseesN1 > 0 && economiesRealiseesN2 === 0) {
+    return 0;
+  }
+
+  // Condition 4: DE6=0, DW6>0, DG6<>0 → DV6 (retourne les pertes N2)
+  if (economiesRealiseesN1 === 0 && economiesRealiseesN2 > 0 && salariéExiste) {
+    return pertesConstateesN2Brut;
+  }
+
+  // Condition 5: DE6=0, DW6>0, DG6=0 → 0
+  if (economiesRealiseesN1 === 0 && economiesRealiseesN2 > 0 && !salariéExiste) {
+    return 0;
+  }
+
+  // Fallback: 0
+  return 0;
+}
+
+/**
+ * PPR PREVUES (semaine)
+ * ============================================
+ * Formule Excel: =SI(B6<>0;('2-Tri-TB Fixe-Données Risko M1'!O3/3)/4;SI(B6=0;0))
+ *
+ * Source des données:
+ * - Module: HCM PERFORMANCE PLAN
+ * - Page: "14 - PRIORITY ACTIONS - N+1"
+ * - Section: TRIMESTRE 1 - ANNÉE N+1
+ * - Champ: Indicateur // par personne
+ *
+ * Calcul:
+ * 1. PPR k¥ → PPR ¥ (× 1000)
+ * 2. PPR trimestriel → PPR mensuel (÷ 3)
+ * 3. PPR mensuel → PPR hebdomadaire (÷ 4)
+ *
+ * @param salarieExiste - Si le salarié existe (B6 <> 0)
+ * @param pprParPersonneParIndicateur - PPR par personne par indicateur en k¥
+ * @returns PPR prévues par semaine en ¥
+ */
+export function calculatePPRPrevues(
+  salarieExiste: boolean,
+  pprParPersonneParIndicateur: number
+): number {
+  if (!salarieExiste) return 0;
+  if (pprParPersonneParIndicateur === 0) return 0;
+
+  // Conversion k¥ → ¥ (× 1000) pour cohérence avec Score Financier
+  const pprEnUnites = pprParPersonneParIndicateur * 1000;
+
+  // PPR semaine = (PPR par personne en ¥ / 3 mois) / 4 semaines
+  const pprSemaine = (pprEnUnites / 3) / 4;
+
+  return pprSemaine;
+}
+
+// ============================================
+// RECALCUL PPR PAR PERSONNE DEPUIS LES SOURCES
+// ============================================
+// Cette fonction recalcule les PPR par personne directement depuis les données sources,
+// EXACTEMENT comme le fait Module 1 dans Page14PriorityActionsN1.tsx
+// Cela évite tout drift entre les données stockées et les données affichées
+
+/**
+ * Interface des taux par indicateur (format Module 3)
+ */
+export interface IndicatorRatesModule3 {
+  abs: number;  // Absentéisme (%)
+  qd: number;   // Défauts qualité (%)
+  oa: number;   // Accidents travail (%)
+  ddp: number;  // Écarts productivité (%)
+  ekh: number;  // Écarts know-how (%)
+}
+
+/**
+ * Interface des lignes d'activité Module 1
+ */
+export interface Module1BusinessLineData {
+  activityName: string;
+  staffCount: number;
+  budget: number;
+  budgetRate?: number;
+}
+
+/**
+ * Calcule la PPR par personne pour un indicateur et une ligne d'activité
+ * DIRECTEMENT depuis les données sources (même logique que Module 1)
+ *
+ * Formule Module 1:
+ * perLine = gainsN1 × (indicatorRate / 100) × lineBudgetRate
+ * perPerson = perLine / lineStaffCount
+ *
+ * @param businessLineName - Nom de la ligne d'activité
+ * @param indicatorId - ID de l'indicateur ('absenteeism', 'quality', 'accidents', 'productivity', 'knowhow')
+ * @param gainsN1 - PPR total annuel N+1 (en k¥)
+ * @param indicatorRates - Taux par indicateur (en %)
+ * @param module1BusinessLines - Lignes d'activité avec staffCount et budget
+ * @returns PPR par personne en k¥
+ */
+export function calculatePPRPerPersonFromSources(
+  businessLineName: string,
+  indicatorId: string,
+  gainsN1: number,
+  indicatorRates: IndicatorRatesModule3 | undefined,
+  module1BusinessLines: Module1BusinessLineData[] | undefined
+): number {
+  // Validation des données
+  if (!businessLineName || !indicatorId) return 0;
+  if (!gainsN1 || gainsN1 <= 0) return 0;
+  if (!indicatorRates) return 0;
+  if (!module1BusinessLines || module1BusinessLines.length === 0) return 0;
+
+  // Mapper l'indicatorId du format Module 3 vers le format Module 1
+  // Module 3: 'absenteeism', 'quality', 'accidents', 'productivity', 'knowhow'
+  // IndicatorRates: 'abs', 'qd', 'oa', 'ddp', 'ekh'
+  const indicatorRateMap: Record<string, keyof IndicatorRatesModule3> = {
+    'absenteeism': 'abs',
+    'quality': 'qd',
+    'accidents': 'oa',
+    'productivity': 'ddp',
+    'knowhow': 'ekh',
+    // Alias directs
+    'abs': 'abs',
+    'qd': 'qd',
+    'oa': 'oa',
+    'ddp': 'ddp',
+    'ekh': 'ekh'
+  };
+
+  const rateKey = indicatorRateMap[indicatorId.toLowerCase()];
+  if (!rateKey) {
+    console.warn(`[calculatePPRPerPersonFromSources] Unknown indicatorId: ${indicatorId}`);
+    return 0;
+  }
+
+  const indicatorRate = indicatorRates[rateKey] || 0;
+  if (indicatorRate <= 0) return 0;
+
+  // Trouver la ligne d'activité
+  const businessLine = module1BusinessLines.find(
+    bl => bl.activityName && bl.activityName.toLowerCase() === businessLineName.toLowerCase()
+  );
+
+  if (!businessLine) {
+    console.warn(`[calculatePPRPerPersonFromSources] Business line not found: ${businessLineName}`);
+    return 0;
+  }
+
+  // Calculer le budgetRate
+  const totalBudget = module1BusinessLines.reduce((sum, bl) => sum + (bl.budget || 0), 0);
+  const lineBudget = businessLine.budget || 0;
+  const calculatedBudgetRate = totalBudget > 0 ? (lineBudget / totalBudget) * 100 : 0;
+  const lineBudgetRate = (businessLine.budgetRate || calculatedBudgetRate) / 100; // % -> décimal
+
+  const lineStaffCount = businessLine.staffCount || 1; // Éviter division par zéro
+
+  // FORMULE IDENTIQUE À MODULE 1:
+  // perLine = gainsN1 × (indicatorRate / 100) × lineBudgetRate
+  // perPerson = perLine / lineStaffCount
+  const perLine = gainsN1 * (indicatorRate / 100) * lineBudgetRate;
+  const perPerson = perLine / lineStaffCount;
+
+  return perPerson;
+}
+
+// ============================================
+// SELECTION DYNAMIQUE PPR PAR TRIMESTRE
+// ============================================
+//
+// LOGIQUE:
+// 1. L'utilisateur sélectionne une période de saisie (semaine) dans Module 3
+// 2. Le système détermine dans quel trimestre (T1-T4) et année (N+1/N+2/N+3) cette période se trouve
+// 3. Le système récupère la PPR par personne correspondante depuis Module 1
+// 4. Cette valeur est utilisée dans les calculs de PPR PREVUES
+//
+
+/**
+ * Information sur la période sélectionnée
+ */
+export interface SelectedPeriodInfo {
+  yearOffset: number;       // 1 = N+1, 2 = N+2, 3 = N+3
+  quarter: 1 | 2 | 3 | 4;   // Trimestre
+  fiscalYear: string;       // "N+1", "N+2", "N+3"
+  quarterLabel: string;     // "T1", "T2", "T3", "T4"
+  fiscalWeek: number;       // Semaine fiscale (1-156 sur 3 ans)
+  weekInYear: number;       // Semaine dans l'année (1-52)
+  weekInQuarter: number;    // Semaine dans le trimestre (1-13)
+  isValid: boolean;         // true si dans la période du plan (3 ans)
+}
+
+/**
+ * Données PPR par personne pour un indicateur et une ligne d'activité
+ */
+export interface PPRPerPersonData {
+  businessLine: string;
+  indicator: string;
+  perPerson: number;        // PPR par personne en k¥ (valeur de Module 1)
+  perLine: number;          // PPR total pour la ligne
+  periodInfo: SelectedPeriodInfo;
+}
+
+/**
+ * Détermine la période (trimestre et année fiscale) à partir de la période de saisie sélectionnée
+ *
+ * @param launchDate - Date de lancement de la plateforme (depuis Company Profile)
+ * @param periodStart - Date de début de la période de saisie sélectionnée (format ISO: "2025-12-01")
+ * @returns Information sur la période ou null si invalide
+ */
+export function getPeriodInfoFromSelectedWeek(
+  launchDate: Date,
+  periodStart: string
+): SelectedPeriodInfo | null {
+  if (!launchDate || !periodStart) return null;
+
+  // Parser les dates
+  const launch = new Date(launchDate);
+  launch.setHours(0, 0, 0, 0);
+
+  // Parser periodStart (format ISO: "2025-12-01")
+  const [year, month, day] = periodStart.split('-').map(Number);
+  const selectedDate = new Date(year, month - 1, day, 0, 0, 0);
+
+  // Si avant le lancement, retourner null
+  if (selectedDate < launch) {
+    console.warn('[getPeriodInfoFromSelectedWeek] Date sélectionnée avant le lancement');
+    return null;
+  }
+
+  // Calculer le nombre de jours depuis le lancement
+  const diffMs = selectedDate.getTime() - launch.getTime();
+  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+  // Calculer la semaine fiscale (1-indexed)
+  const fiscalWeek = Math.floor(diffDays / 7) + 1;
+
+  // Calculer l'année fiscale offset (1 = N+1, 2 = N+2, 3 = N+3)
+  const weeksPerYear = 52;
+  const yearOffset = Math.floor((fiscalWeek - 1) / weeksPerYear) + 1;
+
+  // Calculer la semaine dans l'année courante (1-52)
+  const weekInYear = ((fiscalWeek - 1) % weeksPerYear) + 1;
+
+  // Calculer le trimestre (1-4) : semaines 1-13 = T1, 14-26 = T2, 27-39 = T3, 40-52 = T4
+  const quarter = Math.ceil(weekInYear / 13) as 1 | 2 | 3 | 4;
+
+  // Calculer la semaine dans le trimestre (1-13)
+  const weekInQuarter = ((weekInYear - 1) % 13) + 1;
+
+  // Vérifier si dans la période du plan (3 ans max)
+  const isValid = yearOffset >= 1 && yearOffset <= 3;
+
+  const result: SelectedPeriodInfo = {
+    yearOffset,
+    quarter,
+    fiscalYear: `N+${yearOffset}`,
+    quarterLabel: `T${quarter}`,
+    fiscalWeek,
+    weekInYear,
+    weekInQuarter,
+    isValid,
+  };
+
+  console.log(`[getPeriodInfoFromSelectedWeek] Period: ${periodStart} → ${result.fiscalYear} ${result.quarterLabel} (Semaine ${result.weekInYear})`);
+
+  return result;
+}
+
+/**
+ * Structure PPR par trimestre (import depuis Module 1)
+ */
+export interface QuarterlyPPRData {
+  T1: number;
+  T2: number;
+  T3: number;
+  T4: number;
+}
+
+/**
+ * Structure des données Priority Actions de Module 1
+ */
+export interface PriorityActionDistribution {
+  indicator: string;
+  perLine: number;
+  perPerson: number;
+  // 🆕 Données trimestrielles différenciées
+  perPersonByQuarter?: QuarterlyPPRData;
+  perLineByQuarter?: QuarterlyPPRData;
+}
+
+export interface PriorityActionData {
+  businessLine: string;
+  staffCount: number;
+  budgetRate: number;
+  distributions: PriorityActionDistribution[];
+}
+
+/**
+ * Récupère la PPR par personne pour une période, une ligne d'activité et un indicateur
+ *
+ * @param periodInfo - Information sur la période sélectionnée
+ * @param businessLineName - Nom de la ligne d'activité
+ * @param indicatorId - ID de l'indicateur ('abs', 'qd', 'oa', 'ddp', 'ekh')
+ * @param priorityActionsN1 - Données Priority Actions N+1 depuis Module 1
+ * @param priorityActionsN2 - Données Priority Actions N+2 depuis Module 1
+ * @param priorityActionsN3 - Données Priority Actions N+3 depuis Module 1
+ * @returns PPR par personne en k¥ ou 0 si non trouvé
+ */
+export function getPPRPerPersonForPeriod(
+  periodInfo: SelectedPeriodInfo | null,
+  businessLineName: string,
+  indicatorId: string,
+  priorityActionsN1?: PriorityActionData[],
+  priorityActionsN2?: PriorityActionData[],
+  priorityActionsN3?: PriorityActionData[]
+): number {
+  if (!periodInfo || !periodInfo.isValid) {
+    console.warn('[getPPRPerPersonForPeriod] Période invalide');
+    return 0;
+  }
+
+  // Sélectionner les données de l'année correspondante
+  let priorityActions: PriorityActionData[] | undefined;
+  switch (periodInfo.yearOffset) {
+    case 1:
+      priorityActions = priorityActionsN1;
+      break;
+    case 2:
+      priorityActions = priorityActionsN2;
+      break;
+    case 3:
+      priorityActions = priorityActionsN3;
+      break;
+    default:
+      console.warn(`[getPPRPerPersonForPeriod] Année non supportée: N+${periodInfo.yearOffset}`);
+      return 0;
+  }
+
+  if (!priorityActions || priorityActions.length === 0) {
+    console.warn(`[getPPRPerPersonForPeriod] Pas de données Priority Actions pour ${periodInfo.fiscalYear}`);
+    return 0;
+  }
+
+  // Mapper l'indicatorId vers le format de Module 1
+  const indicatorMap: Record<string, string> = {
+    'abs': 'absenteeism',
+    'qd': 'quality',
+    'oa': 'accidents',
+    'ddp': 'productivity',
+    'ekh': 'knowhow',
+  };
+  const module1IndicatorId = indicatorMap[indicatorId] || indicatorId;
+
+  // Trouver la ligne d'activité
+  const lineData = priorityActions.find(
+    pa => pa.businessLine.toLowerCase() === businessLineName.toLowerCase()
+  );
+
+  if (!lineData) {
+    console.warn(`[getPPRPerPersonForPeriod] Ligne d'activité non trouvée: ${businessLineName}`);
+    return 0;
+  }
+
+  // Trouver l'indicateur
+  const distribution = lineData.distributions.find(
+    d => d.indicator === module1IndicatorId || d.indicator === indicatorId
+  );
+
+  if (!distribution) {
+    console.warn(`[getPPRPerPersonForPeriod] Indicateur non trouvé: ${indicatorId} pour ${businessLineName}`);
+    return 0;
+  }
+
+  // 🆕 SÉLECTION DYNAMIQUE PAR TRIMESTRE
+  // Priorité 1: Utiliser les données trimestrielles différenciées si disponibles
+  // Priorité 2: Fallback sur division par 4 de la valeur annuelle
+  let pprPerPersonQuarterly: number;
+  const quarterKey = `T${periodInfo.quarter}` as keyof QuarterlyPPRData;
+
+  if (distribution.perPersonByQuarter && distribution.perPersonByQuarter[quarterKey] !== undefined) {
+    // ✅ Données trimestrielles DIFFÉRENCIÉES disponibles
+    pprPerPersonQuarterly = distribution.perPersonByQuarter[quarterKey];
+    console.log(`[getPPRPerPersonForPeriod] ✅ Données trimestrielles: ${periodInfo.fiscalYear} ${periodInfo.quarterLabel} | ${businessLineName} | ${indicatorId} → PPR/personne: ${pprPerPersonQuarterly.toFixed(2)} k¥`);
+  } else {
+    // ⚠️ Fallback: Division par 4 de la valeur annuelle
+    pprPerPersonQuarterly = distribution.perPerson / 4;
+    console.log(`[getPPRPerPersonForPeriod] ⚠️ Fallback /4: ${periodInfo.fiscalYear} ${periodInfo.quarterLabel} | ${businessLineName} | ${indicatorId} → PPR/personne: ${pprPerPersonQuarterly.toFixed(2)} k¥`);
+  }
+
+  return pprPerPersonQuarterly;
+}
+
+/**
+ * Calcule la PPR PREVUES (semaine) à partir de la période sélectionnée
+ *
+ * FORMULE: PPR semaine = (PPR par personne k¥ × 1000 / 3 mois) / 4 semaines
+ *
+ * @param launchDate - Date de lancement
+ * @param periodStart - Période de saisie sélectionnée
+ * @param businessLineName - Nom de la ligne d'activité
+ * @param indicatorId - ID de l'indicateur
+ * @param priorityActionsN1 - Données N+1
+ * @param priorityActionsN2 - Données N+2
+ * @param priorityActionsN3 - Données N+3
+ * @returns PPR PREVUES (semaine) en ¥
+ */
+export function calculatePPRPrevuesFromPeriod(
+  launchDate: Date,
+  periodStart: string,
+  businessLineName: string,
+  indicatorId: string,
+  priorityActionsN1?: PriorityActionData[],
+  priorityActionsN2?: PriorityActionData[],
+  priorityActionsN3?: PriorityActionData[]
+): { pprSemaine: number; periodInfo: SelectedPeriodInfo | null } {
+  // 1. Déterminer la période (trimestre + année)
+  const periodInfo = getPeriodInfoFromSelectedWeek(launchDate, periodStart);
+
+  if (!periodInfo) {
+    return { pprSemaine: 0, periodInfo: null };
+  }
+
+  // 2. Récupérer la PPR par personne pour cette période
+  const pprPerPersonK = getPPRPerPersonForPeriod(
+    periodInfo,
+    businessLineName,
+    indicatorId,
+    priorityActionsN1,
+    priorityActionsN2,
+    priorityActionsN3
+  );
+
+  if (pprPerPersonK === 0) {
+    return { pprSemaine: 0, periodInfo };
+  }
+
+  // 3. Calculer la PPR semaine avec la formule standard
+  // PPR semaine = (PPR k¥ × 1000 / 3) / 4
+  const pprSemaine = calculatePPRPrevues(true, pprPerPersonK);
+
+  return { pprSemaine, periodInfo };
+}
+
+// Ancien alias pour compatibilité
+export function getCurrentPeriodInfo(
+  launchDate: Date,
+  currentDate: Date = new Date()
+): SelectedPeriodInfo | null {
+  // Convertir la date en format ISO string
+  const periodStart = currentDate.toISOString().split('T')[0];
+  return getPeriodInfoFromSelectedWeek(launchDate, periodStart);
 }
 
 /**
@@ -1129,4 +1735,166 @@ export function formatDuration(minutes: number): string {
 
 export function formatPercentage(value: number, decimals: number = 1): string {
   return `${value.toFixed(decimals)}%`;
+}
+
+// ============================================
+// DONNÉES NIVEAU 2 AGRÉGÉES
+// ============================================
+
+/**
+ * Interface pour les données N2 agrégées
+ */
+export interface TempsN2AggregatedData {
+  business_line_id: string;
+  kpi_type: string;
+  total_temps_n2_hours: number;
+  total_fees_n2: number;
+  entries_count: number;
+}
+
+/**
+ * Type pour le map des données N2 agrégées
+ * Structure: { [businessLineId]: { [kpiType]: TempsN2AggregatedData } }
+ */
+export type TempsN2Map = Record<string, Record<string, TempsN2AggregatedData>>;
+
+/**
+ * Récupère tous les temps N2 agrégés pour une company/période
+ * Équivalent Excel: =SI(ESTERREUR('20-Tri-NIVEAU2-LIGNES'!$S$37>0);0;(...))
+ *
+ * @param supabase - Client Supabase
+ * @param companyId - ID de la company
+ * @param periodStart - Date de début de période
+ * @param periodEnd - Date de fin de période
+ * @returns Map des données N2 par businessLine et kpiType
+ */
+export async function getAllTempsN2Aggregated(
+  supabase: any, // SupabaseClient type
+  companyId: string,
+  periodStart: string,
+  periodEnd: string
+): Promise<TempsN2Map> {
+  try {
+    const { data, error } = await supabase
+      .rpc('get_all_temps_n2_aggregated', {
+        p_company_id: companyId,
+        p_period_start: periodStart,
+        p_period_end: periodEnd
+      });
+
+    if (error) {
+      console.warn('[N2] Error fetching aggregated temps N2:', error);
+      return {};
+    }
+
+    // Construire le map
+    const tempsN2Map: TempsN2Map = {};
+    (data || []).forEach((row: TempsN2AggregatedData) => {
+      if (!tempsN2Map[row.business_line_id]) {
+        tempsN2Map[row.business_line_id] = {};
+      }
+      tempsN2Map[row.business_line_id][row.kpi_type] = row;
+    });
+
+    return tempsN2Map;
+  } catch (err) {
+    console.warn('[N2] Exception fetching aggregated temps N2:', err);
+    return {}; // Fallback vide comme ESTERREUR
+  }
+}
+
+/**
+ * Récupère le temps N2 agrégé pour une business_line/kpi spécifique
+ * Utilise le map pré-chargé pour éviter les requêtes multiples
+ *
+ * @param tempsN2Map - Map pré-chargé des données N2
+ * @param businessLineId - ID de la ligne d'activité
+ * @param kpiType - Type de KPI (abs, qd, oa, ddp)
+ * @param fallbackValue - Valeur de fallback si pas de données (défaut: 0)
+ * @returns Temps N2 en heures décimales
+ */
+export function getTempsN2FromMap(
+  tempsN2Map: TempsN2Map,
+  businessLineId: string,
+  kpiType: string,
+  fallbackValue: number = 0
+): number {
+  return tempsN2Map?.[businessLineId]?.[kpiType]?.total_temps_n2_hours ?? fallbackValue;
+}
+
+/**
+ * Récupère les frais N2 agrégés pour une business_line/kpi spécifique
+ *
+ * @param tempsN2Map - Map pré-chargé des données N2
+ * @param businessLineId - ID de la ligne d'activité
+ * @param kpiType - Type de KPI (abs, qd, oa, ddp)
+ * @param fallbackValue - Valeur de fallback si pas de données (défaut: 0)
+ * @returns Frais N2 en euros
+ */
+export function getFeesN2FromMap(
+  tempsN2Map: TempsN2Map,
+  businessLineId: string,
+  kpiType: string,
+  fallbackValue: number = 0
+): number {
+  return tempsN2Map?.[businessLineId]?.[kpiType]?.total_fees_n2 ?? fallbackValue;
+}
+
+// ============================================
+// COLONNES SPÉCIFIQUES DDP (Écarts de Productivité Directe)
+// ============================================
+
+/**
+ * PERTES AVEC INCAPACITÉ - SPÉCIFIQUE DDP (DD6)
+ *
+ * FORMULE EXCEL DD6:
+ * =SI(DE6<0;CZ6--DE6;SI(DE6>0;CZ6-DE6;SI(DE6=0;CZ6-DE6)))
+ *
+ * Simplification:
+ * - Si pertes < 0: PPR + |pertes| (PPR - (-pertes))
+ * - Si pertes >= 0: PPR - pertes
+ *
+ * Où:
+ * - CZ6 = PPR Prévues
+ * - DE6 = Pertes Constatées
+ *
+ * @param pprPrevues - PPR Prévues (CZ6)
+ * @param pertesConstatees - Pertes Constatées (DE6)
+ * @returns Pertes avec incapacité pour DDP
+ */
+export function calculatePertesAvecIncapaciteDDP(
+  pprPrevues: number,
+  pertesConstatees: number
+): number {
+  if (pertesConstatees < 0) {
+    // Pertes négatives: PPR - (-pertes) = PPR + |pertes|
+    return pprPrevues - (-pertesConstatees);
+  }
+  // Pertes >= 0: PPR - pertes
+  return pprPrevues - pertesConstatees;
+}
+
+/**
+ * PERTES EN % - SPÉCIFIQUE DDP (DF6)
+ *
+ * FORMULE EXCEL DF6:
+ * =SI(DD6=0;"0%";SI(ESTERREUR(DD6/DC6);0%;DD6/DC6))
+ *
+ * Où:
+ * - DD6 = Pertes avec incapacité (calculé par calculatePertesAvecIncapaciteDDP)
+ * - DC6 = $CU$3 = Total des pertes (référence)
+ *
+ * @param pertesAvecIncapacite - Pertes avec incapacité DDP (DD6)
+ * @param totalPertesReference - Total des pertes ($CU$3)
+ * @returns Pertes en % pour DDP (0-1, pas 0-100)
+ */
+export function calculatePertesEnPourcentageDDP(
+  pertesAvecIncapacite: number,
+  totalPertesReference: number
+): number {
+  if (pertesAvecIncapacite === 0) return 0;
+  if (totalPertesReference === 0) return 0; // Éviter division par 0
+
+  // Retourner le ratio (sera formaté en % à l'affichage)
+  return pertesAvecIncapacite / totalPertesReference;
 }

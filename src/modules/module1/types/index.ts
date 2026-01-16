@@ -208,36 +208,42 @@ export interface CalculatedFields {
 
   // 🆕 PPR par personne par indicateur par business line (Page 14, 15, 16)
   // Ces données sont utilisées par le Module 3 pour calculer PPR PREVUES
-  priorityActionsN1?: {
-    businessLine: string;
-    staffCount: number;
-    budgetRate: number;
-    distributions: {
-      indicator: string;  // 'absenteeism' | 'productivity' | 'quality' | 'accidents' | 'knowhow'
-      perLine: number;    // PPR total pour la ligne
-      perPerson: number;  // PPR par personne (= perLine / staffCount)
-    }[];
-  }[];
-  priorityActionsN2?: {
-    businessLine: string;
-    staffCount: number;
-    budgetRate: number;
-    distributions: {
-      indicator: string;
-      perLine: number;
-      perPerson: number;
-    }[];
-  }[];
-  priorityActionsN3?: {
-    businessLine: string;
-    staffCount: number;
-    budgetRate: number;
-    distributions: {
-      indicator: string;
-      perLine: number;
-      perPerson: number;
-    }[];
-  }[];
+  priorityActionsN1?: PriorityActionEntry[];
+  priorityActionsN2?: PriorityActionEntry[];
+  priorityActionsN3?: PriorityActionEntry[];
+}
+
+/**
+ * Structure PPR par trimestre pour sélection dynamique
+ * Permet d'avoir des valeurs DIFFÉRENTES pour T1, T2, T3, T4
+ */
+export interface QuarterlyPPRData {
+  T1: number;  // PPR par personne Trimestre 1
+  T2: number;  // PPR par personne Trimestre 2
+  T3: number;  // PPR par personne Trimestre 3
+  T4: number;  // PPR par personne Trimestre 4
+}
+
+/**
+ * Distribution PPR par indicateur avec données trimestrielles
+ */
+export interface PriorityActionDistribution {
+  indicator: string;  // 'absenteeism' | 'productivity' | 'quality' | 'accidents' | 'knowhow'
+  perLine: number;    // PPR total pour la ligne (ANNUEL)
+  perPerson: number;  // PPR par personne ANNUEL (= perLine / staffCount)
+  // 🆕 PPR par personne PAR TRIMESTRE (pour sélection dynamique Module 3)
+  perPersonByQuarter?: QuarterlyPPRData;
+  perLineByQuarter?: QuarterlyPPRData;
+}
+
+/**
+ * Entrée Priority Actions par ligne d'activité
+ */
+export interface PriorityActionEntry {
+  businessLine: string;
+  staffCount: number;
+  budgetRate: number;
+  distributions: PriorityActionDistribution[];
 }
 
 // Budget data interface

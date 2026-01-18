@@ -50,6 +50,7 @@ interface TeamMember {
     name: string;
     professional_category: string;
     tech_level: string;
+    team_number: number; // Numéro de l'équipe pour le filtrage
 }
 
 interface KPIType {
@@ -72,6 +73,16 @@ interface CostEntry {
     hours: number;
     minutes: number;
     compensation: number;
+}
+
+// Type pour les équipes (chargées depuis module3_teams)
+interface Team {
+    id: string;
+    team_number: number;
+    team_name: string;
+    team_leader_id: string | null;
+    team_leader_name: string | null;  // Nom du team leader (JOIN avec module3_team_members)
+    is_configured: boolean;
 }
 
 // KPI Definitions - Key Performance Indicators (Drivers of Economic Benefit)
@@ -138,6 +149,7 @@ export default function CostDataEntry() {
     const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
     const [selectedBusinessLine, setSelectedBusinessLine] = useState('');
     const [selectedTeam, setSelectedTeam] = useState('all');
+    const [teams, setTeams] = useState<Team[]>([]); // Équipes chargées depuis module3_teams
     const [periodStart, setPeriodStart] = useState('');
     const [periodEnd, setPeriodEnd] = useState('');
 
@@ -198,6 +210,38 @@ export default function CostDataEntry() {
         }
     };
 
+    // Fonction pour charger les équipes depuis module3_teams avec le nom du team leader
+    const fetchTeams = async (businessLineId: string) => {
+        try {
+            const { data, error } = await supabase
+                .from('module3_teams')
+                .select(`
+                    id,
+                    team_number,
+                    team_name,
+                    team_leader_id,
+                    is_configured,
+                    team_leader:module3_team_members!team_leader_id(name)
+                `)
+                .eq('business_line_id', businessLineId)
+                .order('team_number', { ascending: true });
+
+            if (error) throw error;
+
+            // Transformer les données pour extraire le nom du team leader
+            const teamsWithLeaderName = (data || []).map(team => ({
+                ...team,
+                team_leader_name: team.team_leader?.name || null
+            }));
+
+            setTeams(teamsWithLeaderName);
+            setSelectedTeam('all'); // Reset à "Toutes les équipes" quand on change de ligne
+        } catch (error) {
+            console.error('Erreur lors du chargement des équipes:', error);
+            setTeams([]);
+        }
+    };
+
     // OPTIMISATION 10K: Fonction de chargement paginé des membres
     const fetchTeamMembers = useCallback(async (businessLineId: string, page: number = 0, append: boolean = false) => {
         try {
@@ -212,7 +256,7 @@ export default function CostDataEntry() {
 
             const { data, error, count } = await supabase
                 .from('module3_team_members')
-                .select('id, name, professional_category, tech_level', { count: 'exact' })
+                .select('id, name, professional_category, tech_level, team_number', { count: 'exact' })
                 .eq('business_line_id', businessLineId)
                 .order('name', { ascending: true })
                 .range(from, to);
@@ -403,15 +447,19 @@ export default function CostDataEntry() {
                     kpi_type: selectedKPI,
                     period_start: periodStart,
                     period_end: periodEnd,
-                    event_date: new Date().toISOString().split('T')[0], // Date du jour pour DDP
+                    event_date: periodEnd, // Utiliser la fin de période pour DDP (respect contrainte cost_entries_event_in_period)
                     duration_hours: entry.plannedTimeHours,
                     duration_minutes: entry.plannedTimeMinutes,
                     compensation_amount: entry.plannedExpenses,
-                    // Champs spécifiques DDP
+                    // Champs spécifiques DDP - Gains
                     selected_days: entry.selectedDays,
                     recovered_time_hours: entry.recoveredTimeHours,
                     recovered_time_minutes: entry.recoveredTimeMinutes,
                     saved_expenses: entry.savedExpenses,
+                    // Champs spécifiques DDP - Pertes
+                    lost_time_hours: entry.lostTimeHours,
+                    lost_time_minutes: entry.lostTimeMinutes,
+                    excess_expenses: entry.excessExpenses,
                     created_by: user?.id
                 }));
             } else {
@@ -770,6 +818,16 @@ export default function CostDataEntry() {
     const selectedBusinessLineData = businessLines.find(bl => bl.id === selectedBusinessLine);
     const selectedKPIData = KPI_DEFINITIONS.find(kpi => kpi.id === selectedKPI);
 
+    // Filtrer les membres selon l'équipe sélectionnée
+    const filteredTeamMembers = useMemo(() => {
+        if (selectedTeam === 'all') {
+            return teamMembers;
+        }
+        return teamMembers.filter(member =>
+            member.team_number === parseInt(selectedTeam)
+        );
+    }, [teamMembers, selectedTeam]);
+
     if (loading || isCompanyLoading) {
         return (
             <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
@@ -936,7 +994,10 @@ export default function CostDataEntry() {
                                                 <Building2 className="w-4 h-4 text-primary" />
                                                 Ligne d'activité
                                             </Label>
-                                            <Select value={selectedBusinessLine} onValueChange={setSelectedBusinessLine}>
+                                            <Select value={selectedBusinessLine} onValueChange={(value) => {
+                                                    setSelectedBusinessLine(value);
+                                                    fetchTeams(value); // Charger les équipes de cette ligne
+                                                }}>
                                                 <SelectTrigger className="h-12 bg-background border-input hover:border-primary/50 transition-colors">
                                                     <SelectValue placeholder="Sélectionnez une ligne" />
                                                 </SelectTrigger>
@@ -985,7 +1046,12 @@ export default function CostDataEntry() {
                                                 <SelectTrigger className="h-12 bg-background border-input hover:border-purple-500/50 transition-colors disabled:opacity-50">
                                                     <SelectValue placeholder="Sélectionnez une équipe" />
                                                 </SelectTrigger>
-                                                <SelectContent>
+                                                <SelectContent
+                                                    position="popper"
+                                                    sideOffset={5}
+                                                    className="max-h-[300px] overflow-y-auto z-50"
+                                                >
+                                                    {/* Option "Toutes les équipes" */}
                                                     <SelectItem value="all">
                                                         <div className="flex items-center gap-2">
                                                             <Users className="w-4 h-4" />
@@ -997,22 +1063,29 @@ export default function CostDataEntry() {
                                                             )}
                                                         </div>
                                                     </SelectItem>
-                                                    {selectedBusinessLineData && selectedBusinessLineData.team_leader && (
-                                                        <SelectItem value={selectedBusinessLineData.id}>
+
+                                                    {/* Liste des équipes depuis module3_teams avec nom du Team Leader */}
+                                                    {teams.map((team) => (
+                                                        <SelectItem key={team.id} value={team.team_number.toString()}>
                                                             <div className="flex items-center gap-2">
                                                                 <UserCircle className="w-4 h-4" />
-                                                                <span>Équipe {selectedBusinessLineData.team_leader}</span>
+                                                                <span>
+                                                                    {team.team_leader_name
+                                                                        ? `Équipe de ${team.team_leader_name}`
+                                                                        : `Équipe ${team.team_number}`
+                                                                    }
+                                                                </span>
                                                                 <Badge variant="outline" className="text-xs ml-2">
-                                                                    {selectedBusinessLineData.activity_name}
+                                                                    #{team.team_number}
                                                                 </Badge>
                                                             </div>
                                                         </SelectItem>
-                                                    )}
+                                                    ))}
                                                 </SelectContent>
                                             </Select>
-                                            {selectedBusinessLineData && teamMembers.length > 0 && (
+                                            {selectedBusinessLineData && filteredTeamMembers.length > 0 && (
                                                 <p className="text-xs text-muted-foreground">
-                                                    {teamMembers.length} employé(s) disponible(s) pour la saisie
+                                                    {filteredTeamMembers.length} employé(s) disponible(s) pour la saisie{selectedTeam !== 'all' && ` (Équipe ${selectedTeam})`}
                                                 </p>
                                             )}
                                         </div>
@@ -1075,20 +1148,11 @@ export default function CostDataEntry() {
                                         </Button>
                                         <Button
                                             onClick={handleNextStep}
-                                            disabled={!selectedBusinessLine || !periodStart || !periodEnd || isPeriodLocked}
+                                            disabled={!selectedBusinessLine || !periodStart || !periodEnd}
                                             className="bg-gradient-to-r from-primary to-purple-600 hover:from-primary/90 hover:to-purple-700 text-primary-foreground shadow-lg shadow-primary/25"
                                         >
-                                            {isPeriodLocked ? (
-                                                <>
-                                                    <Shield className="w-4 h-4 mr-2" />
-                                                    Période verrouillée
-                                                </>
-                                            ) : (
-                                                <>
-                                                    Suivant
-                                                    <ArrowRight className="w-4 h-4 ml-2" />
-                                                </>
-                                            )}
+                                            Suivant
+                                            <ArrowRight className="w-4 h-4 ml-2" />
                                         </Button>
                                     </div>
                                 </CardContent>

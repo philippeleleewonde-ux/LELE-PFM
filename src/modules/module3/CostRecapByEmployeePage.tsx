@@ -92,6 +92,10 @@ interface CostEntry {
   recovered_time_hours?: number;
   recovered_time_minutes?: number;
   saved_expenses?: number;
+  // Champs pour les pertes DDP
+  lost_time_hours?: number;
+  lost_time_minutes?: number;
+  excess_expenses?: number;
   created_at: string;
   created_by: string;
 }
@@ -894,11 +898,21 @@ export default function CostRecapByEmployeePage() {
                                               {entry.compensation_amount.toLocaleString('fr-FR')} {currencyConfig.symbol}
                                             </span>
                                           </div>
+                                          {/* Économies - GAIN (vert) */}
                                           {entry.saved_expenses !== undefined && entry.saved_expenses > 0 && (
                                             <div className="flex justify-between text-sm">
                                               <span className="text-muted-foreground">Économies:</span>
                                               <span className="font-medium text-green-600">
                                                 {entry.saved_expenses.toLocaleString('fr-FR')} {currencyConfig.symbol}
+                                              </span>
+                                            </div>
+                                          )}
+                                          {/* Dépenses en trop - PERTE (rouge) */}
+                                          {entry.excess_expenses !== undefined && entry.excess_expenses > 0 && (
+                                            <div className="flex justify-between text-sm">
+                                              <span className="text-muted-foreground">Dépenses en trop:</span>
+                                              <span className="font-medium text-red-600">
+                                                +{entry.excess_expenses.toLocaleString('fr-FR')} {currencyConfig.symbol}
                                               </span>
                                             </div>
                                           )}
@@ -957,11 +971,23 @@ export default function CostRecapByEmployeePage() {
                                                   </div>
                                                 </div>
                                               )}
-                                              {(entry.recovered_time_hours !== undefined || entry.recovered_time_minutes !== undefined) && (
+                                              {/* Temps récupéré - GAIN (vert) */}
+                                              {(entry.recovered_time_hours !== undefined || entry.recovered_time_minutes !== undefined) &&
+                                               (entry.recovered_time_hours > 0 || entry.recovered_time_minutes > 0) && (
                                                 <div className="flex justify-between text-sm mt-2">
                                                   <span className="text-muted-foreground">Temps récupéré:</span>
                                                   <span className="font-medium text-green-600">
                                                     {formatDuration(entry.recovered_time_hours || 0, entry.recovered_time_minutes || 0)}
+                                                  </span>
+                                                </div>
+                                              )}
+                                              {/* Temps utilisé en plus - PERTE (rouge) */}
+                                              {(entry.lost_time_hours !== undefined || entry.lost_time_minutes !== undefined) &&
+                                               (entry.lost_time_hours > 0 || entry.lost_time_minutes > 0) && (
+                                                <div className="flex justify-between text-sm mt-2">
+                                                  <span className="text-muted-foreground">Temps utilisé en plus:</span>
+                                                  <span className="font-medium text-red-600">
+                                                    +{formatDuration(entry.lost_time_hours || 0, entry.lost_time_minutes || 0)}
                                                   </span>
                                                 </div>
                                               )}

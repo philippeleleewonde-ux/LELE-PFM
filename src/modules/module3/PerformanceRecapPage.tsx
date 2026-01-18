@@ -2051,17 +2051,27 @@ export default function PerformanceRecapPage() {
         let totalHours = 0;
         let totalMinutes = 0;
         let totalFrais = 0;
+        // GAINS DDP
         let totalSavedExpenses = 0;
         let totalRecoveredHours = 0;
         let totalRecoveredMinutes = 0;
+        // PERTES DDP (NOUVEAU - Audit Financier 18/01/2026)
+        let totalLostHours = 0;
+        let totalLostMinutes = 0;
+        let totalExcessExpenses = 0;
 
         kpiEntries.forEach(entry => {
           totalHours += entry.duration_hours || 0;
           totalMinutes += entry.duration_minutes || 0;
           totalFrais += entry.compensation_amount || 0;
+          // GAINS DDP
           totalSavedExpenses += entry.saved_expenses || 0;
           totalRecoveredHours += entry.recovered_time_hours || 0;
           totalRecoveredMinutes += entry.recovered_time_minutes || 0;
+          // PERTES DDP (NOUVEAU)
+          totalLostHours += entry.lost_time_hours || 0;
+          totalLostMinutes += entry.lost_time_minutes || 0;
+          totalExcessExpenses += entry.excess_expenses || 0;
         });
 
         // NIVEAU 1: Données collectées
@@ -2137,13 +2147,42 @@ export default function PerformanceRecapPage() {
         // Formule Excel: ECONOMIES (brut) = SI(M6<0;J6-0;SI(M6>0;J6-M6;SI(M6=0;J6-M6)))
         const economiesBrut = calculateEconomiesRealiseesBrut(pprPrevues, pertesConstatees);
 
+        // 🆕 AJOUT: Conversion du temps récupéré en valeur monétaire (économies DDP)
+        // Le temps récupéré représente le gain de productivité en temps
+        // Exemple: Mistral fait gagner 30mn → 0.5h × margeHoraire = économie en ¥
+        // Formule: tempsRécupéré × ((recettesN1 - dépensesN1) / volumeHoraireN1) × 1000
+        const totalRecoveredDecimalHours = totalRecoveredHours + (totalRecoveredMinutes / 60);
+        const economiesTempsRecupere = (kpiType === 'ddp' && totalRecoveredDecimalHours > 0)
+          ? calculateScoreFinancier(
+              totalRecoveredDecimalHours,
+              params.recettesN1,
+              params.depensesN1,
+              params.volumeHoraireN1
+            )
+          : 0;
+
+        // 🆕 PERTES DDP: Conversion du temps perdu en valeur monétaire (Audit Financier 18/01/2026)
+        // Le temps perdu représente la perte de productivité en temps
+        // Formule: tempsPerdu × ((recettesN1 - dépensesN1) / volumeHoraireN1) × 1000
+        const totalLostDecimalHours = totalLostHours + (totalLostMinutes / 60);
+        const pertesTempsPerdu = (kpiType === 'ddp' && totalLostDecimalHours > 0)
+          ? calculateScoreFinancier(
+              totalLostDecimalHours,
+              params.recettesN1,
+              params.depensesN1,
+              params.volumeHoraireN1
+            )
+          : 0;
+
         // Formule Excel: ECONOMIES REALISEES = SI(ET(F6=0;T6=0;B6<>0);N6;...)
+        // 🆕 MODIFIÉ: Économies = GAINS - PERTES (Audit Financier 18/01/2026)
         const economiesRealisees = calculateEconomiesRealiseesN1(
           tempsCalculN1,
           tempsCalculN2,
           salariéExiste,
           economiesBrut
-        ) + totalSavedExpenses;
+        ) + totalSavedExpenses + economiesTempsRecupere  // GAINS: économies directes + temps récupéré
+          - totalExcessExpenses - pertesTempsPerdu;       // PERTES: dépenses en trop + temps perdu
 
         // PASSE 1: pertesEnPourcentage = 0 (placeholder)
         // La vraie valeur sera calculée en PASSE 2 après avoir le total des pertes ($E$3)

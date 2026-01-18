@@ -23,6 +23,10 @@ export interface CostEntry {
   recovered_time_hours?: number;
   recovered_time_minutes?: number;
   saved_expenses?: number;
+  // Champs spécifiques DDP - PERTES
+  lost_time_hours?: number;
+  lost_time_minutes?: number;
+  excess_expenses?: number;
   created_at: string;
 }
 

@@ -87,8 +87,11 @@ interface DirectProductivityEntry {
     plannedTimeMinutes: number;
     recoveredTimeHours: number;
     recoveredTimeMinutes: number;
+    lostTimeHours: number;        // Temps utilisé en plus (perte)
+    lostTimeMinutes: number;      // Temps utilisé en plus (perte)
     plannedExpenses: number;
     savedExpenses: number;
+    excessExpenses: number;       // Dépenses en trop (perte)
     employeeId: string;
     employeeName: string;
     employeeTechLevel: string;
@@ -127,6 +130,13 @@ export function DirectProductivityForm({
     const [plannedExpenses, setPlannedExpenses] = useState(0);
     const [savedExpenses, setSavedExpenses] = useState(0);
 
+    // Nouveaux états pour les choix conditionnels et les pertes
+    const [timeChoiceType, setTimeChoiceType] = useState<'less' | 'more' | null>(null);
+    const [expenseChoiceType, setExpenseChoiceType] = useState<'less' | 'more' | null>(null);
+    const [lostTimeHours, setLostTimeHours] = useState(0);
+    const [lostTimeMinutes, setLostTimeMinutes] = useState(0);
+    const [excessExpenses, setExcessExpenses] = useState(0);
+
     const handleDayToggle = (dayId: string) => {
         setSelectedDays(prev =>
             prev.includes(dayId)
@@ -158,8 +168,11 @@ export function DirectProductivityForm({
             plannedTimeMinutes,
             recoveredTimeHours,
             recoveredTimeMinutes,
+            lostTimeHours,
+            lostTimeMinutes,
             plannedExpenses,
             savedExpenses,
+            excessExpenses,
             employeeId: selectedEmployee,
             employeeName: employee?.name || '',
             employeeTechLevel: employee?.tech_level || 'Standard'
@@ -172,8 +185,13 @@ export function DirectProductivityForm({
         setPlannedTimeMinutes(0);
         setRecoveredTimeHours(0);
         setRecoveredTimeMinutes(0);
+        setLostTimeHours(0);
+        setLostTimeMinutes(0);
         setPlannedExpenses(0);
         setSavedExpenses(0);
+        setExcessExpenses(0);
+        setTimeChoiceType(null);
+        setExpenseChoiceType(null);
 
         toast.success(`Écart de productivité enregistré pour ${employee?.name}`);
     };
@@ -333,7 +351,7 @@ export function DirectProductivityForm({
                             <span className="text-violet-600 dark:text-violet-400 font-bold text-sm">3</span>
                         </div>
                         <Label className="text-foreground font-semibold text-base">
-                            Temps opérationnel planifié (heures:minutes)
+                            Quel est le Temps opérationnel planifié de la tâche ? (heures:minutes)
                         </Label>
                     </div>
 
@@ -364,120 +382,282 @@ export function DirectProductivityForm({
                     </div>
                 </div>
 
-                {/* Section 4: Temps récupéré */}
+                {/* Section 4: Choix temps réalisé */}
                 <div>
                     <div className="flex items-center gap-2 mb-4">
                         <div className="w-8 h-8 rounded-lg bg-violet-500/20 flex items-center justify-center">
                             <span className="text-violet-600 dark:text-violet-400 font-bold text-sm">4</span>
                         </div>
                         <Label className="text-foreground font-semibold text-base">
-                            Temps récupéré et alloué aux autres tâches (heures:minutes)
+                            Quel est le temps opérationnel réalisé ?
                         </Label>
                     </div>
 
-                    <div className="flex items-center gap-3 max-w-xs">
-                        <div className="p-2 rounded-lg bg-emerald-500/10">
-                            <TrendingUp className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
-                        </div>
-                        <Input
-                            type="number"
-                            min="0"
-                            max="99"
-                            placeholder="H"
-                            value={recoveredTimeHours || ''}
-                            onChange={(e) => setRecoveredTimeHours(parseInt(e.target.value) || 0)}
-                            className="bg-background border-input w-20 text-center text-lg"
-                        />
-                        <span className="text-2xl text-muted-foreground font-bold">:</span>
-                        <Input
-                            type="number"
-                            min="0"
-                            max="59"
-                            placeholder="M"
-                            value={recoveredTimeMinutes || ''}
-                            onChange={(e) => setRecoveredTimeMinutes(parseInt(e.target.value) || 0)}
-                            className="bg-background border-input w-20 text-center text-lg"
-                        />
-                        <span className="text-sm text-muted-foreground">(ex: 00:45)</span>
-                    </div>
+                    {/* Select pour le choix temps */}
+                    <Select
+                        value={timeChoiceType || ''}
+                        onValueChange={(value) => {
+                            setTimeChoiceType(value as 'less' | 'more');
+                            // Reset les deux champs quand on change de choix
+                            setRecoveredTimeHours(0);
+                            setRecoveredTimeMinutes(0);
+                            setLostTimeHours(0);
+                            setLostTimeMinutes(0);
+                        }}
+                    >
+                        <SelectTrigger className="bg-background border-input max-w-lg">
+                            <SelectValue placeholder="Sélectionnez une option..." />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="less">
+                                <div className="flex items-center gap-2">
+                                    <TrendingUp className="w-4 h-4 text-emerald-500" />
+                                    <span>Le salarié a-t-il réalisé la tâche en moins de temps ?</span>
+                                </div>
+                            </SelectItem>
+                            <SelectItem value="more">
+                                <div className="flex items-center gap-2">
+                                    <TrendingDown className="w-4 h-4 text-red-500" />
+                                    <span>Le salarié a-t-il réalisé la tâche avec plus de temps que prévu ?</span>
+                                </div>
+                            </SelectItem>
+                        </SelectContent>
+                    </Select>
+
+                    {/* Affichage conditionnel - Temps récupéré (gain) */}
+                    <AnimatePresence>
+                        {timeChoiceType === 'less' && (
+                            <motion.div
+                                initial={{ opacity: 0, height: 0 }}
+                                animate={{ opacity: 1, height: 'auto' }}
+                                exit={{ opacity: 0, height: 0 }}
+                                className="mt-4 p-4 rounded-lg bg-emerald-500/10 border border-emerald-500/20"
+                            >
+                                <Label className="text-emerald-700 dark:text-emerald-400 font-medium mb-3 block">
+                                    Temps récupéré et alloué aux autres tâches (heures:minutes)
+                                </Label>
+                                <div className="flex items-center gap-3 max-w-xs">
+                                    <div className="p-2 rounded-lg bg-emerald-500/20">
+                                        <TrendingUp className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+                                    </div>
+                                    <Input
+                                        type="number"
+                                        min="0"
+                                        max="99"
+                                        placeholder="H"
+                                        value={recoveredTimeHours || ''}
+                                        onChange={(e) => setRecoveredTimeHours(parseInt(e.target.value) || 0)}
+                                        className="bg-background border-emerald-500/30 w-20 text-center text-lg"
+                                    />
+                                    <span className="text-2xl text-muted-foreground font-bold">:</span>
+                                    <Input
+                                        type="number"
+                                        min="0"
+                                        max="59"
+                                        placeholder="M"
+                                        value={recoveredTimeMinutes || ''}
+                                        onChange={(e) => setRecoveredTimeMinutes(parseInt(e.target.value) || 0)}
+                                        className="bg-background border-emerald-500/30 w-20 text-center text-lg"
+                                    />
+                                    <span className="text-sm text-muted-foreground">(ex: 00:45)</span>
+                                </div>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+
+                    {/* Affichage conditionnel - Temps perdu (perte) */}
+                    <AnimatePresence>
+                        {timeChoiceType === 'more' && (
+                            <motion.div
+                                initial={{ opacity: 0, height: 0 }}
+                                animate={{ opacity: 1, height: 'auto' }}
+                                exit={{ opacity: 0, height: 0 }}
+                                className="mt-4 p-4 rounded-lg bg-red-500/10 border border-red-500/20"
+                            >
+                                <Label className="text-red-700 dark:text-red-400 font-medium mb-3 block">
+                                    Temps utilisé en plus pour réaliser la tâche (heures:minutes)
+                                </Label>
+                                <div className="flex items-center gap-3 max-w-xs">
+                                    <div className="p-2 rounded-lg bg-red-500/20">
+                                        <TrendingDown className="w-5 h-5 text-red-600 dark:text-red-400" />
+                                    </div>
+                                    <Input
+                                        type="number"
+                                        min="0"
+                                        max="99"
+                                        placeholder="H"
+                                        value={lostTimeHours || ''}
+                                        onChange={(e) => setLostTimeHours(parseInt(e.target.value) || 0)}
+                                        className="bg-background border-red-500/30 w-20 text-center text-lg"
+                                    />
+                                    <span className="text-2xl text-muted-foreground font-bold">:</span>
+                                    <Input
+                                        type="number"
+                                        min="0"
+                                        max="59"
+                                        placeholder="M"
+                                        value={lostTimeMinutes || ''}
+                                        onChange={(e) => setLostTimeMinutes(parseInt(e.target.value) || 0)}
+                                        className="bg-background border-red-500/30 w-20 text-center text-lg"
+                                    />
+                                    <span className="text-sm text-muted-foreground">(ex: 01:30)</span>
+                                </div>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
                 </div>
             </div>
 
-            {/* Section 5 & 6: Dépenses planifiées et économisées */}
-            <div className="p-5 rounded-xl bg-muted/30 border border-border">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {/* Section 5: Dépenses planifiées */}
-                    <div>
-                        <div className="flex items-center gap-2 mb-4">
-                            <div className="w-8 h-8 rounded-lg bg-violet-500/20 flex items-center justify-center">
-                                <span className="text-violet-600 dark:text-violet-400 font-bold text-sm">5</span>
-                            </div>
-                            <Label className="text-foreground font-semibold text-base">
-                                Dépenses planifiées (€)
-                            </Label>
+            {/* Section 5 & 6: Dépenses planifiées et réalisées */}
+            <div className="p-5 rounded-xl bg-muted/30 border border-border space-y-6">
+                {/* Section 5: Dépenses planifiées */}
+                <div>
+                    <div className="flex items-center gap-2 mb-4">
+                        <div className="w-8 h-8 rounded-lg bg-violet-500/20 flex items-center justify-center">
+                            <span className="text-violet-600 dark:text-violet-400 font-bold text-sm">5</span>
                         </div>
-
-                        <div className="flex items-center gap-3">
-                            <div className="p-2 rounded-lg bg-amber-500/10">
-                                <Wallet className="w-5 h-5 text-amber-600 dark:text-amber-400" />
-                            </div>
-                            <Input
-                                type="number"
-                                min="0"
-                                step="0.01"
-                                placeholder="ex: 250"
-                                value={plannedExpenses || ''}
-                                onChange={(e) => setPlannedExpenses(parseFloat(e.target.value) || 0)}
-                                className="bg-background border-input max-w-[150px]"
-                            />
-                        </div>
+                        <Label className="text-foreground font-semibold text-base">
+                            Quelle est la dépense opérationnelle prévue pour la tâche ?
+                        </Label>
                     </div>
 
-                    {/* Section 6: Dépenses économisées */}
-                    <div>
-                        <div className="flex items-center gap-2 mb-4">
-                            <div className="w-8 h-8 rounded-lg bg-violet-500/20 flex items-center justify-center">
-                                <span className="text-violet-600 dark:text-violet-400 font-bold text-sm">6</span>
-                            </div>
-                            <Label className="text-foreground font-semibold text-base">
-                                Dépenses économisées (€)
-                            </Label>
+                    <div className="flex items-center gap-3">
+                        <div className="p-2 rounded-lg bg-amber-500/10">
+                            <Wallet className="w-5 h-5 text-amber-600 dark:text-amber-400" />
                         </div>
-
-                        <div className="flex items-center gap-3">
-                            <div className="p-2 rounded-lg bg-emerald-500/10">
-                                <PiggyBank className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
-                            </div>
-                            <Input
-                                type="number"
-                                min="0"
-                                step="0.01"
-                                placeholder="ex: 23"
-                                value={savedExpenses || ''}
-                                onChange={(e) => setSavedExpenses(parseFloat(e.target.value) || 0)}
-                                className="bg-background border-input max-w-[150px]"
-                            />
-                        </div>
+                        <Input
+                            type="number"
+                            min="0"
+                            step="0.01"
+                            placeholder="ex: 250"
+                            value={plannedExpenses || ''}
+                            onChange={(e) => setPlannedExpenses(parseFloat(e.target.value) || 0)}
+                            className="bg-background border-input max-w-[150px]"
+                        />
+                        <span className="text-sm text-muted-foreground">€</span>
                     </div>
                 </div>
 
-                {/* Savings indicator */}
-                {plannedExpenses > 0 && savedExpenses > 0 && (
-                    <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        className="mt-4 p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/20"
-                    >
-                        <div className="flex items-center justify-between">
-                            <span className="text-emerald-700 dark:text-emerald-400 text-sm font-medium">
-                                Taux d'économie
-                            </span>
-                            <span className="text-emerald-700 dark:text-emerald-400 font-bold">
-                                {Math.round((savedExpenses / plannedExpenses) * 100)}%
-                            </span>
+                {/* Section 6: Choix dépenses réalisées */}
+                <div>
+                    <div className="flex items-center gap-2 mb-4">
+                        <div className="w-8 h-8 rounded-lg bg-violet-500/20 flex items-center justify-center">
+                            <span className="text-violet-600 dark:text-violet-400 font-bold text-sm">6</span>
                         </div>
-                    </motion.div>
-                )}
+                        <Label className="text-foreground font-semibold text-base">
+                            Quelle est la dépense opérationnelle réalisée ?
+                        </Label>
+                    </div>
+
+                    {/* Select pour le choix dépenses */}
+                    <Select
+                        value={expenseChoiceType || ''}
+                        onValueChange={(value) => {
+                            setExpenseChoiceType(value as 'less' | 'more');
+                            // Reset les deux champs quand on change de choix
+                            setSavedExpenses(0);
+                            setExcessExpenses(0);
+                        }}
+                    >
+                        <SelectTrigger className="bg-background border-input max-w-lg">
+                            <SelectValue placeholder="Sélectionnez une option..." />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="less">
+                                <div className="flex items-center gap-2">
+                                    <PiggyBank className="w-4 h-4 text-emerald-500" />
+                                    <span>Le salarié a-t-il dépensé moins que la somme prévue ?</span>
+                                </div>
+                            </SelectItem>
+                            <SelectItem value="more">
+                                <div className="flex items-center gap-2">
+                                    <TrendingDown className="w-4 h-4 text-red-500" />
+                                    <span>Le salarié a-t-il dépensé plus que la somme prévue ?</span>
+                                </div>
+                            </SelectItem>
+                        </SelectContent>
+                    </Select>
+
+                    {/* Affichage conditionnel - Dépenses économisées (gain) */}
+                    <AnimatePresence>
+                        {expenseChoiceType === 'less' && (
+                            <motion.div
+                                initial={{ opacity: 0, height: 0 }}
+                                animate={{ opacity: 1, height: 'auto' }}
+                                exit={{ opacity: 0, height: 0 }}
+                                className="mt-4 p-4 rounded-lg bg-emerald-500/10 border border-emerald-500/20"
+                            >
+                                <Label className="text-emerald-700 dark:text-emerald-400 font-medium mb-3 block">
+                                    Dépenses économisées
+                                </Label>
+                                <div className="flex items-center gap-3">
+                                    <div className="p-2 rounded-lg bg-emerald-500/20">
+                                        <PiggyBank className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+                                    </div>
+                                    <Input
+                                        type="number"
+                                        min="0"
+                                        step="0.01"
+                                        placeholder="ex: 23"
+                                        value={savedExpenses || ''}
+                                        onChange={(e) => setSavedExpenses(parseFloat(e.target.value) || 0)}
+                                        className="bg-background border-emerald-500/30 max-w-[150px]"
+                                    />
+                                    <span className="text-sm text-emerald-600 dark:text-emerald-400">€</span>
+                                </div>
+                                {/* Indicateur taux d'économie */}
+                                {plannedExpenses > 0 && savedExpenses > 0 && (
+                                    <div className="mt-3 flex items-center justify-between text-sm">
+                                        <span className="text-emerald-700 dark:text-emerald-400">Taux d'économie</span>
+                                        <span className="text-emerald-700 dark:text-emerald-400 font-bold">
+                                            {Math.round((savedExpenses / plannedExpenses) * 100)}%
+                                        </span>
+                                    </div>
+                                )}
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+
+                    {/* Affichage conditionnel - Dépenses en trop (perte) */}
+                    <AnimatePresence>
+                        {expenseChoiceType === 'more' && (
+                            <motion.div
+                                initial={{ opacity: 0, height: 0 }}
+                                animate={{ opacity: 1, height: 'auto' }}
+                                exit={{ opacity: 0, height: 0 }}
+                                className="mt-4 p-4 rounded-lg bg-red-500/10 border border-red-500/20"
+                            >
+                                <Label className="text-red-700 dark:text-red-400 font-medium mb-3 block">
+                                    Le montant de la somme dépensée en plus pour réaliser la tâche
+                                </Label>
+                                <div className="flex items-center gap-3">
+                                    <div className="p-2 rounded-lg bg-red-500/20">
+                                        <TrendingDown className="w-5 h-5 text-red-600 dark:text-red-400" />
+                                    </div>
+                                    <Input
+                                        type="number"
+                                        min="0"
+                                        step="0.01"
+                                        placeholder="ex: 150"
+                                        value={excessExpenses || ''}
+                                        onChange={(e) => setExcessExpenses(parseFloat(e.target.value) || 0)}
+                                        className="bg-background border-red-500/30 max-w-[150px]"
+                                    />
+                                    <span className="text-sm text-red-600 dark:text-red-400">€</span>
+                                </div>
+                                {/* Indicateur taux de dépassement */}
+                                {plannedExpenses > 0 && excessExpenses > 0 && (
+                                    <div className="mt-3 flex items-center justify-between text-sm">
+                                        <span className="text-red-700 dark:text-red-400">Taux de dépassement</span>
+                                        <span className="text-red-700 dark:text-red-400 font-bold">
+                                            +{Math.round((excessExpenses / plannedExpenses) * 100)}%
+                                        </span>
+                                    </div>
+                                )}
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+                </div>
             </div>
 
             {/* Employé selector */}
@@ -581,11 +761,36 @@ export function DirectProductivityForm({
                                                 ) : null;
                                             })}
                                         </div>
-                                        <p className="text-muted-foreground text-sm mt-1">
-                                            Planifié: {entry.plannedTimeHours}h{entry.plannedTimeMinutes.toString().padStart(2, '0')} •
-                                            Récupéré: {entry.recoveredTimeHours}h{entry.recoveredTimeMinutes.toString().padStart(2, '0')} •
-                                            Économies: {entry.savedExpenses}€/{entry.plannedExpenses}€
-                                        </p>
+                                        <div className="text-sm mt-1 space-y-1">
+                                            <p className="text-muted-foreground">
+                                                Planifié: {entry.plannedTimeHours}h{entry.plannedTimeMinutes.toString().padStart(2, '0')}
+                                                {(entry.recoveredTimeHours > 0 || entry.recoveredTimeMinutes > 0) && (
+                                                    <span className="text-emerald-600 dark:text-emerald-400 ml-2">
+                                                        • Récupéré: {entry.recoveredTimeHours}h{entry.recoveredTimeMinutes.toString().padStart(2, '0')}
+                                                    </span>
+                                                )}
+                                                {(entry.lostTimeHours > 0 || entry.lostTimeMinutes > 0) && (
+                                                    <span className="text-red-600 dark:text-red-400 ml-2">
+                                                        • Perdu: {entry.lostTimeHours}h{entry.lostTimeMinutes.toString().padStart(2, '0')}
+                                                    </span>
+                                                )}
+                                            </p>
+                                            {entry.plannedExpenses > 0 && (
+                                                <p className="text-muted-foreground">
+                                                    Budget: {entry.plannedExpenses}€
+                                                    {entry.savedExpenses > 0 && (
+                                                        <span className="text-emerald-600 dark:text-emerald-400 ml-2">
+                                                            • Économisé: {entry.savedExpenses}€
+                                                        </span>
+                                                    )}
+                                                    {entry.excessExpenses > 0 && (
+                                                        <span className="text-red-600 dark:text-red-400 ml-2">
+                                                            • Dépassement: +{entry.excessExpenses}€
+                                                        </span>
+                                                    )}
+                                                </p>
+                                            )}
+                                        </div>
                                     </div>
                                 </div>
                                 <Button

@@ -6,10 +6,13 @@
  * Composant optimisé utilisant @tanstack/react-virtual
  * pour ne rendre que les lignes visibles dans le viewport.
  *
+ * UTILISE CSS GRID pour garantir l'alignement parfait des colonnes
+ * avec la virtualisation (position absolute).
+ *
  * PERFORMANCE: Support 10K+ salariés en ne rendant que ~15 lignes visibles
  */
 
-import React, { useRef, useMemo } from 'react';
+import React, { useRef, useMemo, useCallback } from 'react';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { Badge } from '@/components/ui/badge';
 import { Award } from 'lucide-react';
@@ -76,6 +79,43 @@ const INDICATEURS = [
   { key: 'ekh', label: 'ESF', fullLabel: 'Écart Savoir Faire' }
 ] as const;
 
+// Configuration des colonnes avec largeurs fixes en pixels (total ~1600px)
+const COLUMN_WIDTHS = {
+  nom: 180,        // 12%
+  cat: 75,         // 5%
+  pertes: 75,      // 5%
+  partPrime: 100,  // 7%
+  partTreso: 100,  // 7%
+  contrib: 75,     // 5%
+  tranche: 75,     // 5%
+  triTr: 75,       // 5%
+  triN2: 75,       // 5%
+  scorePrime: 100, // 7%
+  scoreNote: 80,   // 5%
+  totalEco: 100,   // 7%
+  txInd: 60,       // 4% x 5 = 300
+  totalTx: 75,     // 5%
+};
+
+const TOTAL_WIDTH =
+  COLUMN_WIDTHS.nom +
+  COLUMN_WIDTHS.cat +
+  COLUMN_WIDTHS.pertes +
+  COLUMN_WIDTHS.partPrime +
+  COLUMN_WIDTHS.partTreso +
+  COLUMN_WIDTHS.contrib +
+  COLUMN_WIDTHS.tranche +
+  COLUMN_WIDTHS.triTr +
+  COLUMN_WIDTHS.triN2 +
+  COLUMN_WIDTHS.scorePrime +
+  COLUMN_WIDTHS.scoreNote +
+  COLUMN_WIDTHS.totalEco +
+  (COLUMN_WIDTHS.txInd * 5) +
+  COLUMN_WIDTHS.totalTx;
+
+// Grid template columns
+const GRID_TEMPLATE = `${COLUMN_WIDTHS.nom}px ${COLUMN_WIDTHS.cat}px ${COLUMN_WIDTHS.pertes}px ${COLUMN_WIDTHS.partPrime}px ${COLUMN_WIDTHS.partTreso}px ${COLUMN_WIDTHS.contrib}px ${COLUMN_WIDTHS.tranche}px ${COLUMN_WIDTHS.triTr}px ${COLUMN_WIDTHS.triN2}px ${COLUMN_WIDTHS.scorePrime}px ${COLUMN_WIDTHS.scoreNote}px ${COLUMN_WIDTHS.totalEco}px repeat(5, ${COLUMN_WIDTHS.txInd}px) ${COLUMN_WIDTHS.totalTx}px`;
+
 // Composant principal virtualisé
 export function VirtualizedSynthesisTable({
   employeeScores,
@@ -84,6 +124,14 @@ export function VirtualizedSynthesisTable({
   currencySymbol
 }: VirtualizedSynthesisTableProps) {
   const parentRef = useRef<HTMLDivElement>(null);
+  const headerRef = useRef<HTMLDivElement>(null);
+
+  // Synchronisation du scroll horizontal entre header et body
+  const handleBodyScroll = useCallback(() => {
+    if (parentRef.current && headerRef.current) {
+      headerRef.current.scrollLeft = parentRef.current.scrollLeft;
+    }
+  }, []);
 
   // Trier les employés par contribution décroissante
   const sortedScores = useMemo(() => {
@@ -148,79 +196,89 @@ export function VirtualizedSynthesisTable({
         </div>
       </div>
 
-      {/* Tableau virtualisé */}
+      {/* Grille virtualisée avec CSS Grid */}
       <div className="px-4 pb-4">
         <h3 className="text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">
           Synthèse par salarié (trié par contribution décroissante)
         </h3>
 
-        {/* En-tête fixe */}
-        <div className="overflow-x-auto border rounded-t-lg">
-          <table className="w-full text-xs border-collapse" style={{ minWidth: '1600px' }}>
-            <thead className="bg-indigo-500/10 dark:bg-indigo-900/30">
-              <tr className="border-b-2 border-indigo-500/30">
-                <th className="text-left py-2 px-2 font-semibold whitespace-nowrap border-r" style={{ width: '12%' }}>
-                  Nom du salarié
-                </th>
-                <th className="text-center py-2 px-2 font-semibold whitespace-nowrap border-r" style={{ width: '5%' }}>
-                  Cat.
-                </th>
-                <th className="text-center py-2 px-2 font-semibold whitespace-nowrap border-r bg-orange-100/50 dark:bg-orange-900/20" style={{ width: '5%' }}>
-                  <TooltipProvider><Tooltip><TooltipTrigger>Pertes%</TooltipTrigger>
-                    <TooltipContent><p>Scores - Pertes constatées en %</p></TooltipContent>
-                  </Tooltip></TooltipProvider>
-                </th>
-                <th className="text-center py-2 px-2 font-semibold whitespace-nowrap border-r bg-amber-100/50 dark:bg-amber-900/20" style={{ width: '7%' }}>
-                  Part Prime
-                </th>
-                <th className="text-center py-2 px-2 font-semibold whitespace-nowrap border-r bg-cyan-100/50 dark:bg-cyan-900/20" style={{ width: '7%' }}>
-                  Part Tréso
-                </th>
-                <th className="text-center py-2 px-2 font-semibold whitespace-nowrap border-r bg-purple-100/50 dark:bg-purple-900/20" style={{ width: '5%' }}>
-                  Contrib%
-                </th>
-                <th className="text-center py-2 px-2 font-semibold whitespace-nowrap border-r" style={{ width: '5%' }}>
-                  Tranche%
-                </th>
-                <th className="text-center py-2 px-2 font-semibold whitespace-nowrap border-r" style={{ width: '5%' }}>
-                  Tri-Tr
-                </th>
-                <th className="text-center py-2 px-2 font-semibold whitespace-nowrap border-r" style={{ width: '5%' }}>
-                  TriN2
-                </th>
-                <th className="text-center py-2 px-2 font-semibold whitespace-nowrap border-r bg-green-100/50 dark:bg-green-900/20" style={{ width: '7%' }}>
-                  Score-Prime
-                </th>
-                <th className="text-center py-2 px-2 font-semibold whitespace-nowrap border-r" style={{ width: '5%' }}>
-                  ScoreNote%
-                </th>
-                <th className="text-center py-2 px-2 font-semibold whitespace-nowrap border-r bg-green-200/50 dark:bg-green-800/20" style={{ width: '7%' }}>
-                  Total Éco
-                </th>
-                {INDICATEURS.map(ind => (
-                  <th key={ind.key} className="text-center py-2 px-2 font-semibold whitespace-nowrap border-r" style={{ width: '4%' }}>
-                    Tx{ind.label}
-                  </th>
-                ))}
-                <th className="text-center py-2 px-2 font-semibold whitespace-nowrap bg-slate-200/50 dark:bg-slate-700/50" style={{ width: '5%' }}>
-                  TotalTx
-                </th>
-              </tr>
-            </thead>
-          </table>
-        </div>
+        {/* Container scrollable */}
+        <div className="border rounded-lg overflow-hidden">
+          {/* Header fixe avec scroll synchronisé */}
+          <div
+            ref={headerRef}
+            className="overflow-x-auto"
+            style={{ overflowY: 'hidden' }}
+          >
+            <div
+              className="grid text-xs font-semibold bg-indigo-100 dark:bg-indigo-900/50 border-b-2 border-indigo-500/30"
+              style={{
+                display: 'grid',
+                gridTemplateColumns: GRID_TEMPLATE,
+                minWidth: `${TOTAL_WIDTH}px`,
+              }}
+            >
+              <div className="py-2 px-2 text-left border-r border-indigo-200 dark:border-indigo-700 truncate">
+                Nom du salarié
+              </div>
+              <div className="py-2 px-2 text-center border-r border-indigo-200 dark:border-indigo-700">
+                Cat.
+              </div>
+              <div className="py-2 px-2 text-center border-r border-indigo-200 dark:border-indigo-700 bg-orange-100 dark:bg-orange-900/50">
+                <TooltipProvider><Tooltip><TooltipTrigger>Pertes%</TooltipTrigger>
+                  <TooltipContent><p>Scores - Pertes constatées en %</p></TooltipContent>
+                </Tooltip></TooltipProvider>
+              </div>
+              <div className="py-2 px-2 text-right border-r border-indigo-200 dark:border-indigo-700 bg-amber-100 dark:bg-amber-900/50">
+                Part Prime
+              </div>
+              <div className="py-2 px-2 text-right border-r border-indigo-200 dark:border-indigo-700 bg-cyan-100 dark:bg-cyan-900/50">
+                Part Tréso
+              </div>
+              <div className="py-2 px-2 text-center border-r border-indigo-200 dark:border-indigo-700 bg-purple-100 dark:bg-purple-900/50">
+                Contrib%
+              </div>
+              <div className="py-2 px-2 text-center border-r border-indigo-200 dark:border-indigo-700">
+                Tranche%
+              </div>
+              <div className="py-2 px-2 text-center border-r border-indigo-200 dark:border-indigo-700">
+                Tri-Tr
+              </div>
+              <div className="py-2 px-2 text-center border-r border-indigo-200 dark:border-indigo-700">
+                TriN2
+              </div>
+              <div className="py-2 px-2 text-right border-r border-indigo-200 dark:border-indigo-700 bg-green-100 dark:bg-green-900/50">
+                Score-Prime
+              </div>
+              <div className="py-2 px-2 text-center border-r border-indigo-200 dark:border-indigo-700">
+                ScoreNote%
+              </div>
+              <div className="py-2 px-2 text-right border-r border-indigo-200 dark:border-indigo-700 bg-green-200 dark:bg-green-800/50">
+                Total Éco
+              </div>
+              {INDICATEURS.map(ind => (
+                <div key={ind.key} className="py-2 px-1 text-center border-r border-indigo-200 dark:border-indigo-700 text-[10px]">
+                  Tx{ind.label}
+                </div>
+              ))}
+              <div className="py-2 px-2 text-center bg-slate-200 dark:bg-slate-700">
+                TotalTx
+              </div>
+            </div>
+          </div>
 
-        {/* Corps virtualisé */}
-        <div
-          ref={parentRef}
-          className="overflow-auto border-x border-b rounded-b-lg"
-          style={{ height: '450px' }}
-        >
-          <table className="w-full text-xs border-collapse" style={{ minWidth: '1600px' }}>
-            <tbody
+          {/* Body virtualisé avec scroll synchronisé */}
+          <div
+            ref={parentRef}
+            className="overflow-auto"
+            style={{ height: '450px' }}
+            onScroll={handleBodyScroll}
+          >
+            <div
               style={{
                 height: `${rowVirtualizer.getTotalSize()}px`,
-                width: '100%',
+                width: `${TOTAL_WIDTH}px`,
+                minWidth: `${TOTAL_WIDTH}px`,
                 position: 'relative',
               }}
             >
@@ -229,86 +287,89 @@ export function VirtualizedSynthesisTable({
                 const isEven = virtualRow.index % 2 === 0;
 
                 return (
-                  <tr
+                  <div
                     key={empScore.employee.employeeId}
                     className={cn(
-                      "border-b hover:bg-indigo-500/5 transition-colors absolute w-full",
+                      "grid text-xs border-b border-slate-200 dark:border-slate-700 hover:bg-indigo-500/5 transition-colors absolute left-0 right-0",
                       isEven && "bg-muted/20",
                       !empScore.hasActivityData && "opacity-50"
                     )}
                     style={{
+                      display: 'grid',
+                      gridTemplateColumns: GRID_TEMPLATE,
                       height: `${virtualRow.size}px`,
                       transform: `translateY(${virtualRow.start}px)`,
+                      width: `${TOTAL_WIDTH}px`,
                     }}
                   >
                     {/* COL 1: Nom */}
-                    <td className="py-2 px-2 font-medium border-r" style={{ width: '12%' }}>
-                      {empScore.employee.employeeName}
+                    <div className="py-2 px-2 font-medium border-r border-slate-200 dark:border-slate-700 truncate flex items-center">
+                      <span className="truncate">{empScore.employee.employeeName}</span>
                       {!empScore.hasActivityData && (
-                        <Badge variant="outline" className="ml-1 text-[9px] bg-slate-100 text-slate-500 py-0">
+                        <Badge variant="outline" className="ml-1 text-[9px] bg-slate-100 text-slate-500 py-0 flex-shrink-0">
                           N/A
                         </Badge>
                       )}
-                    </td>
+                    </div>
                     {/* COL 2: Catégorie */}
-                    <td className="py-2 px-2 text-center border-r" style={{ width: '5%' }}>
+                    <div className="py-2 px-2 text-center border-r border-slate-200 dark:border-slate-700 truncate flex items-center justify-center">
                       {empScore.employee.professionalCategory || '-'}
-                    </td>
+                    </div>
                     {/* COL 3: Scores Pertes % */}
-                    <td className="py-2 px-2 text-center border-r bg-orange-50/30 dark:bg-orange-900/10" style={{ width: '5%' }}>
+                    <div className="py-2 px-2 text-center border-r border-slate-200 dark:border-slate-700 bg-orange-50/30 dark:bg-orange-900/10 flex items-center justify-center">
                       {empScore.scoresPertesEn.toFixed(2)}%
-                    </td>
+                    </div>
                     {/* COL 4: Part Prime */}
-                    <td className="py-2 px-2 text-right border-r bg-amber-50/30 dark:bg-amber-900/10 font-medium text-amber-700 dark:text-amber-300" style={{ width: '7%' }}>
+                    <div className="py-2 px-2 text-right border-r border-slate-200 dark:border-slate-700 bg-amber-50/30 dark:bg-amber-900/10 font-medium text-amber-700 dark:text-amber-300 flex items-center justify-end">
                       {empScore.partPrime.toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                    </td>
+                    </div>
                     {/* COL 5: Part Tréso */}
-                    <td className="py-2 px-2 text-right border-r bg-cyan-50/30 dark:bg-cyan-900/10 font-medium text-cyan-700 dark:text-cyan-300" style={{ width: '7%' }}>
+                    <div className="py-2 px-2 text-right border-r border-slate-200 dark:border-slate-700 bg-cyan-50/30 dark:bg-cyan-900/10 font-medium text-cyan-700 dark:text-cyan-300 flex items-center justify-end">
                       {empScore.partTresorerie.toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                    </td>
+                    </div>
                     {/* COL 6: Contrib % */}
-                    <td className="py-2 px-2 text-center border-r bg-purple-50/30 dark:bg-purple-900/10" style={{ width: '5%' }}>
+                    <div className="py-2 px-2 text-center border-r border-slate-200 dark:border-slate-700 bg-purple-50/30 dark:bg-purple-900/10 flex items-center justify-center">
                       {empScore.contributionPct.toFixed(3)}%
-                    </td>
+                    </div>
                     {/* COL 7: Tranche % */}
-                    <td className="py-2 px-2 text-center border-r" style={{ width: '5%' }}>
+                    <div className="py-2 px-2 text-center border-r border-slate-200 dark:border-slate-700 flex items-center justify-center">
                       {empScore.trancheNote.toFixed(2)}%
-                    </td>
+                    </div>
                     {/* COL 8: Tri-Tranche */}
-                    <td className="py-2 px-2 text-center border-r" style={{ width: '5%' }}>
+                    <div className="py-2 px-2 text-center border-r border-slate-200 dark:border-slate-700 flex items-center justify-center">
                       {empScore.triTrancheNote.toFixed(3)}
-                    </td>
+                    </div>
                     {/* COL 9: Tri N°2 */}
-                    <td className="py-2 px-2 text-center border-r" style={{ width: '5%' }}>
+                    <div className="py-2 px-2 text-center border-r border-slate-200 dark:border-slate-700 flex items-center justify-center">
                       {empScore.triN2TrancheNote.toFixed(3)}
-                    </td>
+                    </div>
                     {/* COL 10: Score-Prime */}
-                    <td className="py-2 px-2 text-right border-r bg-green-50/30 dark:bg-green-900/10" style={{ width: '7%' }}>
+                    <div className="py-2 px-2 text-right border-r border-slate-200 dark:border-slate-700 bg-green-50/30 dark:bg-green-900/10 flex items-center justify-end">
                       {empScore.scorePrimeTotal.toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                    </td>
+                    </div>
                     {/* COL 11: Score Note % */}
-                    <td className="py-2 px-2 text-center border-r" style={{ width: '5%' }}>
+                    <div className="py-2 px-2 text-center border-r border-slate-200 dark:border-slate-700 flex items-center justify-center">
                       {empScore.scoreNoteTotalPct.toFixed(2)}%
-                    </td>
+                    </div>
                     {/* COL 12: Total Éco */}
-                    <td className="py-2 px-2 text-right border-r bg-green-100/30 dark:bg-green-800/10 font-semibold text-green-700 dark:text-green-300" style={{ width: '7%' }}>
+                    <div className="py-2 px-2 text-right border-r border-slate-200 dark:border-slate-700 bg-green-100/30 dark:bg-green-800/10 font-semibold text-green-700 dark:text-green-300 flex items-center justify-end">
                       {empScore.empTotalEco.toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                    </td>
+                    </div>
                     {/* COL 13-17: Taux Économie par indicateur */}
                     {INDICATEURS.map(ind => (
-                      <td key={ind.key} className="py-2 px-2 text-center border-r" style={{ width: '4%' }}>
+                      <div key={ind.key} className="py-2 px-1 text-center border-r border-slate-200 dark:border-slate-700 text-[10px] flex items-center justify-center">
                         {((empScore.tauxEcoByIndicator[ind.key] || 0) * 100).toFixed(1)}%
-                      </td>
+                      </div>
                     ))}
                     {/* COL 18: Total Taux */}
-                    <td className="py-2 px-2 text-center font-semibold bg-slate-100/50 dark:bg-slate-800/50" style={{ width: '5%' }}>
+                    <div className="py-2 px-2 text-center font-semibold bg-slate-100/50 dark:bg-slate-800/50 flex items-center justify-center">
                       {(empScore.totalTauxEco * 100).toFixed(1)}%
-                    </td>
-                  </tr>
+                    </div>
+                  </div>
                 );
               })}
-            </tbody>
-          </table>
+            </div>
+          </div>
         </div>
 
         {/* Info virtualisation */}

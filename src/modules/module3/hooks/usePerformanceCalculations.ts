@@ -319,12 +319,27 @@ export const calculateIndicatorData = (
 
   // Économies
   const economiesBrut = calculateEconomiesRealiseesBrut(pprPrevues, pertesConstatees);
+
+  // 🆕 AJOUT: Conversion du temps récupéré en valeur monétaire (économies DDP)
+  // Le temps récupéré représente le gain de productivité en temps
+  // Exemple: Mistral fait gagner 30mn → 0.5h × margeHoraire = économie en ¥
+  // Formule: tempsRécupéré × ((recettesN1 - dépensesN1) / volumeHoraireN1) × 1000
+  const totalRecoveredDecimalHours = totalRecoveredHours + (totalRecoveredMinutes / 60);
+  const economiesTempsRecupere = (kpiType === 'ddp' && totalRecoveredDecimalHours > 0)
+    ? calculateScoreFinancier(
+        totalRecoveredDecimalHours,
+        params.recettesN1,
+        params.depensesN1,
+        params.volumeHoraireN1
+      )
+    : 0;
+
   const economiesRealisees = calculateEconomiesRealiseesN1(
     tempsCalculN1,
     tempsCalculN2,
     salariéExiste,
     economiesBrut
-  ) + totalSavedExpenses;
+  ) + totalSavedExpenses + economiesTempsRecupere; // ← AJOUT: économies du temps récupéré DDP
 
   // PASSE 1: pertesEnPourcentage = 0 (placeholder)
   // La vraie valeur sera calculée en PASSE 2 après avoir le total des pertes ($E$3)

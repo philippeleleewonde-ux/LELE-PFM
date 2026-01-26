@@ -1,25 +1,34 @@
 /**
  * ============================================
- * VIRTUALIZED EKH TABLE
+ * VIRTUALIZED EKH TABLE - CSS GRID VERSION
  * ============================================
  *
  * Composant optimisé utilisant @tanstack/react-virtual
  * pour ne rendre que les lignes visibles dans le viewport.
  *
- * PERFORMANCE: Au lieu de rendre 73 employés × 10 colonnes = 730 cellules,
- * on ne rend que ~15 lignes × 10 colonnes = 150 cellules (5× moins)
+ * FIX 2026-01-18: Correction alignement colonnes avec CSS Grid
+ * - Remplacement structure table par CSS Grid
+ * - Synchronisation scroll header/body
+ * - Largeurs fixes en pixels pour garantir l'alignement
+ *
+ * FIX 2026-01-21: Regroupement des salariés par ligne d'activité
+ * - Ajout des en-têtes par ligne d'activité (Building2 + nom + badge)
+ * - Sous-totaux par ligne d'activité
+ * - Cohérence visuelle avec les autres blocs d'indicateurs
  */
 
-import React, { useRef, useMemo } from 'react';
-import { useVirtualizer } from '@tanstack/react-virtual';
+import React, { useMemo } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
+import { Building2 } from 'lucide-react';
 
 // Types
 interface EKHData {
   coefficientCompetence: number;
   scoreFinancierN1: number;
   pertesConstateesN1: number;
+  pertesConstateesIncapN1: number;  // Pertes avec taux incapacité N1
+  pertesIncapPctN1: number;  // Pertes en % basé sur pertesConstateesIncap N1
   pprPrevuesN1: number;
   economiesRealiseesN1: number;
   pertesEnPourcentageN1: number;
@@ -27,6 +36,8 @@ interface EKHData {
   pertesN1PctRef: number;
   scoreFinancierN2: number;
   pertesConstateesN2: number;
+  pertesConstateesIncapN2: number;  // Pertes avec taux incapacité N2
+  pertesIncapPctN2: number;  // Pertes en % basé sur pertesConstateesIncap N2
   pprPrevuesN2: number;
   economiesRealiseesN2: number;
   pertesEnPourcentageN2: number;
@@ -39,14 +50,14 @@ interface EmployeePerformance {
   employeeId: string;
   employeeName: string;
   businessLineId: string;
-  category: string;
+  professionalCategory: string;
   incapacityRate: number;
   coefficientCompetence: number;
 }
 
 interface BusinessLine {
   id: string;
-  name: string;
+  activity_name: string;
 }
 
 interface VirtualizedEKHTableProps {
@@ -80,112 +91,31 @@ interface VirtualizedEKHTableProps {
   };
 }
 
-// Composant ligne employé mémorisé
-const EmployeeRowN1 = React.memo(function EmployeeRowN1({
-  employee,
-  data,
-  currencySymbol,
-  isEven
-}: {
-  employee: EmployeePerformance;
-  data: EKHData;
-  currencySymbol: string;
-  isEven: boolean;
-}) {
-  return (
-    <tr className={cn(
-      "border-b hover:bg-cyan-500/5 transition-colors",
-      isEven && "bg-muted/20"
-    )}>
-      <td className="py-2 px-2 font-medium">{employee.employeeName}</td>
-      <td className="py-2 px-2">{employee.category}</td>
-      <td className="py-2 px-2 text-center">
-        <Badge variant="outline">{(employee.incapacityRate * 100).toFixed(0)}%</Badge>
-      </td>
-      <td className="py-2 px-2 text-right text-blue-600 font-medium">
-        {data.scoreFinancierN1.toLocaleString('fr-FR', {minimumFractionDigits: 2, maximumFractionDigits: 2})} {currencySymbol}
-      </td>
-      <td className="py-2 px-2 text-right text-orange-600">
-        {data.pertesConstateesN1.toLocaleString('fr-FR', {minimumFractionDigits: 2, maximumFractionDigits: 2})} {currencySymbol}
-      </td>
-      <td className="py-2 px-2 text-right">
-        {data.pprPrevuesN1.toLocaleString('fr-FR', {minimumFractionDigits: 2, maximumFractionDigits: 2})} {currencySymbol}
-      </td>
-      <td className="py-2 px-2 text-right text-green-600 font-bold">
-        {data.economiesRealiseesN1.toLocaleString('fr-FR', {minimumFractionDigits: 2, maximumFractionDigits: 2})} {currencySymbol}
-      </td>
-      <td className="py-2 px-2 text-right text-muted-foreground">
-        {data.pertesConstateesRefN1.toLocaleString('fr-FR', {minimumFractionDigits: 2, maximumFractionDigits: 2})} {currencySymbol}
-      </td>
-      <td className="py-2 px-2 text-right text-orange-500">
-        {data.pertesConstateesN1.toLocaleString('fr-FR', {minimumFractionDigits: 2, maximumFractionDigits: 2})} {currencySymbol}
-      </td>
-      <td className="py-2 px-2 text-center">
-        <Badge variant="outline" className={cn(
-          data.pertesN1PctRef > 80 ? "bg-red-500/10 text-red-600" :
-          data.pertesN1PctRef > 50 ? "bg-orange-500/10 text-orange-600" :
-          "bg-green-500/10 text-green-600"
-        )}>
-          {data.pertesN1PctRef.toFixed(2)}%
-        </Badge>
-      </td>
-    </tr>
-  );
-});
+// ============================================
+// CONSTANTES CSS GRID - Largeurs fixes en pixels
+// FIX 2026-01-21: Largeurs augmentées pour éviter chevauchement headers
+// ============================================
+const COLUMN_WIDTHS = {
+  nom: 150,           // Nom du salarié
+  categorie: 120,     // Catégorie pro
+  coefCompetence: 140, // Coef. Compétence (augmenté de 90 à 140)
+  scoreFinancier: 150, // Score Financier N1 (augmenté de 130 à 150)
+  pertesConstatees: 165, // Pertes Constatées N1 (augmenté de 130 à 165)
+  pprPrevues: 135,    // PPR PREVUES N1 (augmenté de 120 à 135)
+  economies: 135,     // ECONOMIES N1 (augmenté de 120 à 135)
+  pertesPct: 95,      // Pertes % - Position 8 (déplacé après ECONOMIES)
+  pertesRef: 120,     // Pertes Constatées N1 (=$EB$3) - Position 9
+  pertesIncap: 130,   // Pertes incap. N1 - Position 10
+  pertesIncapPct: 100, // Pertes % basé sur pertesIncap - Position 11 (NOUVELLE)
+};
 
-const EmployeeRowN2 = React.memo(function EmployeeRowN2({
-  employee,
-  data,
-  currencySymbol,
-  isEven
-}: {
-  employee: EmployeePerformance;
-  data: EKHData;
-  currencySymbol: string;
-  isEven: boolean;
-}) {
-  return (
-    <tr className={cn(
-      "border-b hover:bg-cyan-500/5 transition-colors",
-      isEven && "bg-muted/20"
-    )}>
-      <td className="py-2 px-2 font-medium">{employee.employeeName}</td>
-      <td className="py-2 px-2">{employee.category}</td>
-      <td className="py-2 px-2 text-center">
-        <Badge variant="outline">{(employee.incapacityRate * 100).toFixed(0)}%</Badge>
-      </td>
-      <td className="py-2 px-2 text-right text-blue-600 font-medium">
-        {data.scoreFinancierN2.toLocaleString('fr-FR', {minimumFractionDigits: 2, maximumFractionDigits: 2})} {currencySymbol}
-      </td>
-      <td className="py-2 px-2 text-right text-orange-600">
-        {data.pertesConstateesN2.toLocaleString('fr-FR', {minimumFractionDigits: 2, maximumFractionDigits: 2})} {currencySymbol}
-      </td>
-      <td className="py-2 px-2 text-right">
-        {data.pprPrevuesN2.toLocaleString('fr-FR', {minimumFractionDigits: 2, maximumFractionDigits: 2})} {currencySymbol}
-      </td>
-      <td className="py-2 px-2 text-right text-green-600 font-bold">
-        {data.economiesRealiseesN2.toLocaleString('fr-FR', {minimumFractionDigits: 2, maximumFractionDigits: 2})} {currencySymbol}
-      </td>
-      <td className="py-2 px-2 text-right text-muted-foreground">
-        {data.pertesConstateesRefN2.toLocaleString('fr-FR', {minimumFractionDigits: 2, maximumFractionDigits: 2})} {currencySymbol}
-      </td>
-      <td className="py-2 px-2 text-right text-orange-500">
-        {data.pertesConstateesN2.toLocaleString('fr-FR', {minimumFractionDigits: 2, maximumFractionDigits: 2})} {currencySymbol}
-      </td>
-      <td className="py-2 px-2 text-center">
-        <Badge variant="outline" className={cn(
-          data.pertesN2PctRef > 80 ? "bg-red-500/10 text-red-600" :
-          data.pertesN2PctRef > 50 ? "bg-orange-500/10 text-orange-600" :
-          "bg-green-500/10 text-green-600"
-        )}>
-          {data.pertesN2PctRef.toFixed(2)}%
-        </Badge>
-      </td>
-    </tr>
-  );
-});
+const TOTAL_WIDTH = Object.values(COLUMN_WIDTHS).reduce((a, b) => a + b, 0);
 
-// Composant principal
+const GRID_TEMPLATE = `${COLUMN_WIDTHS.nom}px ${COLUMN_WIDTHS.categorie}px ${COLUMN_WIDTHS.coefCompetence}px ${COLUMN_WIDTHS.scoreFinancier}px ${COLUMN_WIDTHS.pertesConstatees}px ${COLUMN_WIDTHS.pprPrevues}px ${COLUMN_WIDTHS.economies}px ${COLUMN_WIDTHS.pertesPct}px ${COLUMN_WIDTHS.pertesRef}px ${COLUMN_WIDTHS.pertesIncap}px ${COLUMN_WIDTHS.pertesIncapPct}px`;
+
+// ============================================
+// COMPOSANT PRINCIPAL
+// ============================================
 export const VirtualizedEKHTable = React.memo(function VirtualizedEKHTable({
   level,
   employees,
@@ -196,7 +126,6 @@ export const VirtualizedEKHTable = React.memo(function VirtualizedEKHTable({
   ekhTotalsN2,
   ekhTotalsCalculated
 }: VirtualizedEKHTableProps) {
-  const parentRef = useRef<HTMLDivElement>(null);
 
   // Pré-calculer toutes les données EKH une seule fois
   const employeesWithData = useMemo(() => {
@@ -206,245 +135,407 @@ export const VirtualizedEKHTable = React.memo(function VirtualizedEKHTable({
     }));
   }, [employees, getEKHData]);
 
-  // Virtualizer pour les lignes
-  const rowVirtualizer = useVirtualizer({
-    count: employeesWithData.length,
-    getScrollElement: () => parentRef.current,
-    estimateSize: () => 48, // hauteur estimée d'une ligne
-    overscan: 5, // rendre 5 lignes supplémentaires au-dessus/en-dessous
-  });
+  // Grouper les employés par ligne d'activité
+  const employeesByBusinessLine = useMemo(() => {
+    const grouped = new Map<string, Array<{ employee: EmployeePerformance; data: EKHData }>>();
+    businessLines.forEach(bl => {
+      grouped.set(bl.id, []);
+    });
+    employeesWithData.forEach(item => {
+      const blGroup = grouped.get(item.employee.businessLineId);
+      if (blGroup) {
+        blGroup.push(item);
+      }
+    });
+    return grouped;
+  }, [employeesWithData, businessLines]);
 
-  const virtualRows = rowVirtualizer.getVirtualItems();
+  // Compter les lignes d'activité avec des employés
+  const businessLinesWithEmployees = useMemo(() => {
+    return businessLines.filter(bl => (employeesByBusinessLine.get(bl.id) || []).length > 0);
+  }, [businessLines, employeesByBusinessLine]);
 
+  // ============================================
   // NIVEAU 1
+  // ============================================
   if (level === '1') {
     return (
-      <div className="overflow-x-auto">
-        <table className="w-full text-sm">
-          <thead className="sticky top-0 z-10 bg-background">
-            <tr className="border-b-2 bg-cyan-500/10">
-              <th className="text-left py-3 px-2 font-semibold whitespace-nowrap">Nom du salarié</th>
-              <th className="text-left py-3 px-2 font-semibold whitespace-nowrap">Catégorie pro</th>
-              <th className="text-center py-3 px-2 font-semibold whitespace-nowrap">Taux d'incapacité</th>
-              <th className="text-right py-3 px-2 font-semibold whitespace-nowrap">Score Financier N1</th>
-              <th className="text-right py-3 px-2 font-semibold whitespace-nowrap">Pertes Constatées N1</th>
-              <th className="text-right py-3 px-2 font-semibold whitespace-nowrap">PPR PREVUES N1</th>
-              <th className="text-right py-3 px-2 font-semibold whitespace-nowrap">ECONOMIES N1</th>
-              <th className="text-right py-3 px-2 font-semibold whitespace-nowrap">Pertes Ref N1</th>
-              <th className="text-right py-3 px-2 font-semibold whitespace-nowrap">Pertes N1</th>
-              <th className="text-center py-3 px-2 font-semibold whitespace-nowrap">Pertes %</th>
-            </tr>
-          </thead>
-        </table>
-        <div
-          ref={parentRef}
-          className="overflow-auto"
-          style={{ height: '400px' }}
-        >
-          <table className="w-full text-sm">
-            <tbody
-              style={{
-                height: `${rowVirtualizer.getTotalSize()}px`,
-                width: '100%',
-                position: 'relative',
-              }}
-            >
-              {virtualRows.map((virtualRow) => {
-                const { employee, data } = employeesWithData[virtualRow.index];
-                return (
-                  <tr
-                    key={employee.employeeId}
-                    className={cn(
-                      "border-b hover:bg-cyan-500/5 transition-colors absolute w-full",
-                      virtualRow.index % 2 === 0 && "bg-muted/20"
-                    )}
-                    style={{
-                      height: `${virtualRow.size}px`,
-                      transform: `translateY(${virtualRow.start}px)`,
-                    }}
-                  >
-                    <td className="py-2 px-2 font-medium" style={{width: '15%'}}>{employee.employeeName}</td>
-                    <td className="py-2 px-2" style={{width: '10%'}}>{employee.category}</td>
-                    <td className="py-2 px-2 text-center" style={{width: '8%'}}>
-                      <Badge variant="outline">{(employee.incapacityRate * 100).toFixed(0)}%</Badge>
-                    </td>
-                    <td className="py-2 px-2 text-right text-blue-600 font-medium" style={{width: '12%'}}>
-                      {data.scoreFinancierN1.toLocaleString('fr-FR', {minimumFractionDigits: 2, maximumFractionDigits: 2})} {currencySymbol}
-                    </td>
-                    <td className="py-2 px-2 text-right text-orange-600" style={{width: '12%'}}>
-                      {data.pertesConstateesN1.toLocaleString('fr-FR', {minimumFractionDigits: 2, maximumFractionDigits: 2})} {currencySymbol}
-                    </td>
-                    <td className="py-2 px-2 text-right" style={{width: '10%'}}>
-                      {data.pprPrevuesN1.toLocaleString('fr-FR', {minimumFractionDigits: 2, maximumFractionDigits: 2})} {currencySymbol}
-                    </td>
-                    <td className="py-2 px-2 text-right text-green-600 font-bold" style={{width: '10%'}}>
-                      {data.economiesRealiseesN1.toLocaleString('fr-FR', {minimumFractionDigits: 2, maximumFractionDigits: 2})} {currencySymbol}
-                    </td>
-                    <td className="py-2 px-2 text-right text-muted-foreground" style={{width: '10%'}}>
-                      {data.pertesConstateesRefN1.toLocaleString('fr-FR', {minimumFractionDigits: 2, maximumFractionDigits: 2})} {currencySymbol}
-                    </td>
-                    <td className="py-2 px-2 text-right text-orange-500" style={{width: '8%'}}>
-                      {data.pertesConstateesN1.toLocaleString('fr-FR', {minimumFractionDigits: 2, maximumFractionDigits: 2})} {currencySymbol}
-                    </td>
-                    <td className="py-2 px-2 text-center" style={{width: '5%'}}>
-                      <Badge variant="outline" className={cn(
-                        data.pertesN1PctRef > 80 ? "bg-red-500/10 text-red-600" :
-                        data.pertesN1PctRef > 50 ? "bg-orange-500/10 text-orange-600" :
-                        "bg-green-500/10 text-green-600"
-                      )}>
-                        {data.pertesN1PctRef.toFixed(2)}%
-                      </Badge>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
+      <div className="overflow-hidden space-y-4">
+        {businessLines.map((businessLine) => {
+          const blEmployeesWithData = employeesByBusinessLine.get(businessLine.id) || [];
+          if (blEmployeesWithData.length === 0) return null;
+
+          // Calculer sous-totaux de cette ligne d'activité
+          const blTotals = blEmployeesWithData.reduce((acc, { data }) => ({
+            scoreFinancier: acc.scoreFinancier + data.scoreFinancierN1,
+            pertesConstatees: acc.pertesConstatees + data.pertesConstateesN1,
+            pprPrevues: acc.pprPrevues + data.pprPrevuesN1,
+            economiesRealisees: acc.economiesRealisees + data.economiesRealiseesN1,
+          }), { scoreFinancier: 0, pertesConstatees: 0, pprPrevues: 0, economiesRealisees: 0 });
+
+          return (
+            <div key={businessLine.id} className="space-y-2">
+              {/* En-tête ligne d'activité */}
+              <div className="flex items-center gap-2 px-3 py-2 bg-gradient-to-r from-cyan-400 to-cyan-500 rounded-lg text-white">
+                <Building2 className="w-5 h-5" />
+                <span className="font-bold">{businessLine.activity_name}</span>
+                <Badge className="bg-white/20 text-white ml-2">{blEmployeesWithData.length} salariés</Badge>
+              </div>
+
+              {/* Tableau scrollable - FIX 2026-01-23: Restructuration pour synchronisation scroll */}
+              {/* Le conteneur principal gère TOUT le scroll (horizontal ET vertical) */}
+              <div className="rounded-lg border border-cyan-200" style={{ maxHeight: '400px', overflow: 'auto' }}>
+                {/* Header colonnes - sticky pour rester visible lors du scroll vertical */}
+                <div
+                  className="text-sm font-semibold bg-cyan-500/10 border-b-2 sticky top-0 z-10"
+                  style={{
+                    display: 'grid',
+                    gridTemplateColumns: GRID_TEMPLATE,
+                    width: `${TOTAL_WIDTH}px`,
+                  }}
+                >
+                  <div className="py-3 px-2 text-left whitespace-nowrap overflow-hidden text-ellipsis bg-cyan-500/10">Nom du salarié</div>
+                  <div className="py-3 px-2 text-left whitespace-nowrap overflow-hidden text-ellipsis bg-cyan-500/10">Catégorie pro</div>
+                  <div className="py-3 px-2 text-center whitespace-nowrap overflow-hidden text-ellipsis bg-cyan-500/10">Coef. Compétence</div>
+                  <div className="py-3 px-2 text-right whitespace-nowrap overflow-hidden text-ellipsis bg-cyan-500/10">Score Financier N1</div>
+                  <div className="py-3 px-2 text-right whitespace-nowrap overflow-hidden text-ellipsis bg-cyan-500/10">Pertes Constatées N1</div>
+                  <div className="py-3 px-2 text-right whitespace-nowrap overflow-hidden text-ellipsis bg-cyan-500/10">PPR PREVUES N1</div>
+                  <div className="py-3 px-2 text-right whitespace-nowrap overflow-hidden text-ellipsis bg-cyan-500/10">ECONOMIES N1</div>
+                  <div className="py-3 px-2 text-center whitespace-nowrap overflow-hidden text-ellipsis bg-cyan-500/10">Pertes %</div>
+                  <div className="py-3 px-2 text-right whitespace-nowrap overflow-hidden text-ellipsis bg-cyan-500/10">Pertes Constatées N1</div>
+                  <div className="py-3 px-2 text-right whitespace-nowrap overflow-hidden text-ellipsis bg-cyan-500/10">Pertes incap. N1</div>
+                  <div className="py-3 px-2 text-center whitespace-nowrap overflow-hidden text-ellipsis bg-cyan-500/10">Pertes %</div>
+                </div>
+
+                {/* Body - liste des employés - Plus de sous-conteneur, tout dans le même flux */}
+                <div>
+                  {blEmployeesWithData.map(({ employee, data }, idx) => (
+                    <div
+                      key={employee.employeeId}
+                      className={cn(
+                        "border-b hover:bg-cyan-500/5 transition-colors text-sm",
+                        idx % 2 === 0 && "bg-muted/20"
+                      )}
+                      style={{
+                        display: 'grid',
+                        gridTemplateColumns: GRID_TEMPLATE,
+                        width: `${TOTAL_WIDTH}px`,
+                      }}
+                    >
+                      <div className="py-2 px-2 font-medium truncate">{employee.employeeName}</div>
+                      <div className="py-2 px-2 truncate">{employee.professionalCategory}</div>
+                      <div className="py-2 px-2 text-center">
+                        <Badge variant="outline" className={cn(
+                          employee.coefficientCompetence >= 0.8 ? "bg-green-500/10 text-green-600 border-green-500/30" :
+                          employee.coefficientCompetence >= 0.5 ? "bg-blue-500/10 text-blue-600 border-blue-500/30" :
+                          "bg-orange-500/10 text-orange-600 border-orange-500/30"
+                        )}>
+                          {employee.coefficientCompetence.toFixed(2)}
+                        </Badge>
+                      </div>
+                      <div className="py-2 px-2 text-right text-blue-600 font-medium">
+                        {data.scoreFinancierN1.toLocaleString('fr-FR', {minimumFractionDigits: 2, maximumFractionDigits: 2})} {currencySymbol}
+                      </div>
+                      <div className="py-2 px-2 text-right text-orange-600">
+                        {data.pertesConstateesN1.toLocaleString('fr-FR', {minimumFractionDigits: 2, maximumFractionDigits: 2})} {currencySymbol}
+                      </div>
+                      <div className="py-2 px-2 text-right">
+                        {data.pprPrevuesN1.toLocaleString('fr-FR', {minimumFractionDigits: 2, maximumFractionDigits: 2})} {currencySymbol}
+                      </div>
+                      <div className="py-2 px-2 text-right text-green-600 font-bold">
+                        {data.economiesRealiseesN1.toLocaleString('fr-FR', {minimumFractionDigits: 2, maximumFractionDigits: 2})} {currencySymbol}
+                      </div>
+                      <div className="py-2 px-2 text-center">
+                        <Badge variant="outline" className={cn(
+                          data.pertesEnPourcentageN1 > 80 ? "bg-red-500/10 text-red-600" :
+                          data.pertesEnPourcentageN1 > 50 ? "bg-orange-500/10 text-orange-600" :
+                          "bg-green-500/10 text-green-600"
+                        )}>
+                          {data.pertesEnPourcentageN1.toFixed(2)}%
+                        </Badge>
+                      </div>
+                      <div className="py-2 px-2 text-right text-muted-foreground">
+                        {data.pertesConstateesRefN1.toLocaleString('fr-FR', {minimumFractionDigits: 2, maximumFractionDigits: 2})} {currencySymbol}
+                      </div>
+                      <div className="py-2 px-2 text-right text-orange-600">
+                        {data.pertesConstateesIncapN1.toLocaleString('fr-FR', {minimumFractionDigits: 2, maximumFractionDigits: 2})} {currencySymbol}
+                      </div>
+                      <div className="py-2 px-2 text-center">
+                        <Badge variant="outline" className={cn(
+                          data.pertesIncapPctN1 > 80 ? "bg-red-500/10 text-red-600" :
+                          data.pertesIncapPctN1 > 50 ? "bg-orange-500/10 text-orange-600" :
+                          "bg-green-500/10 text-green-600"
+                        )}>
+                          {data.pertesIncapPctN1.toFixed(2)}%
+                        </Badge>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Sous-total ligne d'activité */}
+                <div
+                  className="text-sm font-bold bg-cyan-500/20 border-t-2"
+                  style={{
+                    display: 'grid',
+                    gridTemplateColumns: GRID_TEMPLATE,
+                    minWidth: `${TOTAL_WIDTH}px`,
+                  }}
+                >
+                  <div className="py-3 px-2 text-right" style={{ gridColumn: 'span 3' }}>
+                    TOTAL {businessLine.activity_name}:
+                  </div>
+                  <div className="py-3 px-2 text-right text-blue-600">
+                    {blTotals.scoreFinancier.toLocaleString('fr-FR', {minimumFractionDigits: 2, maximumFractionDigits: 2})} {currencySymbol}
+                  </div>
+                  <div className="py-3 px-2 text-right text-orange-600">
+                    {blTotals.pertesConstatees.toLocaleString('fr-FR', {minimumFractionDigits: 2, maximumFractionDigits: 2})} {currencySymbol}
+                  </div>
+                  <div className="py-3 px-2 text-right">
+                    {blTotals.pprPrevues.toLocaleString('fr-FR', {minimumFractionDigits: 2, maximumFractionDigits: 2})} {currencySymbol}
+                  </div>
+                  <div className="py-3 px-2 text-right text-green-600">
+                    {blTotals.economiesRealisees.toLocaleString('fr-FR', {minimumFractionDigits: 2, maximumFractionDigits: 2})} {currencySymbol}
+                  </div>
+                  <div className="py-3 px-2 text-center">-</div>
+                  <div className="py-3 px-2 text-right">-</div>
+                  <div className="py-3 px-2 text-right">-</div>
+                  <div className="py-3 px-2 text-center">-</div>
+                </div>
+              </div>
+            </div>
+          );
+        })}
+
+        {/* TOTAL GLOBAL EKH NIVEAU 1 */}
         {ekhTotalsN1 && (
-          <table className="w-full text-sm">
-            <tfoot>
-              <tr className="border-t-2 font-bold bg-cyan-500/10">
-                <td colSpan={3} className="py-4 px-2 text-right">TOTAL EKH NIVEAU 1:</td>
-                <td className="py-4 px-2 text-right text-blue-600">
-                  {ekhTotalsN1.scoreFinancierTotal.toLocaleString('fr-FR', {minimumFractionDigits: 2, maximumFractionDigits: 2})} {currencySymbol}
-                </td>
-                <td className="py-4 px-2 text-right text-orange-600">
-                  {ekhTotalsN1.pertesConstateesTotal.toLocaleString('fr-FR', {minimumFractionDigits: 2, maximumFractionDigits: 2})} {currencySymbol}
-                </td>
-                <td className="py-4 px-2 text-right">
-                  {ekhTotalsN1.pprPrevuesTotal.toLocaleString('fr-FR', {minimumFractionDigits: 2, maximumFractionDigits: 2})} {currencySymbol}
-                </td>
-                <td className="py-4 px-2 text-right text-green-600">
-                  {ekhTotalsN1.economiesRealiseesTotal.toLocaleString('fr-FR', {minimumFractionDigits: 2, maximumFractionDigits: 2})} {currencySymbol}
-                </td>
-                <td colSpan={3}></td>
-              </tr>
-            </tfoot>
-          </table>
+          <div
+            className="text-sm font-bold bg-cyan-600/20 border-2 border-cyan-500 rounded-lg"
+            style={{
+              display: 'grid',
+              gridTemplateColumns: GRID_TEMPLATE,
+              minWidth: `${TOTAL_WIDTH}px`,
+            }}
+          >
+            <div className="py-4 px-2 text-right" style={{ gridColumn: 'span 3' }}>TOTAL EKH NIVEAU 1:</div>
+            <div className="py-4 px-2 text-right text-blue-600">
+              {ekhTotalsN1.scoreFinancierTotal.toLocaleString('fr-FR', {minimumFractionDigits: 2, maximumFractionDigits: 2})} {currencySymbol}
+            </div>
+            <div className="py-4 px-2 text-right text-orange-600">
+              {ekhTotalsN1.pertesConstateesTotal.toLocaleString('fr-FR', {minimumFractionDigits: 2, maximumFractionDigits: 2})} {currencySymbol}
+            </div>
+            <div className="py-4 px-2 text-right">
+              {ekhTotalsN1.pprPrevuesTotal.toLocaleString('fr-FR', {minimumFractionDigits: 2, maximumFractionDigits: 2})} {currencySymbol}
+            </div>
+            <div className="py-4 px-2 text-right text-green-600">
+              {ekhTotalsN1.economiesRealiseesTotal.toLocaleString('fr-FR', {minimumFractionDigits: 2, maximumFractionDigits: 2})} {currencySymbol}
+            </div>
+            <div className="py-4 px-2 text-center">-</div>
+            <div className="py-4 px-2 text-right">-</div>
+            <div className="py-4 px-2 text-right">-</div>
+            <div className="py-4 px-2 text-center">-</div>
+          </div>
         )}
+
         <div className="text-xs text-muted-foreground text-center py-2">
-          {employees.length} employés (virtualisé - seules les lignes visibles sont rendues)
+          {employees.length} employés répartis sur {businessLinesWithEmployees.length} lignes d'activité
         </div>
       </div>
     );
   }
 
+  // ============================================
   // NIVEAU 2
+  // ============================================
   if (level === '2') {
     return (
-      <div className="overflow-x-auto">
-        <table className="w-full text-sm">
-          <thead className="sticky top-0 z-10 bg-background">
-            <tr className="border-b-2 bg-cyan-500/10">
-              <th className="text-left py-3 px-2 font-semibold whitespace-nowrap">Nom du salarié</th>
-              <th className="text-left py-3 px-2 font-semibold whitespace-nowrap">Catégorie pro</th>
-              <th className="text-center py-3 px-2 font-semibold whitespace-nowrap">Taux d'incapacité</th>
-              <th className="text-right py-3 px-2 font-semibold whitespace-nowrap">Score Financier N2</th>
-              <th className="text-right py-3 px-2 font-semibold whitespace-nowrap">Pertes Constatées N2</th>
-              <th className="text-right py-3 px-2 font-semibold whitespace-nowrap">PPR PREVUES N2</th>
-              <th className="text-right py-3 px-2 font-semibold whitespace-nowrap">ECONOMIES N2</th>
-              <th className="text-right py-3 px-2 font-semibold whitespace-nowrap">Pertes Ref N2</th>
-              <th className="text-right py-3 px-2 font-semibold whitespace-nowrap">Pertes N2</th>
-              <th className="text-center py-3 px-2 font-semibold whitespace-nowrap">Pertes %</th>
-            </tr>
-          </thead>
-        </table>
-        <div
-          ref={parentRef}
-          className="overflow-auto"
-          style={{ height: '400px' }}
-        >
-          <table className="w-full text-sm">
-            <tbody
-              style={{
-                height: `${rowVirtualizer.getTotalSize()}px`,
-                width: '100%',
-                position: 'relative',
-              }}
-            >
-              {virtualRows.map((virtualRow) => {
-                const { employee, data } = employeesWithData[virtualRow.index];
-                return (
-                  <tr
-                    key={employee.employeeId}
-                    className={cn(
-                      "border-b hover:bg-cyan-500/5 transition-colors absolute w-full",
-                      virtualRow.index % 2 === 0 && "bg-muted/20"
-                    )}
-                    style={{
-                      height: `${virtualRow.size}px`,
-                      transform: `translateY(${virtualRow.start}px)`,
-                    }}
-                  >
-                    <td className="py-2 px-2 font-medium" style={{width: '15%'}}>{employee.employeeName}</td>
-                    <td className="py-2 px-2" style={{width: '10%'}}>{employee.category}</td>
-                    <td className="py-2 px-2 text-center" style={{width: '8%'}}>
-                      <Badge variant="outline">{(employee.incapacityRate * 100).toFixed(0)}%</Badge>
-                    </td>
-                    <td className="py-2 px-2 text-right text-blue-600 font-medium" style={{width: '12%'}}>
-                      {data.scoreFinancierN2.toLocaleString('fr-FR', {minimumFractionDigits: 2, maximumFractionDigits: 2})} {currencySymbol}
-                    </td>
-                    <td className="py-2 px-2 text-right text-orange-600" style={{width: '12%'}}>
-                      {data.pertesConstateesN2.toLocaleString('fr-FR', {minimumFractionDigits: 2, maximumFractionDigits: 2})} {currencySymbol}
-                    </td>
-                    <td className="py-2 px-2 text-right" style={{width: '10%'}}>
-                      {data.pprPrevuesN2.toLocaleString('fr-FR', {minimumFractionDigits: 2, maximumFractionDigits: 2})} {currencySymbol}
-                    </td>
-                    <td className="py-2 px-2 text-right text-green-600 font-bold" style={{width: '10%'}}>
-                      {data.economiesRealiseesN2.toLocaleString('fr-FR', {minimumFractionDigits: 2, maximumFractionDigits: 2})} {currencySymbol}
-                    </td>
-                    <td className="py-2 px-2 text-right text-muted-foreground" style={{width: '10%'}}>
-                      {data.pertesConstateesRefN2.toLocaleString('fr-FR', {minimumFractionDigits: 2, maximumFractionDigits: 2})} {currencySymbol}
-                    </td>
-                    <td className="py-2 px-2 text-right text-orange-500" style={{width: '8%'}}>
-                      {data.pertesConstateesN2.toLocaleString('fr-FR', {minimumFractionDigits: 2, maximumFractionDigits: 2})} {currencySymbol}
-                    </td>
-                    <td className="py-2 px-2 text-center" style={{width: '5%'}}>
-                      <Badge variant="outline" className={cn(
-                        data.pertesN2PctRef > 80 ? "bg-red-500/10 text-red-600" :
-                        data.pertesN2PctRef > 50 ? "bg-orange-500/10 text-orange-600" :
-                        "bg-green-500/10 text-green-600"
-                      )}>
-                        {data.pertesN2PctRef.toFixed(2)}%
-                      </Badge>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
+      <div className="overflow-hidden space-y-4">
+        {businessLines.map((businessLine) => {
+          const blEmployeesWithData = employeesByBusinessLine.get(businessLine.id) || [];
+          if (blEmployeesWithData.length === 0) return null;
+
+          // Calculer sous-totaux de cette ligne d'activité
+          const blTotals = blEmployeesWithData.reduce((acc, { data }) => ({
+            scoreFinancier: acc.scoreFinancier + data.scoreFinancierN2,
+            pertesConstatees: acc.pertesConstatees + data.pertesConstateesN2,
+            pprPrevues: acc.pprPrevues + data.pprPrevuesN2,
+            economiesRealisees: acc.economiesRealisees + data.economiesRealiseesN2,
+          }), { scoreFinancier: 0, pertesConstatees: 0, pprPrevues: 0, economiesRealisees: 0 });
+
+          return (
+            <div key={businessLine.id} className="space-y-2">
+              {/* En-tête ligne d'activité */}
+              <div className="flex items-center gap-2 px-3 py-2 bg-gradient-to-r from-cyan-400 to-cyan-500 rounded-lg text-white">
+                <Building2 className="w-5 h-5" />
+                <span className="font-bold">{businessLine.activity_name}</span>
+                <Badge className="bg-white/20 text-white ml-2">{blEmployeesWithData.length} salariés</Badge>
+              </div>
+
+              {/* Tableau scrollable - FIX 2026-01-23: Restructuration pour synchronisation scroll */}
+              {/* Le conteneur principal gère TOUT le scroll (horizontal ET vertical) */}
+              <div className="rounded-lg border border-cyan-200" style={{ maxHeight: '400px', overflow: 'auto' }}>
+                {/* Header colonnes - sticky pour rester visible lors du scroll vertical */}
+                <div
+                  className="text-sm font-semibold bg-cyan-500/10 border-b-2 sticky top-0 z-10"
+                  style={{
+                    display: 'grid',
+                    gridTemplateColumns: GRID_TEMPLATE,
+                    width: `${TOTAL_WIDTH}px`,
+                  }}
+                >
+                  <div className="py-3 px-2 text-left whitespace-nowrap overflow-hidden text-ellipsis bg-cyan-500/10">Nom du salarié</div>
+                  <div className="py-3 px-2 text-left whitespace-nowrap overflow-hidden text-ellipsis bg-cyan-500/10">Catégorie pro</div>
+                  <div className="py-3 px-2 text-center whitespace-nowrap overflow-hidden text-ellipsis bg-cyan-500/10">Coef. Compétence</div>
+                  <div className="py-3 px-2 text-right whitespace-nowrap overflow-hidden text-ellipsis bg-cyan-500/10">Score Financier N2</div>
+                  <div className="py-3 px-2 text-right whitespace-nowrap overflow-hidden text-ellipsis bg-cyan-500/10">Pertes Constatées N2</div>
+                  <div className="py-3 px-2 text-right whitespace-nowrap overflow-hidden text-ellipsis bg-cyan-500/10">PPR PREVUES N2</div>
+                  <div className="py-3 px-2 text-right whitespace-nowrap overflow-hidden text-ellipsis bg-cyan-500/10">ECONOMIES N2</div>
+                  <div className="py-3 px-2 text-center whitespace-nowrap overflow-hidden text-ellipsis bg-cyan-500/10">Pertes %</div>
+                  <div className="py-3 px-2 text-right whitespace-nowrap overflow-hidden text-ellipsis bg-cyan-500/10">Pertes Constatées N2</div>
+                  <div className="py-3 px-2 text-right whitespace-nowrap overflow-hidden text-ellipsis bg-cyan-500/10">Pertes incap. N2</div>
+                  <div className="py-3 px-2 text-center whitespace-nowrap overflow-hidden text-ellipsis bg-cyan-500/10">Pertes %</div>
+                </div>
+
+                {/* Body - liste des employés - Plus de sous-conteneur, tout dans le même flux */}
+                <div>
+                  {blEmployeesWithData.map(({ employee, data }, idx) => (
+                    <div
+                      key={employee.employeeId}
+                      className={cn(
+                        "border-b hover:bg-cyan-500/5 transition-colors text-sm",
+                        idx % 2 === 0 && "bg-muted/20"
+                      )}
+                      style={{
+                        display: 'grid',
+                        gridTemplateColumns: GRID_TEMPLATE,
+                        width: `${TOTAL_WIDTH}px`,
+                      }}
+                    >
+                      <div className="py-2 px-2 font-medium truncate">{employee.employeeName}</div>
+                      <div className="py-2 px-2 truncate">{employee.professionalCategory}</div>
+                      <div className="py-2 px-2 text-center">
+                        <Badge variant="outline" className={cn(
+                          employee.coefficientCompetence >= 0.8 ? "bg-green-500/10 text-green-600 border-green-500/30" :
+                          employee.coefficientCompetence >= 0.5 ? "bg-blue-500/10 text-blue-600 border-blue-500/30" :
+                          "bg-orange-500/10 text-orange-600 border-orange-500/30"
+                        )}>
+                          {employee.coefficientCompetence.toFixed(2)}
+                        </Badge>
+                      </div>
+                      <div className="py-2 px-2 text-right text-blue-600 font-medium">
+                        {data.scoreFinancierN2.toLocaleString('fr-FR', {minimumFractionDigits: 2, maximumFractionDigits: 2})} {currencySymbol}
+                      </div>
+                      <div className="py-2 px-2 text-right text-orange-600">
+                        {data.pertesConstateesN2.toLocaleString('fr-FR', {minimumFractionDigits: 2, maximumFractionDigits: 2})} {currencySymbol}
+                      </div>
+                      <div className="py-2 px-2 text-right">
+                        {data.pprPrevuesN2.toLocaleString('fr-FR', {minimumFractionDigits: 2, maximumFractionDigits: 2})} {currencySymbol}
+                      </div>
+                      <div className="py-2 px-2 text-right text-green-600 font-bold">
+                        {data.economiesRealiseesN2.toLocaleString('fr-FR', {minimumFractionDigits: 2, maximumFractionDigits: 2})} {currencySymbol}
+                      </div>
+                      <div className="py-2 px-2 text-center">
+                        <Badge variant="outline" className={cn(
+                          data.pertesEnPourcentageN2 > 80 ? "bg-red-500/10 text-red-600" :
+                          data.pertesEnPourcentageN2 > 50 ? "bg-orange-500/10 text-orange-600" :
+                          "bg-green-500/10 text-green-600"
+                        )}>
+                          {data.pertesEnPourcentageN2.toFixed(2)}%
+                        </Badge>
+                      </div>
+                      <div className="py-2 px-2 text-right text-muted-foreground">
+                        {data.pertesConstateesRefN2.toLocaleString('fr-FR', {minimumFractionDigits: 2, maximumFractionDigits: 2})} {currencySymbol}
+                      </div>
+                      <div className="py-2 px-2 text-right text-orange-600">
+                        {data.pertesConstateesIncapN2.toLocaleString('fr-FR', {minimumFractionDigits: 2, maximumFractionDigits: 2})} {currencySymbol}
+                      </div>
+                      <div className="py-2 px-2 text-center">
+                        <Badge variant="outline" className={cn(
+                          data.pertesIncapPctN2 > 80 ? "bg-red-500/10 text-red-600" :
+                          data.pertesIncapPctN2 > 50 ? "bg-orange-500/10 text-orange-600" :
+                          "bg-green-500/10 text-green-600"
+                        )}>
+                          {data.pertesIncapPctN2.toFixed(2)}%
+                        </Badge>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Sous-total ligne d'activité */}
+                <div
+                  className="text-sm font-bold bg-cyan-500/20 border-t-2"
+                  style={{
+                    display: 'grid',
+                    gridTemplateColumns: GRID_TEMPLATE,
+                    minWidth: `${TOTAL_WIDTH}px`,
+                  }}
+                >
+                  <div className="py-3 px-2 text-right" style={{ gridColumn: 'span 3' }}>
+                    TOTAL {businessLine.activity_name}:
+                  </div>
+                  <div className="py-3 px-2 text-right text-blue-600">
+                    {blTotals.scoreFinancier.toLocaleString('fr-FR', {minimumFractionDigits: 2, maximumFractionDigits: 2})} {currencySymbol}
+                  </div>
+                  <div className="py-3 px-2 text-right text-orange-600">
+                    {blTotals.pertesConstatees.toLocaleString('fr-FR', {minimumFractionDigits: 2, maximumFractionDigits: 2})} {currencySymbol}
+                  </div>
+                  <div className="py-3 px-2 text-right">
+                    {blTotals.pprPrevues.toLocaleString('fr-FR', {minimumFractionDigits: 2, maximumFractionDigits: 2})} {currencySymbol}
+                  </div>
+                  <div className="py-3 px-2 text-right text-green-600">
+                    {blTotals.economiesRealisees.toLocaleString('fr-FR', {minimumFractionDigits: 2, maximumFractionDigits: 2})} {currencySymbol}
+                  </div>
+                  <div className="py-3 px-2 text-center">-</div>
+                  <div className="py-3 px-2 text-right">-</div>
+                  <div className="py-3 px-2 text-right">-</div>
+                  <div className="py-3 px-2 text-center">-</div>
+                </div>
+              </div>
+            </div>
+          );
+        })}
+
+        {/* TOTAL GLOBAL EKH NIVEAU 2 */}
         {ekhTotalsN2 && (
-          <table className="w-full text-sm">
-            <tfoot>
-              <tr className="border-t-2 font-bold bg-cyan-500/10">
-                <td colSpan={3} className="py-4 px-2 text-right">TOTAL EKH NIVEAU 2:</td>
-                <td className="py-4 px-2 text-right text-blue-600">
-                  {ekhTotalsN2.scoreFinancierTotal.toLocaleString('fr-FR', {minimumFractionDigits: 2, maximumFractionDigits: 2})} {currencySymbol}
-                </td>
-                <td className="py-4 px-2 text-right text-orange-600">
-                  {ekhTotalsN2.pertesConstateesTotal.toLocaleString('fr-FR', {minimumFractionDigits: 2, maximumFractionDigits: 2})} {currencySymbol}
-                </td>
-                <td className="py-4 px-2 text-right">
-                  {ekhTotalsN2.pprPrevuesTotal.toLocaleString('fr-FR', {minimumFractionDigits: 2, maximumFractionDigits: 2})} {currencySymbol}
-                </td>
-                <td className="py-4 px-2 text-right text-green-600">
-                  {ekhTotalsN2.economiesRealiseesTotal.toLocaleString('fr-FR', {minimumFractionDigits: 2, maximumFractionDigits: 2})} {currencySymbol}
-                </td>
-                <td colSpan={3}></td>
-              </tr>
-            </tfoot>
-          </table>
+          <div
+            className="text-sm font-bold bg-cyan-600/20 border-2 border-cyan-500 rounded-lg"
+            style={{
+              display: 'grid',
+              gridTemplateColumns: GRID_TEMPLATE,
+              minWidth: `${TOTAL_WIDTH}px`,
+            }}
+          >
+            <div className="py-4 px-2 text-right" style={{ gridColumn: 'span 3' }}>TOTAL EKH NIVEAU 2:</div>
+            <div className="py-4 px-2 text-right text-blue-600">
+              {ekhTotalsN2.scoreFinancierTotal.toLocaleString('fr-FR', {minimumFractionDigits: 2, maximumFractionDigits: 2})} {currencySymbol}
+            </div>
+            <div className="py-4 px-2 text-right text-orange-600">
+              {ekhTotalsN2.pertesConstateesTotal.toLocaleString('fr-FR', {minimumFractionDigits: 2, maximumFractionDigits: 2})} {currencySymbol}
+            </div>
+            <div className="py-4 px-2 text-right">
+              {ekhTotalsN2.pprPrevuesTotal.toLocaleString('fr-FR', {minimumFractionDigits: 2, maximumFractionDigits: 2})} {currencySymbol}
+            </div>
+            <div className="py-4 px-2 text-right text-green-600">
+              {ekhTotalsN2.economiesRealiseesTotal.toLocaleString('fr-FR', {minimumFractionDigits: 2, maximumFractionDigits: 2})} {currencySymbol}
+            </div>
+            <div className="py-4 px-2 text-center">-</div>
+            <div className="py-4 px-2 text-right">-</div>
+            <div className="py-4 px-2 text-right">-</div>
+            <div className="py-4 px-2 text-center">-</div>
+          </div>
         )}
+
         <div className="text-xs text-muted-foreground text-center py-2">
-          {employees.length} employés (virtualisé - seules les lignes visibles sont rendues)
+          {employees.length} employés répartis sur {businessLinesWithEmployees.length} lignes d'activité
         </div>
       </div>
     );
   }
 
+  // ============================================
   // NIVEAU TOTAL
+  // ============================================
   return (
     <div className="overflow-x-auto p-4">
       <div className="text-center text-lg font-bold mb-4">

@@ -2044,7 +2044,7 @@ export default function PerformanceRecapPage() {
       // Le salarié existe si son nom est défini (B6 <> 0 dans Excel)
       const salariéExiste = member.name && member.name.trim() !== '';
 
-      const calculateIndicatorData = (kpiType: string): IndicatorData => {
+      const calculateIndicatorData = (kpiType: string, economiesDDP?: number): IndicatorData => {
         const kpiEntries = memberEntries.get(kpiType) || [];
 
         // Aggregate data from all entries for this KPI
@@ -2091,9 +2091,10 @@ export default function PerformanceRecapPage() {
         // For EKH, calculations are based on coefficient de compétence
         let scoreFinancier: number;
         if (kpiType === 'ekh') {
-          // Score EKH = coefficient de compétence × facteur économique
-          const FACTEUR_EKH = 1000; // Valeur économique par point de coefficient
-          scoreFinancier = coefficientCompetence * FACTEUR_EKH;
+          // Score Financier EKH = Économies DDP × Coefficient de compétence
+          // Formule Excel: =DA6*EC6
+          // economiesDDP est passé en paramètre depuis le calcul DDP préalable
+          scoreFinancier = (economiesDDP || 0) * coefficientCompetence;
         } else {
           // Formule Excel: Score Financier = ((L3 - M3) / K3) * E6 * 1000
           scoreFinancier = calculateScoreFinancier(
@@ -2295,6 +2296,11 @@ export default function PerformanceRecapPage() {
         };
       };
 
+      // Calculer DDP d'abord pour avoir les économies disponibles pour EKH
+      const ddpData = calculateIndicatorData('ddp');
+      // Pour EKH, passer les économies DDP pour le calcul du Score Financier
+      const ekhData = calculateIndicatorData('ekh', ddpData.economiesRealisees);
+
       return {
         employeeId: member.id,
         employeeName: member.name,
@@ -2306,8 +2312,8 @@ export default function PerformanceRecapPage() {
         abs: calculateIndicatorData('abs'),
         qd: calculateIndicatorData('qd'),
         oa: calculateIndicatorData('oa'),
-        ddp: calculateIndicatorData('ddp'),
-        ekh: calculateIndicatorData('ekh')
+        ddp: ddpData,
+        ekh: ekhData
       };
     }; // Fin de processSingleMember
 
@@ -2629,13 +2635,50 @@ export default function PerformanceRecapPage() {
       const coefficientCompetence = perf.coefficientCompetence || 0;
 
       // NIVEAU 1
-      const economiesDDP_N1 = ddpData.economiesRealisees || 0;
+      // Logique conditionnelle Excel DA6 pour ECONOMIES DDP N1:
+      // =SI(ET(CV6=0;DL6=0;CR6<>"");DE6;SI(ET(CV6=0;DL6=0;CR6="");0;SI(ET(CV6>0;DL6=0);DE6;SI(ET(CV6=0;DL6>0);0))))
+      // CV6 = tempsCalcul (DDP N1), DL6 = tempsCalculN2 (DDP N2), CR6 = nomSalarié, DE6 = economiesRealisees2 (Éco2 N1)
+      const tempsCalculDDP_N1 = ddpData.tempsCalcul || 0;       // CV6
+      const tempsCalculDDP_N2 = ddpData.tempsCalculN2 || 0;     // DL6
+      const nomSalarieExiste = (perf.employeeName || '') !== ''; // CR6 <> ""
+      const economiesRealisees2_N1 = ddpData.economiesRealisees2 || 0;  // DE6
+
+      let economiesDDP_N1: number;
+      if (tempsCalculDDP_N1 === 0 && tempsCalculDDP_N2 === 0 && nomSalarieExiste) {
+        economiesDDP_N1 = economiesRealisees2_N1;  // DE6
+      } else if (tempsCalculDDP_N1 === 0 && tempsCalculDDP_N2 === 0 && !nomSalarieExiste) {
+        economiesDDP_N1 = 0;
+      } else if (tempsCalculDDP_N1 > 0 && tempsCalculDDP_N2 === 0) {
+        economiesDDP_N1 = economiesRealisees2_N1;  // DE6
+      } else if (tempsCalculDDP_N1 === 0 && tempsCalculDDP_N2 > 0) {
+        economiesDDP_N1 = 0;
+      } else {
+        economiesDDP_N1 = 0;  // Cas par défaut
+      }
+
       const scoreFinancierN1 = economiesDDP_N1 * coefficientCompetence;
       const pprPrevuesN1 = ekhData.pprPrevues || 0;
       const economiesRealiseesN1 = scoreFinancierN1;
 
       // NIVEAU 2
-      const scoreFinancierN2 = economiesDDP_N1 * coefficientCompetence;
+      // Logique conditionnelle Excel DS6 pour ECONOMIES DDP N2:
+      // =SI(ET(CV6=0;DM6=0);0;SI(ET(CV6>0;DM6=0);0;SI(ET(CV6=0;DM6>0);DW6)))
+      // CV6 = tempsCalcul (DDP N1), DM6 = tempsPrisEnCompte (DDP N2), DW6 = economiesRealisees2N2 (Éco2 N2)
+      const tempsPrisEnCompteDDP_N2 = ddpData.tempsPrisEnCompte || 0;  // DM6
+      const economiesRealisees2_N2 = ddpData.economiesRealisees2N2 || 0;  // DW6
+
+      let economiesDDP_N2: number;
+      if (tempsCalculDDP_N1 === 0 && tempsPrisEnCompteDDP_N2 === 0) {
+        economiesDDP_N2 = 0;
+      } else if (tempsCalculDDP_N1 > 0 && tempsPrisEnCompteDDP_N2 === 0) {
+        economiesDDP_N2 = 0;
+      } else if (tempsCalculDDP_N1 === 0 && tempsPrisEnCompteDDP_N2 > 0) {
+        economiesDDP_N2 = economiesRealisees2_N2;  // DW6 - CLEF: utiliser Éco2 N2
+      } else {
+        economiesDDP_N2 = 0;  // Cas par défaut (CV6>0 et DM6>0)
+      }
+
+      const scoreFinancierN2 = economiesDDP_N2 * coefficientCompetence;
       const pprPrevuesN2 = pprPrevuesN1;
       const economiesRealiseesN2 = scoreFinancierN2;
 
@@ -2750,10 +2793,21 @@ export default function PerformanceRecapPage() {
         ? (pertesConstateesN2Final / pertesConstateesRefN2) * 100
         : 0;
 
+      // Pertes en % basé sur pertesConstateesIncap (formule Excel: =SI(EJ6=0;"0,00%";SI(ESTERREUR(EJ6/EI6);0%;EJ6/EI6)))
+      // EJ6 = pertesConstateesIncap, EI6 = pertesConstateesRef
+      const pertesIncapPctN1 = pertesConstateesRefN1 > 0 && pertesConstateesN1_EKH !== 0
+        ? (pertesConstateesN1_EKH / pertesConstateesRefN1) * 100
+        : 0;
+      const pertesIncapPctN2 = pertesConstateesRefN2 > 0 && pertesConstateesN2_EKH !== 0
+        ? (pertesConstateesN2_EKH / pertesConstateesRefN2) * 100
+        : 0;
+
       return {
         coefficientCompetence,
         scoreFinancierN1,
         pertesConstateesN1: pertesConstateesN1Final,
+        pertesConstateesIncapN1: pertesConstateesN1_EKH,  // Pertes avec taux incapacité N1
+        pertesIncapPctN1,  // Pertes en % basé sur pertesConstateesIncap N1
         pprPrevuesN1,
         economiesRealiseesN1,
         pertesEnPourcentageN1,
@@ -2762,6 +2816,8 @@ export default function PerformanceRecapPage() {
         pertesN1PctRef, // PRÉ-CALCULÉ pour éviter IIFE
         scoreFinancierN2,
         pertesConstateesN2: pertesConstateesN2Final,
+        pertesConstateesIncapN2: pertesConstateesN2_EKH,  // Pertes avec taux incapacité N2
+        pertesIncapPctN2,  // Pertes en % basé sur pertesConstateesIncap N2
         pprPrevuesN2,
         economiesRealiseesN2,
         pertesEnPourcentageN2,
@@ -2914,7 +2970,7 @@ export default function PerformanceRecapPage() {
       { key: 'qd', label: 'QD', fullLabel: 'Défaut Qualité' },
       { key: 'oa', label: 'AT', fullLabel: 'Accident Travail' },
       { key: 'ddp', label: 'EPD', fullLabel: 'Écart Productivité Directe' },
-      { key: 'ekh', label: 'ESF', fullLabel: 'Écart Savoir Faire' }
+      { key: 'ekh', label: 'EKH', fullLabel: 'Écart de Know-How' }
     ] as const;
 
     // Fonction pour obtenir les données d'un salarié pour un indicateur
@@ -2960,23 +3016,17 @@ export default function PerformanceRecapPage() {
 
     // PASSE 1: Calcul des données de base
     const employeeScoresPass1 = filteredPerformances.map(emp => {
-      const hasActivityData = indicateurs.some(ind => {
-        const data = getIndicatorData(emp, ind.key);
-        return (
-          data.tempsCollecte > 0 ||
-          data.fraisCollectes > 0 ||
-          data.tempsCollecteN2 > 0 ||
-          data.tempsPrisEnCompte > 0 ||
-          data.fraisPrisEnCompte > 0
-        );
-      });
-
+      // Calculer d'abord les économies totales du salarié
       const empTotalEco = indicateurs.reduce((sum, ind) => {
         const data = getIndicatorData(emp, ind.key);
         const ecoN1 = Math.max(0, data.economiesRealisees);
         const ecoN2 = Math.max(0, data.economiesRealiseesN2);
         return sum + ecoN1 + ecoN2;
       }, 0);
+
+      // CRITÈRE D'ÉLIGIBILITÉ CORRIGÉ : basé sur les économies réalisées
+      // Un salarié est éligible s'il a généré des économies (cohérent avec Total Éco et ScoreNote%)
+      const hasActivityData = empTotalEco > 0;
 
       const empTotalPPR = indicateurs.reduce((sum, ind) => {
         const data = getIndicatorData(emp, ind.key);
@@ -3145,15 +3195,14 @@ export default function PerformanceRecapPage() {
     }, {} as Record<string, { totalPertesReference: number }>);
 
     const employeePrimeData = filteredPerformances.map(emp => {
-      const hasActivityData = primeIndicateurs.some(ind => {
-        const data = getIndicatorDataForPrime(emp, ind.key);
-        return data.tempsCollecte > 0 || data.fraisCollectes > 0 || data.tempsCollecteN2 > 0 || data.tempsPrisEnCompte > 0 || data.fraisPrisEnCompte > 0;
-      });
-
+      // Calculer d'abord les économies totales
       const empTotalEco = primeIndicateurs.reduce((sum, ind) => {
         const data = getIndicatorDataForPrime(emp, ind.key);
         return sum + Math.max(0, data.economiesRealisees) + Math.max(0, data.economiesRealiseesN2);
       }, 0);
+
+      // CRITÈRE D'ÉLIGIBILITÉ CORRIGÉ : basé sur les économies réalisées
+      const hasActivityData = empTotalEco > 0;
 
       const tauxEcoByIndicator = primeIndicateurs.reduce((acc, ind) => {
         const data = getIndicatorDataForPrime(emp, ind.key);
@@ -3868,7 +3917,7 @@ export default function PerformanceRecapPage() {
               {false && (() => {
                 // ============================================
                 // CALCULS POUR LE TABLEAU SYNTHÈSE - LEGACY CODE DISABLED
-                // Source: Tous les indicateurs (ABS, QD, AT, EPD, ESF)
+                // Source: Tous les indicateurs (ABS, QD, AT, EPD, EKH)
                 // ============================================
 
                 // Indicateurs avec leurs labels pour les colonnes
@@ -3877,7 +3926,7 @@ export default function PerformanceRecapPage() {
                   { key: 'qd', label: 'QD', fullLabel: 'Défaut Qualité' },
                   { key: 'oa', label: 'AT', fullLabel: 'Accident Travail' },
                   { key: 'ddp', label: 'EPD', fullLabel: 'Écart Productivité Directe' },
-                  { key: 'ekh', label: 'ESF', fullLabel: 'Écart Savoir Faire' }
+                  { key: 'ekh', label: 'EKH', fullLabel: 'Écart de Know-How' }
                 ] as const;
 
                 // Fonction pour obtenir les données d'un salarié pour un indicateur
@@ -3943,56 +3992,14 @@ export default function PerformanceRecapPage() {
                   // ============================================
                   // CRITÈRE D'ÉLIGIBILITÉ À LA DISTRIBUTION (SOLUTION A - AUDIT CONFORME)
                   // ============================================
-                  // Un salarié est ÉLIGIBLE à la distribution si et seulement si
-                  // il a des données d'activité réelles (temps ou frais collectés)
-                  // sur AU MOINS UN indicateur.
-                  //
-                  // PRINCIPE COMPTABLE: Respect du principe de CAUSALITÉ (IAS/IFRS)
-                  // "Les coûts doivent être imputés aux unités qui les ont générés"
                   // ============================================
-                  const hasActivityData = indicateurs.some(ind => {
-                    const data = getIndicatorData(emp, ind.key);
-                    // Vérifier si le salarié a des données de coûts réels
-                    // Niveau 1: tempsCollecte ou fraisCollectes
-                    // Niveau 2: tempsCollecteN2, tempsPrisEnCompte ou fraisPrisEnCompte
-                    return (
-                      data.tempsCollecte > 0 ||
-                      data.fraisCollectes > 0 ||
-                      data.tempsCollecteN2 > 0 ||
-                      data.tempsPrisEnCompte > 0 ||
-                      data.fraisPrisEnCompte > 0
-                    );
-                  });
-
-                  // ============================================
-                  // TOTAUX SALARIÉ - CONDITIONNÉS PAR hasActivityData
-                  // ============================================
-                  // RÈGLE AUDIT CONFORME:
-                  // Seuls les salariés ayant généré des coûts (hasActivityData = true)
-                  // doivent avoir des valeurs dans ces colonnes.
-                  // Les salariés sans activité = 0 (pas de coûts = pas d'économies)
-                  //
-                  // JUSTIFICATION (IAS/IFRS):
-                  // - Principe de Causalité: pas d'activité → pas d'imputation
-                  // - Cohérence avec le fichier Excel source
-                  // - Traçabilité audit: lien direct coûts ↔ économies
-                  // ============================================
-
-                  // Total économies du salarié
-                  // = 0 si pas d'activité (hasActivityData = false)
+                  // TOTAUX SALARIÉ - Calcul des économies d'abord
                   // ============================================
                   // CORRECTION AUDIT: Plafonnement à 0 des économies négatives
-                  // ============================================
                   // PROBLÈME IDENTIFIÉ: economiesRealisees peut être négatif quand Pertes > PPR
-                  // Ex: [ekh] PPR: 141.87 | Pertes: 666.67 | Éco = -524.80 (NÉGATIF)
-                  //
                   // SOLUTION: Plafonner chaque économie à 0 minimum
-                  // Car on ne peut pas avoir des "économies négatives"
-                  // Si Pertes > PPR → Économie = 0 (pas de gain, mais pas de perte comptabilisée ici)
-                  //
                   // CONFORME AU FICHIER EXCEL: Aucune valeur négative dans les colonnes K6, AA6, etc.
                   // ============================================
-                  // TOUS les salariés participent - calcul pour tous
                   const empTotalEco = indicateurs.reduce((sum, ind) => {
                     const data = getIndicatorData(emp, ind.key);
                     // Plafonner chaque économie à 0 minimum (pas de négatif)
@@ -4000,6 +4007,17 @@ export default function PerformanceRecapPage() {
                     const ecoN2 = Math.max(0, data.economiesRealiseesN2);
                     return sum + ecoN1 + ecoN2;
                   }, 0);
+
+                  // ============================================
+                  // CRITÈRE D'ÉLIGIBILITÉ CORRIGÉ
+                  // ============================================
+                  // Un salarié est ÉLIGIBLE si et seulement si il a généré des économies.
+                  // Cohérent avec:
+                  // - La colonne "Total Éco" du tableau (empTotalEco)
+                  // - Le ScoreNote% (somme des triN2TrancheNote des salariés avec économies)
+                  // - Le principe de CAUSALITÉ (IAS/IFRS): économies réalisées → éligible
+                  // ============================================
+                  const hasActivityData = empTotalEco > 0;
 
                   // Total PPR du salarié - calcul pour tous les salariés
                   const empTotalPPR = indicateurs.reduce((sum, ind) => {
@@ -4362,7 +4380,7 @@ export default function PerformanceRecapPage() {
                               <th className="text-center py-2 px-2 font-semibold whitespace-nowrap border-r border-indigo-500/20 bg-cyan-50 dark:bg-cyan-900/20">
                                 <TooltipProvider>
                                   <Tooltip>
-                                    <TooltipTrigger>Tx ESF</TooltipTrigger>
+                                    <TooltipTrigger>Tx EKH</TooltipTrigger>
                                     <TooltipContent><p>Taux Economie - Ecart de Know-how</p></TooltipContent>
                                   </Tooltip>
                                 </TooltipProvider>

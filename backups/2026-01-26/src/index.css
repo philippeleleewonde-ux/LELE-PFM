@@ -1,0 +1,527 @@
+
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* LELE HCM Brand Colors - Light Mode (Navy-First Approach) */
+    --brand-cyan: 93 211 243;        /* #5DD3F3 - Original brand */
+    --brand-navy: 10 47 79;          /* #0A2F4F - Original brand */
+    --brand-cyan-light: 135 230 250;
+    --brand-navy-light: 15 60 100;
+
+    /* Backgrounds - Nuancés pour profondeur visuelle */
+    --background: 0 0% 98%;          /* Gris très clair (warm white) */
+    --card: 0 0% 100%;               /* Blanc pur pour cards (contraste) */
+    --popover: 0 0% 100%;
+
+    /* Foregrounds - Navy foncé et Noir pour maximum lisibilité */
+    --foreground: 210 65% 20%;       /* Navy très foncé pour body text (#0A2F4F plus sombre) */
+    --card-foreground: 210 65% 20%;  /* Idem pour cards */
+    --popover-foreground: 210 65% 20%;
+
+    /* Primary (Cyan) - Foncé pour meilleur contraste sur blanc */
+    --primary: 195 100% 45%;         /* Cyan foncé #00A8CC (meilleur contraste) */
+    --primary-foreground: 220 13% 9%; /* Slate-900 (noir profond) pour texte lisible sur cyan */
+    --primary-glow: 195 100% 55%;
+
+    /* Secondary (Navy) - Ultra foncé pour boutons */
+    --secondary: 210 70% 22%;        /* Navy profond #0A2F4F */
+    --secondary-foreground: 0 0% 100%;
+
+    /* Muted - Gris nuancés */
+    --muted: 210 15% 94%;            /* Gris clair pour backgrounds secondaires */
+    --muted-foreground: 210 30% 35%; /* Gris foncé pour texte secondaire */
+
+    /* Accent - Cyan très clair pour hover states */
+    --accent: 195 80% 96%;           /* Cyan pastel pour hover */
+    --accent-foreground: 210 65% 20%; /* Navy foncé sur accent */
+
+    /* Destructive - Rouge visible */
+    --destructive: 0 72% 45%;        /* Rouge foncé */
+    --destructive-foreground: 0 0% 100%;
+
+    /* Borders - Navy foncé pour définition nette */
+    --border: 210 40% 75%;           /* Navy-gris pour borders subtiles mais visibles */
+    --input: 210 40% 70%;            /* Légèrement plus foncé pour inputs */
+    --ring: 195 100% 45%;            /* Cyan foncé pour focus ring visible */
+    --radius: 0.5rem;
+
+    /* Sidebar - Navy profond */
+    --sidebar-background: 210 70% 22%;  /* Navy profond */
+    --sidebar-foreground: 0 0% 100%;
+    --sidebar-primary: 195 100% 55%;    /* Cyan vibrant */
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 210 60% 28%;      /* Navy moyen */
+    --sidebar-accent-foreground: 0 0% 100%;
+    --sidebar-border: 210 50% 35%;
+    --sidebar-ring: 195 100% 55%;
+
+    /* Gradients - Navy à Cyan pour hero sections */
+    --gradient-primary: linear-gradient(135deg, hsl(195 100% 45%), hsl(210 70% 22%));
+    --gradient-light: linear-gradient(180deg, hsl(0 0% 98%), hsl(210 15% 95%));
+
+    /* Shadows - Navy-tinted pour cohérence */
+    --shadow-elegant: 0 10px 30px -10px hsl(210 70% 22% / 0.15);
+    --shadow-glow: 0 0 40px hsl(195 100% 45% / 0.25);
+
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+    /* Chart colors - Palette Navy-Cyan */
+    --chart-1: 195 100% 45%;         /* Cyan foncé */
+    --chart-2: 210 70% 22%;          /* Navy profond */
+    --chart-3: 195 80% 65%;          /* Cyan moyen */
+    --chart-4: 210 50% 45%;          /* Navy moyen */
+    --chart-5: 210 30% 35%;          /* Gris navy */
+  }
+
+  .dark {
+    /* LELE HCM Brand Colors - Dark Mode */
+    --background: 210 50% 8%;        /* Very dark navy */
+    --foreground: 210 20% 95%;
+    --card: 210 45% 12%;
+    --card-foreground: 210 20% 95%;
+    --popover: 210 45% 12%;
+    --popover-foreground: 210 20% 95%;
+    --primary: 195 100% 65%;         /* Cyan stays vibrant */
+    --primary-foreground: 220 13% 9%; /* Slate-900 (noir profond) pour texte lisible sur cyan */
+    --primary-glow: 195 100% 75%;
+    --secondary: 15 60 100%;         /* Light navy */
+    --secondary-foreground: 210 20% 95%;
+    --muted: 210 40% 18%;
+    --muted-foreground: 210 20% 65%;
+    --accent: 195 100% 75%;          /* Bright cyan */
+    --accent-foreground: 210 50% 10%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 210 40% 18%;
+    --input: 210 40% 18%;
+    --ring: 195 100% 65%;
+
+    --sidebar-background: 210 50% 6%; /* Darker navy */
+    --sidebar-foreground: 210 20% 90%;
+    --sidebar-primary: 195 100% 65%;
+    --sidebar-primary-foreground: 210 50% 10%;
+    --sidebar-accent: 210 40% 15%;
+    --sidebar-accent-foreground: 210 20% 95%;
+    --sidebar-border: 210 40% 15%;
+    --sidebar-ring: 195 100% 65%;
+
+    --gradient-primary: linear-gradient(135deg, hsl(195 100% 65%), hsl(195 100% 75%));
+    --gradient-dark: linear-gradient(180deg, hsl(210 50% 8%), hsl(210 45% 12%));
+
+    --shadow-elegant: 0 10px 30px -10px hsl(195 100% 65% / 0.3);
+    --shadow-glow: 0 0 40px hsl(195 100% 75% / 0.4);
+
+    /* Chart colors (adjusted for dark) */
+    --chart-1: 195 100% 65%;
+    --chart-2: 195 100% 75%;
+    --chart-3: 15 60 100%;
+    --chart-4: 210 40% 18%;
+    --chart-5: 210 20% 65%;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-semibold tracking-tight text-secondary;
+  }
+
+  /* Override headings to use Navy in light mode, Cyan in dark mode */
+  :root h1, :root h2, :root h3, :root h4, :root h5, :root h6 {
+    color: hsl(var(--secondary));
+  }
+
+  .dark h1, .dark h2, .dark h3, .dark h4, .dark h5, .dark h6 {
+    color: hsl(var(--primary));
+  }
+  
+  p, span, div {
+    @apply text-foreground;
+  }
+}
+
+@layer utilities {
+  .gradient-primary {
+    background: var(--gradient-primary);
+  }
+
+  .gradient-dark {
+    background: var(--gradient-dark);
+  }
+
+  .shadow-elegant {
+    box-shadow: var(--shadow-elegant);
+  }
+
+  .shadow-glow {
+    box-shadow: var(--shadow-glow);
+  }
+
+  .transition-smooth {
+    transition: var(--transition-smooth);
+  }
+}
+
+/* ============================================
+ * ANIMATIONS BULLETIN DE PERFORMANCE
+ * ============================================
+ * Micro-interactions et animations fluides
+ * pour une expérience utilisateur professionnelle
+ */
+
+/* 1. FADE-IN PROGRESSIF (staggered) */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.5s ease-out forwards;
+  opacity: 0;
+}
+
+/* Délais pour staggered effect */
+.animate-delay-100 { animation-delay: 100ms; }
+.animate-delay-200 { animation-delay: 200ms; }
+.animate-delay-300 { animation-delay: 300ms; }
+.animate-delay-400 { animation-delay: 400ms; }
+.animate-delay-500 { animation-delay: 500ms; }
+
+/* 2. SLIDE-IN depuis les côtés */
+@keyframes slideInFromLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInFromRight {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.animate-slide-in-left {
+  animation: slideInFromLeft 0.4s ease-out forwards;
+  opacity: 0;
+}
+
+.animate-slide-in-right {
+  animation: slideInFromRight 0.4s ease-out forwards;
+  opacity: 0;
+}
+
+/* 3. SCALE-IN (pour éléments qui "popent") */
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-scale-in {
+  animation: scaleIn 0.3s ease-out forwards;
+  opacity: 0;
+}
+
+/* 4. BADGE POP (pour Top X%, Grade, etc.) */
+@keyframes badgePop {
+  0% {
+    opacity: 0;
+    transform: scale(0);
+  }
+  70% {
+    transform: scale(1.15);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-badge-pop {
+  animation: badgePop 0.4s ease-out forwards;
+  animation-delay: 0.5s;
+  opacity: 0;
+}
+
+/* 5. PULSE GLOW (pour Grade A/A+) */
+@keyframes pulseGlow {
+  0%, 100% {
+    box-shadow: 0 0 5px currentColor, 0 0 10px currentColor;
+  }
+  50% {
+    box-shadow: 0 0 15px currentColor, 0 0 25px currentColor, 0 0 35px currentColor;
+  }
+}
+
+.animate-pulse-glow {
+  animation: pulseGlow 2s ease-in-out infinite;
+}
+
+/* 6. PROGRESS BAR FILL */
+@keyframes progressFill {
+  from {
+    width: 0%;
+  }
+}
+
+.animate-progress-fill {
+  animation: progressFill 0.7s ease-out forwards;
+}
+
+/* 7. GAUGE DRAW (cercle qui se dessine) */
+@keyframes gaugeDraw {
+  from {
+    stroke-dashoffset: var(--circumference);
+  }
+}
+
+.animate-gauge-draw {
+  animation: gaugeDraw 1.5s ease-out forwards;
+}
+
+/* 8. COUNT UP HIGHLIGHT */
+@keyframes highlightPulse {
+  0%, 100% {
+    background-color: transparent;
+  }
+  50% {
+    background-color: rgba(59, 130, 246, 0.1);
+  }
+}
+
+.animate-highlight-pulse {
+  animation: highlightPulse 2s ease-in-out;
+  border-radius: 4px;
+  padding: 2px 4px;
+}
+
+/* 9. HOVER EFFECTS - Cartes avec lift */
+.card-hover-lift {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.card-hover-lift:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 24px -8px rgba(0, 0, 0, 0.15);
+}
+
+.dark .card-hover-lift:hover {
+  box-shadow: 0 12px 24px -8px rgba(59, 130, 246, 0.2);
+}
+
+/* 10. MINI-CARD SCALE (indicateurs) */
+.card-hover-scale {
+  transition: all 0.2s ease-out;
+}
+
+.card-hover-scale:hover {
+  transform: scale(1.03);
+  z-index: 10;
+}
+
+/* 11. TAB UNDERLINE ANIMATION */
+.tab-animated {
+  position: relative;
+}
+
+.tab-animated::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: 0;
+  height: 2px;
+  background: hsl(var(--primary));
+  transition: all 0.3s ease;
+  transform: translateX(-50%);
+}
+
+.tab-animated:hover::after {
+  width: 80%;
+}
+
+.tab-animated.active::after {
+  width: 100%;
+}
+
+/* 12. CONTENT FADE TRANSITION (onglets) */
+.content-fade-enter {
+  opacity: 0;
+  transform: translateY(8px);
+}
+
+.content-fade-enter-active {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 0.2s ease-out, transform 0.2s ease-out;
+}
+
+.content-fade-exit {
+  opacity: 1;
+}
+
+.content-fade-exit-active {
+  opacity: 0;
+  transition: opacity 0.15s ease-in;
+}
+
+/* 13. RIPPLE EFFECT (boutons) */
+.btn-ripple {
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-ripple::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  transition: width 0.4s ease-out, height 0.4s ease-out;
+}
+
+.btn-ripple:active::after {
+  width: 300px;
+  height: 300px;
+}
+
+/* 14. TABLE ROW HIGHLIGHT */
+.table-row-hover {
+  transition: background-color 0.15s ease;
+}
+
+.table-row-hover:hover {
+  background-color: rgba(59, 130, 246, 0.05);
+}
+
+.dark .table-row-hover:hover {
+  background-color: rgba(59, 130, 246, 0.1);
+}
+
+/* 15. POSITION MARKER ANIMATION (benchmark bar) */
+@keyframes markerSlide {
+  from {
+    left: 0%;
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.animate-marker-slide {
+  animation: markerSlide 1s ease-out forwards;
+  animation-delay: 0.3s;
+}
+
+/* 16. SHIMMER SKELETON */
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.skeleton-shimmer {
+  background: linear-gradient(
+    90deg,
+    hsl(var(--muted)) 0%,
+    hsl(var(--muted-foreground) / 0.1) 50%,
+    hsl(var(--muted)) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+/* 17. FOCUS RING ANIMATION */
+@keyframes focusRing {
+  0%, 100% {
+    box-shadow: 0 0 0 2px hsl(var(--ring));
+  }
+  50% {
+    box-shadow: 0 0 0 4px hsl(var(--ring) / 0.5);
+  }
+}
+
+.animate-focus-ring:focus {
+  animation: focusRing 1s ease-in-out;
+}
+
+/* 18. PRINT: Désactiver toutes les animations */
+@media print {
+  .animate-fade-in-up,
+  .animate-slide-in-left,
+  .animate-slide-in-right,
+  .animate-scale-in,
+  .animate-badge-pop,
+  .animate-pulse-glow,
+  .animate-progress-fill,
+  .animate-gauge-draw,
+  .animate-marker-slide {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
+
+/* 19. REDUCED MOTION: Respecter les préférences utilisateur */
+@media (prefers-reduced-motion: reduce) {
+  .animate-fade-in-up,
+  .animate-slide-in-left,
+  .animate-slide-in-right,
+  .animate-scale-in,
+  .animate-badge-pop,
+  .animate-pulse-glow,
+  .animate-progress-fill,
+  .animate-gauge-draw,
+  .animate-highlight-pulse,
+  .animate-marker-slide,
+  .skeleton-shimmer {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  .card-hover-lift,
+  .card-hover-scale,
+  .tab-animated::after {
+    transition: none !important;
+  }
+}

@@ -2,9 +2,13 @@ import { createRoot } from "react-dom/client";
 import App from "./App.tsx";
 import "./index.css";
 import { initSentry } from "./lib/sentry";
+import { initParticleBackground } from "./lib/particles";
 
 // 🔍 CRITICAL: Initialize Sentry BEFORE React renders
-// This ensures all errors are captured from the very first render
 initSentry();
+
+// 🎨 Initialize particle background animation (v3.1.0)
+// Canvas transparent + Toggle support + Config externalisée
+initParticleBackground();
 
 createRoot(document.getElementById("root")!).render(<App />);

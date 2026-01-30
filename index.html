@@ -7,18 +7,38 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <title>pulse-pro-hcm</title>
-    <meta name="description" content="Lovable Generated Project" />
-    <meta name="author" content="Lovable" />
+    <title>LELE HCM - Plateforme ESG</title>
+    <meta name="description" content="LELE HCM - Solution complète pour la gestion du capital humain" />
+    <meta name="author" content="LELE HCM" />
 
-    <meta property="og:title" content="pulse-pro-hcm" />
-    <meta property="og:description" content="Lovable Generated Project" />
+    <meta property="og:title" content="LELE HCM" />
+    <meta property="og:description" content="Solution complète pour la gestion du capital humain" />
     <meta property="og:type" content="website" />
-    <meta property="og:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
 
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:site" content="@lovable_dev" />
-    <meta name="twitter:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
+    <!--
+      PARTICLE BACKGROUND LAYER SYSTEM v3.1.0
+      - Canvas z-index: 0 (derrière tout)
+      - #root z-index: 1 (au-dessus du canvas)
+      - Cards/Tables ont un fond opaque pour lisibilité
+    -->
+    <style>
+      /* Layer 0: Canvas de particules (fond transparent) */
+      #particle-bg {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        z-index: 0;
+        pointer-events: none;
+      }
+
+      /* Layer 1: Application React */
+      #root {
+        position: relative;
+        z-index: 1;
+      }
+    </style>
   </head>
 
   <body>

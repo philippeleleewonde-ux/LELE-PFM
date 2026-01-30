@@ -46,7 +46,7 @@ const LoadingFallback = () => (
 
 export default function DataScannerDashboard() {
   return (
-    <div className="flex h-screen overflow-hidden bg-background">
+    <div className="flex h-screen overflow-hidden">
       {/* CEO Sidebar - Menu gauche moderne (collapsible) */}
       <CEOSidebar />
 

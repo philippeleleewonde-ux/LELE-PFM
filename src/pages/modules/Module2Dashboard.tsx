@@ -19,7 +19,7 @@ export default function Module2Dashboard() {
 
   return (
     <ModuleAccess moduleNumber={2} requiredPermissions={['read']}>
-      <div className="flex h-screen overflow-hidden bg-background">
+      <div className="flex h-screen overflow-hidden">
         {/* Sidebar */}
         <CEOSidebar />
 

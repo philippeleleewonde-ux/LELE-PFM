@@ -65,13 +65,14 @@ const RoleSelection = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background p-4">
+    <div className="min-h-screen flex items-center justify-center p-4 bg-transparent">
       <div className="w-full max-w-5xl">
         <div className="flex justify-center mb-8">
           <ThemeLogo className="h-20" />
         </div>
-        
-        <Card className="border-border bg-card shadow-glow">
+
+        {/* Card avec fond opaque pour lisibilité sur les particules */}
+        <Card className="border-border bg-card/95 backdrop-blur-sm shadow-glow">
           <CardHeader className="text-center">
             <CardTitle className="text-3xl font-bold text-primary">
               Quel est votre profil ?

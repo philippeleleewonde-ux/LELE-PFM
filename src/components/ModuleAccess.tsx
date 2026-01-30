@@ -41,7 +41,7 @@ export function ModuleAccess({
 
   if (isLoading) {
     return (
-      <div className="min-h-screen w-full flex items-center justify-center bg-background overflow-hidden">
+      <div className="min-h-screen w-full flex items-center justify-center overflow-hidden">
         <HCMLoader
           text="Vérification des permissions..."
         />
@@ -73,7 +73,7 @@ export function ModuleAccess({
     }
 
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background p-4">
+      <div className="min-h-screen flex items-center justify-center p-4">
         <Card className="w-full max-w-md">
           <CardHeader>
             <div className="flex items-center gap-3 mb-2">

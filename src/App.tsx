@@ -12,6 +12,8 @@ import { SidebarProvider } from "@/contexts/SidebarContext";
 import { PerformanceDataProvider } from "@/contexts/PerformanceDataContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { HelmetProvider } from "react-helmet-async";
+// ParticleBackground is now loaded directly from index.html for better performance
+// import ParticleBackground from "@/components/ui/ParticleBackground";
 
 // ✅ IMPORTS STATIQUES : Pages critiques (auth flow)
 import Landing from "./pages/Landing";
@@ -67,14 +69,16 @@ const queryClient = new QueryClient({
 
 function App() {
   return (
-    <HelmetProvider>
-      <QueryClientProvider client={queryClient}>
-        <TooltipProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
-            {/* ✅ ThemeProvider pour light/dark mode global */}
-            <ThemeProvider>
+    <>
+      {/* ✅ Background animé avec particules - chargé depuis index.html */}
+      <HelmetProvider>
+        <QueryClientProvider client={queryClient}>
+          <TooltipProvider>
+            <Toaster />
+            <Sonner />
+            <BrowserRouter>
+              {/* ✅ ThemeProvider pour light/dark mode global */}
+              <ThemeProvider>
               {/* ✅ SidebarProvider pour sidebar state global */}
               <SidebarProvider>
                 <AuthProvider>
@@ -124,10 +128,11 @@ function App() {
                 </AuthProvider>
               </SidebarProvider>
             </ThemeProvider>
-          </BrowserRouter>
-        </TooltipProvider>
-      </QueryClientProvider>
-    </HelmetProvider>
+            </BrowserRouter>
+          </TooltipProvider>
+        </QueryClientProvider>
+      </HelmetProvider>
+    </>
   );
 }
 

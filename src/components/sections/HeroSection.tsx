@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { ThemeLogo } from '@/components/ThemeLogo';
 import { ThemeToggle } from '@/components/ThemeToggle';
+import { ParticleToggle } from '@/components/ui/ParticleToggle';
 import { AwardsBadge } from '@/components/AwardsBadge';
 import { memo } from 'react';
 
@@ -24,13 +25,14 @@ interface HeroSectionProps {
 const HeroSection = memo(({ onCTAClick }: HeroSectionProps) => {
   return (
     <>
-      {/* Header */}
-      <header className="border-b border-border">
+      {/* Header - fond semi-transparent pour voir les particules */}
+      <header className="border-b border-border bg-background/80 backdrop-blur-sm">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
           <div className="flex items-center">
             <ThemeLogo className="h-14" />
           </div>
           <div className="flex gap-4 items-center">
+            <ParticleToggle />
             <ThemeToggle />
             <Link to="/auth/login">
               <Button variant="ghost">Connexion</Button>

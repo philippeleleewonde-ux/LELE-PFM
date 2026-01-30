@@ -7,7 +7,7 @@ import { SidebarToggle } from '@/components/ui/SidebarToggle';
 export default function Module1Dashboard() {
   return (
     <ModuleAccess moduleNumber={1} requiredPermissions={['read']}>
-      <div className="flex h-screen overflow-hidden bg-background">
+      <div className="flex h-screen overflow-hidden">
         {/* CEO Sidebar - Menu gauche moderne (collapsible) */}
         <CEOSidebar />
 

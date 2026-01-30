@@ -65,8 +65,9 @@ const Auth = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background p-4">
-      <Card className="w-full max-w-md border-border bg-card shadow-glow">
+    <div className="min-h-screen flex items-center justify-center p-4 bg-transparent">
+      {/* Card avec fond opaque pour lisibilité sur les particules */}
+      <Card className="w-full max-w-md border-border bg-card/95 backdrop-blur-sm shadow-glow">
         <CardHeader className="space-y-4">
           <div className="flex justify-center">
             <ThemeLogo className="h-24" />

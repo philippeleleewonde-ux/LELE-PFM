@@ -31,7 +31,7 @@ export default function Module3Dashboard() {
 
   return (
     <ModuleAccess moduleNumber={3} requiredPermissions={['read']}>
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen">
         <div className="container mx-auto p-6 space-y-6">
           {/* Header */}
           <div className="flex items-center justify-between">

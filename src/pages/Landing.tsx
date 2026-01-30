@@ -94,7 +94,7 @@ const Landing = () => {
         />
       </Helmet>
 
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen bg-transparent">
         {/* Section critique above-the-fold - chargement immédiat */}
         <HeroSection onCTAClick={handleHeroCTAClick} />
 
@@ -115,8 +115,8 @@ const Landing = () => {
           <AwardsBadge variant="detailed" />
         </Suspense>
 
-        {/* Footer */}
-        <footer className="border-t border-border py-8">
+        {/* Footer - fond semi-transparent */}
+        <footer className="border-t border-border py-8 bg-background/80 backdrop-blur-sm">
           <div className="container mx-auto px-4 text-center text-muted-foreground">
             <p>&copy; 2025 LELE HCM Portal. Tous droits réservés.</p>
           </div>

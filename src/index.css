@@ -127,10 +127,43 @@
     @apply border-border;
   }
 
-  body {
-    @apply bg-background text-foreground font-sans antialiased;
-    font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  /*
+   * PARTICLE BACKGROUND LAYER SYSTEM v3.1.0
+   * ========================================
+   * Canvas z-index: 0 (particules en arrière-plan)
+   * #root z-index: 1 (contenu au-dessus)
+   *
+   * RÈGLE:
+   * - Containers (html, body, layouts) → TRANSPARENT pour voir les particules
+   * - Cards, Tables, Forms → OPAQUES pour lisibilité du contenu
+   */
+
+  html {
+    /* Fond de page visible à travers le contenu transparent */
+    background: hsl(var(--background));
   }
+
+  body {
+    @apply text-foreground font-sans antialiased;
+    font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    /* Body transparent pour voir les particules */
+    background: transparent;
+  }
+
+  #root {
+    position: relative;
+    z-index: 1;
+    /* Root transparent pour voir les particules */
+    background: transparent;
+  }
+
+  /* Containers principaux transparents */
+  .min-h-screen {
+    background: transparent;
+  }
+
+  /* IMPORTANT: .bg-background reste avec sa couleur de fond par défaut
+   * Tailwind gère cela correctement. On ne force pas transparent ici. */
 
   h1, h2, h3, h4, h5, h6 {
     @apply font-semibold tracking-tight text-secondary;

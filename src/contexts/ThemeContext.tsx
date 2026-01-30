@@ -23,7 +23,7 @@ const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 // ============================================================================
 
 export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  // Initialize from localStorage or system preference
+  // Initialize from localStorage or default to dark mode
   const [theme, setThemeState] = useState<Theme>(() => {
     // Check localStorage first
     const savedTheme = localStorage.getItem('lele-hcm-theme') as Theme;
@@ -31,12 +31,8 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       return savedTheme;
     }
 
-    // Fallback to system preference
-    if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-      return 'dark';
-    }
-
-    return 'light';
+    // Default to dark mode for LELE HCM platform
+    return 'dark';
   });
 
   // Apply theme to document and persist to localStorage

@@ -64,6 +64,9 @@ import { toast } from 'sonner';
 // Smart Calendar Integration - Dernière semaine complétée
 import { getLastCompletedWeek, type LastCompletedWeekResult } from '@/lib/fiscal/LaunchDateService';
 
+// Import des fonctions de calcul centralisées (Note et Grade)
+import { calculateGlobalNote, calculateGrade } from './types/performanceCenter';
+
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -2387,12 +2390,17 @@ export default function PerformanceRecapPage() {
       let economiesRealiseesN2 = data.economiesRealisees2N2;
 
       if (kpiType === 'ekh') {
+        // ✅ CORRIGÉ: EKH utilise économies DDP × coefficient de compétence
+        // Formule Excel: EG146 (N1) + ER146 (N2) avec valeurs DISTINCTES
         const ddpData = perf.ddp;
         const coefficientCompetence = perf.coefficientCompetence || 0;
-        const economiesDDP = ddpData.economiesRealisees || 0;
+        // N1: utiliser économies2 (PPR - Pertes brut) pour cohérence avec getEKHDataForEmployee
+        const economiesDDP_N1 = ddpData.economiesRealisees2 || 0;
+        // N2: utiliser économies2N2 pour cohérence
+        const economiesDDP_N2 = ddpData.economiesRealisees2N2 || 0;
         // Score Financier = ECONOMIES DDP × Coef compétence
-        economiesRealisees = economiesDDP * coefficientCompetence;
-        economiesRealiseesN2 = 0; // N2 EKH = 0 car identique à N1 dans la formule
+        economiesRealisees = economiesDDP_N1 * coefficientCompetence;
+        economiesRealiseesN2 = economiesDDP_N2 * coefficientCompetence;
       }
 
       return {
@@ -2402,7 +2410,8 @@ export default function PerformanceRecapPage() {
         scoreFinancierTotal: acc.scoreFinancierTotal + data.scoreFinancier,
         pertesConstateesBrutTotal: acc.pertesConstateesBrutTotal + data.pertesConstateesBrut,  // 🆕
         pertesConstateesTotal: acc.pertesConstateesTotal + data.pertesConstatees,
-        pprPrevuesTotal: acc.pprPrevuesTotal + data.pprPrevues,
+        // ✅ CORRIGÉ: PPR Total = N1 + N2 pour cohérence avec économies (N1+N2)
+        pprPrevuesTotal: acc.pprPrevuesTotal + (data.pprPrevues || 0) + (data.pprPrevuesN2 || 0),
         economiesRealiseesTotal: acc.economiesRealiseesTotal + economiesRealisees,
         pertesEnPourcentageTotal: 0, // Calculé ci-dessous
         // NIVEAU 2 - Totaux
@@ -2547,6 +2556,320 @@ export default function PerformanceRecapPage() {
       ).length
     };
   }, [memoizedKPITotals, employeePerformances]);
+
+  // ============================================
+  // TRANSFERT DES DONNÉES VERS LE CONTEXTE PARTAGÉ
+  // Source de vérité: globalStats + calculs de primes/trésorerie
+  // Destination: CostSavingsReportingPage via PerformanceDataContext
+  // CORRECTION AUDIT 06/02/2026: Calcul correct des primes/trésorerie (33%/67%)
+  // FIX CRITIQUE 06/02/2026: Supprimé !isFromCache - on DOIT transférer même si données du cache!
+  // ============================================
+  useEffect(() => {
+    // Ne transmettre que si les données sont disponibles (cache OU calcul frais)
+    // IMPORTANT: Supprimé !isFromCache car on veut TOUJOURS synchroniser avec le contexte
+    if (!loading && employeePerformances.length > 0 && memoizedKPITotals && businessLines.length > 0) {
+
+      // ============================================
+      // ÉTAPE 1: Calculer les scores par employé (même logique que le bloc Répartition des Primes)
+      // ============================================
+      const indicatorKeys = ['abs', 'qd', 'oa', 'ddp', 'ekh'] as const;
+      const indicatorLabels: Record<string, string> = {
+        abs: 'Absentéisme',
+        qd: 'Défauts de qualité',
+        oa: 'Accidents du travail',
+        ddp: 'Écarts de productivité directe',
+        ekh: 'Écarts de know how'
+      };
+
+      // Fonction pour obtenir les données d'un indicateur
+      const getIndicatorData = (emp: EmployeePerformance, key: string) => {
+        switch (key) {
+          case 'abs': return emp.abs;
+          case 'qd': return emp.qd;
+          case 'oa': return emp.oa;
+          case 'ddp': return emp.ddp;
+          case 'ekh': return emp.ekh;
+          default: return emp.abs;
+        }
+      };
+
+      // Calculer les économies totales pour la répartition
+      const totalEconomiesGlobal = employeePerformances.reduce((sum, emp) => {
+        return sum + indicatorKeys.reduce((s, key) => {
+          const data = getIndicatorData(emp, key);
+          return s + (data.economiesRealisees || 0) + (data.economiesRealiseesN2 || 0);
+        }, 0);
+      }, 0);
+
+      // Calculer les scores par employé (contributionRatio, partPrime, partTresorerie)
+      const employeeScores = employeePerformances.map(emp => {
+        const empTotalEco = indicatorKeys.reduce((sum, key) => {
+          const data = getIndicatorData(emp, key);
+          return sum + (data.economiesRealisees || 0) + (data.economiesRealiseesN2 || 0);
+        }, 0);
+
+        const contributionRatio = totalEconomiesGlobal > 0 ? empTotalEco / totalEconomiesGlobal : 0;
+
+        // Répartition du bénéfice économique: 33% primes, 67% trésorerie
+        const partPrime = totalEconomiesGlobal * 0.33 * contributionRatio;
+        const partTresorerie = totalEconomiesGlobal * 0.67 * contributionRatio;
+
+        // Calculer le taux d'économie par indicateur
+        const tauxEcoByIndicator: Record<string, number> = {};
+        indicatorKeys.forEach(key => {
+          const data = getIndicatorData(emp, key);
+          const pprTotal = (data.pprPrevues || 0) + (data.pprPrevuesN2 || 0);
+          const ecoTotal = (data.economiesRealisees || 0) + (data.economiesRealiseesN2 || 0);
+          tauxEcoByIndicator[key] = pprTotal > 0 ? ecoTotal / pprTotal : 0;
+        });
+
+        return {
+          employeeName: emp.employeeName,
+          empTotalEco,
+          contributionRatio,
+          partPrime,
+          partTresorerie,
+          tauxEcoByIndicator
+        };
+      });
+
+      const employeeScoresMap = new Map(employeeScores.map(s => [s.employeeName, s]));
+
+      // ============================================
+      // ÉTAPE 2: Calculer les totaux par INDICATEUR (BLOC 1 & BLOC 3)
+      // ============================================
+      const performanceIndicators = indicatorKeys.map(key => {
+        let totalPPRPrevues = 0;
+        let totalEconomies = 0;
+        let totalPrevPrime = 0;
+        let totalPrevTreso = 0;
+        let totalRealPrime = 0;
+        let totalRealTreso = 0;
+
+        employeePerformances.forEach(emp => {
+          const indicatorData = getIndicatorData(emp, key);
+          const empScore = employeeScoresMap.get(emp.employeeName);
+
+          // ✅ FIX CRITIQUE 07/02/2026: Utiliser N1+N2 pour cohérence avec les autres blocs
+          // AVANT (BUG): N1 seulement → données incohérentes dans le contexte
+          const pprPrevues = (indicatorData.pprPrevues || 0) + (indicatorData.pprPrevuesN2 || 0);
+          totalPPRPrevues += pprPrevues;
+
+          // ✅ FIX CRITIQUE 07/02/2026: Économies N1+N2 pour cohérence
+          totalEconomies += (indicatorData.economiesRealisees || 0) + (indicatorData.economiesRealiseesN2 || 0);
+
+          // Primes/Trésorerie prévisionnelles (33%/67% du PPR)
+          const prevPrime = pprPrevues * 0.33;
+          const prevTreso = pprPrevues * 0.67;
+          totalPrevPrime += prevPrime;
+          totalPrevTreso += prevTreso;
+
+          // Primes/Trésorerie réalisées (avec plafonnement Réalisé ≤ Prévu)
+          if (empScore) {
+            const tauxEco = empScore.tauxEcoByIndicator[key] || 0;
+            totalRealPrime += Math.min(empScore.partPrime * tauxEco, prevPrime);
+            totalRealTreso += Math.min(empScore.partTresorerie * tauxEco, prevTreso);
+          }
+        });
+
+        return {
+          key,
+          label: indicatorLabels[key],
+          pprPrevues: totalPPRPrevues,
+          totalEconomies,
+          totalPrevPrime,
+          totalPrevTreso,
+          totalRealPrime,
+          totalRealTreso,
+          partPct: 0
+        };
+      });
+
+      // Calculer les pourcentages de contribution
+      const grandTotalEco = performanceIndicators.reduce((sum, i) => sum + i.totalEconomies, 0);
+      performanceIndicators.forEach(i => {
+        i.partPct = grandTotalEco > 0 ? (i.totalEconomies / grandTotalEco) * 100 : 0;
+      });
+
+      // Construire les totaux généraux
+      const performanceTotals = {
+        grandTotalPPR: performanceIndicators.reduce((sum, i) => sum + i.pprPrevues, 0),
+        grandTotalEco: grandTotalEco,
+        grandTotalPrevPrime: performanceIndicators.reduce((sum, i) => sum + i.totalPrevPrime, 0),
+        grandTotalPrevTreso: performanceIndicators.reduce((sum, i) => sum + i.totalPrevTreso, 0),
+        grandTotalRealPrime: performanceIndicators.reduce((sum, i) => sum + i.totalRealPrime, 0),
+        grandTotalRealTreso: performanceIndicators.reduce((sum, i) => sum + i.totalRealTreso, 0)
+      };
+
+      // ============================================
+      // ÉTAPE 3: CALCUL DES DONNÉES PAR LIGNE D'ACTIVITÉ (BLOCS 2 & 4)
+      // ============================================
+      const businessLinePerformancesData = businessLines.map(bl => {
+        const blEmployees = employeePerformances.filter(emp => emp.businessLineId === bl.id);
+
+        if (blEmployees.length === 0) {
+          return null;
+        }
+
+        const blTotals = blEmployees.reduce((acc, emp) => {
+          const empScore = employeeScoresMap.get(emp.employeeName);
+          let empObjectif = 0;
+          let empEconomies = 0;
+          let empPrevPrime = 0;
+          let empPrevTreso = 0;
+          let empRealPrime = 0;
+          let empRealTreso = 0;
+
+          indicatorKeys.forEach(key => {
+            const empData = getIndicatorData(emp, key);
+            // FIX CRITIQUE 06/02/2026: Utiliser N1+N2 (comme le Récapitulatif affiche)
+            const pprPrevues = (empData.pprPrevues || 0) + (empData.pprPrevuesN2 || 0);
+
+            // Objectif = PPR Prévues N1+N2 (FIX: était N1 seul)
+            empObjectif += pprPrevues;
+            // Économies N1+N2 (FIX: était N1 seul)
+            empEconomies += (empData.economiesRealisees || 0) + (empData.economiesRealiseesN2 || 0);
+
+            // Primes/Trésorerie prévisionnelles (33%/67%)
+            const prevPrime = pprPrevues * 0.33;
+            const prevTreso = pprPrevues * 0.67;
+            empPrevPrime += prevPrime;
+            empPrevTreso += prevTreso;
+
+            // Primes/Trésorerie réalisées (avec plafonnement)
+            if (empScore) {
+              const tauxEco = empScore.tauxEcoByIndicator[key] || 0;
+              empRealPrime += Math.min(empScore.partPrime * tauxEco, prevPrime);
+              empRealTreso += Math.min(empScore.partTresorerie * tauxEco, prevTreso);
+            }
+          });
+
+          return {
+            objectif: acc.objectif + empObjectif,
+            economiesRealisees: acc.economiesRealisees + empEconomies,
+            prevPrime: acc.prevPrime + empPrevPrime,
+            prevTreso: acc.prevTreso + empPrevTreso,
+            realPrime: acc.realPrime + empRealPrime,
+            realTreso: acc.realTreso + empRealTreso
+          };
+        }, { objectif: 0, economiesRealisees: 0, prevPrime: 0, prevTreso: 0, realPrime: 0, realTreso: 0 });
+
+        return {
+          businessLineId: bl.id,
+          businessLineName: bl.activity_name,
+          objectif: blTotals.objectif,
+          economiesRealisees: blTotals.economiesRealisees,
+          employeeCount: blEmployees.length,
+          prevPrime: blTotals.prevPrime,
+          prevTreso: blTotals.prevTreso,
+          realPrime: blTotals.realPrime,
+          realTreso: blTotals.realTreso
+        };
+      }).filter((bl): bl is NonNullable<typeof bl> => bl !== null && bl.employeeCount > 0);
+
+      // ============================================
+      // ÉTAPE 4: CALCUL DES DONNÉES PAR EMPLOYÉ (AUDIT 06/02/2026)
+      // Pour synchronisation avec Centre de la Performance / Bulletins
+      // ============================================
+      const employeePerformancesData = employeePerformances.map(emp => {
+        const empScore = employeeScoresMap.get(emp.employeeName);
+
+        // Calculer les totaux par employé
+        let totalObjectif = 0;
+        let totalEconomies = 0;
+        let totalPrevPrime = 0;
+        let totalPrevTreso = 0;
+        let totalRealPrime = 0;
+        let totalRealTreso = 0;
+        const indicatorsDataMap: Record<string, any> = {};
+
+        indicatorKeys.forEach(key => {
+          const indData = getIndicatorData(emp, key);
+          // FIX CRITIQUE 06/02/2026: Utiliser N1+N2 pour l'objectif (comme le Récapitulatif)
+          const pprPrevues = (indData.pprPrevues || 0) + (indData.pprPrevuesN2 || 0);
+          const ecoRealisees = (indData.economiesRealisees || 0) + (indData.economiesRealiseesN2 || 0);
+
+          const prevPrime = pprPrevues * 0.33;
+          const prevTreso = pprPrevues * 0.67;
+
+          let realPrime = 0;
+          let realTreso = 0;
+          if (empScore) {
+            const tauxEco = empScore.tauxEcoByIndicator[key] || 0;
+            realPrime = Math.min(empScore.partPrime * tauxEco, prevPrime);
+            realTreso = Math.min(empScore.partTresorerie * tauxEco, prevTreso);
+          }
+
+          totalObjectif += pprPrevues;
+          totalEconomies += ecoRealisees;
+          totalPrevPrime += prevPrime;
+          totalPrevTreso += prevTreso;
+          totalRealPrime += realPrime;
+          totalRealTreso += realTreso;
+
+          indicatorsDataMap[key] = {
+            objectif: pprPrevues,
+            economiesRealisees: ecoRealisees,
+            prevPrime,
+            prevTreso,
+            realPrime,
+            realTreso,
+            totalTemps: (indData.tempsCalcul || 0) + (indData.tempsPrisEnCompte || 0),
+            totalFrais: (indData.fraisCollectes || 0) + (indData.fraisPrisEnCompte || 0)
+          };
+        });
+
+        // Calculer note et grade
+        const globalNote = totalObjectif > 0 ? Math.min(10, (totalEconomies / totalObjectif) * 10) : 0;
+        const gradeValue = globalNote >= 9 ? 'A+' : globalNote >= 8 ? 'A' : globalNote >= 7 ? 'B+'
+          : globalNote >= 6 ? 'B' : globalNote >= 5 ? 'C+' : globalNote >= 4 ? 'C'
+          : globalNote >= 3 ? 'D+' : globalNote >= 2 ? 'D' : globalNote >= 1 ? 'E+' : 'E';
+
+        return {
+          employeeId: emp.employeeId,
+          employeeName: emp.employeeName,
+          businessLineId: emp.businessLineId,
+          businessLineName: emp.businessLineName,
+          professionalCategory: emp.professionalCategory,
+          globalNote,
+          grade: gradeValue,
+          employeePerformance: {
+            objectif: totalObjectif,
+            economiesRealisees: totalEconomies,
+            prevPrime: totalPrevPrime,
+            prevTreso: totalPrevTreso,
+            realPrime: totalRealPrime,
+            realTreso: totalRealTreso
+          },
+          indicators: indicatorsDataMap
+        };
+      });
+
+      // TRANSFÉRER au contexte partagé (sera lu par CostSavingsReportingPage ET PerformanceCenterPage)
+      console.log('[PerformanceRecap] ✅ Transfert données vers contexte:', {
+        employeesCount: globalStats.employeesCount,
+        totalEconomies: globalStats.totalEconomies,
+        totalPPR: globalStats.totalPPR,
+        businessLinesCount: businessLinePerformancesData.length,
+        employeePerformancesCount: employeePerformancesData.length,
+        // AUDIT 06/02/2026: Log sample IDs pour debug
+        sampleEmployeeIds: employeePerformancesData.slice(0, 3).map(e => ({
+          id: e.employeeId,
+          name: e.employeeName,
+          objectif: e.employeePerformance.objectif
+        })),
+        businessLines: businessLinePerformancesData.map(bl => ({
+          name: bl.businessLineName,
+          employees: bl.employeeCount,
+          objectif: bl.objectif,
+          economies: bl.economiesRealisees
+        }))
+      });
+
+      setPerformanceData(performanceIndicators, performanceTotals, businessLinePerformancesData, employeePerformancesData);
+    }
+    // FIX 06/02/2026: Supprimé isFromCache des dépendances - on synchronise TOUJOURS
+  }, [loading, employeePerformances.length, memoizedKPITotals, globalStats, setPerformanceData, businessLines, employeePerformances]);
 
   // Filter performances based on search
   const filteredPerformances = useMemo(() => {
@@ -3028,9 +3351,11 @@ export default function PerformanceRecapPage() {
       // Un salarié est éligible s'il a généré des économies (cohérent avec Total Éco et ScoreNote%)
       const hasActivityData = empTotalEco > 0;
 
+      // ✅ CORRIGÉ: empTotalPPR = somme PPR (N1 + N2) des 5 indicateurs
+      // Pour cohérence avec empTotalEco qui inclut N1 + N2
       const empTotalPPR = indicateurs.reduce((sum, ind) => {
         const data = getIndicatorData(emp, ind.key);
-        return sum + data.pprPrevues;
+        return sum + (data.pprPrevues || 0) + (data.pprPrevuesN2 || 0);
       }, 0);
 
       const empTotalPertes = indicateurs.reduce((sum, ind) => {
@@ -3250,14 +3575,17 @@ export default function PerformanceRecapPage() {
     const calculatePrimeData = (emp: EmployeePerformance, indicatorKey: string) => {
       const empScore = employeePrimeScoresMap.get(emp.employeeName);
       const indicatorData = getIndicatorDataForPrime(emp, indicatorKey);
-      const prevPrime = indicatorData.pprPrevues * 0.33;
-      const prevTreso = indicatorData.pprPrevues * 0.67;
+      // ✅ FIX CRITIQUE 07/02/2026: Utiliser N1+N2 pour cohérence
+      const pprTotal = (indicatorData.pprPrevues || 0) + (indicatorData.pprPrevuesN2 || 0);
+      const prevPrime = pprTotal * 0.33;
+      const prevTreso = pprTotal * 0.67;
 
       if (!empScore) return { prevPrime, prevTreso, realPrime: 0, realTreso: 0 };
 
       const tauxEco = empScore.tauxEcoByIndicator[indicatorKey] || 0;
-      const realPrime = empScore.partPrime * tauxEco;
-      const realTreso = empScore.partTresorerie * tauxEco;
+      // ✅ CORRECTION AUDIT 04/02/2026: Plafonnement Réalisé ≤ Prévu (rigueur comptable)
+      const realPrime = Math.min(empScore.partPrime * tauxEco, prevPrime);
+      const realTreso = Math.min(empScore.partTresorerie * tauxEco, prevTreso);
 
       return { prevPrime, prevTreso, realPrime, realTreso };
     };
@@ -3308,11 +3636,13 @@ export default function PerformanceRecapPage() {
             const contributionPct = totalEcoIndicator > 0 ? (empEconomies / totalEcoIndicator) * 100 : 0;
 
             // Calculer les vraies valeurs Prime/Trésorerie
-            const pprPrevues = indData.pprPrevues || 0;
+            // ✅ FIX CRITIQUE 07/02/2026: Utiliser N1+N2 pour cohérence avec le cache
+            const pprPrevues = (indData.pprPrevues || 0) + (indData.pprPrevuesN2 || 0);
             const prevPrime = pprPrevues * 0.33;
             const prevTreso = pprPrevues * 0.67;
-            const realPrime = empEconomies * 0.33;
-            const realTreso = empEconomies * 0.67;
+            // ✅ CORRECTION AUDIT 04/02/2026: Plafonnement Réalisé ≤ Prévu (rigueur comptable)
+            const realPrime = Math.min(empEconomies * 0.33, prevPrime);
+            const realTreso = Math.min(empEconomies * 0.67, prevTreso);
 
             cacheEntries.push({
               company_id: companyId,
@@ -3365,7 +3695,10 @@ export default function PerformanceRecapPage() {
             const indData = emp[indKey];
             if (!indData) return;
 
-            const pprPrevues = indData.pprPrevues || 0;
+            // FIX CRITIQUE 06/02/2026: Utiliser N1+N2 pour l'objectif (comme le Récapitulatif)
+            // AVANT (BUG): const pprPrevues = indData.pprPrevues || 0; // N1 seul = ¥615
+            // APRÈS (FIX): N1+N2 = ¥1,230 (valeur correcte)
+            const pprPrevues = (indData.pprPrevues || 0) + (indData.pprPrevuesN2 || 0);
             // CORRECTION: Plafonner les économies à 0 minimum (pas de négatif)
             // Conforme au fichier Excel et à l'affichage du tableau PERFORMANCE GLOBALE
             const ecoN1 = Math.max(0, indData.economiesRealisees || 0);
@@ -3374,8 +3707,9 @@ export default function PerformanceRecapPage() {
 
             const prevPrime = pprPrevues * 0.33;
             const prevTreso = pprPrevues * 0.67;
-            const realPrime = empEconomies * 0.33;
-            const realTreso = empEconomies * 0.67;
+            // ✅ CORRECTION AUDIT 04/02/2026: Plafonnement Réalisé ≤ Prévu (rigueur comptable)
+            const realPrime = Math.min(empEconomies * 0.33, prevPrime);
+            const realTreso = Math.min(empEconomies * 0.67, prevTreso);
 
             totalObjectif += pprPrevues;
             totalEconomies += empEconomies;
@@ -3396,9 +3730,11 @@ export default function PerformanceRecapPage() {
             };
           });
 
-          // Calculer note et grade
-          const globalNote = totalObjectif > 0 ? Math.min(10, (totalEconomies / totalObjectif) * 10) : 0;
-          const grade = globalNote >= 9 ? 'A+' : globalNote >= 8 ? 'A' : globalNote >= 7 ? 'B' : globalNote >= 6 ? 'C' : globalNote >= 5 ? 'D' : 'E';
+          // Calculer note et grade avec les fonctions centralisées
+          // IMPORTANT: Utilise calculateGlobalNote() et calculateGrade() de performanceCenter.ts
+          // pour garantir la cohérence des calculs dans toute l'application
+          const globalNote = calculateGlobalNote(totalEconomies, totalObjectif);
+          const grade = calculateGrade(globalNote);
 
           return {
             employeeId: emp.employeeId,
@@ -5222,16 +5558,19 @@ export default function PerformanceRecapPage() {
                   const empScore = employeePerfScoresMap.get(emp.employeeName);
                   const indicatorData = getPerfIndicatorData(emp, indicatorKey);
 
-                  const prevPrime = indicatorData.pprPrevues * 0.33;
-                  const prevTreso = indicatorData.pprPrevues * 0.67;
+                  // ✅ FIX CRITIQUE 07/02/2026: Utiliser N1+N2 pour cohérence
+                  const pprTotal = (indicatorData.pprPrevues || 0) + (indicatorData.pprPrevuesN2 || 0);
+                  const prevPrime = pprTotal * 0.33;
+                  const prevTreso = pprTotal * 0.67;
 
                   if (!empScore) {
                     return { prevPrime, prevTreso, realPrime: 0, realTreso: 0 };
                   }
 
                   const tauxEco = empScore.tauxEcoByIndicator[indicatorKey] || 0;
-                  const realPrime = empScore.partPrime * tauxEco;
-                  const realTreso = empScore.partTresorerie * tauxEco;
+                  // ✅ CORRECTION AUDIT 04/02/2026: Plafonnement Réalisé ≤ Prévu (rigueur comptable)
+                  const realPrime = Math.min(empScore.partPrime * tauxEco, prevPrime);
+                  const realTreso = Math.min(empScore.partTresorerie * tauxEco, prevTreso);
 
                   return { prevPrime, prevTreso, realPrime, realTreso };
                 };
@@ -5283,10 +5622,11 @@ export default function PerformanceRecapPage() {
                         const blTotals = blEmployees.reduce((acc, emp) => {
                           const empScore = employeePerfScoresMap.get(emp.employeeName);
 
-                          // Objectif ligne = somme PPR N1 des 5 indicateurs
+                          // ✅ CORRIGÉ: Objectif ligne = somme PPR (N1 + N2) des 5 indicateurs
+                          // Pour cohérence avec economiesTotal qui inclut N1 + N2
                           const objectifLigne = perfIndicateurs.reduce((sum, ind) => {
                             const data = getPerfIndicatorData(emp, ind.key);
-                            return sum + (data.pprPrevues || 0);
+                            return sum + (data.pprPrevues || 0) + (data.pprPrevuesN2 || 0);
                           }, 0);
 
                           // Économies = somme (N1 + N2) des 5 indicateurs
@@ -5337,14 +5677,46 @@ export default function PerformanceRecapPage() {
                                   {blEmployees.map((emp, empIndex) => {
                                     const empScore = employeePerfScoresMap.get(emp.employeeName);
 
-                                    // Objectif ligne = somme PPR N1 des 5 indicateurs
+                                    // ✅ CORRIGÉ: Objectif ligne = somme PPR (N1 + N2) des 5 indicateurs
+                                    // Pour cohérence avec economiesTotal qui inclut N1 + N2
                                     const objectifLigne = perfIndicateurs.reduce((sum, ind) => {
                                       const data = getPerfIndicatorData(emp, ind.key);
-                                      return sum + (data.pprPrevues || 0);
+                                      return sum + (data.pprPrevues || 0) + (data.pprPrevuesN2 || 0);
                                     }, 0);
 
                                     // Économies = somme (N1 + N2) des 5 indicateurs
                                     const economiesTotal = empScore?.empTotalEco || 0;
+
+                                    // 🔍 DIAGNOSTIC AUDIT: Affiche les valeurs détaillées pour debug
+                                    if (emp.employeeName && emp.employeeName.toUpperCase().includes('CHATGPT')) {
+                                      console.log('════════════════════════════════════════════════════════════');
+                                      console.log('🔍 AUDIT FINANCIER - SALARIÉ CHATGPT');
+                                      console.log('════════════════════════════════════════════════════════════');
+                                      console.log('📋 DONNÉES PAR INDICATEUR:');
+                                      perfIndicateurs.forEach(ind => {
+                                        const data = getPerfIndicatorData(emp, ind.key);
+                                        console.log(`  ${ind.label}:`);
+                                        console.log(`    PPR N1: ${(data.pprPrevues || 0).toFixed(2)} €`);
+                                        console.log(`    PPR N2: ${(data.pprPrevuesN2 || 0).toFixed(2)} €`);
+                                        console.log(`    Éco N1: ${(data.economiesRealisees || 0).toFixed(2)} €`);
+                                        console.log(`    Éco N2: ${(data.economiesRealiseesN2 || 0).toFixed(2)} €`);
+                                      });
+                                      console.log('════════════════════════════════════════════════════════════');
+                                      console.log('📊 TOTAUX CALCULÉS:');
+                                      const totalPPRN1 = perfIndicateurs.reduce((s, i) => s + (getPerfIndicatorData(emp, i.key).pprPrevues || 0), 0);
+                                      const totalPPRN2 = perfIndicateurs.reduce((s, i) => s + (getPerfIndicatorData(emp, i.key).pprPrevuesN2 || 0), 0);
+                                      const totalEcoN1 = perfIndicateurs.reduce((s, i) => s + (getPerfIndicatorData(emp, i.key).economiesRealisees || 0), 0);
+                                      const totalEcoN2 = perfIndicateurs.reduce((s, i) => s + (getPerfIndicatorData(emp, i.key).economiesRealiseesN2 || 0), 0);
+                                      console.log(`  Σ PPR N1 = ${totalPPRN1.toFixed(2)} €`);
+                                      console.log(`  Σ PPR N2 = ${totalPPRN2.toFixed(2)} €`);
+                                      console.log(`  Σ PPR (N1+N2) = ${(totalPPRN1 + totalPPRN2).toFixed(2)} € ← OBJECTIF CORRIGÉ`);
+                                      console.log(`  Σ Éco N1 = ${totalEcoN1.toFixed(2)} €`);
+                                      console.log(`  Σ Éco N2 = ${totalEcoN2.toFixed(2)} €`);
+                                      console.log(`  Σ Éco (N1+N2) = ${(totalEcoN1 + totalEcoN2).toFixed(2)} € ← ÉCONOMIES TOTAL`);
+                                      console.log('════════════════════════════════════════════════════════════');
+                                      console.log(`📈 RATIO: ${((totalEcoN1 + totalEcoN2) / (totalPPRN1 + totalPPRN2) * 100).toFixed(2)}%`);
+                                      console.log('════════════════════════════════════════════════════════════');
+                                    }
 
                                     // Totaux Prime/Trésorerie
                                     const primeData = perfIndicateurs.map(ind => calculatePerfPrimeData(emp, ind.key));
@@ -5835,15 +6207,19 @@ export default function PerformanceRecapPage() {
                         const blEmployees = performancesByBLForPerf.get(businessLine.id) || [];
                         if (blEmployees.length === 0) return null;
 
-                        // Calculer le total EKH avec formule Excel: =('L1'!EG146+'L1'!ER146) = N1 + N2
-                        // EG146 = ECONOMIES REALISEES NIVEAU 1 EKH = scoreFinancierN1 = economiesDDP × coefCompetence
-                        // ER146 = ECONOMIES REALISEES NIVEAU 2 EKH = scoreFinancierN2 = economiesDDP × coefCompetence
+                        // ✅ CORRIGÉ: Calculer le total EKH avec formule Excel: =('L1'!EG146+'L1'!ER146) = N1 + N2
+                        // EG146 = ECONOMIES REALISEES NIVEAU 1 EKH = scoreFinancierN1 = economiesDDP_N1 × coefCompetence
+                        // ER146 = ECONOMIES REALISEES NIVEAU 2 EKH = scoreFinancierN2 = economiesDDP_N2 × coefCompetence
+                        // CORRECTION: Utiliser des valeurs DISTINCTES pour N1 et N2 (évite double comptage)
                         const totalEcoEKH = filteredPerformances.reduce((sum, emp) => {
                           const ddpData = getPerfIndicatorData(emp, 'ddp');
                           const coefficientCompetence = emp.coefficientCompetence || 0;
-                          const economiesDDP = ddpData.economiesRealisees || 0;
-                          const scoreFinancierN1 = economiesDDP * coefficientCompetence;
-                          const scoreFinancierN2 = economiesDDP * coefficientCompetence;
+                          // ✅ N1: utiliser économies2 (PPR - Pertes brut)
+                          const economiesDDP_N1 = ddpData.economiesRealisees2 || 0;
+                          // ✅ N2: utiliser économies2N2 pour cohérence
+                          const economiesDDP_N2 = ddpData.economiesRealisees2N2 || 0;
+                          const scoreFinancierN1 = economiesDDP_N1 * coefficientCompetence;
+                          const scoreFinancierN2 = economiesDDP_N2 * coefficientCompetence;
                           // Formule Excel exacte: EG146 + ER146 = N1 + N2
                           return sum + scoreFinancierN1 + scoreFinancierN2;
                         }, 0) || 1;
@@ -5872,21 +6248,24 @@ export default function PerformanceRecapPage() {
                                 </thead>
                                 <tbody>
                                   {blEmployees.map((emp, empIndex) => {
-                                    // Calculer les valeurs EKH avec formule Excel
+                                    // ✅ CORRIGÉ: Calculer les valeurs EKH avec formule Excel
                                     const ekhData = getPerfIndicatorData(emp, 'ekh');
                                     const ddpData = getPerfIndicatorData(emp, 'ddp');
                                     const primeData = calculatePerfPrimeData(emp, 'ekh');
                                     const coefficientCompetence = emp.coefficientCompetence || 0;
-                                    const economiesDDP = ddpData.economiesRealisees || 0;
+                                    // ✅ N1: utiliser économies2 (PPR - Pertes brut)
+                                    const economiesDDP_N1 = ddpData.economiesRealisees2 || 0;
+                                    // ✅ N2: utiliser économies2N2 pour cohérence
+                                    const economiesDDP_N2 = ddpData.economiesRealisees2N2 || 0;
 
-                                    // COLONNE 1: PPR PREVUES = EF146
-                                    const pprPrevues = ekhData.pprPrevues || 0;
+                                    // COLONNE 1: PPR PREVUES = EF146 + EQ146 (N1 + N2)
+                                    const pprPrevues = (ekhData.pprPrevues || 0) + (ekhData.pprPrevuesN2 || 0);
 
                                     // COLONNE 2: ECONOMIES REALISEES = EG146 + ER146 (formule Excel exacte)
-                                    // EG146 = economiesRealiseesN1 = scoreFinancierN1 = economiesDDP × coefCompetence
-                                    // ER146 = economiesRealiseesN2 = scoreFinancierN2 = economiesDDP × coefCompetence
-                                    const scoreFinancierN1 = economiesDDP * coefficientCompetence;
-                                    const scoreFinancierN2 = economiesDDP * coefficientCompetence;
+                                    // EG146 = economiesRealiseesN1 = scoreFinancierN1 = economiesDDP_N1 × coefCompetence
+                                    // ER146 = economiesRealiseesN2 = scoreFinancierN2 = economiesDDP_N2 × coefCompetence
+                                    const scoreFinancierN1 = economiesDDP_N1 * coefficientCompetence;
+                                    const scoreFinancierN2 = economiesDDP_N2 * coefficientCompetence;
                                     const economiesEKH = scoreFinancierN1 + scoreFinancierN2;
                                     const contributionPct = totalEcoEKH > 0 ? (economiesEKH / totalEcoEKH) * 100 : 0;
 
@@ -5906,20 +6285,24 @@ export default function PerformanceRecapPage() {
                                   {/* TOTAL LIGNE D'ACTIVITÉ - ÉCART DE KNOW-HOW (sans temps/frais) */}
                                   {(() => {
                                     const blTotalsEKH = blEmployees.reduce((acc, emp) => {
-                                      // Calculer les valeurs EKH avec formule Excel
+                                      // ✅ CORRIGÉ: Calculer les valeurs EKH avec formule Excel
                                       const ekhData = getPerfIndicatorData(emp, 'ekh');
                                       const ddpData = getPerfIndicatorData(emp, 'ddp');
                                       const primeData = calculatePerfPrimeData(emp, 'ekh');
                                       const coefficientCompetence = emp.coefficientCompetence || 0;
-                                      const economiesDDP = ddpData.economiesRealisees || 0;
+                                      // ✅ N1: utiliser économies2 (PPR - Pertes brut)
+                                      const economiesDDP_N1 = ddpData.economiesRealisees2 || 0;
+                                      // ✅ N2: utiliser économies2N2 pour cohérence
+                                      const economiesDDP_N2 = ddpData.economiesRealisees2N2 || 0;
 
                                       // COLONNE 2: ECONOMIES REALISEES = EG146 + ER146 (formule Excel exacte)
-                                      const scoreFinancierN1 = economiesDDP * coefficientCompetence;
-                                      const scoreFinancierN2 = economiesDDP * coefficientCompetence;
+                                      const scoreFinancierN1 = economiesDDP_N1 * coefficientCompetence;
+                                      const scoreFinancierN2 = economiesDDP_N2 * coefficientCompetence;
                                       const economiesEKH = scoreFinancierN1 + scoreFinancierN2;
 
                                       return {
-                                        pprPrevues: acc.pprPrevues + (ekhData.pprPrevues || 0),
+                                        // ✅ PPR = N1 + N2 pour cohérence
+                                        pprPrevues: acc.pprPrevues + (ekhData.pprPrevues || 0) + (ekhData.pprPrevuesN2 || 0),
                                         economies: acc.economies + economiesEKH,
                                         prevPrime: acc.prevPrime + primeData.prevPrime,
                                         prevTreso: acc.prevTreso + primeData.prevTreso,
@@ -5986,7 +6369,8 @@ export default function PerformanceRecapPage() {
                             });
 
                             // PPR PREVUES = somme des pprPrevues de chaque salarié
-                            totalPPRPrevues += indicatorData.pprPrevues || 0;
+                            // ✅ FIX CRITIQUE 07/02/2026: Utiliser N1+N2 pour cohérence avec autres blocs
+                            totalPPRPrevues += (indicatorData.pprPrevues || 0) + (indicatorData.pprPrevuesN2 || 0);
                             // Prévisionnel Prime et Trésorerie
                             totalPrevPrime += primeData.prevPrime;
                             totalPrevTreso += primeData.prevTreso;
@@ -6092,10 +6476,11 @@ export default function PerformanceRecapPage() {
                         const blTotalsForContext = blEmployees.reduce((acc, emp) => {
                           const empScore = employeePerfScoresMap.get(emp.employeeName);
 
-                          // Objectif ligne = somme PPR N1 des 5 indicateurs (même calcul que ligne 4780-4783)
+                          // ✅ CORRIGÉ: Objectif ligne = somme PPR N1 + N2 des 5 indicateurs
+                          // Pour cohérence avec economiesTotal qui inclut N1 + N2
                           const objectifLigne = perfIndicateurs.reduce((sum, ind) => {
                             const data = getPerfIndicatorData(emp, ind.key);
-                            return sum + (data.pprPrevues || 0);
+                            return sum + (data.pprPrevues || 0) + (data.pprPrevuesN2 || 0);
                           }, 0);
 
                           // Économies = empTotalEco depuis employeePerfScoresMap (même calcul que ligne 4786)
@@ -6132,8 +6517,10 @@ export default function PerformanceRecapPage() {
                         };
                       }).filter(bl => bl.employeeCount > 0); // Ne garder que les lignes avec des employés
 
-                      // Envoyer au contexte (sera disponible pour CostSavingsReportingPage)
-                      setPerformanceData(performanceIndicators, performanceTotals, businessLinePerformancesData);
+                      // AUDIT 06/02/2026: SUPPRIMÉ - Cet appel était un ANTI-PATTERN React (dans le rendu)
+                      // et écrasait les données employés du contexte car il ne passait pas le paramètre employees
+                      // La sauvegarde correcte se fait dans le useEffect ligne ~2858
+                      // setPerformanceData(performanceIndicators, performanceTotals, businessLinePerformancesData);
 
                       return (
                         <div className="mt-8">

@@ -13,7 +13,8 @@
  * - Bouton pour générer le bulletin de performance
  */
 
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
+import { useVirtualizer } from '@tanstack/react-virtual';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
@@ -48,18 +49,187 @@ import {
   calculateGlobalNote,
   calculateGrade,
   getGradeColor,
-  INDICATOR_LABELS
+  INDICATOR_LABELS,
+  sanitizeEmployeePerformances
 } from '../types/performanceCenter';
 
 import PerformanceBulletin from '../components/PerformanceBulletin';
 import { createPeriodResultsService, EmployeeDetail } from '../services/PeriodResultsService';
 import { createPerformanceCacheService, PerformanceCacheEntry } from '../services/PerformanceCacheService';
-import type { BusinessLinePerformance } from '@/contexts/PerformanceDataContext';
+import { usePerformanceData, type BusinessLinePerformance } from '@/contexts/PerformanceDataContext';
+
+// Diagnostic des performances (accessible via window.diagPerformance)
+import '../utils/performanceDiagnostic';
 
 // ============================================
-// CONSTANTS - Pagination 10K employés
+// AUDIT 06/02/2026: Déclaration globale pour avertissement fallback
 // ============================================
-const EMPLOYEES_PER_PAGE = 50; // Nombre d'employés affichés par défaut par ligne
+declare global {
+  interface Window {
+    __hcm_fallback_warning_shown__?: boolean;
+  }
+}
+
+// ============================================
+// CONSTANTS - Virtualisation 10K employés
+// ============================================
+const EMPLOYEE_ROW_HEIGHT = 64; // Hauteur d'une ligne employé en pixels
+const VIRTUALIZED_LIST_HEIGHT = 480; // Hauteur max du conteneur virtualisé (8 lignes visibles)
+const OVERSCAN_COUNT = 5; // Nombre de lignes pré-rendues au-delà du viewport
+
+// ============================================
+// COMPOSANT VIRTUALISÉ - LISTE EMPLOYÉS
+// ============================================
+
+/**
+ * Liste virtualisée des employés pour performances optimales avec 10K+ entrées.
+ * Utilise @tanstack/react-virtual pour ne rendre que les lignes visibles.
+ *
+ * @param employees - Tableau des employés à afficher
+ * @param onSelectEmployee - Callback pour sélectionner un employé
+ */
+interface VirtualizedEmployeeListProps {
+  employees: EmployeePerformance[];
+  onSelectEmployee: (employee: EmployeePerformance) => void;
+}
+
+function VirtualizedEmployeeList({ employees, onSelectEmployee }: VirtualizedEmployeeListProps) {
+  const parentRef = useRef<HTMLDivElement>(null);
+
+  const virtualizer = useVirtualizer({
+    count: employees.length,
+    getScrollElement: () => parentRef.current,
+    estimateSize: () => EMPLOYEE_ROW_HEIGHT,
+    overscan: OVERSCAN_COUNT
+  });
+
+  const virtualItems = virtualizer.getVirtualItems();
+
+  return (
+    <div className="overflow-x-auto">
+      {/* En-tête fixe du tableau */}
+      <div
+        className="bg-slate-100 dark:bg-slate-700/50 grid grid-cols-[1fr,120px,100px,180px] gap-2 px-6 py-3"
+        role="row"
+        aria-label="En-tête du tableau des performances"
+      >
+        <div
+          className="text-left text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wider"
+          role="columnheader"
+        >
+          Collaborateur
+        </div>
+        <div
+          className="text-center text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wider"
+          role="columnheader"
+        >
+          Note Globale
+        </div>
+        <div
+          className="text-center text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wider"
+          role="columnheader"
+        >
+          Grade
+        </div>
+        <div
+          className="text-right text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wider"
+          role="columnheader"
+        >
+          Bulletin
+        </div>
+      </div>
+
+      {/* Conteneur scrollable virtualisé */}
+      <div
+        ref={parentRef}
+        className="overflow-auto"
+        style={{ height: Math.min(VIRTUALIZED_LIST_HEIGHT, employees.length * EMPLOYEE_ROW_HEIGHT) }}
+        role="table"
+        aria-label="Tableau des performances des employés"
+        aria-rowcount={employees.length}
+      >
+        <div
+          style={{
+            height: `${virtualizer.getTotalSize()}px`,
+            width: '100%',
+            position: 'relative'
+          }}
+        >
+          {virtualItems.map(virtualRow => {
+            const employee = employees[virtualRow.index];
+            return (
+              <div
+                key={employee.id}
+                role="row"
+                aria-rowindex={virtualRow.index + 1}
+                className="absolute top-0 left-0 w-full grid grid-cols-[1fr,120px,100px,180px] gap-2 px-6 items-center hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors border-b border-slate-200 dark:border-slate-700"
+                style={{
+                  height: `${virtualRow.size}px`,
+                  transform: `translateY(${virtualRow.start}px)`
+                }}
+              >
+                {/* Collaborateur */}
+                <div role="cell">
+                  <p className="font-semibold text-slate-900 dark:text-white truncate">
+                    {employee.name}
+                  </p>
+                  <p className="text-sm text-slate-500 dark:text-slate-400 truncate">
+                    {employee.role}
+                  </p>
+                </div>
+
+                {/* Note Globale */}
+                <div role="cell" className="text-center">
+                  <span
+                    className="font-mono font-bold text-lg text-slate-900 dark:text-white"
+                    aria-label={`Note: ${employee.globalNote.toFixed(1)} sur 10`}
+                  >
+                    {employee.globalNote.toFixed(1)}/10
+                  </span>
+                </div>
+
+                {/* Grade */}
+                <div role="cell" className="flex justify-center">
+                  <span
+                    className={cn(
+                      "inline-flex items-center justify-center w-10 h-10 rounded-lg text-white font-bold text-sm",
+                      getGradeColor(employee.grade)
+                    )}
+                    role="img"
+                    aria-label={`Grade ${employee.grade}`}
+                  >
+                    {employee.grade}
+                  </span>
+                </div>
+
+                {/* Bouton Bulletin */}
+                <div role="cell" className="text-right">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => onSelectEmployee(employee)}
+                    className="border-blue-200 dark:border-blue-800 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30"
+                    aria-label={`Générer le bulletin de performance pour ${employee.name}`}
+                  >
+                    <FileText className="w-4 h-4 mr-2" />
+                    Bulletin
+                  </Button>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Indicateur de nombre d'employés */}
+      <div className="px-6 py-2 bg-slate-50 dark:bg-slate-800/50 border-t border-slate-200 dark:border-slate-700">
+        <p className="text-xs text-slate-500 dark:text-slate-400 text-center">
+          {employees.length} collaborateur{employees.length > 1 ? 's' : ''} • Scroll virtualisé pour performances optimales
+        </p>
+      </div>
+    </div>
+  );
+}
 
 // ============================================
 // COMPOSANT PRINCIPAL
@@ -70,14 +240,23 @@ export default function PerformanceCenterPage() {
   const { user } = useAuth();
   const { company: currentCompany } = useCompany();
 
+  // ============================================
+  // CORRECTION AUDIT 06/02/2026: Lire les données du contexte partagé
+  // Source de vérité: PerformanceRecapPage via PerformanceDataContext
+  // ============================================
+  const {
+    businessLinePerformances: contextBusinessLinePerformances,
+    getEmployeeById: contextGetEmployeeById,
+    employeePerformancesMap: contextEmployeesMap
+  } = usePerformanceData();
+
   // États
   const [loading, setLoading] = useState(true);
   const [businessLinesWithEmployees, setBusinessLinesWithEmployees] = useState<BusinessLineWithEmployees[]>([]);
   const [expandedLines, setExpandedLines] = useState<Set<string>>(new Set());
   const [selectedEmployee, setSelectedEmployee] = useState<EmployeePerformance | null>(null);
 
-  // Pagination par ligne d'activité : { lineId: nombreEmployésAffichés }
-  const [employeesShown, setEmployeesShown] = useState<Record<string, number>>({});
+  // État supprimé: employeesShown - remplacé par virtualisation
   const [weekStart, setWeekStart] = useState<Date>(new Date());
   const [weekEnd, setWeekEnd] = useState<Date>(new Date());
 
@@ -144,6 +323,13 @@ export default function PerformanceCenterPage() {
 
   useEffect(() => {
     const loadData = async () => {
+      // AUDIT 06/02/2026: Log contexte au début de loadData
+      console.log('[PerformanceCenter] 🚀 loadData START - Context state:', {
+        contextMapSize: contextEmployeesMap.size,
+        contextBusinessLinesCount: contextBusinessLinePerformances.length,
+        sampleContextKeys: Array.from(contextEmployeesMap.keys()).slice(0, 3)
+      });
+
       if (!currentCompany?.id) {
         setLoading(false);
         return;
@@ -203,7 +389,8 @@ export default function PerformanceCenterPage() {
           if (bulletinData) {
             const parsed = JSON.parse(bulletinData);
             if (parsed.data && parsed.data.length > 0 && parsed.companyId === currentCompany.id) {
-              bulletinPerformances = parsed.data;
+              // ✅ SANITIZATION: Garantir Réalisé ≤ Prévu (rigueur comptable)
+              bulletinPerformances = sanitizeEmployeePerformances(parsed.data);
               console.log('[PerformanceCenter] ✅ PRIORITÉ 0: Bulletin data from localStorage:', bulletinPerformances.length, 'employees');
               console.log('[PerformanceCenter] Sample data:', bulletinPerformances[0]);
             }
@@ -415,30 +602,48 @@ export default function PerformanceCenterPage() {
 
         console.log('[PerformanceCenter] Team leaders mapped (total):', teamLeaderMap.size);
 
-        // Initialiser les lignes d'activité avec les totaux de période validée si disponibles
+        // ============================================
+        // CORRECTION AUDIT 06/02/2026: Priorité au contexte partagé
+        // Source de vérité: PerformanceRecapPage via PerformanceDataContext
+        // Cascade: CONTEXTE → Période validée → Fallback (0)
+        // ============================================
         (businessLines || []).forEach(bl => {
-          // Chercher les données de période validée pour cette ligne
+          // PRIORITÉ 1: Données du contexte (calculées correctement par PerformanceRecapPage)
+          const contextData = contextBusinessLinePerformances.find(p => p.businessLineId === bl.id);
+          // PRIORITÉ 2: Données de période validée (fallback)
           const periodData = periodBLPerformances.find(p => p.businessLineId === bl.id);
+
+          // Utiliser le contexte si disponible, sinon période validée
+          const sourceData = contextData && contextData.objectif > 0 ? contextData : periodData;
+
+          if (contextData && contextData.objectif > 0) {
+            console.log(`[PerformanceCenter] ✅ CONTEXTE: Using context data for line "${bl.activity_name}":`, {
+              objectif: contextData.objectif,
+              economies: contextData.economiesRealisees,
+              prevPrime: contextData.prevPrime,
+              realPrime: contextData.realPrime
+            });
+          }
 
           businessLinesMap.set(bl.id, {
             id: bl.id,
             name: bl.activity_name,
             employees: [],
             totals: {
-              objectif: periodData?.objectif || 0,
-              economiesRealisees: periodData?.economiesRealisees || 0,
+              objectif: sourceData?.objectif || 0,
+              economiesRealisees: sourceData?.economiesRealisees || 0,
               avgNote: 0,
-              // Totaux Prime/Trésorerie depuis période validée
-              prevPrime: periodData?.prevPrime || 0,
-              prevTreso: periodData?.prevTreso || 0,
-              realPrime: periodData?.realPrime || 0,
-              realTreso: periodData?.realTreso || 0
+              // Totaux Prime/Trésorerie depuis contexte ou période validée
+              prevPrime: sourceData?.prevPrime || 0,
+              prevTreso: sourceData?.prevTreso || 0,
+              realPrime: sourceData?.realPrime || 0,
+              realTreso: sourceData?.realTreso || 0
             }
           });
         });
 
         // Calculer les données par employé
-        teamMembers.forEach(member => {
+        teamMembers.forEach((member, memberIndex) => {
           const blId = member.business_line_id;
           console.log('[PerformanceCenter] Processing member:', member.name, 'business_line_id:', blId);
           const bl = businessLinesMap.get(blId);
@@ -448,14 +653,33 @@ export default function PerformanceCenterPage() {
           }
 
           // ============================================
-          // PRIORITÉ 0: Données du bulletin (TRANSFERT DIRECT depuis PerformanceRecapPage)
+          // PRIORITÉ 0: Données du bulletin (TRANSFERT DIRECT depuis PerformanceRecapPage via localStorage)
+          // PRIORITÉ 0.5: Données du contexte partagé (PerformanceDataContext) - AUDIT 06/02/2026
           // PRIORITÉ 1: Données de période validée
           // PRIORITÉ 2: Cache de performance (depuis PerformanceRecapPage)
           // PRIORITÉ 3: Fallback cost_entries
           // ============================================
           const bulletinEmpData = bulletinPerformances.find(p => p.employeeId === member.id);
+          // AUDIT 06/02/2026: Nouvelle source - données du contexte partagé
+          const contextEmpData = contextGetEmployeeById(member.id);
           const periodEmpData = periodEmpDetails.find(p => p.employeeId === member.id);
           const cachedEmpData = cacheByEmployee.get(member.id);
+
+          // DEBUG AUDIT 06/02/2026: Log sources disponibles pour chaque employé
+          // Afficher TOUS les IDs disponibles dans le contexte pour le premier employé seulement
+          if (memberIndex === 0) {
+            console.log('[PerformanceCenter] 🔍 CONTEXT MAP KEYS:', Array.from(contextEmployeesMap.keys()).slice(0, 5));
+          }
+          console.log(`[PerformanceCenter] DEBUG ${member.name} (ID: "${member.id}"):`, {
+            bulletinFound: !!bulletinEmpData,
+            contextFound: !!contextEmpData,
+            periodFound: !!periodEmpData,
+            cacheFound: !!cachedEmpData,
+            bulletinPerformancesCount: bulletinPerformances.length,
+            contextMapSize: contextEmployeesMap.size,
+            // AUDIT: Afficher si l'ID est dans le contexte
+            idExistsInContext: contextEmployeesMap.has(member.id)
+          });
 
           let totalObjectif = 0;
           let totalEconomies = 0;
@@ -467,7 +691,7 @@ export default function PerformanceCenterPage() {
 
           if (bulletinEmpData) {
             // ============================================
-            // PRIORITÉ 0: TRANSFERT DIRECT depuis PerformanceRecapPage
+            // PRIORITÉ 0: TRANSFERT DIRECT depuis PerformanceRecapPage via localStorage
             // ============================================
             // Données exactes calculées dans PerformanceRecapPage et transférées via localStorage
             console.log('[PerformanceCenter] ✅✅ PRIORITÉ 0: Using bulletin data for:', member.name, bulletinEmpData.employeePerformance);
@@ -476,8 +700,9 @@ export default function PerformanceCenterPage() {
             totalEconomies = bulletinEmpData.employeePerformance.economiesRealisees;
             totalPrevPrime = bulletinEmpData.employeePerformance.prevPrime;
             totalPrevTreso = bulletinEmpData.employeePerformance.prevTreso;
-            totalRealPrime = bulletinEmpData.employeePerformance.realPrime;
-            totalRealTreso = bulletinEmpData.employeePerformance.realTreso;
+            // ✅ CORRECTION AUDIT 05/02/2026: Plafonnement Réalisé ≤ Prévu (rigueur comptable)
+            totalRealPrime = Math.min(bulletinEmpData.employeePerformance.realPrime || 0, totalPrevPrime);
+            totalRealTreso = Math.min(bulletinEmpData.employeePerformance.realTreso || 0, totalPrevTreso);
 
             // Reconstruire les indicateurs depuis les données du bulletin
             indicators = {
@@ -487,6 +712,29 @@ export default function PerformanceCenterPage() {
               productivite: buildIndicatorFromBulletin('ddp', bulletinEmpData.indicators),
               savoirFaire: buildIndicatorFromBulletin('ekh', bulletinEmpData.indicators)
             };
+          } else if (contextEmpData) {
+            // ============================================
+            // PRIORITÉ 0.5: DONNÉES DU CONTEXTE PARTAGÉ - AUDIT 06/02/2026
+            // ============================================
+            // Source de vérité depuis PerformanceRecapPage via PerformanceDataContext
+            console.log('[PerformanceCenter] ✅✅ PRIORITÉ 0.5: Using CONTEXT data for:', member.name, contextEmpData.employeePerformance);
+
+            totalObjectif = contextEmpData.employeePerformance.objectif;
+            totalEconomies = contextEmpData.employeePerformance.economiesRealisees;
+            totalPrevPrime = contextEmpData.employeePerformance.prevPrime;
+            totalPrevTreso = contextEmpData.employeePerformance.prevTreso;
+            // Plafonnement Réalisé ≤ Prévu
+            totalRealPrime = Math.min(contextEmpData.employeePerformance.realPrime || 0, totalPrevPrime);
+            totalRealTreso = Math.min(contextEmpData.employeePerformance.realTreso || 0, totalPrevTreso);
+
+            // Reconstruire les indicateurs depuis les données du contexte
+            indicators = {
+              absenteisme: buildIndicatorFromBulletin('abs', contextEmpData.indicators),
+              qualite: buildIndicatorFromBulletin('qd', contextEmpData.indicators),
+              accident: buildIndicatorFromBulletin('oa', contextEmpData.indicators),
+              productivite: buildIndicatorFromBulletin('ddp', contextEmpData.indicators),
+              savoirFaire: buildIndicatorFromBulletin('ekh', contextEmpData.indicators)
+            };
           } else if (periodEmpData) {
             // PRIORITÉ 1: Utiliser les données validées de la période
             console.log('[PerformanceCenter] ✅ Using validated period data for:', member.name, periodEmpData.totals);
@@ -495,12 +743,14 @@ export default function PerformanceCenterPage() {
             totalEconomies = periodEmpData.totals.totalEconomies || 0;
             totalPrevPrime = periodEmpData.totals.totalPrevPrime || 0;
             totalPrevTreso = periodEmpData.totals.totalPrevTreso || 0;
-            totalRealPrime = periodEmpData.totals.totalRealPrime || 0;
-            totalRealTreso = periodEmpData.totals.totalRealTreso || 0;
+            // ✅ CORRECTION AUDIT 05/02/2026: Plafonnement Réalisé ≤ Prévu (rigueur comptable)
+            totalRealPrime = Math.min(periodEmpData.totals.totalRealPrime || 0, totalPrevPrime);
+            totalRealTreso = Math.min(periodEmpData.totals.totalRealTreso || 0, totalPrevTreso);
 
             // Reconstruire les indicateurs depuis les données de période
-            const primeRate = 0.10;
-            const tresoRate = 0.90;
+            // IMPORTANT: Utiliser les ratios officiels 33%/67% (PRIME_RATIO/TRESO_RATIO)
+            const primeRate = 0.33;
+            const tresoRate = 0.67;
             indicators = {
               absenteisme: buildIndicatorFromPeriod('abs', periodEmpData.indicators, primeRate, tresoRate),
               qualite: buildIndicatorFromPeriod('qd', periodEmpData.indicators, primeRate, tresoRate),
@@ -529,6 +779,12 @@ export default function PerformanceCenterPage() {
                   realTreso: 0
                 };
               }
+              // ✅ CORRECTION AUDIT 04/02/2026: Plafonnement Réalisé ≤ Prévu (rigueur comptable)
+              const prevPrime = cached.prev_prime || (cached.ppr_prevues * 0.33);
+              const prevTreso = cached.prev_treso || (cached.ppr_prevues * 0.67);
+              const rawRealPrime = cached.real_prime || (cached.economies_realisees * 0.33);
+              const rawRealTreso = cached.real_treso || (cached.economies_realisees * 0.67);
+
               return {
                 key: indicatorKey,
                 label: INDICATOR_LABELS[indicatorKey] || indicatorKey.toUpperCase(),
@@ -536,10 +792,10 @@ export default function PerformanceCenterPage() {
                 totalFrais: cached.frais_collectes || 0,
                 objectif: cached.ppr_prevues || 0,
                 economiesRealisees: cached.economies_realisees || 0,
-                prevPrime: cached.prev_prime || (cached.ppr_prevues * 0.33),
-                prevTreso: cached.prev_treso || (cached.ppr_prevues * 0.67),
-                realPrime: cached.real_prime || (cached.economies_realisees * 0.33),
-                realTreso: cached.real_treso || (cached.economies_realisees * 0.67)
+                prevPrime,
+                prevTreso,
+                realPrime: Math.min(rawRealPrime, prevPrime),  // PLAFONNÉ
+                realTreso: Math.min(rawRealTreso, prevTreso)   // PLAFONNÉ
               };
             };
 
@@ -559,8 +815,24 @@ export default function PerformanceCenterPage() {
             totalRealPrime = Object.values(indicators).reduce((sum: number, ind: any) => sum + ind.realPrime, 0);
             totalRealTreso = Object.values(indicators).reduce((sum: number, ind: any) => sum + ind.realTreso, 0);
           } else {
-            // PRIORITÉ 3: Fallback - Calculer depuis cost_entries (formule simplifiée)
-            console.log('[PerformanceCenter] ⚠️ No period/cache data for:', member.name, '- using cost_entries fallback');
+            // ============================================
+            // PRIORITÉ 3: FALLBACK - DONNÉES INCOMPLÈTES (AUDIT 06/02/2026)
+            // ⚠️ ATTENTION: Ce fallback utilise des valeurs PPR hebdomadaires simples
+            // qui sont ~2000x plus petites que les vraies valeurs calculées!
+            // Pour des données correctes, l'utilisateur doit d'abord visiter
+            // la page "Récapitulatif des Performances Réalisées"
+            // ============================================
+            console.error('[PerformanceCenter] ❌❌ PRIORITÉ 3 FALLBACK pour:', member.name);
+            console.error('[PerformanceCenter] ⚠️ DONNÉES INCORRECTES: Visitez le Récapitulatif des Performances pour synchroniser les données!');
+
+            // Afficher un avertissement UNE SEULE FOIS par session
+            if (!window.__hcm_fallback_warning_shown__) {
+              window.__hcm_fallback_warning_shown__ = true;
+              toast.error(
+                'Données de performance incomplètes! Veuillez d\'abord visiter le "Récapitulatif des Performances Réalisées" pour synchroniser les données.',
+                { duration: 8000 }
+              );
+            }
 
             const employeeEntries = (costEntries || []).filter(e => e.employee_id === member.id);
             indicators = {
@@ -619,9 +891,15 @@ export default function PerformanceCenterPage() {
 
           bl.employees.push(empPerf);
 
-          // Accumuler les totaux de la ligne (si pas de données de période validée)
-          // Les données de période validée sont déjà chargées dans bl.totals
-          if (!periodBLPerformances.find(p => p.businessLineId === blId)) {
+          // ============================================
+          // CORRECTION AUDIT 06/02/2026: Ne pas accumuler si données du contexte disponibles
+          // Les données du contexte (PerformanceRecapPage) sont la source de vérité
+          // ============================================
+          const hasContextData = contextBusinessLinePerformances.find(p => p.businessLineId === blId && p.objectif > 0);
+          const hasPeriodData = periodBLPerformances.find(p => p.businessLineId === blId);
+
+          // Accumuler UNIQUEMENT si ni le contexte ni la période validée n'ont de données
+          if (!hasContextData && !hasPeriodData) {
             bl.totals.objectif += totalObjectif;
             bl.totals.economiesRealisees += totalEconomies;
             bl.totals.prevPrime = (bl.totals.prevPrime || 0) + totalPrevPrime;
@@ -675,18 +953,10 @@ export default function PerformanceCenterPage() {
         console.log('[PerformanceCenter] Final result (lines with employees):', result.length);
         setBusinessLinesWithEmployees(result);
 
-        // OPTIMISATION 10K: Ne pas ouvrir toutes les lignes par défaut
-        // Ouvrir seulement la première ligne si elle existe
+        // OPTIMISATION 10K: Virtualisation activée - ouvrir la première ligne par défaut
         if (result.length > 0) {
           setExpandedLines(new Set([result[0].id]));
         }
-
-        // Initialiser la pagination : EMPLOYEES_PER_PAGE par ligne
-        const initialShown: Record<string, number> = {};
-        result.forEach(bl => {
-          initialShown[bl.id] = EMPLOYEES_PER_PAGE;
-        });
-        setEmployeesShown(initialShown);
 
       } catch (error) {
         console.error('Erreur chargement données:', error);
@@ -697,7 +967,10 @@ export default function PerformanceCenterPage() {
     };
 
     loadData();
-  }, [currentCompany?.id]);
+    // CORRECTION AUDIT 06/02/2026: Recharger quand les données du contexte changent
+    // FIX CRITIQUE: contextGetEmployeeById doit être dans les dépendances sinon STALE CLOSURE
+    // La fonction capture une référence à l'ancienne Map vide quand elle n'est pas actualisée
+  }, [currentCompany?.id, contextBusinessLinePerformances, contextEmployeesMap.size, contextGetEmployeeById]);
 
   // Debug: Log data state
   useEffect(() => {
@@ -730,6 +1003,10 @@ export default function PerformanceCenterPage() {
     const primeRate = 0.33;
     const tresoRate = 0.67;
 
+    // ✅ CORRECTION AUDIT 04/02/2026: Plafonnement Réalisé ≤ Prévu (rigueur comptable)
+    const prevPrime = objectif * primeRate;
+    const prevTreso = objectif * tresoRate;
+
     return {
       key: kpiType.toLowerCase(),
       label: INDICATOR_LABELS[kpiType.toLowerCase()] || kpiType,
@@ -737,10 +1014,10 @@ export default function PerformanceCenterPage() {
       totalFrais,
       objectif,
       economiesRealisees,
-      prevPrime: objectif * primeRate,
-      prevTreso: objectif * tresoRate,
-      realPrime: economiesRealisees * primeRate,
-      realTreso: economiesRealisees * tresoRate
+      prevPrime,
+      prevTreso,
+      realPrime: Math.min(economiesRealisees * primeRate, prevPrime),  // PLAFONNÉ
+      realTreso: Math.min(economiesRealisees * tresoRate, prevTreso)   // PLAFONNÉ
     };
   }
 
@@ -755,6 +1032,12 @@ export default function PerformanceCenterPage() {
     const objectif = indData.pprPrevues || 0;
     const economiesRealisees = indData.economiesRealisees || 0;
 
+    // ✅ CORRECTION AUDIT 04/02/2026: Plafonnement Réalisé ≤ Prévu (rigueur comptable)
+    const prevPrime = indData.prevPrime || objectif * primeRate;
+    const prevTreso = indData.prevTreso || objectif * tresoRate;
+    const rawRealPrime = indData.realPrime || economiesRealisees * primeRate;
+    const rawRealTreso = indData.realTreso || economiesRealisees * tresoRate;
+
     return {
       key,
       label: INDICATOR_LABELS[key] || key.toUpperCase(),
@@ -762,30 +1045,42 @@ export default function PerformanceCenterPage() {
       totalFrais: 0, // Non disponible dans les données de période
       objectif,
       economiesRealisees,
-      prevPrime: indData.prevPrime || objectif * primeRate,
-      prevTreso: indData.prevTreso || objectif * tresoRate,
-      realPrime: indData.realPrime || economiesRealisees * primeRate,
-      realTreso: indData.realTreso || economiesRealisees * tresoRate
+      prevPrime,
+      prevTreso,
+      realPrime: Math.min(rawRealPrime, prevPrime),  // PLAFONNÉ
+      realTreso: Math.min(rawRealTreso, prevTreso)   // PLAFONNÉ
     };
   }
 
   // Helper pour reconstruire un indicateur depuis les données du bulletin (localStorage)
+  // ✅ CORRECTION AUDIT 05/02/2026: Plafonnement Réalisé ≤ Prévu (rigueur comptable)
   function buildIndicatorFromBulletin(
     key: string,
     indicators: Record<string, any>
   ) {
     const indData = indicators?.[key] || {};
+    const objectif = indData.objectif || 0;
+    const economiesRealisees = indData.economiesRealisees || 0;
+    const primeRate = 0.33;
+    const tresoRate = 0.67;
+
+    // Calculer les valeurs prévues et réalisées
+    const prevPrime = indData.prevPrime || objectif * primeRate;
+    const prevTreso = indData.prevTreso || objectif * tresoRate;
+    const rawRealPrime = indData.realPrime || economiesRealisees * primeRate;
+    const rawRealTreso = indData.realTreso || economiesRealisees * tresoRate;
+
     return {
       key,
       label: INDICATOR_LABELS[key] || key.toUpperCase(),
       totalTemps: indData.totalTemps || 0,
       totalFrais: indData.totalFrais || 0,
-      objectif: indData.objectif || 0,
-      economiesRealisees: indData.economiesRealisees || 0,
-      prevPrime: indData.prevPrime || 0,
-      prevTreso: indData.prevTreso || 0,
-      realPrime: indData.realPrime || 0,
-      realTreso: indData.realTreso || 0
+      objectif,
+      economiesRealisees,
+      prevPrime,
+      prevTreso,
+      realPrime: Math.min(rawRealPrime, prevPrime),  // PLAFONNÉ
+      realTreso: Math.min(rawRealTreso, prevTreso)   // PLAFONNÉ
     };
   }
 
@@ -911,119 +1206,15 @@ export default function PerformanceCenterPage() {
                 </div>
               </CardHeader>
 
-              {/* Tableau des employés - PAGINATION 10K */}
-              {expandedLines.has(businessLine.id) && (() => {
-                const currentShown = employeesShown[businessLine.id] || EMPLOYEES_PER_PAGE;
-                const visibleEmployees = businessLine.employees.slice(0, currentShown);
-                const totalEmployees = businessLine.employees.length;
-                const hasMore = currentShown < totalEmployees;
-                const remaining = totalEmployees - currentShown;
-
-                return (
-                  <CardContent className="p-0">
-                    <div className="overflow-x-auto">
-                      <table className="w-full">
-                        <thead className="bg-slate-100 dark:bg-slate-700/50">
-                          <tr>
-                            <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wider">
-                              Collaborateur
-                            </th>
-                            <th className="px-6 py-3 text-center text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wider">
-                              Note Globale
-                            </th>
-                            <th className="px-6 py-3 text-center text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wider">
-                              Grade
-                            </th>
-                            <th className="px-6 py-3 text-right text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wider">
-                              Bulletin de Performance
-                            </th>
-                          </tr>
-                        </thead>
-                        <tbody className="divide-y divide-slate-200 dark:divide-slate-700">
-                          {visibleEmployees.map(employee => (
-                            <tr
-                              key={employee.id}
-                              className="hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
-                            >
-                              <td className="px-6 py-4">
-                                <div>
-                                  <p className="font-semibold text-slate-900 dark:text-white">
-                                    {employee.name}
-                                  </p>
-                                  <p className="text-sm text-slate-500 dark:text-slate-400">
-                                    {employee.role}
-                                  </p>
-                                </div>
-                              </td>
-                              <td className="px-6 py-4 text-center">
-                                <span className="font-mono font-bold text-lg text-slate-900 dark:text-white">
-                                  {employee.globalNote.toFixed(1)}/10
-                                </span>
-                              </td>
-                              <td className="px-6 py-4 text-center">
-                                <span className={cn(
-                                  "inline-flex items-center justify-center w-10 h-10 rounded-lg text-white font-bold text-sm",
-                                  getGradeColor(employee.grade)
-                                )}>
-                                  {employee.grade}
-                                </span>
-                              </td>
-                              <td className="px-6 py-4 text-right">
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  onClick={() => setSelectedEmployee(employee)}
-                                  className="border-blue-200 dark:border-blue-800 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30"
-                                >
-                                  <FileText className="w-4 h-4 mr-2" />
-                                  Générer Audit
-                                </Button>
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
-
-                    {/* Bouton "Voir plus" pour pagination */}
-                    {hasMore && (
-                      <div className="px-6 py-4 bg-slate-50 dark:bg-slate-800/50 border-t border-slate-200 dark:border-slate-700">
-                        <div className="flex items-center justify-between">
-                          <p className="text-sm text-slate-500 dark:text-slate-400">
-                            Affichage de {currentShown} sur {totalEmployees} collaborateurs
-                          </p>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => {
-                              setEmployeesShown(prev => ({
-                                ...prev,
-                                [businessLine.id]: Math.min(
-                                  currentShown + EMPLOYEES_PER_PAGE,
-                                  totalEmployees
-                                )
-                              }));
-                            }}
-                            className="border-blue-200 dark:border-blue-800 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30"
-                          >
-                            <ChevronDown className="w-4 h-4 mr-2" />
-                            Voir {Math.min(remaining, EMPLOYEES_PER_PAGE)} de plus
-                          </Button>
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Message quand tous les employés sont affichés */}
-                    {!hasMore && totalEmployees > EMPLOYEES_PER_PAGE && (
-                      <div className="px-6 py-3 bg-emerald-50 dark:bg-emerald-900/20 border-t border-emerald-200 dark:border-emerald-800">
-                        <p className="text-sm text-emerald-600 dark:text-emerald-400 text-center">
-                          Tous les {totalEmployees} collaborateurs sont affichés
-                        </p>
-                      </div>
-                    )}
-                  </CardContent>
-                );
-              })()}
+              {/* Tableau des employés - VIRTUALISÉ pour 10K+ employés */}
+              {expandedLines.has(businessLine.id) && (
+                <CardContent className="p-0">
+                  <VirtualizedEmployeeList
+                    employees={businessLine.employees}
+                    onSelectEmployee={setSelectedEmployee}
+                  />
+                </CardContent>
+              )}
             </Card>
           ))
         )}

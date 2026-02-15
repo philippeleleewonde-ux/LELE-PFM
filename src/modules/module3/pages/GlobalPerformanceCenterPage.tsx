@@ -70,6 +70,9 @@ import ChampionsSummaryTable from '../components/ChampionsSummaryTable';
 // Composants d'analyse au niveau des salariés
 import { EmployeeAnalysisSection, IndicatorEmployeeAnalysis } from '../components/EmployeeAnalysis';
 
+// Validation du ratio Prime/Trésorerie et sanitization des données
+import { validatePrimeTresoRatio, PRIME_RATIO, TRESO_RATIO, sanitizeEmployeePerformances } from '../types/performanceCenter';
+
 // ============================================
 // TYPES - Structure des données transférées
 // ============================================
@@ -124,6 +127,78 @@ const INDICATOR_CONFIGS = [
   { key: 'ddp', label: 'Délai de Production', icon: Clock, gradient: 'from-blue-500 to-cyan-500', gradientLight: 'from-blue-400 to-cyan-400', bgLight: 'blue', border: 'blue' },
   { key: 'ekh', label: 'Efficacité KH', icon: Target, gradient: 'from-purple-500 to-violet-500', gradientLight: 'from-purple-400 to-violet-400', bgLight: 'purple', border: 'purple' }
 ];
+
+// ============================================
+// MAPPING EXPLICITE DES STYLES TAILWIND (Fix BUG #2 - Classes dynamiques)
+// Ces classes sont statiques pour éviter la purge Tailwind en production
+// ============================================
+const INDICATOR_STYLES: Record<string, {
+  cardBorder: string;
+  rowAlt: string;
+  rowHover: string;
+  totalRow: string;
+  totalText: string;
+  badge: string;
+  footerBg: string;
+  footerText: string;
+  buttonBorder: string;
+}> = {
+  abs: {
+    cardBorder: 'border-orange-200 dark:border-orange-800',
+    rowAlt: 'bg-orange-50/30 dark:bg-orange-900/10',
+    rowHover: 'hover:bg-orange-100/50 dark:hover:bg-orange-800/20',
+    totalRow: 'bg-gradient-to-r from-orange-200 to-orange-300 dark:from-orange-800/50 dark:to-orange-700/50 border-t-2 border-orange-400',
+    totalText: 'text-orange-900 dark:text-orange-100',
+    badge: 'bg-orange-600',
+    footerBg: 'bg-orange-50 dark:bg-orange-900/30 border-t border-orange-200 dark:border-orange-700',
+    footerText: 'text-orange-600 dark:text-orange-400',
+    buttonBorder: 'border-orange-300 text-orange-600 hover:bg-orange-100 dark:border-orange-700 dark:text-orange-400'
+  },
+  qd: {
+    cardBorder: 'border-rose-200 dark:border-rose-800',
+    rowAlt: 'bg-rose-50/30 dark:bg-rose-900/10',
+    rowHover: 'hover:bg-rose-100/50 dark:hover:bg-rose-800/20',
+    totalRow: 'bg-gradient-to-r from-rose-200 to-rose-300 dark:from-rose-800/50 dark:to-rose-700/50 border-t-2 border-rose-400',
+    totalText: 'text-rose-900 dark:text-rose-100',
+    badge: 'bg-rose-600',
+    footerBg: 'bg-rose-50 dark:bg-rose-900/30 border-t border-rose-200 dark:border-rose-700',
+    footerText: 'text-rose-600 dark:text-rose-400',
+    buttonBorder: 'border-rose-300 text-rose-600 hover:bg-rose-100 dark:border-rose-700 dark:text-rose-400'
+  },
+  oa: {
+    cardBorder: 'border-red-200 dark:border-red-800',
+    rowAlt: 'bg-red-50/30 dark:bg-red-900/10',
+    rowHover: 'hover:bg-red-100/50 dark:hover:bg-red-800/20',
+    totalRow: 'bg-gradient-to-r from-red-200 to-red-300 dark:from-red-800/50 dark:to-red-700/50 border-t-2 border-red-400',
+    totalText: 'text-red-900 dark:text-red-100',
+    badge: 'bg-red-600',
+    footerBg: 'bg-red-50 dark:bg-red-900/30 border-t border-red-200 dark:border-red-700',
+    footerText: 'text-red-600 dark:text-red-400',
+    buttonBorder: 'border-red-300 text-red-600 hover:bg-red-100 dark:border-red-700 dark:text-red-400'
+  },
+  ddp: {
+    cardBorder: 'border-blue-200 dark:border-blue-800',
+    rowAlt: 'bg-blue-50/30 dark:bg-blue-900/10',
+    rowHover: 'hover:bg-blue-100/50 dark:hover:bg-blue-800/20',
+    totalRow: 'bg-gradient-to-r from-blue-200 to-blue-300 dark:from-blue-800/50 dark:to-blue-700/50 border-t-2 border-blue-400',
+    totalText: 'text-blue-900 dark:text-blue-100',
+    badge: 'bg-blue-600',
+    footerBg: 'bg-blue-50 dark:bg-blue-900/30 border-t border-blue-200 dark:border-blue-700',
+    footerText: 'text-blue-600 dark:text-blue-400',
+    buttonBorder: 'border-blue-300 text-blue-600 hover:bg-blue-100 dark:border-blue-700 dark:text-blue-400'
+  },
+  ekh: {
+    cardBorder: 'border-purple-200 dark:border-purple-800',
+    rowAlt: 'bg-purple-50/30 dark:bg-purple-900/10',
+    rowHover: 'hover:bg-purple-100/50 dark:hover:bg-purple-800/20',
+    totalRow: 'bg-gradient-to-r from-purple-200 to-purple-300 dark:from-purple-800/50 dark:to-purple-700/50 border-t-2 border-purple-400',
+    totalText: 'text-purple-900 dark:text-purple-100',
+    badge: 'bg-purple-600',
+    footerBg: 'bg-purple-50 dark:bg-purple-900/30 border-t border-purple-200 dark:border-purple-700',
+    footerText: 'text-purple-600 dark:text-purple-400',
+    buttonBorder: 'border-purple-300 text-purple-600 hover:bg-purple-100 dark:border-purple-700 dark:text-purple-400'
+  }
+};
 
 // ============================================
 // CONSTANTS - Optimisation 10K employés
@@ -269,7 +344,9 @@ export default function GlobalPerformanceCenterPage() {
               // Vérifier la structure du premier employé
               console.log('[GlobalPerformanceCenter] Sample employee:', parsed.data[0]);
 
-              setEmployeePerformances(parsed.data);
+              // ✅ SANITIZATION: Garantir Réalisé ≤ Prévu (rigueur comptable)
+              const sanitizedData = sanitizeEmployeePerformances(parsed.data);
+              setEmployeePerformances(sanitizedData);
               setFiscalWeek(parsed.fiscalWeek || 0);
               setFiscalYear(parsed.fiscalYear || baseFiscalYear);
               setDataSource('hcm_bulletin_performances');
@@ -291,7 +368,9 @@ export default function GlobalPerformanceCenterPage() {
             const parsed = JSON.parse(savedData);
             if (parsed.employees && parsed.employees.length > 0) {
               console.log('[GlobalPerformanceCenter] Using fallback hcm_performance_data:', parsed.employees.length, 'employees');
-              setEmployeePerformances(parsed.employees);
+              // ✅ SANITIZATION: Garantir Réalisé ≤ Prévu (rigueur comptable)
+              const sanitizedData = sanitizeEmployeePerformances(parsed.employees);
+              setEmployeePerformances(sanitizedData);
               setDataSource('hcm_performance_data');
               setLoading(false);
               return;
@@ -951,7 +1030,7 @@ export default function GlobalPerformanceCenterPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 + indIndex * 0.1 }}
           >
-            <Card className={`border-${indConfig.border}-200 dark:border-${indConfig.border}-800 overflow-hidden`}>
+            <Card className={cn(INDICATOR_STYLES[indConfig.key]?.cardBorder, 'overflow-hidden')}>
               {/* OPTIMISATION 10K: Header cliquable pour collapse avec mini-KPIs */}
               <CardHeader
                 className={`bg-gradient-to-r ${indConfig.gradient} text-white cursor-pointer hover:opacity-90 transition-opacity`}
@@ -1011,7 +1090,7 @@ export default function GlobalPerformanceCenterPage() {
                   const hasMoreEmployees = currentShown < bl.employees.length;
 
                   return (
-                    <div key={`${indConfig.key}-${bl.id}`} className={blIndex > 0 ? `border-t border-${indConfig.border}-200 dark:border-${indConfig.border}-800` : ''}>
+                    <div key={`${indConfig.key}-${bl.id}`} className={blIndex > 0 ? INDICATOR_STYLES[indConfig.key]?.cardBorder.replace('border-', 'border-t ') : ''}>
                       {/* Header ligne d'activité */}
                       <div className={`flex items-center gap-2 px-4 py-3 bg-gradient-to-r ${indConfig.gradientLight} text-white`}>
                         <Building2 className="w-4 h-4" />
@@ -1066,28 +1145,50 @@ export default function GlobalPerformanceCenterPage() {
                               const indData = getIndicatorData(emp, indConfig.key);
                               if (!indData) return null;
 
-                              const totalTemps = (indData.tempsCalcul || 0) + (indData.tempsPrisEnCompte || 0);
-                              const totalFrais = (indData.fraisCollectes || 0) + (indData.fraisPrisEnCompte || 0);
-                              const economies = (indData.economiesRealisees || 0) + (indData.economiesRealiseesN2 || 0);
+                              const totalTemps = indData.totalTemps || 0;
+                              const totalFrais = indData.totalFrais || 0;
+                              const economies = indData.economiesRealisees || 0;
                               const contribution = indicatorTotalEco > 0 ? (economies / indicatorTotalEco) * 100 : 0;
+
+                              // Validation ratio 33%/67% par employé
+                              const empRatioValidation = validatePrimeTresoRatio(
+                                economies,
+                                indData.realPrime || 0,
+                                indData.realTreso || 0
+                              );
 
                               return (
                                 <tr
                                   key={emp.employeeId}
                                   className={cn(
-                                    empIndex % 2 === 0 ? 'bg-white dark:bg-slate-900/50' : `bg-${indConfig.bgLight}-50/30 dark:bg-${indConfig.bgLight}-900/10`,
-                                    `hover:bg-${indConfig.bgLight}-100/50 dark:hover:bg-${indConfig.bgLight}-800/20 transition-colors`
+                                    empIndex % 2 === 0 ? 'bg-white dark:bg-slate-900/50' : INDICATOR_STYLES[indConfig.key]?.rowAlt,
+                                    INDICATOR_STYLES[indConfig.key]?.rowHover,
+                                    'transition-colors'
                                   )}
                                 >
                                   <td className="py-2 px-3 font-medium">{emp.employeeName}</td>
                                   <td className="py-2 px-3 text-right">{totalTemps.toFixed(2)}h</td>
                                   <td className="py-2 px-3 text-right">{totalFrais.toLocaleString('fr-FR', { minimumFractionDigits: 2 })} {currencyConfig.symbol}</td>
-                                  <td className="py-2 px-3 text-right">{(indData.pprPrevues || 0).toLocaleString('fr-FR', { minimumFractionDigits: 2 })} {currencyConfig.symbol}</td>
+                                  <td className="py-2 px-3 text-right">{(indData.objectif || 0).toLocaleString('fr-FR', { minimumFractionDigits: 2 })} {currencyConfig.symbol}</td>
                                   <td className="py-2 px-3 text-right font-bold text-green-600 dark:text-green-400">{economies.toLocaleString('fr-FR', { minimumFractionDigits: 2 })} {currencyConfig.symbol}</td>
                                   <td className="py-2 px-3 text-right text-amber-600 dark:text-amber-400">{(indData.prevPrime || 0).toLocaleString('fr-FR', { minimumFractionDigits: 2 })} {currencyConfig.symbol}</td>
                                   <td className="py-2 px-3 text-right text-amber-600 dark:text-amber-400">{(indData.prevTreso || 0).toLocaleString('fr-FR', { minimumFractionDigits: 2 })} {currencyConfig.symbol}</td>
-                                  <td className="py-2 px-3 text-right text-green-600 dark:text-green-400">{(indData.realPrime || 0).toLocaleString('fr-FR', { minimumFractionDigits: 2 })} {currencyConfig.symbol}</td>
-                                  <td className="py-2 px-3 text-right text-green-600 dark:text-green-400">{(indData.realTreso || 0).toLocaleString('fr-FR', { minimumFractionDigits: 2 })} {currencyConfig.symbol}</td>
+                                  <td className="py-2 px-3 text-right text-green-600 dark:text-green-400">
+                                    <span className="flex items-center justify-end gap-1">
+                                      {(indData.realPrime || 0).toLocaleString('fr-FR', { minimumFractionDigits: 2 })} {currencyConfig.symbol}
+                                      {!empRatioValidation.isPrimeRatioValid && economies > 0 && (
+                                        <AlertTriangle className="w-3 h-3 text-red-500" aria-label="Ratio Prime incorrect" />
+                                      )}
+                                    </span>
+                                  </td>
+                                  <td className="py-2 px-3 text-right text-green-600 dark:text-green-400">
+                                    <span className="flex items-center justify-end gap-1">
+                                      {(indData.realTreso || 0).toLocaleString('fr-FR', { minimumFractionDigits: 2 })} {currencyConfig.symbol}
+                                      {!empRatioValidation.isTresoRatioValid && economies > 0 && (
+                                        <AlertTriangle className="w-3 h-3 text-red-500" aria-label="Ratio Trésorerie incorrect" />
+                                      )}
+                                    </span>
+                                  </td>
                                   <td className="py-2 px-3 text-center">
                                     <Badge className={cn(
                                       contribution > 5 ? "bg-green-500" :
@@ -1106,10 +1207,10 @@ export default function GlobalPerformanceCenterPage() {
                                 const indData = getIndicatorData(emp, indConfig.key);
                                 if (!indData) return acc;
                                 return {
-                                  totalTemps: acc.totalTemps + (indData.tempsCalcul || 0) + (indData.tempsPrisEnCompte || 0),
-                                  totalFrais: acc.totalFrais + (indData.fraisCollectes || 0) + (indData.fraisPrisEnCompte || 0),
-                                  pprPrevues: acc.pprPrevues + (indData.pprPrevues || 0),
-                                  economies: acc.economies + (indData.economiesRealisees || 0) + (indData.economiesRealiseesN2 || 0),
+                                  totalTemps: acc.totalTemps + (indData.totalTemps || 0),
+                                  totalFrais: acc.totalFrais + (indData.totalFrais || 0),
+                                  pprPrevues: acc.pprPrevues + (indData.objectif || 0),
+                                  economies: acc.economies + (indData.economiesRealisees || 0),
                                   prevPrime: acc.prevPrime + (indData.prevPrime || 0),
                                   prevTreso: acc.prevTreso + (indData.prevTreso || 0),
                                   realPrime: acc.realPrime + (indData.realPrime || 0),
@@ -1119,8 +1220,8 @@ export default function GlobalPerformanceCenterPage() {
                               const blContrib = indicatorTotalEco > 0 ? (blTotals.economies / indicatorTotalEco) * 100 : 0;
 
                               return (
-                                <tr className={`bg-gradient-to-r from-${indConfig.bgLight}-200 to-${indConfig.bgLight}-300 dark:from-${indConfig.bgLight}-800/50 dark:to-${indConfig.bgLight}-700/50 font-bold border-t-2 border-${indConfig.border}-400`}>
-                                  <td className={`py-2 px-3 font-bold text-${indConfig.bgLight}-900 dark:text-${indConfig.bgLight}-100`}>TOTAL LIGNE D'ACTIVITÉ</td>
+                                <tr className={cn(INDICATOR_STYLES[indConfig.key]?.totalRow, 'font-bold')}>
+                                  <td className={cn('py-2 px-3 font-bold', INDICATOR_STYLES[indConfig.key]?.totalText)}>TOTAL LIGNE D'ACTIVITÉ</td>
                                   <td className="py-2 px-3 text-right font-bold">{blTotals.totalTemps.toFixed(2)}h</td>
                                   <td className="py-2 px-3 text-right font-bold">{blTotals.totalFrais.toLocaleString('fr-FR', { minimumFractionDigits: 2 })} {currencyConfig.symbol}</td>
                                   <td className="py-2 px-3 text-right font-bold">{blTotals.pprPrevues.toLocaleString('fr-FR', { minimumFractionDigits: 2 })} {currencyConfig.symbol}</td>
@@ -1130,7 +1231,7 @@ export default function GlobalPerformanceCenterPage() {
                                   <td className="py-2 px-3 text-right font-bold text-green-700 dark:text-green-300">{blTotals.realPrime.toLocaleString('fr-FR', { minimumFractionDigits: 2 })} {currencyConfig.symbol}</td>
                                   <td className="py-2 px-3 text-right font-bold text-green-700 dark:text-green-300">{blTotals.realTreso.toLocaleString('fr-FR', { minimumFractionDigits: 2 })} {currencyConfig.symbol}</td>
                                   <td className="py-2 px-3 text-center">
-                                    <Badge className={`bg-${indConfig.bgLight}-600 text-white`}>{blContrib.toFixed(2)}%</Badge>
+                                    <Badge className={cn(INDICATOR_STYLES[indConfig.key]?.badge, 'text-white')}>{blContrib.toFixed(2)}%</Badge>
                                   </td>
                                 </tr>
                               );
@@ -1141,9 +1242,9 @@ export default function GlobalPerformanceCenterPage() {
 
                       {/* OPTIMISATION 10K: Bouton voir plus par business line */}
                       {hasMoreEmployees && (
-                        <div className={`px-4 py-3 bg-${indConfig.bgLight}-50 dark:bg-${indConfig.bgLight}-900/30 border-t border-${indConfig.border}-200 dark:border-${indConfig.border}-700`}>
+                        <div className={cn('px-4 py-3', INDICATOR_STYLES[indConfig.key]?.footerBg)}>
                           <div className="flex items-center justify-between">
-                            <p className={`text-sm text-${indConfig.bgLight}-600 dark:text-${indConfig.bgLight}-400`}>
+                            <p className={cn('text-sm', INDICATOR_STYLES[indConfig.key]?.footerText)}>
                               Affichage de {currentShown} sur {bl.employees.length} salariés
                             </p>
                             <Button
@@ -1153,7 +1254,7 @@ export default function GlobalPerformanceCenterPage() {
                                 e.stopPropagation();
                                 showMoreInSection(sectionKey, bl.employees.length);
                               }}
-                              className={`border-${indConfig.border}-300 text-${indConfig.bgLight}-600 hover:bg-${indConfig.bgLight}-100 dark:border-${indConfig.border}-700 dark:text-${indConfig.bgLight}-400`}
+                              className={INDICATOR_STYLES[indConfig.key]?.buttonBorder}
                             >
                               <ChevronDown className="w-4 h-4 mr-1" />
                               Voir {Math.min(bl.employees.length - currentShown, EMPLOYEES_PER_SECTION)} de plus
@@ -1273,17 +1374,69 @@ export default function GlobalPerformanceCenterPage() {
                         realTreso: Object.values(globalTotals.byIndicator).reduce((sum, t) => sum + t.realTreso, 0)
                       };
 
+                      // Validation du ratio 33%/67%
+                      const ratioValidation = validatePrimeTresoRatio(
+                        grandTotals.eco,
+                        grandTotals.realPrime,
+                        grandTotals.realTreso
+                      );
+
                       return (
-                        <tr className="bg-gradient-to-r from-emerald-200 to-green-200 dark:from-emerald-800/50 dark:to-green-800/50 font-bold border-t-2 border-emerald-400">
-                          <td className="py-4 px-4 font-bold text-lg text-emerald-900 dark:text-emerald-100">GRAND TOTAL</td>
-                          <td className="py-4 px-4 text-right font-bold text-xl text-indigo-700 dark:text-indigo-300">{grandTotals.ppr.toLocaleString('fr-FR', { minimumFractionDigits: 2 })} {currencyConfig.symbol}</td>
-                          <td className="py-4 px-4 text-right font-bold text-xl text-green-700 dark:text-green-300">{grandTotals.eco.toLocaleString('fr-FR', { minimumFractionDigits: 2 })} {currencyConfig.symbol}</td>
-                          <td className="py-4 px-4 text-right font-bold text-lg text-amber-700 dark:text-amber-300">{grandTotals.prevPrime.toLocaleString('fr-FR', { minimumFractionDigits: 2 })} {currencyConfig.symbol}</td>
-                          <td className="py-4 px-4 text-right font-bold text-lg text-amber-700 dark:text-amber-300">{grandTotals.prevTreso.toLocaleString('fr-FR', { minimumFractionDigits: 2 })} {currencyConfig.symbol}</td>
-                          <td className="py-4 px-4 text-right font-bold text-lg text-green-700 dark:text-green-300">{grandTotals.realPrime.toLocaleString('fr-FR', { minimumFractionDigits: 2 })} {currencyConfig.symbol}</td>
-                          <td className="py-4 px-4 text-right font-bold text-lg text-green-700 dark:text-green-300">{grandTotals.realTreso.toLocaleString('fr-FR', { minimumFractionDigits: 2 })} {currencyConfig.symbol}</td>
-                          <td className="py-4 px-4 text-center"><Badge className="bg-emerald-600 text-white text-lg px-3 py-1">100%</Badge></td>
-                        </tr>
+                        <>
+                          <tr className="bg-gradient-to-r from-emerald-200 to-green-200 dark:from-emerald-800/50 dark:to-green-800/50 font-bold border-t-2 border-emerald-400">
+                            <td className="py-4 px-4 font-bold text-lg text-emerald-900 dark:text-emerald-100">GRAND TOTAL</td>
+                            <td className="py-4 px-4 text-right font-bold text-xl text-indigo-700 dark:text-indigo-300">{grandTotals.ppr.toLocaleString('fr-FR', { minimumFractionDigits: 2 })} {currencyConfig.symbol}</td>
+                            <td className="py-4 px-4 text-right font-bold text-xl text-green-700 dark:text-green-300">{grandTotals.eco.toLocaleString('fr-FR', { minimumFractionDigits: 2 })} {currencyConfig.symbol}</td>
+                            <td className="py-4 px-4 text-right font-bold text-lg text-amber-700 dark:text-amber-300">{grandTotals.prevPrime.toLocaleString('fr-FR', { minimumFractionDigits: 2 })} {currencyConfig.symbol}</td>
+                            <td className="py-4 px-4 text-right font-bold text-lg text-amber-700 dark:text-amber-300">{grandTotals.prevTreso.toLocaleString('fr-FR', { minimumFractionDigits: 2 })} {currencyConfig.symbol}</td>
+                            <td className="py-4 px-4 text-right font-bold text-lg text-green-700 dark:text-green-300">
+                              <div className="flex items-center justify-end gap-2">
+                                {grandTotals.realPrime.toLocaleString('fr-FR', { minimumFractionDigits: 2 })} {currencyConfig.symbol}
+                                {!ratioValidation.isPrimeRatioValid && (
+                                  <Badge variant="destructive" className="text-xs">
+                                    {(ratioValidation.actualPrimeRatio * 100).toFixed(1)}% ≠ {PRIME_RATIO * 100}%
+                                  </Badge>
+                                )}
+                              </div>
+                            </td>
+                            <td className="py-4 px-4 text-right font-bold text-lg text-green-700 dark:text-green-300">
+                              <div className="flex items-center justify-end gap-2">
+                                {grandTotals.realTreso.toLocaleString('fr-FR', { minimumFractionDigits: 2 })} {currencyConfig.symbol}
+                                {!ratioValidation.isTresoRatioValid && (
+                                  <Badge variant="destructive" className="text-xs">
+                                    {(ratioValidation.actualTresoRatio * 100).toFixed(1)}% ≠ {TRESO_RATIO * 100}%
+                                  </Badge>
+                                )}
+                              </div>
+                            </td>
+                            <td className="py-4 px-4 text-center"><Badge className="bg-emerald-600 text-white text-lg px-3 py-1">100%</Badge></td>
+                          </tr>
+                          {/* Badge de conformité global */}
+                          {!ratioValidation.isFullyCompliant && grandTotals.eco > 0 && (
+                            <tr>
+                              <td colSpan={8} className="py-2 px-4 bg-red-50 dark:bg-red-900/20">
+                                <div className="flex items-center gap-2 text-red-700 dark:text-red-300">
+                                  <AlertTriangle className="w-4 h-4" />
+                                  <span className="text-sm font-medium">
+                                    Alerte: La répartition Prime/Trésorerie ne respecte pas le ratio {PRIME_RATIO * 100}%/{TRESO_RATIO * 100}% attendu
+                                  </span>
+                                </div>
+                              </td>
+                            </tr>
+                          )}
+                          {ratioValidation.isFullyCompliant && grandTotals.eco > 0 && (
+                            <tr>
+                              <td colSpan={8} className="py-2 px-4 bg-emerald-50 dark:bg-emerald-900/20">
+                                <div className="flex items-center gap-2 text-emerald-700 dark:text-emerald-300">
+                                  <Award className="w-4 h-4" />
+                                  <span className="text-sm font-medium">
+                                    ✓ Conformité vérifiée: Ratio Prime/Trésorerie {PRIME_RATIO * 100}%/{TRESO_RATIO * 100}% respecté
+                                  </span>
+                                </div>
+                              </td>
+                            </tr>
+                          )}
+                        </>
                       );
                     })()}
                   </tfoot>

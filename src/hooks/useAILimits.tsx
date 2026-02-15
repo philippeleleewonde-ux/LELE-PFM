@@ -1,5 +1,6 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { useCallback } from 'react';
 
 export interface AILimits {
   aiEnabled: boolean;
@@ -11,7 +12,21 @@ export interface AILimits {
   features: string[];
 }
 
-export function useAILimits() {
+export interface AIUsageInfo {
+  limits: AILimits;
+  creditsRemaining: number;
+  planType: string;
+  isLoading: boolean;
+  /** Whether the user can make at least 1 more AI call this period */
+  canMakeCall: boolean;
+  /** Decrement credits_remaining by 1 after a successful AI call */
+  trackCall: () => Promise<void>;
+}
+
+export function useAILimits(): AIUsageInfo {
+  const queryClient = useQueryClient();
+
+  // 1. Fetch subscription (plan_type + credits_remaining)
   const { data: subscription } = useQuery({
     queryKey: ['user-subscription'],
     queryFn: async () => {
@@ -20,7 +35,7 @@ export function useAILimits() {
 
       const { data, error } = await supabase
         .from('user_subscriptions')
-        .select('plan_type')
+        .select('plan_type, credits_remaining, current_period_start, current_period_end')
         .eq('user_id', user.id)
         .single();
 
@@ -29,11 +44,12 @@ export function useAILimits() {
     },
   });
 
+  // 2. Fetch AI limits for the plan
   const { data: limits, isLoading } = useQuery({
     queryKey: ['ai-limits', subscription?.plan_type],
     queryFn: async () => {
       const planType = subscription?.plan_type || 'free';
-      
+
       const { data, error } = await supabase
         .from('subscription_ai_limits')
         .select('*')
@@ -55,17 +71,39 @@ export function useAILimits() {
     enabled: !!subscription,
   });
 
+  const creditsRemaining = subscription?.credits_remaining ?? 0;
+  const resolvedLimits = limits || {
+    aiEnabled: false,
+    aiCallsPerMonth: 0,
+    advancedAnalytics: false,
+    customPrompts: false,
+    predictiveAi: false,
+    bankingScore: false,
+    features: [],
+  };
+
+  const canMakeCall = resolvedLimits.aiEnabled && creditsRemaining > 0;
+
+  // Track a successful AI call by decrementing credits_remaining
+  const trackCall = useCallback(async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
+    await supabase
+      .from('user_subscriptions')
+      .update({ credits_remaining: Math.max(0, creditsRemaining - 1) })
+      .eq('user_id', user.id);
+
+    // Refresh the subscription query to get updated credits
+    queryClient.invalidateQueries({ queryKey: ['user-subscription'] });
+  }, [creditsRemaining, queryClient]);
+
   return {
-    limits: limits || {
-      aiEnabled: false,
-      aiCallsPerMonth: 0,
-      advancedAnalytics: false,
-      customPrompts: false,
-      predictiveAi: false,
-      bankingScore: false,
-      features: [],
-    },
-    isLoading,
+    limits: resolvedLimits,
+    creditsRemaining,
     planType: subscription?.plan_type || 'free',
+    isLoading,
+    canMakeCall,
+    trackCall,
   };
 }

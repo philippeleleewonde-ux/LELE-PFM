@@ -4,7 +4,6 @@ import { useNavigate } from 'react-router-dom';
 import { AwardsBadge } from '@/components/AwardsBadge';
 import { trackCTAClick, trackPageView } from '@/lib/utils/analytics';
 import { Helmet } from 'react-helmet-async';
-
 // Import statique pour section critique above-the-fold
 import HeroSection from '@/components/sections/HeroSection';
 
@@ -43,11 +42,10 @@ const LoadingSection = () => (
 const Landing = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
-
   useEffect(() => {
     // Redirect si déjà connecté
     if (user) {
-      navigate('/dashboard');
+      navigate('/profile');
       return;
     }
 

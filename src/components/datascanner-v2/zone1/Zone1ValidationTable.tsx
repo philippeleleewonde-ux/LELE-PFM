@@ -20,6 +20,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge'
 import { useZone1Context, useZone1Actions } from '@/contexts/Zone1Context'
 import { useToast } from '@/hooks/use-toast'
+import { supabase } from '@/integrations/supabase/client'
 import type { BusinessLine } from '@/types/datascanner-v2'
 
 interface Zone1ValidationTableProps {
@@ -113,7 +114,9 @@ export function Zone1ValidationTable({ jobId, onComplete }: Zone1ValidationTable
       revenue_n_minus_3: 0,
       revenue_n_minus_4: 0,
       headcount_n: 0,
-      headcount_n_minus_1: 0
+      headcount_n_minus_1: 0,
+      team_count: 0,
+      budget: 0
     }
 
     setBusinessLines([...businessLines, newLine])
@@ -146,9 +149,16 @@ export function Zone1ValidationTable({ jobId, onComplete }: Zone1ValidationTable
     setLoading(true)
 
     try {
-      const response = await fetch(`/api/datascanner/jobs/${jobId}/zones/1/validate`, {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session?.access_token) throw new Error('Session expirée. Veuillez vous reconnecter.')
+
+      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001'
+      const response = await fetch(`${API_URL}/api/datascanner/jobs/${jobId}/zones/1/validate`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`
+        },
         body: JSON.stringify({
           business_lines: businessLines,
           user_notes: 'Validé depuis l\'interface Zone 1'
@@ -223,6 +233,8 @@ export function Zone1ValidationTable({ jobId, onComplete }: Zone1ValidationTable
                   <TableHead className="text-right min-w-[120px]">Revenue N (€)</TableHead>
                   <TableHead className="text-right min-w-[120px]">Revenue N-1 (€)</TableHead>
                   <TableHead className="text-right min-w-[100px]">Headcount</TableHead>
+                  <TableHead className="text-right min-w-[100px]">Equipes</TableHead>
+                  <TableHead className="text-right min-w-[120px]">Budget (k€)</TableHead>
                   <TableHead className="w-[100px]">Actions</TableHead>
                 </TableRow>
               </TableHeader>
@@ -306,6 +318,36 @@ export function Zone1ValidationTable({ jobId, onComplete }: Zone1ValidationTable
                           />
                         ) : (
                           <span>{line.headcount_n || 'N/A'}</span>
+                        )}
+                      </TableCell>
+
+                      {/* Equipes (Team Count) */}
+                      <TableCell className="text-right">
+                        {isEditing ? (
+                          <Input
+                            type="number"
+                            value={line.team_count || ''}
+                            onChange={(e) => handleChange(index, 'team_count', e.target.value)}
+                            className="h-8 text-right"
+                            placeholder="N/A"
+                          />
+                        ) : (
+                          <span>{line.team_count || 'N/A'}</span>
+                        )}
+                      </TableCell>
+
+                      {/* Budget (k€) */}
+                      <TableCell className="text-right">
+                        {isEditing ? (
+                          <Input
+                            type="number"
+                            value={line.budget || ''}
+                            onChange={(e) => handleChange(index, 'budget', e.target.value)}
+                            className="h-8 text-right"
+                            placeholder="0"
+                          />
+                        ) : (
+                          <span className="text-blue-600 font-semibold">{formatCurrency(line.budget)}</span>
                         )}
                       </TableCell>
 

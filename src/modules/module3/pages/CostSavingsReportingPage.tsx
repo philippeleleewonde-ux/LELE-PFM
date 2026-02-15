@@ -463,7 +463,7 @@ export default function CostSavingsReportingPage() {
 
               setLoading(false);
               toast.success(`Données S${currentFiscalWeek} - Période validée`, {
-                icon: <Lock className="w-4 h-4" />
+                icon: <Lock className="w-4 h-4" aria-hidden="true" />
               });
               return; // Sortir - données chargées depuis période validée
             }
@@ -781,7 +781,7 @@ export default function CostSavingsReportingPage() {
 
         toast.success(
           `Semaine ${currentFiscalWeek} validée et verrouillée avec succès`,
-          { icon: <Lock className="w-4 h-4 text-green-500" /> }
+          { icon: <Lock className="w-4 h-4 text-green-500" aria-hidden="true" /> }
         );
       } else {
         toast.error(result.error || "Erreur lors de la validation");
@@ -849,17 +849,17 @@ export default function CostSavingsReportingPage() {
                 onClick={() => navigate('/modules/module3/performance-recap')}
                 className="gap-2 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800"
               >
-                <ArrowLeft className="w-4 h-4" />
+                <ArrowLeft className="w-4 h-4" aria-hidden="true" />
                 Retour
               </Button>
               <div>
                 <h1 className="text-xl font-semibold text-slate-800 dark:text-white flex items-center gap-2">
-                  <BarChart3 className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+                  <BarChart3 className="w-5 h-5 text-indigo-600 dark:text-indigo-400" aria-hidden="true" />
                   Reporting Economies de Coûts
                   {/* Badge de période validée */}
                   {periodStatus.isLocked && (
                     <Badge className="ml-2 gap-1 bg-green-500/20 text-green-700 dark:text-green-400 border-green-500/30">
-                      <Lock className="w-3 h-3" />
+                      <Lock className="w-3 h-3" aria-hidden="true" />
                       S{currentFiscalWeek} validée
                     </Badge>
                   )}
@@ -909,7 +909,7 @@ export default function CostSavingsReportingPage() {
                 <span className="text-white font-medium">{formatDate(weekEnd)}</span>
               </div>
               <div className="w-10 h-10 rounded-full border-2 border-indigo-400/50 flex items-center justify-center hover:bg-indigo-500/20 transition-colors cursor-pointer">
-                <RefreshCw className="w-5 h-5 text-indigo-200" />
+                <RefreshCw className="w-5 h-5 text-indigo-200" aria-hidden="true" />
               </div>
             </div>
 
@@ -1928,9 +1928,9 @@ export default function CostSavingsReportingPage() {
             size="lg"
             className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold py-4 px-8 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 flex items-center gap-3"
           >
-            <Award className="w-6 h-6" />
+            <Award className="w-6 h-6" aria-hidden="true" />
             <span className="text-lg">Centre de Performance</span>
-            <Users className="w-5 h-5 opacity-70" />
+            <Users className="w-5 h-5 opacity-70" aria-hidden="true" />
           </Button>
         </div>
 

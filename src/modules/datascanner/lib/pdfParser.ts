@@ -12,7 +12,9 @@
 
 import * as pdfjsLib from 'pdfjs-dist';
 import { GlobalWorkerOptions, version } from 'pdfjs-dist';
+import type { PDFDocumentProxy, TextItem } from 'pdfjs-dist/types/src/display/api';
 import { createWorker } from 'tesseract.js';
+import type { Word as TesseractWord } from 'tesseract.js';
 import { matchKeyword } from './keywordMatcher';
 import { extractYear, isInTargetRange } from './yearDetector';
 import {
@@ -115,14 +117,14 @@ export interface PDFParseResult {
 /**
  * Check if PDF is scanned (has minimal text layer)
  */
-async function isPDFScanned(pdf: any, samplePages: number = 3): Promise<boolean> {
+async function isPDFScanned(pdf: PDFDocumentProxy, samplePages: number = 3): Promise<boolean> {
   const numPages = Math.min(pdf.numPages, samplePages);
   let totalTextLength = 0;
 
   for (let pageNum = 1; pageNum <= numPages; pageNum++) {
     const page = await pdf.getPage(pageNum);
     const textContent = await page.getTextContent();
-    totalTextLength += textContent.items.reduce((sum: number, item: any) => sum + (item.str?.length || 0), 0);
+    totalTextLength += textContent.items.reduce((sum: number, item: TextItem) => sum + (item.str?.length || 0), 0);
   }
 
   // Average < 50 chars/page = likely scanned
@@ -133,7 +135,7 @@ async function isPDFScanned(pdf: any, samplePages: number = 3): Promise<boolean>
  * Extract text with positioning (advanced mode with layout analysis)
  */
 async function extractTextWithPositions(
-  pdf: any,
+  pdf: PDFDocumentProxy,
   config: PDFParseConfig
 ): Promise<PDFTextItem[]> {
   const textItems: PDFTextItem[] = [];
@@ -148,7 +150,7 @@ async function extractTextWithPositions(
     const textContent = await page.getTextContent();
     const viewport = page.getViewport({ scale: 1.0 });
 
-    textContent.items.forEach((item: any) => {
+    textContent.items.forEach((item: TextItem) => {
       if (item.str && item.str.trim().length > 0) {
         const transform = item.transform;
         const x = transform[4];
@@ -178,7 +180,7 @@ async function extractTextWithPositions(
  * Perform OCR on scanned PDF using Tesseract.js
  */
 async function performOCR(
-  pdf: any,
+  pdf: PDFDocumentProxy,
   config: PDFParseConfig
 ): Promise<PDFTextItem[]> {
   const textItems: PDFTextItem[] = [];
@@ -213,7 +215,7 @@ async function performOCR(
       }%`);
 
       // Extract words with positions
-      data.words.forEach((word: any) => {
+      data.words.forEach((word: TesseractWord) => {
         if (word.confidence >= (config.ocrConfidenceThreshold || 60)) {
           const bbox = word.bbox;
           textItems.push({
@@ -373,14 +375,14 @@ function calculateTableConfidence(rows: PDFTableRow[]): number {
 /**
  * Convert table to 2D array (Excel-compatible format)
  */
-export function tableToArray(table: PDFTable): any[][] {
+export function tableToArray(table: PDFTable): string[][] {
   const maxCols = Math.max(...table.rows.map(row =>
     row.cells.length > 0 ? Math.max(...row.cells.map(c => c.colIndex)) + 1 : 0
   ));
 
-  const result: any[][] = [];
+  const result: string[][] = [];
   table.rows.forEach(row => {
-    const rowArray: any[] = new Array(maxCols).fill('');
+    const rowArray: string[] = new Array(maxCols).fill('');
     row.cells.forEach(cell => {
       if (cell.colIndex < maxCols) {
         rowArray[cell.colIndex] = cell.text;
@@ -470,7 +472,7 @@ export async function extractTextFromPDF(file: File): Promise<Map<number, string
           const textContent = await page.getTextContent();
 
           const pageText = textContent.items
-            .map((item: any) => item.str)
+            .map((item: TextItem) => item.str)
             .join(' ');
 
           textByPage.set(pageNum, pageText);

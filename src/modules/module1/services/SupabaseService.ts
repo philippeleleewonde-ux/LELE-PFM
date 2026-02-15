@@ -143,6 +143,10 @@ export const SupabaseService = {
 
                 // B. Prepare new lines with explicit string conversion
                 // NOTE: source must be 'manual' | 'datascanner' | 'import' (DB constraint)
+                // Detect if data came from DataScanner injection
+                const injectionMeta = (formData as any)?._datascannerInjection
+                const lineSource = injectionMeta ? 'datascanner' : 'manual'
+
                 const linesToInsert = formData.businessLines.map((line, index) => ({
                     company_id: companyIdString,
                     user_id: user.id,
@@ -151,7 +155,7 @@ export const SupabaseService = {
                     team_count: line.teamCount || 0,
                     budget: line.budget || 0,
                     display_order: index + 1,
-                    source: 'manual',
+                    source: lineSource,
                     is_active: true
                 }));
 

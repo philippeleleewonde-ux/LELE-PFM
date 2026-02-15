@@ -5,7 +5,6 @@ import {
   User,
   Building2,
   Bot,
-  LayoutDashboard,
   CreditCard,
   Settings,
   Sparkles,
@@ -20,7 +19,9 @@ import {
 import { cn } from '@/lib/utils';
 import { useSidebar } from '@/contexts/SidebarContext';
 import { useAuth } from '@/hooks/useAuth';
+import { useUserRole } from '@/hooks/useUserRole';
 import { useTheme } from '@/contexts/ThemeContext';
+import { PAGE_PERMISSIONS } from '@/types/modules';
 
 // ============================================================================
 // TYPES - Unified Navigation Card System
@@ -94,15 +95,6 @@ const NAV_CARDS: NavCard[] = [
     gradientIntensity: 'light',
     badge: { label: 'New', color: 'purple' },
   },
-  {
-    id: 'dashboard-hcm',
-    title: 'Dashboard HCM',
-    icon: <LayoutDashboard className="h-6 w-6" />,
-    path: '/dashboards/ceo',
-    gradientIntensity: 'light',
-    badge: { label: 'Core', color: 'cyan' },
-  },
-
   // MODULES SECTION - LELE HCM Solutions
   {
     id: 'financial-dept',
@@ -195,7 +187,8 @@ interface UnifiedNavCardProps {
 const UnifiedNavCard = ({ card, onNavigate, onLogout }: UnifiedNavCardProps) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const location = useLocation();
-  const { theme } = useTheme();
+  const { isDark } = useTheme();
+  const isLight = !isDark;
 
   const hasSubItems = card.subItems && card.subItems.length > 0;
   const isActive = card.path ? location.pathname === card.path : false;
@@ -222,7 +215,7 @@ const UnifiedNavCard = ({ card, onNavigate, onLogout }: UnifiedNavCardProps) => 
           'relative overflow-hidden',
 
           // Theme-aware background and borders
-          theme === 'light' ? [
+          isLight ? [
             'bg-white border-gray-200',
             isActive && !hasSubItems && 'bg-cyan-50 border-cyan-300 shadow-md',
           ] : [
@@ -237,7 +230,7 @@ const UnifiedNavCard = ({ card, onNavigate, onLogout }: UnifiedNavCardProps) => 
           'border',
 
           // Hover effects - theme aware
-          theme === 'light' ? [
+          isLight ? [
             isLogout
               ? 'hover:border-red-300 hover:shadow-md hover:shadow-red-200/50'
               : 'hover:border-cyan-300 hover:shadow-md hover:shadow-cyan-200/50',
@@ -266,7 +259,7 @@ const UnifiedNavCard = ({ card, onNavigate, onLogout }: UnifiedNavCardProps) => 
           <div
             className={cn(
               'shrink-0 transition-all duration-300 group-hover:scale-110 transform',
-              theme === 'light' ? [
+              isLight ? [
                 isLogout
                   ? 'text-red-500 group-hover:text-red-600'
                   : isActive && !hasSubItems
@@ -289,7 +282,7 @@ const UnifiedNavCard = ({ card, onNavigate, onLogout }: UnifiedNavCardProps) => 
             <h3
               className={cn(
                 'text-sm font-bold transition-colors',
-                theme === 'light' ? [
+                isLight ? [
                   isActive && !hasSubItems
                     ? 'text-gray-900'
                     : 'text-gray-700 group-hover:text-gray-900',
@@ -305,7 +298,7 @@ const UnifiedNavCard = ({ card, onNavigate, onLogout }: UnifiedNavCardProps) => 
             {hasSubItems && (
               <p className={cn(
                 'text-xs mt-0.5',
-                theme === 'light' ? 'text-gray-500' : 'text-white/60'
+                isLight ? 'text-gray-500' : 'text-white/60'
               )}>
                 {card.subItems.length} module{card.subItems.length > 1 ? 's' : ''}
               </p>
@@ -317,7 +310,7 @@ const UnifiedNavCard = ({ card, onNavigate, onLogout }: UnifiedNavCardProps) => 
             <ChevronDown
               className={cn(
                 'h-4 w-4 transition-all duration-300',
-                theme === 'light' ? 'text-gray-500' : 'text-cyan-300/70',
+                isLight ? 'text-gray-500' : 'text-cyan-300/70',
                 isExpanded ? 'rotate-180' : 'rotate-0'
               )}
             />
@@ -328,7 +321,7 @@ const UnifiedNavCard = ({ card, onNavigate, onLogout }: UnifiedNavCardProps) => 
         <div
           className={cn(
             'absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl pointer-events-none',
-            theme === 'light' ? [
+            isLight ? [
               isLogout
                 ? 'bg-gradient-to-r from-red-200/0 via-red-200/15 to-red-200/0'
                 : 'bg-gradient-to-r from-cyan-200/0 via-cyan-200/15 to-cyan-200/0'
@@ -362,7 +355,7 @@ const UnifiedNavCard = ({ card, onNavigate, onLogout }: UnifiedNavCardProps) => 
                     'transition-all duration-200',
                     'text-sm font-medium',
                     'border-l-4',
-                    theme === 'light' ? [
+                    isLight ? [
                       isSubActive
                         ? 'bg-cyan-100 text-cyan-900 border-cyan-500 shadow-md shadow-cyan-200/50'
                         : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100 border-transparent hover:border-cyan-400/50'
@@ -376,7 +369,7 @@ const UnifiedNavCard = ({ card, onNavigate, onLogout }: UnifiedNavCardProps) => 
                   <Zap
                     className={cn(
                       'h-3.5 w-3.5 shrink-0',
-                      theme === 'light' ? [
+                      isLight ? [
                         isSubActive ? 'text-cyan-600' : 'text-cyan-500/50'
                       ] : [
                         isSubActive ? 'text-cyan-400' : 'text-cyan-300/50'
@@ -398,11 +391,22 @@ const UnifiedNavCard = ({ card, onNavigate, onLogout }: UnifiedNavCardProps) => 
 // MAIN CEO SIDEBAR COMPONENT
 // ============================================================================
 
+const ROLE_LABELS: Record<string, string> = {
+  CEO: 'CEO Dashboard',
+  CONSULTANT: 'Consultant Portal',
+  RH_MANAGER: 'RH Manager',
+  EMPLOYEE: 'Espace Employé',
+  TEAM_LEADER: 'Team Leader',
+  BANQUIER: 'Espace Banquier',
+};
+
 export const CEOSidebar = () => {
   const navigate = useNavigate();
   const { isCollapsed } = useSidebar();
-  const { signOut } = useAuth();
-  const { theme } = useTheme();
+  const { user, signOut } = useAuth();
+  const { role } = useUserRole(user?.id);
+  const { isDark } = useTheme();
+  const isLight = !isDark;
 
   const handleNavigate = (path: string) => {
     navigate(path);
@@ -415,10 +419,16 @@ export const CEOSidebar = () => {
     }
   };
 
-  // Split cards into sections
-  const topCards = NAV_CARDS.slice(0, 4); // Profil, Entreprise, IA, Dashboard
-  const moduleCards = NAV_CARDS.slice(4, 9); // All modules
-  const bottomCards = NAV_CARDS.slice(9); // Pricing, Settings, Logout
+  // Filter cards by role permissions
+  const allowedIds = role ? PAGE_PERMISSIONS[role] : [];
+  const filteredCards = NAV_CARDS.filter(card =>
+    card.action === 'logout' || allowedIds.includes(card.id)
+  );
+
+  // Split filtered cards into sections
+  const topCards = filteredCards.filter(c => ['profil-user', 'profil-entreprise', 'ia-lele'].includes(c.id));
+  const moduleCards = filteredCards.filter(c => ['financial-dept', 'hr-dept', 'cost-savings', 'lines-performance', 'performance-cards'].includes(c.id));
+  const bottomCards = filteredCards.filter(c => ['pricing', 'settings', 'logout'].includes(c.id));
 
   return (
     <aside
@@ -427,7 +437,7 @@ export const CEOSidebar = () => {
         'backdrop-blur-xl',
         isCollapsed ? 'w-0 md:w-0' : 'w-80',
         // Theme-aware background
-        theme === 'light'
+        isLight
           ? 'bg-gradient-to-b from-gray-50 to-gray-100 border-r border-gray-200'
           : 'bg-gradient-to-b from-[rgba(10,47,79,0.95)] to-[rgba(10,47,79,0.98)] border-r border-white/10'
       )}
@@ -435,7 +445,7 @@ export const CEOSidebar = () => {
       {/* Gradient overlay pour profondeur - Theme aware */}
       <div className={cn(
         'absolute inset-0 pointer-events-none',
-        theme === 'light'
+        isLight
           ? 'bg-gradient-to-br from-cyan-50/30 via-transparent to-gray-100/20'
           : 'bg-gradient-to-br from-cyan-500/5 via-transparent to-navy-900/20'
       )} />
@@ -460,15 +470,15 @@ export const CEOSidebar = () => {
             <div>
               <h2 className={cn(
                 'font-black text-lg tracking-tight drop-shadow-sm',
-                theme === 'light' ? 'text-gray-900' : 'text-white'
+                isLight ? 'text-gray-900' : 'text-white'
               )}>
                 LELE HCM
               </h2>
               <p className={cn(
                 'text-xs font-medium tracking-wide',
-                theme === 'light' ? 'text-cyan-600' : 'text-cyan-300/80'
+                isLight ? 'text-cyan-600' : 'text-cyan-300/80'
               )}>
-                CEO Dashboard
+                {ROLE_LABELS[role || ''] || 'LELE HCM Portal'}
               </p>
             </div>
           </div>
@@ -477,7 +487,7 @@ export const CEOSidebar = () => {
         {/* Separator */}
         <div className={cn(
           'h-px mx-4',
-          theme === 'light'
+          isLight
             ? 'bg-gradient-to-r from-transparent via-gray-300 to-transparent'
             : 'bg-gradient-to-r from-transparent via-white/20 to-transparent'
         )} />
@@ -503,17 +513,17 @@ export const CEOSidebar = () => {
           <div className="px-4 pt-2 pb-1">
             <h2 className={cn(
               'text-lg font-black tracking-tight drop-shadow-sm flex items-center gap-2',
-              theme === 'light' ? 'text-gray-900' : 'text-white'
+              isLight ? 'text-gray-900' : 'text-white'
             )}>
               <Sparkles className={cn(
                 'h-5 w-5',
-                theme === 'light' ? 'text-cyan-600' : 'text-cyan-300'
+                isLight ? 'text-cyan-600' : 'text-cyan-300'
               )} />
               LELE HCM SOLUTIONS
             </h2>
             <p className={cn(
               'text-xs font-medium mt-0.5',
-              theme === 'light' ? 'text-gray-600' : 'text-cyan-300/80'
+              isLight ? 'text-gray-600' : 'text-cyan-300/80'
             )}>Modules professionnels</p>
           </div>
 
@@ -533,7 +543,7 @@ export const CEOSidebar = () => {
         {/* BOTTOM SECTION - Settings & Logout */}
         <div className={cn(
           'border-t pt-4 space-y-2',
-          theme === 'light' ? 'border-gray-300' : 'border-white/10'
+          isLight ? 'border-gray-300' : 'border-white/10'
         )}>
           {bottomCards.map((card) => (
             <UnifiedNavCard

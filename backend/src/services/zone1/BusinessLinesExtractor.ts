@@ -6,6 +6,7 @@
 import * as XLSX from 'xlsx'
 import type { BusinessLine, ExtractionResult } from '../../types/datascanner.ts'
 import { GoogleGenerativeAI } from '@google/generative-ai'
+import { parseNumber, matchesKeywords, detectDataRegion, cleanSheetData } from '../../utils/excelParsing.ts'
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!)
 
@@ -16,8 +17,10 @@ const BUSINESS_LINE_KEYWORDS = [
   'activité', 'business', 'line', 'secteur'
 ]
 
-const REVENUE_KEYWORDS = ['ca', 'chiffre', 'revenue', 'ventes', 'k€', '€']
+const REVENUE_KEYWORDS = ['ca', 'chiffre', 'revenue', 'ventes', 'produits']
 const HEADCOUNT_KEYWORDS = ['effectif', 'headcount', 'fte', 'collaborateurs', 'salariés']
+const TEAM_COUNT_KEYWORDS = ['equipe', 'équipe', 'team', 'teams', 'équipes', 'equipes', 'nombre d\'équipes', 'nb equipes', 'nb équipes']
+const BUDGET_KEYWORDS = ['budget', 'dotation', 'enveloppe', 'allocation', 'budget alloué', 'budget annuel', 'montant budget']
 
 interface ParsedWorkbook {
   workbook: XLSX.WorkBook
@@ -72,16 +75,31 @@ export async function extractBusinessLinesFromMultipleFiles(
 function extractLinesFromWorkbook(workbook: XLSX.WorkBook): BusinessLine[] {
   const lines: BusinessLine[] = []
 
-  // Parcourir toutes les sheets
   for (const sheetName of workbook.SheetNames) {
     const sheet = workbook.Sheets[sheetName]
-    const data = XLSX.utils.sheet_to_json<Record<string, any>>(sheet, { defval: '' })
 
-    console.log(`  📋 [Extractor] Sheet "${sheetName}": ${data.length} rows`)
+    // Use detectDataRegion to handle merged cells and offset headers
+    const region = detectDataRegion(sheet, {
+      headerKeywords: [
+        ...BUSINESS_LINE_KEYWORDS, ...REVENUE_KEYWORDS,
+        ...HEADCOUNT_KEYWORDS, ...TEAM_COUNT_KEYWORDS, ...BUDGET_KEYWORDS
+      ]
+    })
 
-    // Chercher les lignes qui ressemblent à des business lines
-    for (let i = 0; i < data.length; i++) {
-      const row = data[i]
+    // Clean subtotal and decorative rows
+    const cleaned = cleanSheetData(region.dataRows)
+
+    if (region.warnings.length > 0) {
+      console.log(`  📋 [Extractor] Sheet "${sheetName}": ${region.warnings.join(', ')}`)
+    }
+    if (cleaned.warnings.length > 0) {
+      console.log(`  🧹 [Extractor] Sheet "${sheetName}": ${cleaned.warnings.join(', ')}`)
+    }
+
+    console.log(`  📋 [Extractor] Sheet "${sheetName}": ${cleaned.rows.length} data rows (${cleaned.removedCount} removed)`)
+
+    for (let i = 0; i < cleaned.rows.length; i++) {
+      const row = cleaned.rows[i]
       const line = tryExtractBusinessLine(row, i)
       if (line) {
         lines.push(line)
@@ -96,28 +114,28 @@ function extractLinesFromWorkbook(workbook: XLSX.WorkBook): BusinessLine[] {
  * Tente d'extraire une business line d'une row Excel
  */
 function tryExtractBusinessLine(row: Record<string, any>, rowIndex: number): BusinessLine | null {
-  // Chercher une colonne qui ressemble à un nom de business line
   let lineName: string | null = null
   let revenueN = 0
   let revenueNMinus1 = 0
   let headcountN: number | undefined
+  let teamCount: number | undefined
+  let budgetN: number | undefined
 
   for (const [key, value] of Object.entries(row)) {
-    const keyLower = key.toLowerCase()
     const valueLower = String(value).toLowerCase()
 
-    // Détection du nom de ligne
-    if (!lineName && BUSINESS_LINE_KEYWORDS.some(kw => keyLower.includes(kw) || valueLower.includes(kw))) {
+    // Détection du nom de ligne (accent-insensitive)
+    if (!lineName && (matchesKeywords(key, BUSINESS_LINE_KEYWORDS) || matchesKeywords(valueLower, BUSINESS_LINE_KEYWORDS))) {
       if (typeof value === 'string' && value.trim().length > 0) {
         lineName = value.trim()
       }
     }
 
-    // Détection des revenues
-    if (REVENUE_KEYWORDS.some(kw => keyLower.includes(kw))) {
+    // Détection des revenues (accent-insensitive)
+    if (matchesKeywords(key, REVENUE_KEYWORDS)) {
       const num = parseNumber(value)
       if (num > 0) {
-        if (keyLower.includes('n-1') || keyLower.includes('précédent') || keyLower.includes('previous')) {
+        if (matchesKeywords(key, ['n-1', 'précédent', 'previous'])) {
           revenueNMinus1 = num
         } else {
           revenueN = num
@@ -125,11 +143,27 @@ function tryExtractBusinessLine(row: Record<string, any>, rowIndex: number): Bus
       }
     }
 
-    // Détection headcount
-    if (HEADCOUNT_KEYWORDS.some(kw => keyLower.includes(kw))) {
+    // Détection headcount (accent-insensitive)
+    if (matchesKeywords(key, HEADCOUNT_KEYWORDS)) {
       const num = parseNumber(value)
       if (num > 0) {
         headcountN = num
+      }
+    }
+
+    // Détection team count (accent-insensitive)
+    if (matchesKeywords(key, TEAM_COUNT_KEYWORDS)) {
+      const num = parseNumber(value)
+      if (num > 0) {
+        teamCount = num
+      }
+    }
+
+    // Détection budget (accent-insensitive)
+    if (matchesKeywords(key, BUDGET_KEYWORDS)) {
+      const num = parseNumber(value)
+      if (num > 0) {
+        budgetN = num
       }
     }
   }
@@ -141,6 +175,8 @@ function tryExtractBusinessLine(row: Record<string, any>, rowIndex: number): Bus
       revenue_n: revenueN,
       revenue_n_minus_1: revenueNMinus1,
       headcount_n: headcountN,
+      team_count: teamCount,
+      budget_n: budgetN,
       evolution_percent: revenueNMinus1 > 0
         ? ((revenueN - revenueNMinus1) / revenueNMinus1) * 100
         : 0,
@@ -149,33 +185,6 @@ function tryExtractBusinessLine(row: Record<string, any>, rowIndex: number): Bus
   }
 
   return null
-}
-
-/**
- * Parse un nombre depuis une valeur Excel (gère "1 234 K€", "1,234.56", etc.)
- */
-function parseNumber(value: any): number {
-  if (typeof value === 'number') return value
-
-  if (typeof value === 'string') {
-    // Nettoyer la string
-    let cleaned = value
-      .replace(/\s/g, '')  // Enlever espaces
-      .replace(/€/g, '')   // Enlever €
-      .replace(/k/gi, '')  // Enlever k/K
-      .replace(/,/g, '.')  // Remplacer , par .
-
-    const num = parseFloat(cleaned)
-
-    // Si la string originale contenait "K", multiplier par 1000
-    if (value.toLowerCase().includes('k')) {
-      return num * 1000
-    }
-
-    return isNaN(num) ? 0 : num
-  }
-
-  return 0
 }
 
 /**

@@ -1,25 +1,82 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { z } from "https://esm.sh/zod@3.23.8";
+import { withAuth, successResponse, errorResponse, logger } from "../_shared/middleware.ts";
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-};
+// ============================================================================
+// ZOD SCHEMAS — Input validation
+// ============================================================================
+
+const TeamDataItemSchema = z.object({
+  team_name: z.string().optional(),
+  cost_savings: z.number().default(0),
+}).passthrough();
+
+const IndustryDataSchema = z.object({
+  sector: z.string().optional(),
+  benchmarks: z.object({
+    averageAnnual: z.number().optional(),
+  }).passthrough().optional(),
+}).passthrough().optional();
+
+const PreviousPeriodSchema = z.object({
+  cost_savings: z.number(),
+}).passthrough();
+
+const CalculateSavingsPayloadSchema = z.object({
+  teamData: z.array(TeamDataItemSchema).min(1, 'teamData must contain at least 1 team'),
+  industryData: IndustryDataSchema,
+  previousPeriods: z.array(PreviousPeriodSchema).optional().default([]),
+});
+
+// ============================================================================
 
 serve(async (req) => {
-  if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders });
-  }
+  // Apply middleware: auth required, rate limited, CEO/RH_MANAGER only
+  const { context, error } = await withAuth(req, {
+    requireAuth: true,
+    rateLimitPerMinute: 30,
+    allowedRoles: ['CEO', 'RH_MANAGER'],
+  });
+
+  // Return error if middleware failed (CORS preflight, auth, rate limit)
+  if (error) return error;
+
+  const { correlationId, user, companyId, supabaseClient } = context;
 
   try {
-    const { teamData, industryData, previousPeriods, companyId } = await req.json();
+    const rawBody = await req.json();
+
+    // Validate payload
+    const parseResult = CalculateSavingsPayloadSchema.safeParse(rawBody);
+    if (!parseResult.success) {
+      logger.error('Payload validation failed', new Error('Validation Error'), {
+        correlationId,
+        user_id: user.id,
+        errors: parseResult.error.issues.map(i => ({ path: i.path.join('.'), message: i.message })),
+      });
+      return errorResponse(
+        `Validation Error: ${parseResult.error.issues.map(i => `${i.path.join('.')}: ${i.message}`).join('; ')}`,
+        400,
+        correlationId
+      );
+    }
+
+    const { teamData, industryData, previousPeriods } = parseResult.data;
+
+    logger.info('Calculating savings', {
+      correlationId,
+      user_id: user.id,
+      company_id: companyId,
+      teams_count: teamData?.length || 0,
+    });
+
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
 
     if (!LOVABLE_API_KEY) {
-      throw new Error('LOVABLE_API_KEY not configured');
+      logger.error('LOVABLE_API_KEY not configured', new Error('Missing API key'), { correlationId });
+      throw new Error('AI API configuration error');
     }
-
-    console.log('Calculating savings for company:', companyId);
 
     const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
@@ -57,12 +114,25 @@ Calculez:
 
     if (!aiResponse.ok) {
       const errorText = await aiResponse.text();
-      console.error('AI API Error:', aiResponse.status, errorText);
+      logger.error('AI API error', new Error(`HTTP ${aiResponse.status}`), {
+        correlationId,
+        user_id: user.id,
+        company_id: companyId,
+        status: aiResponse.status,
+        error_text: errorText,
+      });
       throw new Error(`AI API error: ${aiResponse.status}`);
     }
 
     const aiResult = await aiResponse.json();
     const aiInsights = aiResult.choices[0].message.content;
+
+    logger.info('AI analysis completed', {
+      correlationId,
+      user_id: user.id,
+      company_id: companyId,
+      ai_model: 'google/gemini-2.5-flash',
+    });
 
     // Calculer les économies réelles
     const weeklySavings = teamData.reduce((sum: number, team: any) => {
@@ -80,10 +150,10 @@ Calculez:
     };
 
     // Calculer le score bancaire basé sur plusieurs facteurs
-    const growthRate = previousPeriods?.length > 0 
+    const growthRate = previousPeriods?.length > 0
       ? ((weeklySavings - previousPeriods[0].cost_savings) / previousPeriods[0].cost_savings) * 100
       : 15;
-    
+
     const consistency = previousPeriods?.length >= 4
       ? Math.min(100, 100 - (Math.abs(growthRate) * 2))
       : 75;
@@ -93,11 +163,11 @@ Calculez:
 
     // Score global (0-100)
     const bankingScore = Math.round(
-      (Math.min(growthRate, 30) * 0.30) + // Croissance max 30% = 30 points
-      (consistency * 0.25) +                // Constance = 25 points
-      (Math.min(sectorPosition, 100) * 0.20) + // Position sectorielle = 20 points
-      (85 * 0.15) +                         // Gestion risques (assumée bonne) = 15 points
-      (75 * 0.10)                           // Tendances futures = 10 points
+      (Math.min(growthRate, 30) * 0.30) +
+      (consistency * 0.25) +
+      (Math.min(sectorPosition, 100) * 0.20) +
+      (85 * 0.15) +
+      (75 * 0.10)
     );
 
     // Déterminer le niveau de risque et le taux
@@ -106,13 +176,13 @@ Calculez:
 
     if (bankingScore >= 75) {
       riskLevel = 'LOW';
-      recommendedRate = 2.5 + (Math.random() * 0.5); // 2.5-3.0%
+      recommendedRate = 2.5 + (Math.random() * 0.5);
     } else if (bankingScore >= 50) {
       riskLevel = 'MEDIUM';
-      recommendedRate = 3.5 + (Math.random() * 0.8); // 3.5-4.3%
+      recommendedRate = 3.5 + (Math.random() * 0.8);
     } else {
       riskLevel = 'HIGH';
-      recommendedRate = 5.0 + (Math.random() * 1.5); // 5.0-6.5%
+      recommendedRate = 5.0 + (Math.random() * 1.5);
     }
 
     // Position benchmark
@@ -123,36 +193,36 @@ Calculez:
     else if (sectorPosition >= 80) benchmarkPosition = "Moyenne du secteur";
     else benchmarkPosition = "En dessous de la moyenne - Amélioration nécessaire";
 
-    // Sauvegarder le score dans la base de données si companyId fourni
-    if (companyId) {
-      const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-      const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-      const supabase = createClient(supabaseUrl, supabaseKey);
+    // Sauvegarder le score avec le client authentifié (scoped to user's company via RLS)
+    // Use service role for insert since this is a server-side operation
+    const supabaseAdmin = createClient(
+      Deno.env.get('SUPABASE_URL')!,
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+    );
 
-      await supabase.from('ai_banking_scores').insert({
-        company_id: companyId,
-        global_score: bankingScore,
-        risk_level: riskLevel,
-        recommended_rate: recommendedRate.toFixed(2),
-        confidence_level: 90,
-        factors: [
-          `Croissance: ${growthRate.toFixed(1)}%`,
-          `Constance: ${consistency.toFixed(0)}%`,
-          `Position sectorielle: ${sectorPosition.toFixed(0)}%`
-        ],
-        benchmark_position: benchmarkPosition,
-        module_scores: {
-          module3: bankingScore,
-          weeklySavings,
-          annualProjection
-        },
-        ai_analysis: {
-          insights: aiInsights,
-          breakdown,
-          trends: "Positive"
-        }
-      });
-    }
+    await supabaseAdmin.from('ai_banking_scores').insert({
+      company_id: companyId,
+      global_score: bankingScore,
+      risk_level: riskLevel,
+      recommended_rate: recommendedRate.toFixed(2),
+      confidence_level: 90,
+      factors: [
+        `Croissance: ${growthRate.toFixed(1)}%`,
+        `Constance: ${consistency.toFixed(0)}%`,
+        `Position sectorielle: ${sectorPosition.toFixed(0)}%`
+      ],
+      benchmark_position: benchmarkPosition,
+      module_scores: {
+        module3: bankingScore,
+        weeklySavings,
+        annualProjection
+      },
+      ai_analysis: {
+        insights: aiInsights,
+        breakdown,
+        trends: "Positive"
+      }
+    });
 
     const result = {
       weeklySavings: Math.round(weeklySavings),
@@ -179,23 +249,17 @@ Calculez:
       generatedAt: new Date().toISOString()
     };
 
-    console.log('Savings calculation completed, score:', bankingScore);
-
-    return new Response(JSON.stringify(result), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    logger.info('Savings calculation completed', {
+      correlationId,
+      user_id: user.id,
+      company_id: companyId,
+      banking_score: bankingScore,
+      risk_level: riskLevel,
     });
 
-  } catch (error) {
-    console.error('Error in calculate-savings:', error);
-    return new Response(
-      JSON.stringify({ 
-        error: error instanceof Error ? error.message : 'Unknown error',
-        details: 'Failed to calculate savings'
-      }), 
-      {
-        status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      }
-    );
+    return successResponse(result, correlationId);
+
+  } catch (err) {
+    return errorResponse(err as Error, 500, correlationId);
   }
 });

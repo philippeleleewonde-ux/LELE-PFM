@@ -107,11 +107,11 @@ const AIInsightCard = ({ insight, onDismiss, onActionClick }: AIInsightCardProps
   const getInsightBorderColor = () => {
     switch (insight.type) {
       case 'alert':
-        return 'border-red-200 bg-red-50';
+        return 'border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950/50';
       case 'opportunity':
-        return 'border-yellow-200 bg-yellow-50';
+        return 'border-yellow-200 dark:border-yellow-800 bg-yellow-50 dark:bg-yellow-950/50';
       case 'info':
-        return 'border-blue-200 bg-blue-50';
+        return 'border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-950/50';
     }
   };
 

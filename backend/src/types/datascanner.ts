@@ -7,6 +7,8 @@ export interface BusinessLine {
   revenue_n: number
   revenue_n_minus_1: number
   headcount_n?: number
+  team_count?: number
+  budget_n?: number
   evolution_percent?: number
   confidence?: number
 }

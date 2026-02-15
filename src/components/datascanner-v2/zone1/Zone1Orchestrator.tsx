@@ -73,7 +73,7 @@ const WORKFLOW_STEPS: Array<{
 
 export function Zone1Orchestrator({ jobId, onZoneComplete }: Zone1OrchestratorProps) {
   const { state } = useZone1Context()
-  const { setCurrentStep, setJobId, resetState } = useZone1Actions()
+  const { setStep: setCurrentStep, setJobId, reset: resetState } = useZone1Actions()
 
   const [canGoBack, setCanGoBack] = useState(false)
   const [canGoNext, setCanGoNext] = useState(false)

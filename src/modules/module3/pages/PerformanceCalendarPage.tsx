@@ -226,6 +226,15 @@ const THRESHOLDS = {
   // < 85% = Rouge (Critique)
 };
 
+// ✅ FIX 08/02/2026: Helper unifié pour le formatage des montants
+// Toutes les valeurs internes sont en unité de base (€, ¥, $, etc.)
+// L'abréviation K/M est purement visuelle (compact display)
+function formatAmount(val: number): string {
+  if (val >= 1000000) return `${(val / 1000000).toFixed(1)}M`;
+  if (val >= 1000) return `${(val / 1000).toFixed(0)}K`;
+  return val.toFixed(0);
+}
+
 // ============================================
 // CONSTANTES FILTRES
 // ============================================
@@ -868,12 +877,6 @@ const YearView = ({
   onYearClick,
   selectedBusinessLine = 'all'  // ✅ FIX 07/02/2026
 }: YearViewProps) => {
-  const formatAmount = (val: number) => {
-    if (val >= 1000000) return `${(val / 1000000).toFixed(1)}M`;
-    if (val >= 1000) return `${(val / 1000).toFixed(0)}K`;
-    return val.toFixed(0);
-  };
-
   // ✅ FIX 07/02/2026: Helper pour calculer les totaux filtrés par ligne d'activité
   const getFilteredYearTotals = (data: YearData | undefined) => {
     if (!data) return { totalTarget: 0, totalActual: 0 };
@@ -983,7 +986,7 @@ const YearView = ({
                   <div className="text-center p-3 bg-white/50 dark:bg-slate-800/50 rounded-lg">
                     <p className="text-xs text-slate-500 dark:text-slate-400 uppercase font-medium mb-1">Objectif</p>
                     <p className="text-xl font-bold text-indigo-600 dark:text-indigo-400">
-                      {formatAmount(data?.totalTarget || 0)} {currencySymbol}
+                      {formatAmount(totalTarget)} {currencySymbol}
                     </p>
                   </div>
                   <div className="text-center p-3 bg-white/50 dark:bg-slate-800/50 rounded-lg">
@@ -996,7 +999,7 @@ const YearView = ({
                           "text-red-600 dark:text-red-400"
                         : "text-slate-400"
                     )}>
-                      {formatAmount(data?.totalActual || 0)} {currencySymbol}
+                      {formatAmount(totalActual)} {currencySymbol}
                     </p>
                   </div>
                 </div>
@@ -1061,12 +1064,6 @@ const MonthView = ({
   onBackToYears,
   selectedBusinessLine = 'all'  // ✅ FIX 07/02/2026
 }: MonthViewProps) => {
-  const formatAmount = (val: number) => {
-    if (val >= 1000000) return `${(val / 1000000).toFixed(1)}M`;
-    if (val >= 1000) return `${(val / 1000).toFixed(0)}K`;
-    return val.toFixed(0);
-  };
-
   // ✅ FIX 07/02/2026: Helper pour obtenir les valeurs filtrées par ligne
   const getFilteredWeekValues = (week: WeekData) => {
     if (selectedBusinessLine === 'all') {
@@ -1276,12 +1273,6 @@ const WeekCell = ({
   // ✅ FIX 07/02/2026: Utiliser les valeurs filtrées pour le pourcentage
   const percent = displayTarget > 0 ? Math.round((displayActual / displayTarget) * 100) : 0;
 
-  // Formatage compact des montants
-  const formatAmount = (val: number) => {
-    if (val >= 1000) return `${(val / 1000).toFixed(0)}K`;
-    return val.toFixed(0);
-  };
-
   // ✅ WCAG: Générer un label accessible pour les lecteurs d'écran
   const getAriaLabel = () => {
     const statusText = week.status === 'success' ? 'Objectif atteint' :
@@ -1401,7 +1392,8 @@ const WeekDetailPanel = ({
   yearLabel,
   currencySymbol,
   onClose,
-  onToggleLock
+  onToggleLock,
+  selectedBusinessLine = 'all'  // ✅ FIX 08/02/2026: Filtre ligne d'activité
 }: {
   weekData: WeekData | null;
   month: string;
@@ -1410,16 +1402,22 @@ const WeekDetailPanel = ({
   currencySymbol: string;
   onClose: () => void;
   onToggleLock: () => void;
+  selectedBusinessLine?: string;  // ✅ FIX 08/02/2026
 }) => {
   if (!weekData) return null;
 
-  const percent = weekData.target > 0 ? Math.round((weekData.actual / weekData.target) * 100) : 0;
+  // ✅ FIX 08/02/2026: Calculer les valeurs filtrées par ligne d'activité
+  const filtered = useMemo(() => {
+    if (selectedBusinessLine === 'all') {
+      return { target: weekData.target, actual: weekData.actual };
+    }
+    const lineData = weekData.byBusinessLine?.find(bl => bl.lineId === selectedBusinessLine);
+    return lineData
+      ? { target: lineData.target, actual: lineData.actual }
+      : { target: 0, actual: 0 };
+  }, [weekData, selectedBusinessLine]);
 
-  const formatAmount = (val: number) => {
-    if (val >= 1000000) return `${(val / 1000000).toFixed(1)}M`;
-    if (val >= 1000) return `${(val / 1000).toFixed(0)}K`;
-    return val.toFixed(0);
-  };
+  const percent = filtered.target > 0 ? Math.round((filtered.actual / filtered.target) * 100) : 0;
 
   return (
     <motion.div
@@ -1486,7 +1484,7 @@ const WeekDetailPanel = ({
               Objectif Cible
             </p>
             <p className="text-2xl font-bold text-slate-800 dark:text-white">
-              {formatAmount(weekData.target)} {currencySymbol}
+              {formatAmount(filtered.target)} {currencySymbol}
             </p>
           </div>
           <div className={cn(
@@ -1510,7 +1508,7 @@ const WeekDetailPanel = ({
             </p>
             {weekData.hasRealData ? (
               <p className="text-2xl font-bold text-slate-800 dark:text-white">
-                {formatAmount(weekData.actual)} {currencySymbol}
+                {formatAmount(filtered.actual)} {currencySymbol}
               </p>
             ) : (
               <p className="text-sm text-slate-500 dark:text-slate-400 italic">
@@ -1536,8 +1534,8 @@ const WeekDetailPanel = ({
             </span>
           </div>
           <ProgressBar
-            current={weekData.actual}
-            max={weekData.target}
+            current={filtered.actual}
+            max={filtered.target}
             colorClass={
               percent >= THRESHOLDS.SUCCESS ? "bg-emerald-500" :
               percent >= THRESHOLDS.WARNING ? "bg-amber-500" :
@@ -1552,15 +1550,16 @@ const WeekDetailPanel = ({
           <h4 className="font-bold text-slate-700 dark:text-slate-300 mb-4 text-sm">
             Analyse de Performance
           </h4>
+          {filtered.target > 0 || filtered.actual > 0 ? (
           <div className="relative h-40 bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-slate-100 dark:border-slate-700 p-4 flex items-end justify-around">
             {/* Barre Objectif */}
             <div className="flex flex-col items-center group">
               <div className="text-xs font-bold text-slate-500 dark:text-slate-400 mb-1 opacity-0 group-hover:opacity-100 transition">
-                {formatAmount(weekData.target)} {currencySymbol}
+                {formatAmount(filtered.target)} {currencySymbol}
               </div>
               <motion.div
                 initial={{ height: 0 }}
-                animate={{ height: '80%' }}
+                animate={{ height: filtered.target > 0 ? '80%' : '4px' }}
                 transition={{ duration: 0.5, delay: 0.1 }}
                 className="w-12 bg-indigo-400 dark:bg-indigo-500 rounded-t-lg"
               />
@@ -1570,11 +1569,11 @@ const WeekDetailPanel = ({
             {/* Barre Réalisé */}
             <div className="flex flex-col items-center group">
               <div className="text-xs font-bold text-slate-500 dark:text-slate-400 mb-1 opacity-0 group-hover:opacity-100 transition">
-                {weekData.hasRealData ? `${formatAmount(weekData.actual)} ${currencySymbol}` : '-'}
+                {weekData.hasRealData ? `${formatAmount(filtered.actual)} ${currencySymbol}` : '-'}
               </div>
               <motion.div
                 initial={{ height: 0 }}
-                animate={{ height: weekData.hasRealData ? `${Math.min(100, percent) * 0.8}%` : '0%' }}
+                animate={{ height: weekData.hasRealData && filtered.actual > 0 ? `${Math.min(100, percent) * 0.8}%` : '0%' }}
                 transition={{ duration: 0.5, delay: 0.2 }}
                 className={cn(
                   "w-12 rounded-t-lg",
@@ -1587,6 +1586,13 @@ const WeekDetailPanel = ({
               <p className="text-xs font-bold text-slate-600 dark:text-slate-400 mt-2">Réalisé</p>
             </div>
           </div>
+          ) : (
+          <div className="h-40 bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-slate-100 dark:border-slate-700 p-4 flex items-center justify-center">
+            <p className="text-sm text-slate-400 dark:text-slate-500 italic">
+              Aucune donnée disponible pour cette ligne d'activité
+            </p>
+          </div>
+          )}
         </div>
 
         {/* Ventilation par indicateur */}
@@ -1797,12 +1803,6 @@ const MonthDetailPanel = ({
     ? Math.round((monthData.totalActual / monthData.totalTarget) * 100)
     : 0;
   const variance = monthData.totalActual - monthData.totalTarget;
-
-  const formatAmount = (val: number) => {
-    if (val >= 1000000) return `${(val / 1000000).toFixed(1)}M`;
-    if (val >= 1000) return `${(val / 1000).toFixed(0)}K`;
-    return val.toFixed(0);
-  };
 
   const getStatusColor = () => {
     if (percent >= THRESHOLDS.SUCCESS) return 'emerald';
@@ -2114,12 +2114,6 @@ const YearDetailPanel = ({
     : 0;
   const variance = yearData.totalActual - yearData.totalTarget;
 
-  const formatAmount = (val: number) => {
-    if (val >= 1000000) return `${(val / 1000000).toFixed(1)}M`;
-    if (val >= 1000) return `${(val / 1000).toFixed(0)}K`;
-    return val.toFixed(0);
-  };
-
   const getStatusColor = () => {
     if (percent >= THRESHOLDS.SUCCESS) return 'emerald';
     if (percent >= THRESHOLDS.WARNING) return 'amber';
@@ -2368,9 +2362,9 @@ const YearDetailPanel = ({
               Répartition Prime / Trésorerie
             </h4>
             <RatioValidationBadge
-              economiesRealisees={grandTotals.grandTotalEco * 1000}
-              realPrime={grandTotals.grandTotalRealPrime * 1000}
-              realTreso={grandTotals.grandTotalRealTreso * 1000}
+              economiesRealisees={grandTotals.grandTotalEco}
+              realPrime={grandTotals.grandTotalRealPrime}
+              realTreso={grandTotals.grandTotalRealTreso}
               showDetails={true}
             />
           </div>
@@ -2415,9 +2409,10 @@ export default function PerformanceCalendarPage() {
   // ============================================
   // ✅ TRANSFERT DONNÉES: Hook Context GLOBAL pour grandTotals
   // Source: PerformanceRecapPage bloc "TOTAL GÉNÉRAL - Répartition des Performances"
-  // - grandTotals.grandTotalPPR = OBJ (68,612 k¥)
-  // - grandTotals.grandTotalEco = RÉAL (58,899 k¥)
+  // - grandTotals.grandTotalPPR = OBJ (ex: 34305.94) — en unité de base (¥/€/$), PAS en K
+  // - grandTotals.grandTotalEco = RÉAL (ex: 29449.50) — en unité de base (¥/€/$), PAS en K
   // Ces valeurs sont les VRAIES valeurs du bloc "TOTAL GÉNÉRAL" ≠ getGlobalStats()
+  // ✅ FIX 08/02/2026: calculatePPRPrevues() fait déjà K→unité de base (×1000÷3÷4)
   // ============================================
   const {
     grandTotals,
@@ -2635,8 +2630,8 @@ export default function PerformanceCalendarPage() {
   // ============================================
   // ✅ TRANSFERT DONNÉES OBJ/RÉAL: Depuis Context GLOBAL (grandTotals)
   // Source: PerformanceRecapPage bloc "TOTAL GÉNÉRAL - Répartition des Performances"
-  // - grandTotals.grandTotalPPR = OBJ (68,612 k¥) - PPR Prévues hebdo
-  // - grandTotals.grandTotalEco = RÉAL (58,899 k¥) - Total Économies réalisées
+  // - grandTotals.grandTotalPPR = OBJ (ex: 34305.94) - PPR Prévues hebdo, en unité de base (¥/€/$)
+  // - grandTotals.grandTotalEco = RÉAL (ex: 29449.50) - Total Économies réalisées, en unité de base
   // Règle LELE HCM: TRANSFERT de données DIRECT, pas de nouveau calcul
   // ============================================
   useEffect(() => {
@@ -2657,16 +2652,17 @@ export default function PerformanceCalendarPage() {
     // ✅ OBJ HEBDOMADAIRE: Depuis grandTotals (PRIORITÉ)
     // IMPORTANT: grandTotalPPR est DÉJÀ la valeur de la SEMAINE DE LANCEMENT
     // C'est le résultat du bloc "TOTAL GÉNÉRAL" = performances de la semaine
-    // Les valeurs sont en k¥, multiplier par 1000 pour obtenir les ¥
-    // PAS DE DIVISION PAR 52 - ce sont déjà des valeurs hebdomadaires !
-    let objHebdo = objFromGrandTotals * 1000;
+    // ✅ FIX 08/02/2026: Les valeurs du contexte sont DÉJÀ en unité de base (¥/€/$)
+    // car calculatePPRPrevues() fait déjà la conversion K → unité de base (×1000 ÷ 3 ÷ 4)
+    // PAS DE ×1000 ici — PAS DE DIVISION PAR 52 — ce sont déjà des valeurs hebdomadaires !
+    let objHebdo = objFromGrandTotals;
 
     // Fallback si grandTotals n'a pas de données
-    if (objHebdo < 1000) {
-      // Essayer getGlobalStats() comme fallback (aussi en k¥ hebdo)
-      objHebdo = (globalStats.totalPPR || 0) * 1000;
+    if (objHebdo <= 0) {
+      // Essayer getGlobalStats() comme fallback (aussi en unité de base hebdo)
+      objHebdo = globalStats.totalPPR || 0;
 
-      if (objHebdo < 1000) {
+      if (objHebdo <= 0) {
         // Dernier recours: financialParams (attention: ceux-ci peuvent être annuels)
         const pprRef = financialParams?.pprAnnuelReference || 0;
         const gainsN1 = financialParams?.gainsN1 || 0;
@@ -2686,7 +2682,7 @@ export default function PerformanceCalendarPage() {
     }
 
     // Ventilation par indicateur depuis indicatorsPerformance (contexte GLOBAL)
-    // Ces valeurs sont AUSSI des valeurs hebdomadaires (pas de division par 52)
+    // ✅ FIX 08/02/2026: Valeurs DÉJÀ en unité de base (¥/€/$), PAS de ×1000
     const hasIndicatorPerformance = indicatorsPerformance && indicatorsPerformance.length > 0 &&
       indicatorsPerformance.some(ind => ind.pprPrevues > 0);
 
@@ -2694,19 +2690,19 @@ export default function PerformanceCalendarPage() {
 
     const ppr = {
       abs: hasIndicatorPerformance
-        ? (indicatorsPerformance.find(i => i.key === 'abs')?.pprPrevues || 0) * 1000
+        ? (indicatorsPerformance.find(i => i.key === 'abs')?.pprPrevues || 0)
         : equalShare,
       qd: hasIndicatorPerformance
-        ? (indicatorsPerformance.find(i => i.key === 'qd')?.pprPrevues || 0) * 1000
+        ? (indicatorsPerformance.find(i => i.key === 'qd')?.pprPrevues || 0)
         : equalShare,
       oa: hasIndicatorPerformance
-        ? (indicatorsPerformance.find(i => i.key === 'oa')?.pprPrevues || 0) * 1000
+        ? (indicatorsPerformance.find(i => i.key === 'oa')?.pprPrevues || 0)
         : equalShare,
       ddp: hasIndicatorPerformance
-        ? (indicatorsPerformance.find(i => i.key === 'ddp')?.pprPrevues || 0) * 1000
+        ? (indicatorsPerformance.find(i => i.key === 'ddp')?.pprPrevues || 0)
         : equalShare,
       ekh: hasIndicatorPerformance
-        ? (indicatorsPerformance.find(i => i.key === 'ekh')?.pprPrevues || 0) * 1000
+        ? (indicatorsPerformance.find(i => i.key === 'ekh')?.pprPrevues || 0)
         : equalShare,
       total: objHebdo
     };
@@ -2716,18 +2712,17 @@ export default function PerformanceCalendarPage() {
     // ✅ TRANSFERT RÉAL: Depuis grandTotals.grandTotalEco
     // IMPORTANT: grandTotalEco est DÉJÀ la valeur de la SEMAINE DE LANCEMENT
     // C'est le "Total Économies" du bloc "TOTAL GÉNÉRAL" = économies de la semaine
-    // PAS DE DIVISION PAR 52 !
-    let realHebdo = realFromGrandTotals * 1000;
+    // ✅ FIX 08/02/2026: DÉJÀ en unité de base — PAS de ×1000 — PAS de ÷52
+    let realHebdo = realFromGrandTotals;
 
     // Fallback si grandTotals n'a pas de données RÉAL
-    if (realHebdo < 1000) {
-      // Essayer getGlobalStats() comme fallback (aussi en k¥ hebdo)
-      realHebdo = (globalStats.totalEconomies || 0) * 1000;
-      // [DEBUG] console.log('[PerformanceCalendar] 📊 Fallback RÉAL: getGlobalStats().totalEconomies');
+    if (realHebdo <= 0) {
+      // Essayer getGlobalStats() comme fallback (aussi en unité de base hebdo)
+      realHebdo = globalStats.totalEconomies || 0;
     }
 
     // RÉAL par indicateur depuis indicatorsPerformance (contexte GLOBAL)
-    // Ces valeurs sont AUSSI des valeurs hebdomadaires (pas de division par 52)
+    // ✅ FIX 08/02/2026: Valeurs DÉJÀ en unité de base (¥/€/$), PAS de ×1000
     const hasRealByIndicator = indicatorsPerformance && indicatorsPerformance.length > 0 &&
       indicatorsPerformance.some(ind => ind.totalEconomies > 0);
 
@@ -2735,19 +2730,19 @@ export default function PerformanceCalendarPage() {
 
     const real = {
       abs: hasRealByIndicator
-        ? (indicatorsPerformance.find(i => i.key === 'abs')?.totalEconomies || 0) * 1000
+        ? (indicatorsPerformance.find(i => i.key === 'abs')?.totalEconomies || 0)
         : equalShareReal,
       qd: hasRealByIndicator
-        ? (indicatorsPerformance.find(i => i.key === 'qd')?.totalEconomies || 0) * 1000
+        ? (indicatorsPerformance.find(i => i.key === 'qd')?.totalEconomies || 0)
         : equalShareReal,
       oa: hasRealByIndicator
-        ? (indicatorsPerformance.find(i => i.key === 'oa')?.totalEconomies || 0) * 1000
+        ? (indicatorsPerformance.find(i => i.key === 'oa')?.totalEconomies || 0)
         : equalShareReal,
       ddp: hasRealByIndicator
-        ? (indicatorsPerformance.find(i => i.key === 'ddp')?.totalEconomies || 0) * 1000
+        ? (indicatorsPerformance.find(i => i.key === 'ddp')?.totalEconomies || 0)
         : equalShareReal,
       ekh: hasRealByIndicator
-        ? (indicatorsPerformance.find(i => i.key === 'ekh')?.totalEconomies || 0) * 1000
+        ? (indicatorsPerformance.find(i => i.key === 'ekh')?.totalEconomies || 0)
         : equalShareReal,
       total: realHebdo
     };
@@ -3018,8 +3013,11 @@ export default function PerformanceCalendarPage() {
     FISCAL_MONTHS.forEach((month, fiscalMonthIndex) => {
       const weeksInMonth: WeekData[] = [];
 
-      // Nombre de semaines par mois (Décembre et Novembre peuvent avoir 5 semaines)
-      const weeksCount = (fiscalMonthIndex === 0 || fiscalMonthIndex === 11) ? 5 : 4;
+      // ✅ FIX 08/02/2026: Distribution correcte 52 semaines sur 12 mois fiscaux
+      // 52 = 12 × 4 + 4 restantes → 4 mois reçoivent 5 semaines (indices 0, 3, 6, 9)
+      // Cela distribue 1 mois de 5 semaines par trimestre fiscal
+      const MONTHS_WITH_5_WEEKS = [0, 3, 6, 9]; // Déc, Mar, Jun, Sep
+      const weeksCount = MONTHS_WITH_5_WEEKS.includes(fiscalMonthIndex) ? 5 : 4;
 
       for (let w = 1; w <= weeksCount; w++) {
         globalWeekNum++;
@@ -3183,8 +3181,10 @@ export default function PerformanceCalendarPage() {
       // ✅ FIX BUG #2: Utiliser FISCAL_MONTHS (Décembre → Novembre) au lieu de MONTHS_FR
       FISCAL_MONTHS.forEach((month, fiscalMonthIndex) => {
         const weeksInMonth: WeekData[] = [];
-        // Nombre de semaines par mois (Décembre et Novembre peuvent avoir 5 semaines)
-        const weeksCount = (fiscalMonthIndex === 0 || fiscalMonthIndex === 11) ? 5 : 4;
+        // ✅ FIX 08/02/2026: Distribution correcte 52 semaines sur 12 mois fiscaux
+        // 52 = 12 × 4 + 4 restantes → 4 mois reçoivent 5 semaines (indices 0, 3, 6, 9)
+        const MONTHS_WITH_5_WEEKS = [0, 3, 6, 9]; // Déc, Mar, Jun, Sep
+        const weeksCount = MONTHS_WITH_5_WEEKS.includes(fiscalMonthIndex) ? 5 : 4;
 
         for (let w = 1; w <= weeksCount; w++) {
           globalWeekNum++;
@@ -3477,12 +3477,6 @@ export default function PerformanceCalendarPage() {
     }
   }, [selectedWeekData, selectedYearOffset, currentCompany?.id]);
 
-  const formatAmount = (val: number) => {
-    if (val >= 1000000) return `${(val / 1000000).toFixed(1)}M`;
-    if (val >= 1000) return `${(val / 1000).toFixed(0)}K`;
-    return val.toFixed(0);
-  };
-
   // Loading state
   if (loading) {
     return (
@@ -3638,7 +3632,14 @@ export default function PerformanceCalendarPage() {
                   {Object.entries(yearData.months)
                     .filter(([monthName]) => !selectedMonth || monthName === selectedMonth)
                     .map(([monthName, monthData]) => {
-                      const hasData = monthData.weeks.some(week => week.actual > 0 || week.isLocked);
+                      // ✅ FIX 08/02/2026: hasData respecte le filtre ligne d'activité
+                      const hasData = monthData.weeks.some(week => {
+                        if (selectedBusinessLine === 'all') {
+                          return week.actual > 0 || week.isLocked;
+                        }
+                        const lineData = week.byBusinessLine?.find(bl => bl.lineId === selectedBusinessLine);
+                        return (lineData && lineData.actual > 0) || week.isLocked;
+                      });
 
                       return (
                         <Card
@@ -3723,6 +3724,7 @@ export default function PerformanceCalendarPage() {
               currencySymbol={currencyConfig.symbol}
               onClose={() => setSelectedWeekData(null)}
               onToggleLock={handleToggleLock}
+              selectedBusinessLine={selectedBusinessLine}
             />
           )}
         </AnimatePresence>

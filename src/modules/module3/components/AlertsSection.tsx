@@ -73,6 +73,8 @@ const AlertBlock: React.FC<AlertBlockProps> = ({
 
   return (
     <motion.div
+      role="alert"
+      aria-live="polite"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: delay * 0.1, duration: 0.4 }}
@@ -95,15 +97,18 @@ const AlertBlock: React.FC<AlertBlockProps> = ({
 
       {/* Header */}
       <div className="flex items-center gap-2 mb-3">
-        <div className={cn(
-          "p-2 rounded-lg",
-          isWarning ? "bg-amber-100 dark:bg-amber-500/20 text-amber-600 dark:text-amber-400" : "bg-red-100 dark:bg-red-500/20 text-red-600 dark:text-red-400"
-        )}>
+        <div
+          aria-hidden="true"
+          className={cn(
+            "p-2 rounded-lg",
+            isWarning ? "bg-amber-100 dark:bg-amber-500/20 text-amber-600 dark:text-amber-400" : "bg-red-100 dark:bg-red-500/20 text-red-600 dark:text-red-400"
+          )}
+        >
           {icon}
         </div>
         <h3 className={cn(
           "text-sm font-bold uppercase tracking-wide",
-          isWarning ? "text-amber-700 dark:text-amber-300" : "text-red-700 dark:text-red-300"
+          isWarning ? "text-amber-800 dark:text-amber-300" : "text-red-800 dark:text-red-300"
         )}>
           {title}
         </h3>
@@ -130,7 +135,7 @@ const AlertBlock: React.FC<AlertBlockProps> = ({
         <div>
           <p className={cn(
             "text-lg font-semibold",
-            isWarning ? "text-amber-700 dark:text-amber-300" : "text-red-700 dark:text-red-300"
+            isWarning ? "text-amber-800 dark:text-amber-300" : "text-red-800 dark:text-red-300"
           )}>
             {secondaryValue}
           </p>

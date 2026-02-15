@@ -381,7 +381,7 @@ export default function PerformanceCenterPage() {
         let periodEmpDetails: EmployeeDetail[] = [];
 
         // Structure pour stocker les données du bulletin (transfert direct)
-        let bulletinPerformances: any[] = [];
+        let bulletinPerformances: ReturnType<typeof sanitizeEmployeePerformances> = [];
 
         // PRIORITÉ 0: Lire les données du bulletin depuis localStorage (transfert direct)
         try {
@@ -465,7 +465,7 @@ export default function PerformanceCenterPage() {
             .maybeSingle();
 
           if (scoreData?.factors) {
-            const factors = scoreData.factors as any;
+            const factors = scoreData.factors as Record<string, unknown>;
             if (factors.selectedCurrency) {
               setCurrency(factors.selectedCurrency as Currency);
               console.log('[PerformanceCenter] ✅ Currency set to:', factors.selectedCurrency);
@@ -478,8 +478,8 @@ export default function PerformanceCenterPage() {
         // 2. Charger les membres d'équipe avec leur ligne d'activité
         // Note: La table correcte est module3_team_members, pas team_members
         const businessLineIds = (businessLines || []).map(bl => bl.id);
-        let teamMembers: any[] = [];
-        let teamsData: any[] = [];
+        let teamMembers: Array<{ id: string; name: string; professional_category: string | null; tech_level: string | null; business_line_id: string }> = [];
+        let teamsData: Array<{ id: string; business_line_id: string; team_leader_id: string | null }> = [];
 
         if (businessLineIds.length > 0) {
           // Charger les membres ET les teams en parallèle
@@ -687,7 +687,7 @@ export default function PerformanceCenterPage() {
           let totalPrevTreso = 0;
           let totalRealPrime = 0;
           let totalRealTreso = 0;
-          let indicators: any;
+          let indicators: Record<string, IndicatorPerformanceDetail>;
 
           if (bulletinEmpData) {
             // ============================================
@@ -808,12 +808,12 @@ export default function PerformanceCenterPage() {
             };
 
             // Calculer les totaux depuis les indicateurs cachés
-            totalObjectif = Object.values(indicators).reduce((sum: number, ind: any) => sum + ind.objectif, 0);
-            totalEconomies = Object.values(indicators).reduce((sum: number, ind: any) => sum + ind.economiesRealisees, 0);
-            totalPrevPrime = Object.values(indicators).reduce((sum: number, ind: any) => sum + ind.prevPrime, 0);
-            totalPrevTreso = Object.values(indicators).reduce((sum: number, ind: any) => sum + ind.prevTreso, 0);
-            totalRealPrime = Object.values(indicators).reduce((sum: number, ind: any) => sum + ind.realPrime, 0);
-            totalRealTreso = Object.values(indicators).reduce((sum: number, ind: any) => sum + ind.realTreso, 0);
+            totalObjectif = Object.values(indicators).reduce((sum: number, ind: IndicatorPerformanceDetail) => sum + ind.objectif, 0);
+            totalEconomies = Object.values(indicators).reduce((sum: number, ind: IndicatorPerformanceDetail) => sum + ind.economiesRealisees, 0);
+            totalPrevPrime = Object.values(indicators).reduce((sum: number, ind: IndicatorPerformanceDetail) => sum + ind.prevPrime, 0);
+            totalPrevTreso = Object.values(indicators).reduce((sum: number, ind: IndicatorPerformanceDetail) => sum + ind.prevTreso, 0);
+            totalRealPrime = Object.values(indicators).reduce((sum: number, ind: IndicatorPerformanceDetail) => sum + ind.realPrime, 0);
+            totalRealTreso = Object.values(indicators).reduce((sum: number, ind: IndicatorPerformanceDetail) => sum + ind.realTreso, 0);
           } else {
             // ============================================
             // PRIORITÉ 3: FALLBACK - DONNÉES INCOMPLÈTES (AUDIT 06/02/2026)
@@ -843,12 +843,12 @@ export default function PerformanceCenterPage() {
               savoirFaire: calculateIndicatorData('EKH', employeeEntries, pprSettings)
             };
 
-            totalObjectif = Object.values(indicators).reduce((sum: number, ind: any) => sum + ind.objectif, 0);
-            totalEconomies = Object.values(indicators).reduce((sum: number, ind: any) => sum + ind.economiesRealisees, 0);
-            totalPrevPrime = Object.values(indicators).reduce((sum: number, ind: any) => sum + ind.prevPrime, 0);
-            totalPrevTreso = Object.values(indicators).reduce((sum: number, ind: any) => sum + ind.prevTreso, 0);
-            totalRealPrime = Object.values(indicators).reduce((sum: number, ind: any) => sum + ind.realPrime, 0);
-            totalRealTreso = Object.values(indicators).reduce((sum: number, ind: any) => sum + ind.realTreso, 0);
+            totalObjectif = Object.values(indicators).reduce((sum: number, ind: IndicatorPerformanceDetail) => sum + ind.objectif, 0);
+            totalEconomies = Object.values(indicators).reduce((sum: number, ind: IndicatorPerformanceDetail) => sum + ind.economiesRealisees, 0);
+            totalPrevPrime = Object.values(indicators).reduce((sum: number, ind: IndicatorPerformanceDetail) => sum + ind.prevPrime, 0);
+            totalPrevTreso = Object.values(indicators).reduce((sum: number, ind: IndicatorPerformanceDetail) => sum + ind.prevTreso, 0);
+            totalRealPrime = Object.values(indicators).reduce((sum: number, ind: IndicatorPerformanceDetail) => sum + ind.realPrime, 0);
+            totalRealTreso = Object.values(indicators).reduce((sum: number, ind: IndicatorPerformanceDetail) => sum + ind.realTreso, 0);
           }
 
           // Calculer note et grade
@@ -984,8 +984,8 @@ export default function PerformanceCenterPage() {
 
   function calculateIndicatorData(
     kpiType: string,
-    entries: any[],
-    pprSettings: any
+    entries: Array<{ kpi_type: string; duration_hours?: number; duration_minutes?: number; compensation_amount?: number }>,
+    pprSettings: Record<string, number> | null
   ) {
     const indicatorEntries = entries.filter(e => e.kpi_type === kpiType);
 
@@ -1024,7 +1024,7 @@ export default function PerformanceCenterPage() {
   // Helper pour reconstruire un indicateur depuis les données de période validée
   function buildIndicatorFromPeriod(
     key: string,
-    indicators: Record<string, any>,
+    indicators: Record<string, Partial<IndicatorPerformanceDetail> & { pprPrevues?: number }>,
     primeRate: number,
     tresoRate: number
   ) {
@@ -1056,7 +1056,7 @@ export default function PerformanceCenterPage() {
   // ✅ CORRECTION AUDIT 05/02/2026: Plafonnement Réalisé ≤ Prévu (rigueur comptable)
   function buildIndicatorFromBulletin(
     key: string,
-    indicators: Record<string, any>
+    indicators: Record<string, Partial<IndicatorPerformanceDetail>>
   ) {
     const indData = indicators?.[key] || {};
     const objectif = indData.objectif || 0;

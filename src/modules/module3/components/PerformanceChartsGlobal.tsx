@@ -262,13 +262,17 @@ export default function PerformanceChartsGlobal({
         )}
       >
         <div className="flex items-center gap-2 mb-4">
-          <BarChart3 className="w-5 h-5 text-cyan-400" />
+          <BarChart3 className="w-5 h-5 text-cyan-400" aria-hidden="true" />
           <h3 className="text-lg font-semibold text-white">
             Performance par Département
           </h3>
         </div>
 
-        <div className="h-[350px]">
+        <div
+          className="h-[350px]"
+          role="img"
+          aria-label="Graphique à barres comparant les objectifs et réalisations par département"
+        >
           <ResponsiveContainer width="100%" height="100%">
             <BarChart
               data={barChartData}
@@ -283,7 +287,7 @@ export default function PerformanceChartsGlobal({
               />
               <XAxis
                 type="number"
-                tick={{ fill: '#94a3b8', fontSize: 11 }}
+                tick={{ fill: '#64748b', fontSize: 11 }}
                 tickFormatter={(value) => {
                   if (value >= 1000000) return `${(value / 1000000).toFixed(0)}M`;
                   if (value >= 1000) return `${(value / 1000).toFixed(0)}K`;
@@ -294,7 +298,7 @@ export default function PerformanceChartsGlobal({
               <YAxis
                 type="category"
                 dataKey="name"
-                tick={{ fill: '#94a3b8', fontSize: 11 }}
+                tick={{ fill: '#64748b', fontSize: 11 }}
                 width={100}
                 axisLine={{ stroke: 'rgba(255,255,255,0.2)' }}
               />
@@ -341,13 +345,17 @@ export default function PerformanceChartsGlobal({
         )}
       >
         <div className="flex items-center gap-2 mb-4">
-          <PieChartIcon className="w-5 h-5 text-violet-400" />
+          <PieChartIcon className="w-5 h-5 text-violet-400" aria-hidden="true" />
           <h3 className="text-lg font-semibold text-white">
             Répartition des Contributions
           </h3>
         </div>
 
-        <div className="h-[350px] relative">
+        <div
+          className="h-[350px] relative"
+          role="img"
+          aria-label="Graphique circulaire montrant la répartition des contributions par département"
+        >
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
               <Pie

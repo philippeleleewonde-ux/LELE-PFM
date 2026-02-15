@@ -93,6 +93,7 @@ function zone1Reducer(state: Zone1State, action: Zone1Action): Zone1State {
         needsRegrouping: action.payload.needsRegrouping,
         totalDetected: action.payload.totalDetected,
         confidence: action.payload.confidence,
+        isLoading: false,
         currentStep: action.payload.needsRegrouping ? 'regroupement' : 'validation'
       }
 

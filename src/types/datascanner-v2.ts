@@ -119,6 +119,8 @@ export interface BusinessLine {
     revenue?: number
     expenses?: number
     headcount?: number
+    team_count?: number
+    budget?: number
     budget_n1?: number
   }
   confidence: number

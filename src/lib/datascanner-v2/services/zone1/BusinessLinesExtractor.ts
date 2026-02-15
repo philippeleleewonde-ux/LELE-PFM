@@ -132,6 +132,8 @@ function deduplicateBusinessLines(lines: BusinessLine[]): BusinessLine[] {
         revenue: mergeMetric(existing.metrics.revenue, line.metrics.revenue),
         expenses: mergeMetric(existing.metrics.expenses, line.metrics.expenses),
         headcount: mergeMetric(existing.metrics.headcount, line.metrics.headcount),
+        team_count: mergeMetric(existing.metrics.team_count, line.metrics.team_count),
+        budget: mergeMetric(existing.metrics.budget, line.metrics.budget),
         budget_n1: mergeMetric(existing.metrics.budget_n1, line.metrics.budget_n1)
       }
       // Prendre la confidence la plus élevée

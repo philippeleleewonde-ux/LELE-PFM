@@ -1,11 +1,26 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { z } from "https://esm.sh/zod@3.23.8";
 
-// CORS headers
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-correlation-id',
-};
+// CORS headers — restricted to known frontend domains
+const ALLOWED_ORIGINS = [
+  'https://yhidlozgpvzsroetjxqb.supabase.co',
+  'https://lele-hcm.lovable.app',
+  'https://lele-hcm.vercel.app',
+  'http://localhost:8080',
+  'http://localhost:3000',
+  'http://localhost:5173',
+];
+
+function getCorsHeaders(req?: Request): Record<string, string> {
+  const origin = req?.headers.get('Origin') || '';
+  const allowedOrigin = ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0];
+  return {
+    'Access-Control-Allow-Origin': allowedOrigin,
+    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-correlation-id',
+    'Vary': 'Origin',
+  };
+}
 
 // Structured logger
 const logger = {
@@ -32,7 +47,7 @@ const logger = {
 serve(async (req) => {
   // Handle CORS preflight
   if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders });
+    return new Response(null, { headers: getCorsHeaders(req) });
   }
 
   // Generate correlation ID for request tracing
@@ -48,7 +63,7 @@ serve(async (req) => {
       logger.error('Missing authorization header', new Error('Unauthorized'), { correlationId });
       return new Response(
         JSON.stringify({ error: 'Unauthorized', message: 'Missing authorization header' }),
-        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        { status: 401, headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json' } }
       );
     }
 
@@ -70,14 +85,13 @@ serve(async (req) => {
       logger.error('Invalid or expired token', authError || new Error('No user'), { correlationId });
       return new Response(
         JSON.stringify({ error: 'Forbidden', message: 'Invalid or expired token' }),
-        { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        { status: 403, headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json' } }
       );
     }
 
     logger.info('User authenticated', {
       correlationId,
       user_id: user.id,
-      email: user.email
     });
 
     // ============================================================================
@@ -97,7 +111,7 @@ serve(async (req) => {
       });
       return new Response(
         JSON.stringify({ error: 'Forbidden', message: 'User company not found' }),
-        { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        { status: 403, headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json' } }
       );
     }
 
@@ -111,19 +125,58 @@ serve(async (req) => {
     });
 
     // ============================================================================
-    // STEP 3: PARSE REQUEST BODY
+    // STEP 3: PARSE & VALIDATE REQUEST BODY
     // ============================================================================
 
-    const { indicators, companyData, industryBenchmarks } = await req.json();
+    const IndicatorSchema = z.object({
+      name: z.string().min(1),
+      value: z.number().optional(),
+      cost_impact: z.number().default(0),
+    }).passthrough();
 
-    // Validate that user can only analyze their own company data
-    // (In production, you should verify companyData.id === companyId)
+    const CompanyDataSchema = z.object({
+      name: z.string().optional(),
+      industry: z.string().min(1, 'companyData.industry is required'),
+      employees_count: z.number().int().positive('companyData.employees_count must be positive'),
+    }).passthrough();
 
-    logger.info('Request payload received', {
+    const IndustryBenchmarksSchema = z.object({
+      averageSavings: z.number().default(100000),
+      topPerformers: z.number().optional(),
+    }).passthrough();
+
+    const AnalyzePerformancePayloadSchema = z.object({
+      indicators: z.array(IndicatorSchema).min(1, 'At least 1 indicator required'),
+      companyData: CompanyDataSchema,
+      industryBenchmarks: IndustryBenchmarksSchema.default({ averageSavings: 100000 }),
+    });
+
+    const rawBody = await req.json();
+    const parseResult = AnalyzePerformancePayloadSchema.safeParse(rawBody);
+
+    if (!parseResult.success) {
+      logger.error('Payload validation failed', new Error('Validation Error'), {
+        correlationId,
+        user_id: user.id,
+        errors: parseResult.error.issues.map(i => ({ path: i.path.join('.'), message: i.message })),
+      });
+      return new Response(
+        JSON.stringify({
+          error: 'Validation Error',
+          message: parseResult.error.issues.map(i => `${i.path.join('.')}: ${i.message}`).join('; '),
+          correlation_id: correlationId,
+        }),
+        { status: 400, headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const { indicators, companyData, industryBenchmarks } = parseResult.data;
+
+    logger.info('Request payload validated', {
       correlationId,
       user_id: user.id,
       company_id: companyId,
-      indicators_count: indicators?.length || 0,
+      indicators_count: indicators.length,
       company_name: companyData?.name
     });
 
@@ -237,10 +290,10 @@ Objectif: Plan économies 3 ans avec prédictions mensuelles`
     const response = {
       predictions,
       criticalActions: [
-        `Réduire l'absentéisme de ${Math.round(Math.random() * 5 + 10)}%`,
+        "Réduire l'absentéisme de 15%",
         "Former les équipes sur la qualité",
         "Mettre en place des protocoles de sécurité renforcés",
-        "Optimiser les processus de production"
+        "Optimiser les processus de production",
       ],
       aiInsights: aiContent,
       riskFactors: [
@@ -267,7 +320,7 @@ Objectif: Plan économies 3 ans avec prédictions mensuelles`
     });
 
     return new Response(JSON.stringify(response), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json', 'X-Correlation-ID': correlationId },
+      headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json', 'X-Correlation-ID': correlationId },
     });
 
   } catch (error) {
@@ -281,7 +334,7 @@ Objectif: Plan économies 3 ans avec prédictions mensuelles`
       }),
       {
         status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json', 'X-Correlation-ID': correlationId },
+        headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json', 'X-Correlation-ID': correlationId },
       }
     );
   }

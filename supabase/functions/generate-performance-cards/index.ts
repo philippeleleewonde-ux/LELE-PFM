@@ -1,24 +1,102 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { z } from "https://esm.sh/zod@3.23.8";
+import { withAuth, successResponse, errorResponse, logger } from "../_shared/middleware.ts";
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-};
+// ============================================================================
+// ZOD SCHEMAS — Input validation
+// ============================================================================
+
+const EmployeeDataSchema = z.object({
+  id: z.string().optional(),
+  firstName: z.string().min(1, 'employeeData.firstName is required'),
+  lastName: z.string().min(1, 'employeeData.lastName is required'),
+  position: z.string().optional(),
+  department: z.string().optional(),
+  metrics: z.record(z.number()).optional().default({}),
+}).passthrough();
+
+const TeamContextSchema = z.object({
+  teamName: z.string().optional(),
+}).passthrough().optional();
+
+const GoalSchema = z.object({
+  description: z.string().optional(),
+}).passthrough();
+
+const GenerateCardPayloadSchema = z.object({
+  employeeData: EmployeeDataSchema,
+  teamContext: TeamContextSchema,
+  goals: z.array(GoalSchema).optional().default([]),
+  history: z.array(z.any()).optional().default([]),
+});
+
+// ============================================================================
+// Helper: Parse AI JSON response safely
+// ============================================================================
+
+function parseAIJSON(content: string): Record<string, any> | null {
+  try {
+    // Try direct JSON parse
+    return JSON.parse(content);
+  } catch {
+    // Try extracting JSON from markdown code blocks
+    const jsonMatch = content.match(/```(?:json)?\s*([\s\S]*?)```/);
+    if (jsonMatch) {
+      try {
+        return JSON.parse(jsonMatch[1].trim());
+      } catch {
+        return null;
+      }
+    }
+    return null;
+  }
+}
+
+// ============================================================================
 
 serve(async (req) => {
-  if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders });
-  }
+  // Apply middleware: auth required, rate limited
+  const { context, error } = await withAuth(req, {
+    requireAuth: true,
+    rateLimitPerMinute: 30,
+  });
+
+  if (error) return error;
+
+  const { correlationId, user, companyId } = context;
 
   try {
-    const { employeeData, teamContext, goals, history } = await req.json();
+    const rawBody = await req.json();
+    const parseResult = GenerateCardPayloadSchema.safeParse(rawBody);
+
+    if (!parseResult.success) {
+      logger.error('Payload validation failed', new Error('Validation Error'), {
+        correlationId,
+        user_id: user.id,
+        errors: parseResult.error.issues.map(i => ({ path: i.path.join('.'), message: i.message })),
+      });
+      return errorResponse(
+        `Validation Error: ${parseResult.error.issues.map(i => `${i.path.join('.')}: ${i.message}`).join('; ')}`,
+        400,
+        correlationId
+      );
+    }
+
+    const { employeeData, teamContext, goals, history } = parseResult.data;
+
+    logger.info('Generating performance card', {
+      correlationId,
+      user_id: user.id,
+      company_id: companyId,
+      employee_id: employeeData.id,
+    });
+
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
 
     if (!LOVABLE_API_KEY) {
-      throw new Error('LOVABLE_API_KEY not configured');
+      logger.error('LOVABLE_API_KEY not configured', new Error('Missing API key'), { correlationId });
+      throw new Error('AI API configuration error');
     }
-
-    console.log('Generating performance card for:', employeeData.firstName, employeeData.lastName);
 
     const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
@@ -30,14 +108,20 @@ serve(async (req) => {
         model: 'google/gemini-2.5-flash',
         messages: [{
           role: 'system',
-          content: `Créez une performance card détaillée et personnalisée avec:
-1. Score global de performance (0-100)
-2. Répartition par compétences avec tendances
-3. 3-5 conseils de coaching concrets et actionnables
-4. 2-3 objectifs SMART pour les 3 prochains mois
-5. Recommandation d'évolution de carrière
-6. Score de potentiel talent (0-100)
-Soyez encourageant, constructif et spécifique. Répondez en JSON structuré.`
+          content: `Créez une performance card détaillée et personnalisée. Répondez UNIQUEMENT en JSON valide avec cette structure exacte:
+{
+  "overallScore": <number 0-100>,
+  "breakdown": {
+    "Productivité": { "score": <number>, "trend": "up|down|stable", "comment": "<string>" },
+    "Collaboration": { "score": <number>, "trend": "up|down|stable", "comment": "<string>" },
+    "Innovation": { "score": <number>, "trend": "up|down|stable", "comment": "<string>" },
+    "Leadership": { "score": <number>, "trend": "up|down|stable", "comment": "<string>" }
+  },
+  "aiCoaching": ["<conseil 1>", "<conseil 2>", "<conseil 3>"],
+  "nextMilestones": [{ "goal": "<string>", "deadline": "<YYYY-MM-DD>", "priority": "high|medium|low" }],
+  "careerPath": "<recommandation carrière>",
+  "talentScore": <number 0-100>
+}`
         }, {
           role: 'user',
           content: `Employé: ${employeeData.firstName} ${employeeData.lastName}
@@ -50,80 +134,80 @@ Objectifs en cours: ${JSON.stringify(goals || [])}
 Historique: ${JSON.stringify(history || [])}
 
 Analysez et générez une performance card complète et motivante.`
-        }]
+        }],
+        temperature: 0.3,
       })
     });
 
     if (!aiResponse.ok) {
       const errorText = await aiResponse.text();
-      console.error('AI API Error:', aiResponse.status, errorText);
+      logger.error('AI API error', new Error(`HTTP ${aiResponse.status}`), {
+        correlationId,
+        user_id: user.id,
+        status: aiResponse.status,
+        error_text: errorText,
+      });
       throw new Error(`AI API error: ${aiResponse.status}`);
     }
 
     const aiResult = await aiResponse.json();
     const aiContent = aiResult.choices[0].message.content;
 
-    // Calculer les scores basés sur les métriques
-    const metrics = employeeData.metrics || {};
-    const baseScore = 75 + Math.floor(Math.random() * 20); // 75-95
+    // Try to parse structured AI response
+    const aiParsed = parseAIJSON(aiContent);
 
-    const breakdown = {
-      "Productivité": { 
-        score: metrics.productivity || baseScore + Math.floor(Math.random() * 10) - 5, 
-        trend: "↗️", 
-        comment: "Excellent progrès ce mois" 
+    // Use AI-parsed values if available, otherwise calculate fallbacks
+    const metrics = employeeData.metrics || {};
+    const fallbackBase = 75;
+
+    const breakdown = aiParsed?.breakdown || {
+      "Productivité": {
+        score: metrics.productivity || fallbackBase + 5,
+        trend: "stable",
+        comment: "Performance stable",
       },
-      "Collaboration": { 
-        score: metrics.collaboration || baseScore + Math.floor(Math.random() * 10) - 5, 
-        trend: "→", 
-        comment: "Stable, peut s'améliorer" 
+      "Collaboration": {
+        score: metrics.collaboration || fallbackBase,
+        trend: "stable",
+        comment: "Collaboration correcte",
       },
-      "Innovation": { 
-        score: metrics.innovation || baseScore + Math.floor(Math.random() * 10) - 5, 
-        trend: "↗️", 
-        comment: "Très créatif, continue !" 
+      "Innovation": {
+        score: metrics.innovation || fallbackBase + 3,
+        trend: "stable",
+        comment: "Potentiel d'innovation",
       },
-      "Leadership": { 
-        score: metrics.leadership || baseScore - 10 + Math.floor(Math.random() * 15), 
-        trend: "↗️", 
-        comment: "Bon potentiel à développer" 
-      }
+      "Leadership": {
+        score: metrics.leadership || fallbackBase - 5,
+        trend: "stable",
+        comment: "En développement",
+      },
     };
 
-    const overallScore = Math.round(
-      Object.values(breakdown).reduce((sum, item) => sum + item.score, 0) / Object.keys(breakdown).length
+    const overallScore = aiParsed?.overallScore || Math.round(
+      Object.values(breakdown).reduce((sum: number, item: any) => sum + (item.score || 0), 0) / Object.keys(breakdown).length
     );
 
-    // Générer des conseils de coaching
-    const aiCoaching = [
-      "🎯 Objectif semaine: Proposer 2 idées innovantes en réunion équipe",
-      "📚 Formation recommandée: Leadership situationnel",
-      "🤝 Mentorat: Collaborer avec un collègue senior pour développer vos compétences"
+    const aiCoaching = aiParsed?.aiCoaching || [
+      "Développer les compétences de collaboration en équipe",
+      "Se former sur les techniques de leadership situationnel",
+      "Chercher des opportunités d'innovation dans les projets courants",
     ];
 
-    // Définir les prochaines étapes
-    const nextMilestones = [
-      { 
-        goal: "Atteindre 85 en collaboration", 
+    const nextMilestones = aiParsed?.nextMilestones || [
+      {
+        goal: "Améliorer la collaboration en équipe",
         deadline: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-        priority: "high"
+        priority: "high",
       },
-      { 
-        goal: "Compléter formation leadership", 
+      {
+        goal: "Compléter une formation de leadership",
         deadline: new Date(Date.now() + 120 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-        priority: "medium"
-      }
+        priority: "medium",
+      },
     ];
 
-    // Calculer le score de talent
-    const talentScore = Math.min(100, overallScore + Math.floor(Math.random() * 10));
-    
-    let careerPath = "Continuer à développer vos compétences actuelles";
-    if (talentScore >= 85) {
-      careerPath = `Progression vers ${employeeData.position?.includes('Senior') ? 'Team Leader' : 'Senior ' + (employeeData.position || 'Spécialiste')} recommandée d'ici 12-18 mois`;
-    } else if (talentScore >= 75) {
-      careerPath = "Excellent potentiel - Opportunités d'évolution à explorer";
-    }
+    const talentScore = aiParsed?.talentScore || Math.min(100, overallScore + 5);
+    const careerPath = aiParsed?.careerPath || "Continuer à développer les compétences actuelles";
 
     const result = {
       employeeId: employeeData.id,
@@ -136,35 +220,29 @@ Analysez et générez une performance card complète et motivante.`
       talentScore,
       aiInsights: aiContent,
       strengths: Object.entries(breakdown)
-        .filter(([_, v]) => v.score >= 80)
-        .map(([k, _]) => k),
+        .filter(([_, v]: [string, any]) => (v.score || 0) >= 80)
+        .map(([k]) => k),
       developmentAreas: Object.entries(breakdown)
-        .filter(([_, v]) => v.score < 75)
-        .map(([k, _]) => k),
+        .filter(([_, v]: [string, any]) => (v.score || 0) < 75)
+        .map(([k]) => k),
       generatedAt: new Date().toISOString(),
       period: {
         start: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-        end: new Date().toISOString().split('T')[0]
-      }
+        end: new Date().toISOString().split('T')[0],
+      },
     };
 
-    console.log('Performance card generated, overall score:', overallScore);
-
-    return new Response(JSON.stringify(result), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    logger.info('Performance card generated', {
+      correlationId,
+      user_id: user.id,
+      company_id: companyId,
+      overall_score: overallScore,
+      ai_parsed: !!aiParsed,
     });
 
-  } catch (error) {
-    console.error('Error in generate-performance-cards:', error);
-    return new Response(
-      JSON.stringify({ 
-        error: error instanceof Error ? error.message : 'Unknown error',
-        details: 'Failed to generate performance card'
-      }), 
-      {
-        status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      }
-    );
+    return successResponse(result, correlationId);
+
+  } catch (err) {
+    return errorResponse(err as Error, 500, correlationId);
   }
 });

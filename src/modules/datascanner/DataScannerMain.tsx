@@ -21,7 +21,18 @@ import './datascanner.css';
 import { Zone1Provider } from '@/contexts/Zone1Context';
 import { Zone1Orchestrator } from '@/components/datascanner-v2/zone1/Zone1Orchestrator';
 
-type AppStep = 'landing' | 'mode_selection' | 'zone1_v2' | 'upload' | 'scanning' | 'validation' | 'results';
+// Zone 2 - Financial History
+import { Zone2Provider } from '@/contexts/Zone2Context';
+import { Zone2Orchestrator } from '@/components/datascanner-v2/zone2/Zone2Orchestrator';
+
+// Zone 3 - Risk Data
+import { Zone3Provider } from '@/contexts/Zone3Context';
+import { Zone3Orchestrator } from '@/components/datascanner-v2/zone3/Zone3Orchestrator';
+
+// Injection Summary
+import { InjectionSummary } from '@/components/datascanner-v2/InjectionSummary';
+
+type AppStep = 'landing' | 'mode_selection' | 'zone1_v2' | 'zone2_v2' | 'zone3_v2' | 'summary' | 'upload' | 'scanning' | 'validation' | 'results';
 type ScannerMode = 'legacy' | 'zone1_v2';
 
 export default function DataScannerMain() {
@@ -29,6 +40,9 @@ export default function DataScannerMain() {
   const [currentStep, setCurrentStep] = useState<AppStep>('landing');
   const [scannerMode, setScannerMode] = useState<ScannerMode>('legacy');
   const [zone1JobId, setZone1JobId] = useState<string | null>(null);
+  const [zone1Complete, setZone1Complete] = useState(false);
+  const [zone2Complete, setZone2Complete] = useState(false);
+  const [zone3Complete, setZone3Complete] = useState(false);
 
   // ⚠️ TEMPORARY: useScanEngine disabled to avoid llmClassifier crash
   // const {
@@ -169,9 +183,22 @@ export default function DataScannerMain() {
   };
 
   const handleZone1Complete = () => {
-    // Après Zone 1, on pourrait passer à Zone 2 ou afficher un résumé
-    alert('Zone 1 complétée ! Fonctionnalité Zone 2 à venir.');
-    handleBackToLanding();
+    setZone1Complete(true);
+    setCurrentStep('zone2_v2');
+  };
+
+  const handleZone2Complete = () => {
+    setZone2Complete(true);
+    setCurrentStep('zone3_v2');
+  };
+
+  const handleZone3Complete = () => {
+    setZone3Complete(true);
+    setCurrentStep('summary');
+  };
+
+  const handleInjectionSuccess = () => {
+    // Could navigate to Module 1 or stay on summary
   };
 
   const handleStartScanning = async () => {
@@ -334,6 +361,73 @@ export default function DataScannerMain() {
                   onZoneComplete={handleZone1Complete}
                 />
               </Zone1Provider>
+            </div>
+          </div>
+        );
+
+      case 'zone2_v2':
+        if (!zone1JobId) return null;
+        return (
+          <div className="datascanner-wrapper p-8">
+            <div className="max-w-6xl mx-auto">
+              <div className="mb-6">
+                <Button onClick={() => setCurrentStep('zone1_v2')} variant="ghost">
+                  <ArrowLeft className="w-4 h-4 mr-2" />
+                  Retour à Zone 1
+                </Button>
+              </div>
+
+              <Zone2Provider>
+                <Zone2Orchestrator
+                  jobId={zone1JobId}
+                  onZoneComplete={handleZone2Complete}
+                />
+              </Zone2Provider>
+            </div>
+          </div>
+        );
+
+      case 'zone3_v2':
+        if (!zone1JobId) return null;
+        return (
+          <div className="datascanner-wrapper p-8">
+            <div className="max-w-6xl mx-auto">
+              <div className="mb-6">
+                <Button onClick={() => setCurrentStep('zone2_v2')} variant="ghost">
+                  <ArrowLeft className="w-4 h-4 mr-2" />
+                  Retour à Zone 2
+                </Button>
+              </div>
+
+              <Zone3Provider>
+                <Zone3Orchestrator
+                  jobId={zone1JobId}
+                  onZoneComplete={handleZone3Complete}
+                />
+              </Zone3Provider>
+            </div>
+          </div>
+        );
+
+      case 'summary':
+        if (!zone1JobId) return null;
+        return (
+          <div className="datascanner-wrapper p-8">
+            <div className="max-w-6xl mx-auto">
+              <div className="mb-6">
+                <Button onClick={() => setCurrentStep('zone3_v2')} variant="ghost">
+                  <ArrowLeft className="w-4 h-4 mr-2" />
+                  Retour à Zone 3
+                </Button>
+              </div>
+
+              <InjectionSummary
+                jobId={zone1JobId}
+                zone1Complete={zone1Complete}
+                zone2Complete={zone2Complete}
+                zone3Complete={zone3Complete}
+                onInjectionSuccess={handleInjectionSuccess}
+              />
             </div>
           </div>
         );

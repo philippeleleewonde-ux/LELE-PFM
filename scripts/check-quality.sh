@@ -16,20 +16,34 @@ npm run lint
 echo "✅ Lint passed!"
 echo ""
 
-# 2. Tests
-echo "🧪 [2/5] Running tests..."
-npm test -- --run
+# 2. Tests with coverage
+echo "🧪 [2/6] Running tests with coverage..."
+npx vitest run --coverage
 echo "✅ Tests passed!"
+
+# 2b. Coverage threshold
+COVERAGE_THRESHOLD=40
+if [ -f coverage/coverage-summary.json ]; then
+  COVERAGE=$(node -e "const c = require('./coverage/coverage-summary.json'); console.log(c.total.lines.pct)")
+  echo "Line coverage: ${COVERAGE}%"
+  if (( $(echo "$COVERAGE < $COVERAGE_THRESHOLD" | bc -l) )); then
+    echo "❌ Coverage ${COVERAGE}% is below ${COVERAGE_THRESHOLD}% threshold"
+    exit 1
+  fi
+  echo "✅ Coverage ${COVERAGE}% meets ${COVERAGE_THRESHOLD}% threshold"
+else
+  echo "⚠️  Coverage report not found - skipping threshold check"
+fi
 echo ""
 
 # 3. Build
-echo "🏗️  [3/5] Building project..."
+echo "🏗️  [3/6] Building project..."
 npm run build
 echo "✅ Build successful!"
 echo ""
 
 # 4. Bundle size analysis
-echo "📦 [4/5] Analyzing bundle size..."
+echo "📦 [4/6] Analyzing bundle size..."
 MAIN_BUNDLE=$(ls -lh dist/assets/index-*.js | awk '{print $5, $9}')
 echo "Main bundle: $MAIN_BUNDLE"
 
@@ -45,7 +59,7 @@ fi
 echo ""
 
 # 5. TypeScript 'any' check
-echo "🔒 [5/5] Checking for 'any' types..."
+echo "🔒 [5/6] Checking for 'any' types..."
 ANY_COUNT=$(grep -rn ": any" src --include="*.ts" --include="*.tsx" | grep -v "test.tsx" | wc -l | tr -d ' ')
 
 echo "Found $ANY_COUNT 'any' types in source code"

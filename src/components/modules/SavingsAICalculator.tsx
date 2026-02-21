@@ -15,7 +15,7 @@ interface SavingsAICalculatorProps {
 }
 
 export function SavingsAICalculator({ companyId }: SavingsAICalculatorProps) {
-  const { limits } = useAILimits();
+  const { limits, canMakeCall, creditsRemaining, trackCall } = useAILimits();
   const { toast } = useToast();
   const [isCalculating, setIsCalculating] = useState(false);
 
@@ -49,10 +49,12 @@ export function SavingsAICalculator({ companyId }: SavingsAICalculatorProps) {
   });
 
   const handleCalculate = async () => {
-    if (!limits.bankingScore) {
+    if (!canMakeCall || !limits.bankingScore) {
       toast({
-        title: "Fonctionnalité Premium",
-        description: "Le calcul IA et score bancaire nécessitent le plan Gold.",
+        title: 'Crédits insuffisants',
+        description: creditsRemaining === 0
+          ? 'Crédits IA épuisés pour ce mois.'
+          : "Le calcul IA et score bancaire nécessitent le plan Gold.",
         variant: "destructive",
       });
       return;
@@ -60,8 +62,9 @@ export function SavingsAICalculator({ companyId }: SavingsAICalculatorProps) {
     setIsCalculating(true);
     try {
       await refetch();
+      await trackCall();
       toast({ title: "Calcul terminé", description: "Score bancaire généré avec succès." });
-    } catch (error) {
+    } catch {
       toast({ title: "Erreur", description: "Impossible de calculer.", variant: "destructive" });
     } finally {
       setIsCalculating(false);

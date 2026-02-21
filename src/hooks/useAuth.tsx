@@ -65,7 +65,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const signUp = async (params: SignUpParams) => {
     const { email, password, fullName, metadata } = params;
-    const redirectUrl = `${window.location.origin}/dashboard`;
+    const redirectUrl = `${window.location.origin}/profile`;
 
     // ✅ Construire les métadonnées utilisateur avec type strict
     const userData: UserMetadata & { full_name: string } = {
@@ -83,15 +83,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       },
     });
 
-    // 🔍 DIAGNOSTIC LOGGING - CEO Signup Bug Investigation
-    console.group('🔍 [DIAGNOSTIC] Supabase signUp() Called');
-    console.log('📧 Email:', email);
-    console.log('📋 Full Name:', fullName);
-    console.log('🎭 Metadata:', JSON.stringify(metadata, null, 2));
-    console.log('📦 Complete userData:', JSON.stringify(userData, null, 2));
-    console.log('🔗 Redirect URL:', redirectUrl);
-    console.log('⏰ Timestamp:', new Date().toISOString());
-    console.groupEnd();
+    // 🔍 DIAGNOSTIC LOGGING - DEV only (PII protection)
+    if (import.meta.env.DEV) {
+      console.group('[DIAGNOSTIC] Supabase signUp() Called');
+      console.log('Email:', email);
+      console.log('Full Name:', fullName);
+      console.log('Metadata:', JSON.stringify(metadata, null, 2));
+      console.log('Redirect URL:', redirectUrl);
+      console.groupEnd();
+    }
 
     const { data, error } = await supabase.auth.signUp({
       email,
@@ -102,15 +102,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       }
     });
 
-    // 🔍 DIAGNOSTIC LOGGING - Response from Supabase
-    console.group('🔍 [DIAGNOSTIC] Supabase signUp() Response');
     if (error) {
-      console.error('❌ ERROR DETECTED:');
-      console.error('  Message:', error.message);
-      console.error('  Name:', error.name);
-      console.error('  Status:', (error as any).status);
-      console.error('  Full Error Object:', JSON.stringify(error, null, 2));
-      console.error('  Stack:', error.stack);
+      // Log error details (safe — no PII in error objects)
+      console.error('[Auth] signUp failed:', error.message);
 
       // 🚨 SENTRY: Capture auth error with full context
       captureAuthError(error, {
@@ -128,13 +122,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         },
         error: {
           message: error.message,
-          code: (error as any).code,
+          code: (error as Record<string, unknown>).code as string | undefined,
         },
       });
     } else {
-      console.log('✅ Success! User created:', data?.user?.id);
-      console.log('📧 User email:', data?.user?.email);
-      console.log('🆔 User role from metadata:', data?.user?.user_metadata?.role);
+      if (import.meta.env.DEV) {
+        console.log('[Auth] signUp success, userId:', data?.user?.id);
+      }
 
       // 📊 ANALYTICS: Log signup success
       logAuthEvent({
@@ -146,7 +140,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         },
       });
     }
-    console.groupEnd();
 
     // ✅ Retourner l'utilisateur créé en plus de l'erreur
     return { error, user: data?.user || null };
@@ -177,7 +170,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         email,
         error: {
           message: error.message,
-          code: (error as any).code,
+          code: (error as Record<string, unknown>).code as string | undefined,
         },
       });
     } else {
@@ -188,7 +181,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         userId: data.user?.id,
       });
 
-      navigate('/dashboard');
+      navigate('/profile');
     }
 
     return { error };

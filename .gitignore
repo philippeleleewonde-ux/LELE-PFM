@@ -26,13 +26,14 @@ dist-ssr
 # Auto Claude data directory
 .auto-claude/
 
-# Environment files
+# Environment files (CRITICAL: contains secrets — NEVER commit)
 .env
 .env.local
 .env.production
 .env.development
+.env.localnpm
+.env.save
+backend/.env
 
 # Sentry
 .sentryclirc
-.env.localnpm
-.env.save

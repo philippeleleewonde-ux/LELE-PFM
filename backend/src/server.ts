@@ -11,6 +11,7 @@ import express, { Application } from 'express'
 import cors from 'cors'
 import helmet from 'helmet'
 import datascannerRoutes from './routes/datascanner.routes.ts'
+import leLeAIRoutes from './routes/lele-ai.routes.ts'
 import { errorHandler, notFoundHandler } from './middleware/errorHandler.ts'
 
 const app: Application = express()
@@ -56,13 +57,16 @@ app.get('/', (_req, res) => {
     status: 'running',
     endpoints: {
       health: 'GET /api/datascanner/health',
-      extract_zone1: 'POST /api/datascanner/jobs/:jobId/zones/1/extract'
+      extract_zone1: 'POST /api/datascanner/jobs/:jobId/zones/1/extract',
+      lele_ai_health: 'GET /api/lele-ai/health',
+      lele_ai_chat: 'POST /api/lele-ai/chat'
     }
   })
 })
 
 // API Routes
 app.use('/api/datascanner', datascannerRoutes)
+app.use('/api/lele-ai', leLeAIRoutes)
 
 // 404 Handler
 app.use(notFoundHandler)
@@ -88,6 +92,8 @@ app.listen(PORT, () => {
   console.log(`   GET  /                                         - API Info`)
   console.log(`   GET  /api/datascanner/health                  - Health Check`)
   console.log(`   POST /api/datascanner/jobs/:id/zones/1/extract - Extract Zone 1`)
+  console.log(`   GET  /api/lele-ai/health                      - LELE AI Health`)
+  console.log(`   POST /api/lele-ai/chat                        - LELE AI Chat`)
   console.log('\n' + '='.repeat(60) + '\n')
 })
 

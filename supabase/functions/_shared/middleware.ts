@@ -32,26 +32,50 @@ export interface MiddlewareConfig {
 // CORS HEADERS
 // ============================================================================
 
-export const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-correlation-id',
-  'Access-Control-Allow-Methods': 'POST, GET, OPTIONS, PUT, DELETE',
-  'Access-Control-Max-Age': '86400',
-};
+// Allowed origins for CORS — restrict to known frontend domains
+const ALLOWED_ORIGINS = [
+  'https://yhidlozgpvzsroetjxqb.supabase.co',  // Supabase project
+  'https://lele-hcm.lovable.app',                // Lovable production
+  'https://lele-hcm.vercel.app',                 // Vercel production (if used)
+  'http://localhost:8080',                        // Local dev frontend
+  'http://localhost:3000',                        // Local dev alt
+  'http://localhost:5173',                        // Vite dev server
+];
+
+export function getCorsHeaders(req?: Request): Record<string, string> {
+  const origin = req?.headers.get('Origin') || '';
+  const allowedOrigin = ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0];
+
+  return {
+    'Access-Control-Allow-Origin': allowedOrigin,
+    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-correlation-id',
+    'Access-Control-Allow-Methods': 'POST, GET, OPTIONS, PUT, DELETE',
+    'Access-Control-Max-Age': '86400',
+    'Vary': 'Origin',
+  };
+}
+
+// Legacy export for backward compatibility — prefer getCorsHeaders(req)
+export const corsHeaders = getCorsHeaders();
 
 // ============================================================================
 // SECURITY HEADERS
 // ============================================================================
 
-export const securityHeaders = {
-  ...corsHeaders,
-  'X-Content-Type-Options': 'nosniff',
-  'X-Frame-Options': 'DENY',
-  'X-XSS-Protection': '1; mode=block',
-  'Strict-Transport-Security': 'max-age=31536000; includeSubDomains',
-  'Content-Security-Policy': "default-src 'self'",
-  'Referrer-Policy': 'strict-origin-when-cross-origin',
-};
+export function getSecurityHeaders(req?: Request): Record<string, string> {
+  return {
+    ...getCorsHeaders(req),
+    'X-Content-Type-Options': 'nosniff',
+    'X-Frame-Options': 'DENY',
+    'X-XSS-Protection': '1; mode=block',
+    'Strict-Transport-Security': 'max-age=31536000; includeSubDomains',
+    'Content-Security-Policy': "default-src 'self'",
+    'Referrer-Policy': 'strict-origin-when-cross-origin',
+  };
+}
+
+// Legacy export for backward compatibility — prefer getSecurityHeaders(req)
+export const securityHeaders = getSecurityHeaders();
 
 // ============================================================================
 // STRUCTURED LOGGER
@@ -160,13 +184,15 @@ export async function withAuth(
 ): Promise<{ context: RequestContext; error?: Response }> {
   const correlationId = req.headers.get('x-correlation-id') || crypto.randomUUID();
 
+  const reqSecurityHeaders = getSecurityHeaders(req);
+
   // Handle CORS preflight
   if (req.method === 'OPTIONS') {
     return {
       context: {} as RequestContext,
       error: new Response(null, {
         status: 204,
-        headers: securityHeaders
+        headers: reqSecurityHeaders
       }),
     };
   }
@@ -200,7 +226,7 @@ export async function withAuth(
           {
             status: 429,
             headers: {
-              ...securityHeaders,
+              ...reqSecurityHeaders,
               'Content-Type': 'application/json',
               'X-Correlation-ID': correlationId,
               'X-RateLimit-Remaining': String(rateLimit.remaining),
@@ -246,7 +272,7 @@ export async function withAuth(
           {
             status: 401,
             headers: {
-              ...securityHeaders,
+              ...reqSecurityHeaders,
               'Content-Type': 'application/json',
               'X-Correlation-ID': correlationId,
             },
@@ -283,7 +309,7 @@ export async function withAuth(
           {
             status: 403,
             headers: {
-              ...securityHeaders,
+              ...reqSecurityHeaders,
               'Content-Type': 'application/json',
               'X-Correlation-ID': correlationId,
             },
@@ -295,7 +321,6 @@ export async function withAuth(
     logger.info('User authenticated', {
       correlationId,
       user_id: user.id,
-      email: user.email,
     });
 
     // ========================================================================
@@ -323,7 +348,7 @@ export async function withAuth(
           {
             status: 403,
             headers: {
-              ...securityHeaders,
+              ...reqSecurityHeaders,
               'Content-Type': 'application/json',
               'X-Correlation-ID': correlationId,
             },
@@ -441,7 +466,7 @@ export async function withAuth(
         {
           status: 500,
           headers: {
-            ...securityHeaders,
+            ...reqSecurityHeaders,
             'Content-Type': 'application/json',
             'X-Correlation-ID': correlationId,
           },
@@ -478,7 +503,7 @@ export function errorResponse(
     {
       status,
       headers: {
-        ...securityHeaders,
+        ...getSecurityHeaders(),
         'Content-Type': 'application/json',
         ...(correlationId && { 'X-Correlation-ID': correlationId }),
       },
@@ -507,7 +532,7 @@ export function successResponse(
     {
       status: 200,
       headers: {
-        ...securityHeaders,
+        ...getSecurityHeaders(),
         'Content-Type': 'application/json',
         ...(correlationId && { 'X-Correlation-ID': correlationId }),
         ...additionalHeaders,

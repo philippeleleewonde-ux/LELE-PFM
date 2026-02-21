@@ -20,10 +20,21 @@ interface UserStats {
 }
 
 serve(async (req: Request) => {
-  // CORS headers
+  // CORS headers — restricted to known frontend domains
+  const ALLOWED_ORIGINS = [
+    'https://yhidlozgpvzsroetjxqb.supabase.co',
+    'https://lele-hcm.lovable.app',
+    'https://lele-hcm.vercel.app',
+    'http://localhost:8080',
+    'http://localhost:3000',
+    'http://localhost:5173',
+  ];
+  const origin = req.headers.get('Origin') || '';
+  const allowedOrigin = ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0];
   const corsHeaders = {
-    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Origin': allowedOrigin,
     'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+    'Vary': 'Origin',
   }
 
   // Handle CORS preflight

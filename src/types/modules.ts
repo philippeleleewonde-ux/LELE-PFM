@@ -1,5 +1,15 @@
 import { UserRole } from './roles';
 
+// Pages accessibles par rôle (sidebar items hors modules)
+export const PAGE_PERMISSIONS: Record<UserRole, string[]> = {
+  CEO:         ['profil-user', 'profil-entreprise', 'ia-lele', 'financial-dept', 'hr-dept', 'cost-savings', 'lines-performance', 'performance-cards', 'pricing', 'settings'],
+  CONSULTANT:  ['profil-user', 'profil-entreprise', 'ia-lele', 'financial-dept', 'hr-dept', 'cost-savings', 'lines-performance', 'performance-cards', 'pricing', 'settings'],
+  RH_MANAGER:  ['profil-user', 'ia-lele', 'hr-dept', 'performance-cards', 'pricing'],
+  EMPLOYEE:    ['profil-user', 'hr-dept', 'performance-cards', 'pricing'],
+  TEAM_LEADER: ['profil-user', 'cost-savings', 'performance-cards', 'pricing'],
+  BANQUIER:    ['profil-user', 'pricing'],
+};
+
 export type ModuleNumber = 1 | 2 | 3 | 4;
 export type ModulePermission = 'read' | 'write' | 'admin';
 

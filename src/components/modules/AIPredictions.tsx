@@ -15,7 +15,7 @@ interface AIPredictionsProps {
 }
 
 export function AIPredictions({ companyId }: AIPredictionsProps) {
-  const { limits } = useAILimits();
+  const { limits, canMakeCall, creditsRemaining, trackCall } = useAILimits();
   const { toast } = useToast();
   const [isAnalyzing, setIsAnalyzing] = useState(false);
 
@@ -54,7 +54,7 @@ export function AIPredictions({ companyId }: AIPredictionsProps) {
     queryFn: async () => {
       if (!limits.predictiveAi) return null;
 
-      const { data, error } = await supabase.functions.invoke('analyze-performance', {
+      const { data, error } = await supabase.functions.invoke('analyze-performance-secure', {
         body: {
           indicators: indicators || [],
           companyData: companyData || {},
@@ -72,10 +72,12 @@ export function AIPredictions({ companyId }: AIPredictionsProps) {
   });
 
   const handleAnalyze = async () => {
-    if (!limits.predictiveAi) {
+    if (!canMakeCall) {
       toast({
-        title: "Fonctionnalité Premium",
-        description: "Les prédictions IA nécessitent un plan Silver ou supérieur.",
+        title: 'Crédits insuffisants',
+        description: creditsRemaining === 0
+          ? 'Crédits IA épuisés pour ce mois.'
+          : "Les prédictions IA nécessitent un plan Silver ou supérieur.",
         variant: "destructive",
       });
       return;
@@ -84,11 +86,12 @@ export function AIPredictions({ companyId }: AIPredictionsProps) {
     setIsAnalyzing(true);
     try {
       await refetch();
+      await trackCall();
       toast({
         title: "Analyse terminée",
         description: "Les prédictions IA ont été générées avec succès.",
       });
-    } catch (error) {
+    } catch {
       toast({
         title: "Erreur",
         description: "Impossible de générer les prédictions.",
@@ -125,7 +128,7 @@ export function AIPredictions({ companyId }: AIPredictionsProps) {
             </div>
             <Button
               onClick={handleAnalyze}
-              disabled={isAnalyzing || isLoading}
+              disabled={isAnalyzing || isLoading || !canMakeCall}
               className="bg-gradient-to-r from-purple-500 to-blue-500"
             >
               <Sparkles className="w-4 h-4 mr-2" />

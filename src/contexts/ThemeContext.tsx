@@ -4,10 +4,11 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 // TYPES
 // ============================================================================
 
-type Theme = 'light' | 'dark';
+type Theme = 'light' | 'dark' | 'bw-light' | 'bw-dark';
 
 interface ThemeContextType {
   theme: Theme;
+  isDark: boolean;
   toggleTheme: () => void;
   setTheme: (theme: Theme) => void;
 }
@@ -19,39 +20,75 @@ interface ThemeContextType {
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 // ============================================================================
+// HELPERS
+// ============================================================================
+
+const VALID_THEMES: Theme[] = ['light', 'dark', 'bw-light', 'bw-dark'];
+
+function isValidTheme(value: string | null): value is Theme {
+  return VALID_THEMES.includes(value as Theme);
+}
+
+function getIsDark(theme: Theme): boolean {
+  return theme === 'dark' || theme === 'bw-dark';
+}
+
+// ============================================================================
 // PROVIDER
 // ============================================================================
 
 export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   // Initialize from localStorage or default to dark mode
   const [theme, setThemeState] = useState<Theme>(() => {
-    // Check localStorage first
-    const savedTheme = localStorage.getItem('lele-hcm-theme') as Theme;
-    if (savedTheme === 'light' || savedTheme === 'dark') {
+    const savedTheme = localStorage.getItem('lele-hcm-theme');
+    if (isValidTheme(savedTheme)) {
       return savedTheme;
     }
-
     // Default to dark mode for LELE HCM platform
     return 'dark';
   });
 
-  // Apply theme to document and persist to localStorage
+  const isDark = getIsDark(theme);
+
+  // Apply theme classes to document and persist to localStorage
   useEffect(() => {
     const root = window.document.documentElement;
 
-    // Remove old theme class
-    root.classList.remove('light', 'dark');
+    // Remove all theme classes
+    root.classList.remove('light', 'dark', 'bw-light', 'bw-dark');
 
-    // Add new theme class
-    root.classList.add(theme);
+    // Add appropriate classes
+    // 'light' or 'dark' controls Tailwind dark: prefix
+    // 'bw-light' or 'bw-dark' activates B&W CSS variable overrides
+    switch (theme) {
+      case 'light':
+        root.classList.add('light');
+        break;
+      case 'dark':
+        root.classList.add('dark');
+        break;
+      case 'bw-light':
+        root.classList.add('light', 'bw-light');
+        break;
+      case 'bw-dark':
+        root.classList.add('dark', 'bw-dark');
+        break;
+    }
 
     // Persist to localStorage
     localStorage.setItem('lele-hcm-theme', theme);
   }, [theme]);
 
-  // Toggle between light and dark
+  // Toggle: preserves B&W variant when toggling light/dark
   const toggleTheme = () => {
-    setThemeState((prev) => (prev === 'light' ? 'dark' : 'light'));
+    setThemeState((prev) => {
+      switch (prev) {
+        case 'light': return 'dark';
+        case 'dark': return 'light';
+        case 'bw-light': return 'bw-dark';
+        case 'bw-dark': return 'bw-light';
+      }
+    });
   };
 
   // Set specific theme
@@ -61,6 +98,7 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   const value: ThemeContextType = {
     theme,
+    isDark,
     toggleTheme,
     setTheme,
   };

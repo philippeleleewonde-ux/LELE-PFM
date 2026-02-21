@@ -10,6 +10,7 @@ import { CompanyProvider } from "@/contexts/CompanyContext";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { SidebarProvider } from "@/contexts/SidebarContext";
 import { PerformanceDataProvider } from "@/contexts/PerformanceDataContext";
+import { LeLeAIProvider } from "@/modules/lele-ai/providers/LeLeAIProvider";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { HelmetProvider } from "react-helmet-async";
 // ParticleBackground is now loaded directly from index.html for better performance
@@ -20,6 +21,7 @@ import Landing from "./pages/Landing";
 import Awards from "./pages/Awards";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
+
 
 // ✅ LAZY LOADING : Toutes les pages protégées pour réduire le bundle initial
 const RoleSelection = lazy(() => import("./pages/RoleSelection"));
@@ -35,10 +37,13 @@ const DataMapping = lazy(() => import("./pages/company-profile/DataMapping"));
 
 // ✅ LAZY LOADING : Modules (très lourds)
 const Module1Dashboard = lazy(() => import("./pages/modules/Module1Dashboard"));
-const Module2Dashboard = lazy(() => import("./pages/modules/Module2Dashboard"));
+const Module2Router = lazy(() => import("./modules/module2/Module2Router"));
+const SatisfactionSurvey = lazy(() => import("./pages/modules/SatisfactionSurvey"));
 const CostSavingsDashboard = lazy(() => import("./pages/modules/CostSavingsDashboard")); // Module 3
 const Module4Dashboard = lazy(() => import("./pages/modules/Module4Dashboard"));
 const DataScannerDashboard = lazy(() => import("./pages/modules/DataScannerDashboard"));
+const Module5Router = lazy(() => import("./modules/module5/Module5Router"));
+const AIAssistant = lazy(() => import("./pages/AIAssistant"));
 
 // ✅ LAZY LOADING : Pages Banker
 const BankerDashboard = lazy(() => import("./pages/BankerDashboard"));
@@ -87,6 +92,8 @@ function App() {
                     <CompanyProvider>
                       {/* ✅ PerformanceDataProvider pour données TOTAL GÉNÉRAL → Reporting */}
                       <PerformanceDataProvider>
+                        {/* ✅ LELE AI Provider — Co-pilote IA contextuel */}
+                        <LeLeAIProvider>
                         {/* ✅ Suspense boundary pour lazy loading */}
                         <Suspense fallback={<LoadingFallback />}>
                         <Routes>
@@ -96,6 +103,11 @@ function App() {
                           <Route path="/auth/role-selection" element={<RoleSelection />} />
                           <Route path="/auth/register" element={<Register />} />
                           <Route path="/auth/register-new" element={<RegisterNew />} />
+
+                          {/* Public Survey — accessible sans authentification */}
+                          <Route path="/survey/:accessCode" element={<SatisfactionSurvey />} />
+                          <Route path="/survey" element={<SatisfactionSurvey />} />
+
                           <Route path="/dashboard" element={<ProtectedRoute><DashboardRouter /></ProtectedRoute>} />
                           <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
                           <Route path="/company-profile" element={<ProtectedRoute><CompanyProfile /></ProtectedRoute>} />
@@ -104,24 +116,29 @@ function App() {
                           <Route path="/subscription" element={<ProtectedRoute><Subscription /></ProtectedRoute>} />
                           <Route path="/reports" element={<ProtectedRoute><Reports /></ProtectedRoute>} />
 
-                          {/* Banker Routes */}
-                          <Route path="/banker/dashboard" element={<ProtectedRoute><BankerDashboard /></ProtectedRoute>} />
-                          <Route path="/banker/company/:companyId" element={<ProtectedRoute><CompanyReports /></ProtectedRoute>} />
+                          {/* Banker Routes - Banquiers uniquement */}
+                          <Route path="/banker/dashboard" element={<ProtectedRoute allowedRoles={['BANQUIER']}><BankerDashboard /></ProtectedRoute>} />
+                          <Route path="/banker/company/:companyId" element={<ProtectedRoute allowedRoles={['BANQUIER']}><CompanyReports /></ProtectedRoute>} />
 
-                          {/* Settings Routes */}
-                          <Route path="/settings/banker-access" element={<ProtectedRoute><BankerAccessManagement /></ProtectedRoute>} />
-                          <Route path="/settings/users" element={<ProtectedRoute><UserManagement /></ProtectedRoute>} />
+                          {/* Settings Routes - CEO et Consultant uniquement */}
+                          <Route path="/settings/banker-access" element={<ProtectedRoute allowedRoles={['CEO']}><BankerAccessManagement /></ProtectedRoute>} />
+                          <Route path="/settings/users" element={<ProtectedRoute allowedRoles={['CEO', 'CONSULTANT']}><UserManagement /></ProtectedRoute>} />
 
-                          {/* Module Routes */}
-                          <Route path="/modules/module1/*" element={<ProtectedRoute><Module1Dashboard /></ProtectedRoute>} />
-                          <Route path="/modules/module2/*" element={<ProtectedRoute><Module2Dashboard /></ProtectedRoute>} />
-                          <Route path="/modules/module3/*" element={<ProtectedRoute><CostSavingsDashboard /></ProtectedRoute>} />
-                          <Route path="/modules/module4/*" element={<ProtectedRoute><Module4Dashboard /></ProtectedRoute>} />
-                          <Route path="/modules/datascanner" element={<ProtectedRoute><DataScannerDashboard /></ProtectedRoute>} />
+                          {/* Module Routes - Contrôle d'accès par rôle (cf. MODULE_PERMISSIONS) */}
+                          <Route path="/modules/module1/*" element={<ProtectedRoute allowedRoles={['CEO', 'CONSULTANT']}><Module1Dashboard /></ProtectedRoute>} />
+                          <Route path="/modules/module2/*" element={<ProtectedRoute allowedRoles={['CEO', 'CONSULTANT', 'RH_MANAGER', 'EMPLOYEE']}><Module2Router /></ProtectedRoute>} />
+                          <Route path="/modules/module3/*" element={<ProtectedRoute allowedRoles={['CEO', 'CONSULTANT', 'TEAM_LEADER']}><CostSavingsDashboard /></ProtectedRoute>} />
+                          <Route path="/modules/module4/*" element={<ProtectedRoute allowedRoles={['CEO', 'CONSULTANT', 'EMPLOYEE', 'TEAM_LEADER']}><Module4Dashboard /></ProtectedRoute>} />
+                          <Route path="/modules/psychosocial-risks/*" element={<ProtectedRoute allowedRoles={['CEO', 'CONSULTANT', 'RH_MANAGER', 'EMPLOYEE']}><Module5Router /></ProtectedRoute>} />
+                          <Route path="/modules/datascanner" element={<ProtectedRoute allowedRoles={['CEO', 'CONSULTANT']}><DataScannerDashboard /></ProtectedRoute>} />
+
+                          {/* AI Assistant - IA LELE-HCM */}
+                          <Route path="/ai-assistant" element={<ProtectedRoute allowedRoles={['CEO', 'CONSULTANT', 'RH_MANAGER']}><AIAssistant /></ProtectedRoute>} />
 
                           <Route path="*" element={<NotFound />} />
                         </Routes>
                         </Suspense>
+                        </LeLeAIProvider>
                       </PerformanceDataProvider>
                     </CompanyProvider>
                   </AppProvider>

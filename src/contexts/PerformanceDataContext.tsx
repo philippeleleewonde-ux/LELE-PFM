@@ -53,12 +53,44 @@ export interface GrandTotals {
   grandTotalRealTreso: number;
 }
 
+// AUDIT 06/02/2026: Données par employé pour synchronisation avec Centre de la Performance
+export interface EmployeePerformanceData {
+  employeeId: string;
+  employeeName: string;
+  businessLineId: string;
+  businessLineName: string;
+  professionalCategory: string;
+  globalNote: number;
+  grade: string;
+  employeePerformance: {
+    objectif: number;
+    economiesRealisees: number;
+    prevPrime: number;
+    prevTreso: number;
+    realPrime: number;
+    realTreso: number;
+  };
+  indicators: Record<string, {
+    objectif: number;
+    economiesRealisees: number;
+    prevPrime: number;
+    prevTreso: number;
+    realPrime: number;
+    realTreso: number;
+    totalTemps?: number;
+    totalFrais?: number;
+  }>;
+}
+
 interface PerformanceDataContextType {
   // Bloc 1: Données par indicateur
   indicatorsPerformance: IndicatorPerformance[];
 
   // Bloc 2: Données par ligne d'activité
   businessLinePerformances: BusinessLinePerformance[];
+
+  // AUDIT 06/02/2026: Données par employé pour Centre de la Performance
+  employeePerformancesMap: Map<string, EmployeePerformanceData>;
 
   // Grand totaux
   grandTotals: GrandTotals;
@@ -68,12 +100,18 @@ interface PerformanceDataContextType {
   isDataLoaded: boolean;
 
   // Actions
-  setPerformanceData: (indicators: IndicatorPerformance[], totals: GrandTotals, businessLines?: BusinessLinePerformance[]) => void;
+  setPerformanceData: (
+    indicators: IndicatorPerformance[],
+    totals: GrandTotals,
+    businessLines?: BusinessLinePerformance[],
+    employees?: EmployeePerformanceData[]
+  ) => void;
   clearPerformanceData: () => void;
 
   // Helpers
   getIndicatorByKey: (key: string) => IndicatorPerformance | undefined;
   getBusinessLineById: (id: string) => BusinessLinePerformance | undefined;
+  getEmployeeById: (id: string) => EmployeePerformanceData | undefined;
 }
 
 // ============================================
@@ -114,6 +152,8 @@ interface PerformanceDataProviderProps {
 export function PerformanceDataProvider({ children }: PerformanceDataProviderProps) {
   const [indicatorsPerformance, setIndicatorsPerformance] = useState<IndicatorPerformance[]>(defaultIndicators);
   const [businessLinePerformances, setBusinessLinePerformances] = useState<BusinessLinePerformance[]>([]);
+  // AUDIT 06/02/2026: Map pour accès O(1) aux données employés
+  const [employeePerformancesMap, setEmployeePerformancesMap] = useState<Map<string, EmployeePerformanceData>>(new Map());
   const [grandTotals, setGrandTotals] = useState<GrandTotals>(defaultTotals);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const [isDataLoaded, setIsDataLoaded] = useState(false);
@@ -122,12 +162,31 @@ export function PerformanceDataProvider({ children }: PerformanceDataProviderPro
   const setPerformanceData = useCallback((
     indicators: IndicatorPerformance[],
     totals: GrandTotals,
-    businessLines?: BusinessLinePerformance[]
+    businessLines?: BusinessLinePerformance[],
+    employees?: EmployeePerformanceData[]
   ) => {
     setIndicatorsPerformance(indicators);
     setGrandTotals(totals);
     if (businessLines) {
       setBusinessLinePerformances(businessLines);
+    }
+    // AUDIT 06/02/2026: Stocker les données employés dans une Map pour accès rapide
+    if (employees && employees.length > 0) {
+      const empMap = new Map<string, EmployeePerformanceData>();
+      employees.forEach(emp => empMap.set(emp.employeeId, emp));
+      setEmployeePerformancesMap(empMap);
+      // AUDIT: Log sample IDs pour debug
+      const sampleIds = employees.slice(0, 3).map(e => ({
+        id: e.employeeId,
+        name: e.employeeName,
+        objectif: e.employeePerformance?.objectif
+      }));
+      console.log(`[PerformanceDataContext] ✅ Stored ${employees.length} employees in context. Sample:`, sampleIds);
+    } else {
+      console.warn('[PerformanceDataContext] ⚠️ setPerformanceData called with NO employees!', {
+        employeesParam: employees,
+        employeesLength: employees?.length
+      });
     }
     setLastUpdated(new Date());
     setIsDataLoaded(true);
@@ -138,6 +197,7 @@ export function PerformanceDataProvider({ children }: PerformanceDataProviderPro
         indicators,
         totals,
         businessLines: businessLines || [],
+        employees: employees || [],
         timestamp: new Date().toISOString()
       }));
     } catch (error) {
@@ -149,6 +209,7 @@ export function PerformanceDataProvider({ children }: PerformanceDataProviderPro
   const clearPerformanceData = useCallback(() => {
     setIndicatorsPerformance(defaultIndicators);
     setBusinessLinePerformances([]);
+    setEmployeePerformancesMap(new Map());
     setGrandTotals(defaultTotals);
     setLastUpdated(null);
     setIsDataLoaded(false);
@@ -170,6 +231,11 @@ export function PerformanceDataProvider({ children }: PerformanceDataProviderPro
     return businessLinePerformances.find(bl => bl.businessLineId === id);
   }, [businessLinePerformances]);
 
+  // AUDIT 06/02/2026: Helper pour obtenir un employé par ID
+  const getEmployeeById = useCallback((id: string) => {
+    return employeePerformancesMap.get(id);
+  }, [employeePerformancesMap]);
+
   // Charger les données depuis localStorage au montage
   React.useEffect(() => {
     try {
@@ -177,11 +243,34 @@ export function PerformanceDataProvider({ children }: PerformanceDataProviderPro
       if (stored) {
         const parsed = JSON.parse(stored);
         if (parsed.indicators && parsed.totals) {
+          // AUDIT 06/02/2026: Vérifier si les données sont obsolètes (sans employees)
+          const hasEmployees = parsed.employees && Array.isArray(parsed.employees) && parsed.employees.length > 0;
+
+          if (!hasEmployees) {
+            // Données obsolètes - nettoyer le localStorage pour forcer un recalcul
+            console.warn('[PerformanceDataContext] ⚠️ localStorage obsolète (sans employees) - suppression');
+            localStorage.removeItem('hcm_performance_data');
+            localStorage.removeItem('hcm_bulletin_performances'); // Aussi nettoyer l'ancien cache
+            return; // Ne pas charger les données obsolètes
+          }
+
           setIndicatorsPerformance(parsed.indicators);
           setGrandTotals(parsed.totals);
           if (parsed.businessLines) {
             setBusinessLinePerformances(parsed.businessLines);
           }
+          // AUDIT 06/02/2026: Charger les données employés
+          const empMap = new Map<string, EmployeePerformanceData>();
+          parsed.employees.forEach((emp: EmployeePerformanceData) => empMap.set(emp.employeeId, emp));
+          setEmployeePerformancesMap(empMap);
+          // AUDIT: Log sample IDs pour debug localStorage
+          const sampleIds = parsed.employees.slice(0, 3).map((e: EmployeePerformanceData) => ({
+            id: e.employeeId,
+            name: e.employeeName,
+            objectif: e.employeePerformance?.objectif
+          }));
+          console.log(`[PerformanceDataContext] ✅ Loaded ${parsed.employees.length} employees from localStorage. Sample:`, sampleIds);
+
           setLastUpdated(new Date(parsed.timestamp));
           setIsDataLoaded(true);
         }
@@ -194,13 +283,15 @@ export function PerformanceDataProvider({ children }: PerformanceDataProviderPro
   const value: PerformanceDataContextType = {
     indicatorsPerformance,
     businessLinePerformances,
+    employeePerformancesMap,
     grandTotals,
     lastUpdated,
     isDataLoaded,
     setPerformanceData,
     clearPerformanceData,
     getIndicatorByKey,
-    getBusinessLineById
+    getBusinessLineById,
+    getEmployeeById
   };
 
   return (

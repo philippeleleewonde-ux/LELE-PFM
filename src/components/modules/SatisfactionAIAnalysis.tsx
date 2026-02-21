@@ -15,32 +15,41 @@ interface SatisfactionAIAnalysisProps {
   surveyId: string;
 }
 
-// ✅ Types pour l'analyse IA
-interface AIIssue {
-  title: string;
-  severity: 'high' | 'medium' | 'low';
-  description: string;
+// Types matching the actual Edge Function response shape
+interface CriticalIssue {
+  issue: string;
+  severity: 'HIGH' | 'MEDIUM' | 'LOW';
+  affected: number;
+}
+
+interface ActionItem {
+  action: string;
   impact: string;
+  cost: number;
+  timeframe: string;
 }
 
-interface AIAction {
-  title: string;
-  priority: 'high' | 'medium' | 'low';
-  description: string;
-  timeline: string;
-  expectedImpact: string;
+interface TurnoverRisk {
+  highRisk: number;
+  probability: string;
+  factors?: string[];
 }
 
-interface AIAnalysisResult {
-  criticalIssues: AIIssue[];
-  actionPlan: AIAction[];
-  overallSentiment: 'positive' | 'neutral' | 'negative';
-  satisfactionScore: number;
-  insights: string[];
+interface SatisfactionAnalysisResult {
+  overallSatisfaction: number;
+  trend: string;
+  trendDirection: 'up' | 'down' | 'stable';
+  criticalIssues: CriticalIssue[];
+  turnoverRisk: TurnoverRisk;
+  actionPlan: ActionItem[];
+  aiRecommendations?: string;
+  participationRate: number;
+  responseCount: number;
+  generatedAt: string;
 }
 
 export function SatisfactionAIAnalysis({ surveyId }: SatisfactionAIAnalysisProps) {
-  const { limits } = useAILimits();
+  const { limits, canMakeCall, creditsRemaining, trackCall } = useAILimits();
   const { toast } = useToast();
   const [isAnalyzing, setIsAnalyzing] = useState(false);
 
@@ -71,18 +80,18 @@ export function SatisfactionAIAnalysis({ surveyId }: SatisfactionAIAnalysisProps
     },
   });
 
-  const { data: analysis, isLoading, refetch } = useQuery<AIAnalysisResult | null>({
+  const { data: analysis, isLoading, refetch } = useQuery<SatisfactionAnalysisResult | null>({
     queryKey: ['ai-satisfaction-analysis', surveyId],
     queryFn: async () => {
       if (!limits.aiEnabled) return null;
 
-      const { data, error } = await supabase.functions.invoke<AIAnalysisResult>('analyze-satisfaction', {
+      const { data, error } = await supabase.functions.invoke<SatisfactionAnalysisResult>('analyze-satisfaction', {
         body: {
           responses: responses || [],
           previousSurveys: [],
           employeeProfiles: [],
-          surveyTitle: survey?.title || 'Enquête de satisfaction'
-        }
+          surveyTitle: survey?.title || 'Enquête de satisfaction',
+        },
       });
 
       if (error) throw error;
@@ -92,11 +101,13 @@ export function SatisfactionAIAnalysis({ surveyId }: SatisfactionAIAnalysisProps
   });
 
   const handleAnalyze = async () => {
-    if (!limits.aiEnabled) {
+    if (!canMakeCall) {
       toast({
-        title: "Fonctionnalité Premium",
-        description: "L'analyse IA nécessite un plan Silver ou supérieur.",
-        variant: "destructive",
+        title: 'Crédits insuffisants',
+        description: creditsRemaining === 0
+          ? 'Crédits IA épuisés pour ce mois.'
+          : "L'analyse IA nécessite un plan Silver ou supérieur.",
+        variant: 'destructive',
       });
       return;
     }
@@ -104,15 +115,16 @@ export function SatisfactionAIAnalysis({ surveyId }: SatisfactionAIAnalysisProps
     setIsAnalyzing(true);
     try {
       await refetch();
+      await trackCall();
       toast({
-        title: "Analyse terminée",
+        title: 'Analyse terminée',
         description: "L'analyse IA de satisfaction a été générée avec succès.",
       });
-    } catch (error) {
+    } catch {
       toast({
-        title: "Erreur",
+        title: 'Erreur',
         description: "Impossible de générer l'analyse.",
-        variant: "destructive",
+        variant: 'destructive',
       });
     } finally {
       setIsAnalyzing(false);
@@ -160,14 +172,19 @@ export function SatisfactionAIAnalysis({ surveyId }: SatisfactionAIAnalysisProps
                 Insights automatiques sur {responses?.length || 0} réponses
               </CardDescription>
             </div>
-            <Button
-              onClick={handleAnalyze}
-              disabled={isAnalyzing || isLoading || !responses || responses.length === 0}
-              className="bg-gradient-to-r from-purple-500 to-blue-500"
-            >
-              <Sparkles className="w-4 h-4 mr-2" />
-              {isAnalyzing ? 'Analyse en cours...' : 'Analyser'}
-            </Button>
+            <div className="flex items-center gap-3">
+              <Badge variant="outline" className="text-xs">
+                {creditsRemaining} crédit{creditsRemaining !== 1 ? 's' : ''}
+              </Badge>
+              <Button
+                onClick={handleAnalyze}
+                disabled={isAnalyzing || isLoading || !responses || responses.length === 0 || !canMakeCall}
+                className="bg-gradient-to-r from-purple-500 to-blue-500"
+              >
+                <Sparkles className="w-4 h-4 mr-2" />
+                {isAnalyzing ? 'Analyse en cours...' : 'Analyser'}
+              </Button>
+            </div>
           </div>
         </CardHeader>
         <CardContent>
@@ -229,7 +246,7 @@ export function SatisfactionAIAnalysis({ surveyId }: SatisfactionAIAnalysisProps
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3">
-                    {analysis.criticalIssues.map((issue: AIIssue, index: number) => (
+                    {analysis.criticalIssues.map((issue, index) => (
                       <div
                         key={index}
                         className="flex items-center justify-between p-3 rounded-lg bg-secondary/50"
@@ -253,9 +270,9 @@ export function SatisfactionAIAnalysis({ surveyId }: SatisfactionAIAnalysisProps
               </Card>
 
               {/* Risque de turnover */}
-              <Card className="border-red-500/20 bg-red-500/5">
+              <Card className="border-red-500/20 bg-red-500/5 dark:bg-red-500/10">
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-red-600">
+                  <CardTitle className="flex items-center gap-2 text-red-600 dark:text-red-400">
                     <AlertTriangle className="w-5 h-5" />
                     Risque de Turnover
                   </CardTitle>
@@ -263,13 +280,13 @@ export function SatisfactionAIAnalysis({ surveyId }: SatisfactionAIAnalysisProps
                 <CardContent className="space-y-3">
                   <div className="flex items-center justify-between">
                     <span className="text-sm">Employés à risque élevé:</span>
-                    <span className="text-2xl font-bold text-red-600">
+                    <span className="text-2xl font-bold text-red-600 dark:text-red-400">
                       {analysis.turnoverRisk.highRisk}
                     </span>
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-sm">Probabilité:</span>
-                    <span className="font-medium text-red-600">
+                    <span className="font-medium text-red-600 dark:text-red-400">
                       {analysis.turnoverRisk.probability}
                     </span>
                   </div>
@@ -277,7 +294,7 @@ export function SatisfactionAIAnalysis({ surveyId }: SatisfactionAIAnalysisProps
                     <div className="mt-3 pt-3 border-t">
                       <p className="text-xs text-muted-foreground mb-2">Facteurs de risque:</p>
                       <ul className="space-y-1">
-                        {analysis.turnoverRisk.factors.map((factor: string, index: number) => (
+                        {analysis.turnoverRisk.factors.map((factor, index) => (
                           <li key={index} className="text-sm">• {factor}</li>
                         ))}
                       </ul>
@@ -296,7 +313,7 @@ export function SatisfactionAIAnalysis({ surveyId }: SatisfactionAIAnalysisProps
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3">
-                    {analysis.actionPlan.map((action: AIAction, index: number) => (
+                    {analysis.actionPlan.map((action, index) => (
                       <div
                         key={index}
                         className="p-4 rounded-lg bg-gradient-to-r from-green-500/5 to-emerald-500/5 border border-green-500/20"

@@ -122,8 +122,21 @@ export function Zone1Questionnaire({ jobId, onNext }: Zone1QuestionnaireProps) {
 
       const result = await response.json()
 
+      // Transform backend format (line_name, budget_n) to frontend format (name, budget)
+      const transformedData = {
+        ...result.data,
+        business_lines: (result.data.business_lines || []).map((bl: any) => ({
+          ...bl,
+          name: bl.name || bl.line_name || 'Sans nom',
+          category: bl.category || 'Other Activities',
+          year: bl.year || new Date().getFullYear(),
+          budget: bl.budget ?? bl.budget_n ?? 0,
+          confidence: bl.confidence ?? 0.8,
+        }))
+      }
+
       setExtractedData(
-        result.data,
+        transformedData,
         result.needs_regrouping,
         result.total_detected,
         result.confidence

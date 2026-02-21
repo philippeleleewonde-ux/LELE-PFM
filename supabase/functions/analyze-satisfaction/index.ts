@@ -1,24 +1,92 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { z } from "https://esm.sh/zod@3.23.8";
+import { withAuth, successResponse, errorResponse, logger } from "../_shared/middleware.ts";
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-};
+// ============================================================================
+// ZOD SCHEMAS — Input validation
+// ============================================================================
+
+const SurveyResponseSchema = z.object({
+  responses: z.record(z.union([z.string(), z.number()])).optional().default({}),
+}).passthrough();
+
+const PreviousSurveySchema = z.object({
+  average_score: z.number().optional(),
+}).passthrough();
+
+const AnalyzeSatisfactionPayloadSchema = z.object({
+  responses: z.array(SurveyResponseSchema).min(1, 'At least 1 survey response required'),
+  previousSurveys: z.array(PreviousSurveySchema).optional().default([]),
+  employeeProfiles: z.array(z.any()).optional(),
+  surveyTitle: z.string().min(1, 'surveyTitle is required'),
+});
+
+// ============================================================================
+// Helper: Parse AI JSON response safely
+// ============================================================================
+
+function parseAIJSON(content: string): Record<string, any> | null {
+  try {
+    return JSON.parse(content);
+  } catch {
+    const jsonMatch = content.match(/```(?:json)?\s*([\s\S]*?)```/);
+    if (jsonMatch) {
+      try {
+        return JSON.parse(jsonMatch[1].trim());
+      } catch {
+        return null;
+      }
+    }
+    return null;
+  }
+}
+
+// ============================================================================
 
 serve(async (req) => {
-  if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders });
-  }
+  // Apply middleware: auth required, rate limited
+  const { context, error } = await withAuth(req, {
+    requireAuth: true,
+    rateLimitPerMinute: 30,
+  });
+
+  if (error) return error;
+
+  const { correlationId, user, companyId } = context;
 
   try {
-    const { responses, previousSurveys, employeeProfiles, surveyTitle } = await req.json();
+    const rawBody = await req.json();
+    const parseResult = AnalyzeSatisfactionPayloadSchema.safeParse(rawBody);
+
+    if (!parseResult.success) {
+      logger.error('Payload validation failed', new Error('Validation Error'), {
+        correlationId,
+        user_id: user.id,
+        errors: parseResult.error.issues.map(i => ({ path: i.path.join('.'), message: i.message })),
+      });
+      return errorResponse(
+        `Validation Error: ${parseResult.error.issues.map(i => `${i.path.join('.')}: ${i.message}`).join('; ')}`,
+        400,
+        correlationId
+      );
+    }
+
+    const { responses, previousSurveys, employeeProfiles, surveyTitle } = parseResult.data;
+
+    logger.info('Analyzing satisfaction survey', {
+      correlationId,
+      user_id: user.id,
+      company_id: companyId,
+      survey_title: surveyTitle,
+      response_count: responses.length,
+    });
+
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
 
     if (!LOVABLE_API_KEY) {
-      throw new Error('LOVABLE_API_KEY not configured');
+      logger.error('LOVABLE_API_KEY not configured', new Error('Missing API key'), { correlationId });
+      throw new Error('AI API configuration error');
     }
-
-    console.log('Analyzing satisfaction survey:', surveyTitle, 'Responses:', responses.length);
 
     const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
@@ -30,7 +98,22 @@ serve(async (req) => {
         model: 'google/gemini-2.5-flash',
         messages: [{
           role: 'system',
-          content: `Analysez cette enquête de satisfaction employés. Identifiez les problèmes critiques, prédisez les risques de turnover, et proposez un plan d'action prioritaire avec impact estimé. Répondez en JSON structuré avec des recommandations concrètes.`
+          content: `Analysez cette enquête de satisfaction employés. Répondez UNIQUEMENT en JSON valide avec cette structure:
+{
+  "overallSatisfaction": <number 0-100>,
+  "criticalIssues": [
+    { "issue": "<description>", "severity": "HIGH|MEDIUM|LOW", "affected": <number> }
+  ],
+  "turnoverRisk": {
+    "highRisk": <number>,
+    "probability": "<string ex: 25% dans 6 mois>",
+    "factors": ["<factor1>", "<factor2>"]
+  },
+  "actionPlan": [
+    { "action": "<description>", "impact": "High|Medium|Low", "cost": <number>, "timeframe": "<string>" }
+  ],
+  "aiRecommendations": "<texte libre avec recommandations détaillées>"
+}`
         }, {
           role: 'user',
           content: `Enquête: ${surveyTitle}
@@ -46,20 +129,29 @@ Analysez et fournissez:
 3. 3 problèmes critiques identifiés
 4. Risques de turnover (qui et probabilité)
 5. Plan d'action avec 3 recommandations prioritaires`
-        }]
+        }],
+        temperature: 0.2,
       })
     });
 
     if (!aiResponse.ok) {
       const errorText = await aiResponse.text();
-      console.error('AI API Error:', aiResponse.status, errorText);
+      logger.error('AI API error', new Error(`HTTP ${aiResponse.status}`), {
+        correlationId,
+        user_id: user.id,
+        status: aiResponse.status,
+        error_text: errorText,
+      });
       throw new Error(`AI API error: ${aiResponse.status}`);
     }
 
     const aiResult = await aiResponse.json();
     const aiContent = aiResult.choices[0].message.content;
 
-    // Calculer le score moyen basé sur les réponses
+    // Try to parse structured AI response
+    const aiParsed = parseAIJSON(aiContent);
+
+    // Calculate score from actual responses as fallback
     const totalScore = responses.reduce((sum: number, r: any) => {
       const responseValues = Object.values(r.responses || {});
       const avgResponse = responseValues.reduce((s: number, v: any) => {
@@ -68,83 +160,70 @@ Analysez et fournissez:
       }, 0) / (responseValues.length || 1);
       return sum + avgResponse;
     }, 0);
-    
-    const overallSatisfaction = Math.round((totalScore / responses.length) * 20); // Scale to 100
 
-    // Calculer la tendance
+    const calculatedSatisfaction = Math.round((totalScore / responses.length) * 20);
+
+    // Use AI values if parsed, otherwise fallback to calculated
+    const overallSatisfaction = aiParsed?.overallSatisfaction ?? calculatedSatisfaction;
+
     const previousScore = previousSurveys?.[0]?.average_score || overallSatisfaction - 5;
     const trend = overallSatisfaction - previousScore;
     const trendText = trend > 0 ? `+${trend}%` : `${trend}%`;
+
+    const criticalIssues = aiParsed?.criticalIssues || [
+      {
+        issue: "Équilibre vie pro/perso",
+        severity: overallSatisfaction < 60 ? "HIGH" : "MEDIUM",
+        affected: Math.round(responses.length * 0.35),
+      },
+      {
+        issue: "Communication management",
+        severity: overallSatisfaction < 50 ? "HIGH" : "MEDIUM",
+        affected: Math.round(responses.length * 0.28),
+      },
+      {
+        issue: "Opportunités de développement",
+        severity: "MEDIUM",
+        affected: Math.round(responses.length * 0.22),
+      },
+    ];
+
+    const turnoverRisk = aiParsed?.turnoverRisk || {
+      highRisk: responses.length > 20 ? Math.round(responses.length * 0.08) : 2,
+      probability: overallSatisfaction < 50 ? "45% dans 6 mois" : overallSatisfaction < 70 ? "25% dans 6 mois" : "10% dans 6 mois",
+      factors: ["Satisfaction faible", "Manque reconnaissance", "Charge de travail élevée"],
+    };
+
+    const actionPlan = aiParsed?.actionPlan || [
+      { action: "Mettre en place des horaires flexibles", impact: "High", cost: 0, timeframe: "1 mois" },
+      { action: "Formation managers communication", impact: "Medium", cost: 5000, timeframe: "2 mois" },
+      { action: "Programme de reconnaissance employés", impact: "High", cost: 3000, timeframe: "1 mois" },
+    ];
 
     const analysisResult = {
       overallSatisfaction,
       trend: `${trendText} vs trimestre précédent`,
       trendDirection: trend > 0 ? 'up' : trend < 0 ? 'down' : 'stable',
-      criticalIssues: [
-        { 
-          issue: "Équilibre vie pro/perso", 
-          severity: overallSatisfaction < 60 ? "HIGH" : "MEDIUM", 
-          affected: Math.round(responses.length * 0.35) 
-        },
-        { 
-          issue: "Communication management", 
-          severity: overallSatisfaction < 50 ? "HIGH" : "MEDIUM", 
-          affected: Math.round(responses.length * 0.28) 
-        },
-        { 
-          issue: "Opportunités de développement", 
-          severity: "MEDIUM", 
-          affected: Math.round(responses.length * 0.22) 
-        }
-      ],
-      turnoverRisk: {
-        highRisk: responses.length > 20 ? Math.round(responses.length * 0.08) : 2,
-        probability: overallSatisfaction < 50 ? "45% dans 6 mois" : overallSatisfaction < 70 ? "25% dans 6 mois" : "10% dans 6 mois",
-        factors: ["Satisfaction faible", "Manque reconnaissance", "Charge de travail élevée"]
-      },
-      actionPlan: [
-        { 
-          action: "Mettre en place des horaires flexibles", 
-          impact: "High", 
-          cost: 0,
-          timeframe: "1 mois"
-        },
-        { 
-          action: "Formation managers communication", 
-          impact: "Medium", 
-          cost: 5000,
-          timeframe: "2 mois"
-        },
-        { 
-          action: "Programme de reconnaissance employés", 
-          impact: "High", 
-          cost: 3000,
-          timeframe: "1 mois"
-        }
-      ],
-      aiRecommendations: aiContent,
+      criticalIssues,
+      turnoverRisk,
+      actionPlan,
+      aiRecommendations: aiParsed?.aiRecommendations || aiContent,
       participationRate: Math.round((responses.length / (employeeProfiles?.length || responses.length)) * 100),
       responseCount: responses.length,
-      generatedAt: new Date().toISOString()
+      generatedAt: new Date().toISOString(),
     };
 
-    console.log('Satisfaction analysis completed, score:', overallSatisfaction);
-
-    return new Response(JSON.stringify(analysisResult), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    logger.info('Satisfaction analysis completed', {
+      correlationId,
+      user_id: user.id,
+      company_id: companyId,
+      overall_satisfaction: overallSatisfaction,
+      ai_parsed: !!aiParsed,
     });
 
-  } catch (error) {
-    console.error('Error in analyze-satisfaction:', error);
-    return new Response(
-      JSON.stringify({ 
-        error: error instanceof Error ? error.message : 'Unknown error',
-        details: 'Failed to analyze satisfaction data'
-      }), 
-      {
-        status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      }
-    );
+    return successResponse(analysisResult, correlationId);
+
+  } catch (err) {
+    return errorResponse(err as Error, 500, correlationId);
   }
 });

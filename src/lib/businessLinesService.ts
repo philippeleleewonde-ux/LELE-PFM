@@ -4,6 +4,7 @@
 // ============================================
 
 import { supabase } from '@/integrations/supabase/client';
+import type { PostgrestError } from '@supabase/supabase-js';
 import type {
   BusinessLine,
   BusinessLineInsert,
@@ -21,7 +22,7 @@ export async function getBusinessLines(
   filters?: BusinessLineFilters,
   sortBy: BusinessLineSortBy = 'display_order',
   sortOrder: SortOrder = 'asc'
-): Promise<{ data: BusinessLine[] | null; error: any }> {
+): Promise<{ data: BusinessLine[] | null; error: PostgrestError | null }> {
   let query = supabase
     .from('business_lines')
     .select('*');
@@ -57,7 +58,7 @@ export async function getBusinessLines(
  */
 export async function getBusinessLinesByCompanyId(
   companyId: string
-): Promise<{ data: BusinessLine[] | null; error: any }> {
+): Promise<{ data: BusinessLine[] | null; error: PostgrestError | null }> {
   const { data, error } = await supabase
     .from('business_lines')
     .select('*')
@@ -73,7 +74,7 @@ export async function getBusinessLinesByCompanyId(
  */
 export async function getBusinessLineById(
   id: string
-): Promise<{ data: BusinessLine | null; error: any }> {
+): Promise<{ data: BusinessLine | null; error: PostgrestError | null }> {
   const { data, error } = await supabase
     .from('business_lines')
     .select('*')
@@ -88,7 +89,7 @@ export async function getBusinessLineById(
  */
 export async function createBusinessLine(
   businessLine: BusinessLineInsert
-): Promise<{ data: BusinessLine | null; error: any }> {
+): Promise<{ data: BusinessLine | null; error: PostgrestError | null }> {
   const { data, error } = await supabase
     .from('business_lines')
     .insert(businessLine)
@@ -104,7 +105,7 @@ export async function createBusinessLine(
  */
 export async function createBusinessLines(
   businessLines: BusinessLineInsert[]
-): Promise<{ data: BusinessLine[] | null; error: any }> {
+): Promise<{ data: BusinessLine[] | null; error: PostgrestError | null }> {
   const { data, error } = await supabase
     .from('business_lines')
     .insert(businessLines)
@@ -119,7 +120,7 @@ export async function createBusinessLines(
 export async function updateBusinessLine(
   id: string,
   updates: BusinessLineUpdate
-): Promise<{ data: BusinessLine | null; error: any }> {
+): Promise<{ data: BusinessLine | null; error: PostgrestError | null }> {
   const { data, error } = await supabase
     .from('business_lines')
     .update(updates)
@@ -135,7 +136,7 @@ export async function updateBusinessLine(
  */
 export async function softDeleteBusinessLine(
   id: string
-): Promise<{ data: BusinessLine | null; error: any }> {
+): Promise<{ data: BusinessLine | null; error: PostgrestError | null }> {
   const { data, error } = await supabase
     .from('business_lines')
     .update({ is_active: false })
@@ -151,7 +152,7 @@ export async function softDeleteBusinessLine(
  */
 export async function deleteBusinessLine(
   id: string
-): Promise<{ error: any }> {
+): Promise<{ error: PostgrestError | null }> {
   const { error } = await supabase
     .from('business_lines')
     .delete()
@@ -166,7 +167,7 @@ export async function deleteBusinessLine(
 export async function getBusinessLinesStats(
   userId: string,
   companyId?: string
-): Promise<{ data: BusinessLinesStats | null; error: any }> {
+): Promise<{ data: BusinessLinesStats | null; error: PostgrestError | null }> {
   let query = supabase
     .from('business_lines_stats')
     .select('*')
@@ -188,7 +189,7 @@ export async function getBusinessLinesStats(
 export async function recalculateRates(
   userId: string,
   companyId?: string
-): Promise<{ data: BusinessLine[] | null; error: any }> {
+): Promise<{ data: BusinessLine[] | null; error: PostgrestError | null }> {
   // Get all active business lines
   const { data: lines, error: fetchError } = await getBusinessLines(
     { user_id: userId, company_id: companyId, is_active: true }

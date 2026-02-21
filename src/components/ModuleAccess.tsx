@@ -65,7 +65,7 @@ export function ModuleAccess({
 
   if (!hasAccess) {
     if (redirectOnDenied) {
-      return <Navigate to="/dashboard" replace />;
+      return <Navigate to="/profile" replace />;
     }
 
     if (fallback) {

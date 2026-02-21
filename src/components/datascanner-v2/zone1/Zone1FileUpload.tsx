@@ -104,10 +104,10 @@ export function Zone1FileUpload({
           job_id: jobId,
           filename: file.name,
           storage_path: fileName,
+          storage_bucket: 'datascanner-uploads',
           file_size: file.size,
           file_type: fileType,
           mime_type: file.type,
-          // Note: storage_bucket a une valeur par défaut, on peut l'omettre
           status: 'pending'
         })
 

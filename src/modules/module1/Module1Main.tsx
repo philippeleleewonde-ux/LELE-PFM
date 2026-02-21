@@ -10,6 +10,8 @@ import { UserStorage } from './utils/userStorage';
 import { useAuth } from '@/hooks/useAuth';
 import { PerformanceCountdownBanner } from '@/components/shared/PerformanceCountdownBanner';
 import { LaunchDateProvider } from '@/components/shared/SmartDateWidgets';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { FileSpreadsheet } from 'lucide-react';
 import './module1.css';
 
 export default function Module1Main() {
@@ -68,6 +70,13 @@ export default function Module1Main() {
   const [isLoading, setIsLoading] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState('');
   const [currency, setCurrency] = useState<Currency>('EUR');
+
+  // DataScanner injection detection
+  const datascannerInjection = (formData as any)?._datascannerInjection as {
+    jobId: string
+    injectedAt: string
+    zones: number[]
+  } | undefined;
 
   // Automatically recalculate when any form data changes
   useEffect(() => {
@@ -147,6 +156,21 @@ export default function Module1Main() {
           variant="minimal"
         />
       </div>
+
+      {/* DataScanner Injection Banner */}
+      {datascannerInjection && (
+        <div className="mb-4">
+          <Alert className="border-blue-200 bg-blue-50">
+            <FileSpreadsheet className="h-4 w-4 text-blue-600" />
+            <AlertTitle className="text-blue-900">Données importées du DataScanner</AlertTitle>
+            <AlertDescription className="text-blue-700">
+              Données importées le {new Date(datascannerInjection.injectedAt).toLocaleDateString('fr-FR')}.
+              Pages {datascannerInjection.zones.map(z => z + 1).join(', ')} pré-remplies.
+              Vous pouvez modifier à tout moment.
+            </AlertDescription>
+          </Alert>
+        </div>
+      )}
 
       {/* Demo Data Button */}
       <div className="mb-4">

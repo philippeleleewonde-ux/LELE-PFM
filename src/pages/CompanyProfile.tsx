@@ -98,7 +98,7 @@ const REPORT_CARDS: Omit<ReportCardProps, 'delay'>[] = [
         color: "text-violet-600 dark:text-violet-400",
         gradient: "from-violet-500/10 to-purple-600/10 dark:from-violet-500/20 dark:to-purple-600/20",
         path: "/modules/psychosocial-risks",
-        status: 'pending'
+        status: 'active'
     },
     {
         title: "LELE HCM Banker/Insurer Access",

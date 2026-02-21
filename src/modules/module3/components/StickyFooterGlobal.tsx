@@ -97,6 +97,8 @@ export default function StickyFooterGlobal({
 
   return (
     <motion.footer
+      role="contentinfo"
+      aria-label="Résumé des performances et actions d'export"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       className={cn(
@@ -112,7 +114,7 @@ export default function StickyFooterGlobal({
         <div className="flex items-center gap-4 md:gap-6">
           {/* Effectif */}
           <div className="flex items-center gap-2">
-            <Users className="w-4 h-4 text-violet-400" />
+            <Users className="w-4 h-4 text-violet-400" aria-hidden="true" />
             <span className="text-sm text-slate-400 hidden sm:inline">
               <span className="font-semibold text-white">{totalEmployees}</span> salariés
             </span>
@@ -124,7 +126,7 @@ export default function StickyFooterGlobal({
 
           {/* Économies */}
           <div className="flex items-center gap-2">
-            <PiggyBank className="w-4 h-4 text-emerald-400" />
+            <PiggyBank className="w-4 h-4 text-emerald-400" aria-hidden="true" />
             <span className="text-sm text-slate-400 hidden sm:inline">
               <span className="font-semibold text-emerald-400">{formatAmount(totalEconomies)}</span> {currencyConfig.symbol}
             </span>
@@ -138,7 +140,7 @@ export default function StickyFooterGlobal({
 
           {/* Taux d'atteinte */}
           <div className="flex items-center gap-2">
-            <Target className="w-4 h-4 text-cyan-400" />
+            <Target className="w-4 h-4 text-cyan-400" aria-hidden="true" />
             <span className="text-sm text-slate-400 hidden sm:inline">
               <span className={cn(
                 "font-semibold",

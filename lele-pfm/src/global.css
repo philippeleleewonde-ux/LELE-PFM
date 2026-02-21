@@ -1,0 +1,9 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Responsive mobile shell — dark background behind the 430px app frame */
+html, body, #root {
+  background-color: #0A0B0E;
+  min-height: 100%;
+}

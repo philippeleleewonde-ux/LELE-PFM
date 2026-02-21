@@ -1,0 +1,64 @@
+# Node modules
+node_modules/
+npm-debug.log
+yarn-debug.log
+yarn-error.log
+
+# Expo
+.expo/
+.expo-shared/
+dist/
+build/
+
+# Native builds
+*.jks
+*.p12
+*.cer
+*.certSigningRequest
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Testing
+coverage/
+.jest/
+
+# Build artifacts
+*.o
+*.a
+*.so
+
+# Temporary files
+*.tmp
+tmp/
+temp/
+
+# OS
+Thumbs.db
+.DS_Store
+
+# Mobile development
+/android/
+/ios/
+
+# Yarn
+.yarn/
+.yarn/build-state.yml
+.yarn/install-state.gz
+*.pnp.*
+
+# Bundle analyzer
+.bundle/
+
+# Local development
+local.properties

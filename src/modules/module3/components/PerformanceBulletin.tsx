@@ -56,8 +56,32 @@ import {
   EmployeePerformance,
   getGradeColor,
   getGradeTextColor,
-  INDICATOR_LABELS
+  INDICATOR_LABELS,
+  sanitizeEmployeePerformances
 } from '../types/performanceCenter';
+
+// Import des sous-modules du bulletin
+import {
+  // Types
+  type TabType,
+  type EvolutionViewMode,
+  type PerformanceHistory,
+
+  // Constantes
+  CHART_COLORS,
+
+  // Fonctions utilitaires
+  getProgressColor,
+  getProgressWidth,
+  isZeroPercentage,
+  getProgressTrackClass,
+  generateDemoHistory,
+  calculateTrend,
+  getDepartmentEmployeesFromStorage,
+  calculateBenchmark
+} from './bulletin';
+
+import { BenchmarkSection, EmptyBenchmark } from './bulletin';
 
 // ============================================
 // PROPS
@@ -69,11 +93,9 @@ interface PerformanceBulletinProps {
   currency?: Currency;
 }
 
-// ============================================
-// COULEURS GRAPHIQUES
-// ============================================
+// Note: Les couleurs et helpers sont maintenant dans ./bulletin/bulletinHelpers.ts
 
-const CHART_COLORS = [
+const CHART_COLORS_LOCAL = [
   '#10b981', // emerald - Absentéisme
   '#eab308', // yellow - Qualité
   '#3b82f6', // blue - Accident
@@ -261,7 +283,10 @@ function getDepartmentEmployeesFromStorage(currentBusinessLineId: string): Depar
 
     const parsed = JSON.parse(bulletinData);
     // Structure: { companyId, data: [...] }
-    const allEmployees: DepartmentEmployee[] = parsed.data || [];
+    const rawEmployees: DepartmentEmployee[] = parsed.data || [];
+
+    // ✅ SANITIZATION: Garantir Réalisé ≤ Prévu (rigueur comptable)
+    const allEmployees = sanitizeEmployeePerformances(rawEmployees);
 
     // Filtrer par même Business Line
     return allEmployees.filter(

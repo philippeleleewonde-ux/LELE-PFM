@@ -13,7 +13,8 @@
  * - Bouton pour générer le bulletin de performance
  */
 
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
+import { useVirtualizer } from '@tanstack/react-virtual';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
@@ -48,7 +49,8 @@ import {
   calculateGlobalNote,
   calculateGrade,
   getGradeColor,
-  INDICATOR_LABELS
+  INDICATOR_LABELS,
+  sanitizeEmployeePerformances
 } from '../types/performanceCenter';
 
 import PerformanceBulletin from '../components/PerformanceBulletin';
@@ -56,10 +58,169 @@ import { createPeriodResultsService, EmployeeDetail } from '../services/PeriodRe
 import { createPerformanceCacheService, PerformanceCacheEntry } from '../services/PerformanceCacheService';
 import type { BusinessLinePerformance } from '@/contexts/PerformanceDataContext';
 
+// Diagnostic des performances (accessible via window.diagPerformance)
+import '../utils/performanceDiagnostic';
+
 // ============================================
-// CONSTANTS - Pagination 10K employés
+// CONSTANTS - Virtualisation 10K employés
 // ============================================
-const EMPLOYEES_PER_PAGE = 50; // Nombre d'employés affichés par défaut par ligne
+const EMPLOYEE_ROW_HEIGHT = 64; // Hauteur d'une ligne employé en pixels
+const VIRTUALIZED_LIST_HEIGHT = 480; // Hauteur max du conteneur virtualisé (8 lignes visibles)
+const OVERSCAN_COUNT = 5; // Nombre de lignes pré-rendues au-delà du viewport
+
+// ============================================
+// COMPOSANT VIRTUALISÉ - LISTE EMPLOYÉS
+// ============================================
+
+/**
+ * Liste virtualisée des employés pour performances optimales avec 10K+ entrées.
+ * Utilise @tanstack/react-virtual pour ne rendre que les lignes visibles.
+ *
+ * @param employees - Tableau des employés à afficher
+ * @param onSelectEmployee - Callback pour sélectionner un employé
+ */
+interface VirtualizedEmployeeListProps {
+  employees: EmployeePerformance[];
+  onSelectEmployee: (employee: EmployeePerformance) => void;
+}
+
+function VirtualizedEmployeeList({ employees, onSelectEmployee }: VirtualizedEmployeeListProps) {
+  const parentRef = useRef<HTMLDivElement>(null);
+
+  const virtualizer = useVirtualizer({
+    count: employees.length,
+    getScrollElement: () => parentRef.current,
+    estimateSize: () => EMPLOYEE_ROW_HEIGHT,
+    overscan: OVERSCAN_COUNT
+  });
+
+  const virtualItems = virtualizer.getVirtualItems();
+
+  return (
+    <div className="overflow-x-auto">
+      {/* En-tête fixe du tableau */}
+      <div
+        className="bg-slate-100 dark:bg-slate-700/50 grid grid-cols-[1fr,120px,100px,180px] gap-2 px-6 py-3"
+        role="row"
+        aria-label="En-tête du tableau des performances"
+      >
+        <div
+          className="text-left text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wider"
+          role="columnheader"
+        >
+          Collaborateur
+        </div>
+        <div
+          className="text-center text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wider"
+          role="columnheader"
+        >
+          Note Globale
+        </div>
+        <div
+          className="text-center text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wider"
+          role="columnheader"
+        >
+          Grade
+        </div>
+        <div
+          className="text-right text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wider"
+          role="columnheader"
+        >
+          Bulletin
+        </div>
+      </div>
+
+      {/* Conteneur scrollable virtualisé */}
+      <div
+        ref={parentRef}
+        className="overflow-auto"
+        style={{ height: Math.min(VIRTUALIZED_LIST_HEIGHT, employees.length * EMPLOYEE_ROW_HEIGHT) }}
+        role="table"
+        aria-label="Tableau des performances des employés"
+        aria-rowcount={employees.length}
+      >
+        <div
+          style={{
+            height: `${virtualizer.getTotalSize()}px`,
+            width: '100%',
+            position: 'relative'
+          }}
+        >
+          {virtualItems.map(virtualRow => {
+            const employee = employees[virtualRow.index];
+            return (
+              <div
+                key={employee.id}
+                role="row"
+                aria-rowindex={virtualRow.index + 1}
+                className="absolute top-0 left-0 w-full grid grid-cols-[1fr,120px,100px,180px] gap-2 px-6 items-center hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors border-b border-slate-200 dark:border-slate-700"
+                style={{
+                  height: `${virtualRow.size}px`,
+                  transform: `translateY(${virtualRow.start}px)`
+                }}
+              >
+                {/* Collaborateur */}
+                <div role="cell">
+                  <p className="font-semibold text-slate-900 dark:text-white truncate">
+                    {employee.name}
+                  </p>
+                  <p className="text-sm text-slate-500 dark:text-slate-400 truncate">
+                    {employee.role}
+                  </p>
+                </div>
+
+                {/* Note Globale */}
+                <div role="cell" className="text-center">
+                  <span
+                    className="font-mono font-bold text-lg text-slate-900 dark:text-white"
+                    aria-label={`Note: ${employee.globalNote.toFixed(1)} sur 10`}
+                  >
+                    {employee.globalNote.toFixed(1)}/10
+                  </span>
+                </div>
+
+                {/* Grade */}
+                <div role="cell" className="flex justify-center">
+                  <span
+                    className={cn(
+                      "inline-flex items-center justify-center w-10 h-10 rounded-lg text-white font-bold text-sm",
+                      getGradeColor(employee.grade)
+                    )}
+                    role="img"
+                    aria-label={`Grade ${employee.grade}`}
+                  >
+                    {employee.grade}
+                  </span>
+                </div>
+
+                {/* Bouton Bulletin */}
+                <div role="cell" className="text-right">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => onSelectEmployee(employee)}
+                    className="border-blue-200 dark:border-blue-800 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30"
+                    aria-label={`Générer le bulletin de performance pour ${employee.name}`}
+                  >
+                    <FileText className="w-4 h-4 mr-2" />
+                    Bulletin
+                  </Button>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Indicateur de nombre d'employés */}
+      <div className="px-6 py-2 bg-slate-50 dark:bg-slate-800/50 border-t border-slate-200 dark:border-slate-700">
+        <p className="text-xs text-slate-500 dark:text-slate-400 text-center">
+          {employees.length} collaborateur{employees.length > 1 ? 's' : ''} • Scroll virtualisé pour performances optimales
+        </p>
+      </div>
+    </div>
+  );
+}
 
 // ============================================
 // COMPOSANT PRINCIPAL
@@ -76,8 +237,7 @@ export default function PerformanceCenterPage() {
   const [expandedLines, setExpandedLines] = useState<Set<string>>(new Set());
   const [selectedEmployee, setSelectedEmployee] = useState<EmployeePerformance | null>(null);
 
-  // Pagination par ligne d'activité : { lineId: nombreEmployésAffichés }
-  const [employeesShown, setEmployeesShown] = useState<Record<string, number>>({});
+  // État supprimé: employeesShown - remplacé par virtualisation
   const [weekStart, setWeekStart] = useState<Date>(new Date());
   const [weekEnd, setWeekEnd] = useState<Date>(new Date());
 
@@ -203,7 +363,8 @@ export default function PerformanceCenterPage() {
           if (bulletinData) {
             const parsed = JSON.parse(bulletinData);
             if (parsed.data && parsed.data.length > 0 && parsed.companyId === currentCompany.id) {
-              bulletinPerformances = parsed.data;
+              // ✅ SANITIZATION: Garantir Réalisé ≤ Prévu (rigueur comptable)
+              bulletinPerformances = sanitizeEmployeePerformances(parsed.data);
               console.log('[PerformanceCenter] ✅ PRIORITÉ 0: Bulletin data from localStorage:', bulletinPerformances.length, 'employees');
               console.log('[PerformanceCenter] Sample data:', bulletinPerformances[0]);
             }
@@ -476,8 +637,9 @@ export default function PerformanceCenterPage() {
             totalEconomies = bulletinEmpData.employeePerformance.economiesRealisees;
             totalPrevPrime = bulletinEmpData.employeePerformance.prevPrime;
             totalPrevTreso = bulletinEmpData.employeePerformance.prevTreso;
-            totalRealPrime = bulletinEmpData.employeePerformance.realPrime;
-            totalRealTreso = bulletinEmpData.employeePerformance.realTreso;
+            // ✅ CORRECTION AUDIT 05/02/2026: Plafonnement Réalisé ≤ Prévu (rigueur comptable)
+            totalRealPrime = Math.min(bulletinEmpData.employeePerformance.realPrime || 0, totalPrevPrime);
+            totalRealTreso = Math.min(bulletinEmpData.employeePerformance.realTreso || 0, totalPrevTreso);
 
             // Reconstruire les indicateurs depuis les données du bulletin
             indicators = {
@@ -495,12 +657,14 @@ export default function PerformanceCenterPage() {
             totalEconomies = periodEmpData.totals.totalEconomies || 0;
             totalPrevPrime = periodEmpData.totals.totalPrevPrime || 0;
             totalPrevTreso = periodEmpData.totals.totalPrevTreso || 0;
-            totalRealPrime = periodEmpData.totals.totalRealPrime || 0;
-            totalRealTreso = periodEmpData.totals.totalRealTreso || 0;
+            // ✅ CORRECTION AUDIT 05/02/2026: Plafonnement Réalisé ≤ Prévu (rigueur comptable)
+            totalRealPrime = Math.min(periodEmpData.totals.totalRealPrime || 0, totalPrevPrime);
+            totalRealTreso = Math.min(periodEmpData.totals.totalRealTreso || 0, totalPrevTreso);
 
             // Reconstruire les indicateurs depuis les données de période
-            const primeRate = 0.10;
-            const tresoRate = 0.90;
+            // IMPORTANT: Utiliser les ratios officiels 33%/67% (PRIME_RATIO/TRESO_RATIO)
+            const primeRate = 0.33;
+            const tresoRate = 0.67;
             indicators = {
               absenteisme: buildIndicatorFromPeriod('abs', periodEmpData.indicators, primeRate, tresoRate),
               qualite: buildIndicatorFromPeriod('qd', periodEmpData.indicators, primeRate, tresoRate),
@@ -529,6 +693,12 @@ export default function PerformanceCenterPage() {
                   realTreso: 0
                 };
               }
+              // ✅ CORRECTION AUDIT 04/02/2026: Plafonnement Réalisé ≤ Prévu (rigueur comptable)
+              const prevPrime = cached.prev_prime || (cached.ppr_prevues * 0.33);
+              const prevTreso = cached.prev_treso || (cached.ppr_prevues * 0.67);
+              const rawRealPrime = cached.real_prime || (cached.economies_realisees * 0.33);
+              const rawRealTreso = cached.real_treso || (cached.economies_realisees * 0.67);
+
               return {
                 key: indicatorKey,
                 label: INDICATOR_LABELS[indicatorKey] || indicatorKey.toUpperCase(),
@@ -536,10 +706,10 @@ export default function PerformanceCenterPage() {
                 totalFrais: cached.frais_collectes || 0,
                 objectif: cached.ppr_prevues || 0,
                 economiesRealisees: cached.economies_realisees || 0,
-                prevPrime: cached.prev_prime || (cached.ppr_prevues * 0.33),
-                prevTreso: cached.prev_treso || (cached.ppr_prevues * 0.67),
-                realPrime: cached.real_prime || (cached.economies_realisees * 0.33),
-                realTreso: cached.real_treso || (cached.economies_realisees * 0.67)
+                prevPrime,
+                prevTreso,
+                realPrime: Math.min(rawRealPrime, prevPrime),  // PLAFONNÉ
+                realTreso: Math.min(rawRealTreso, prevTreso)   // PLAFONNÉ
               };
             };
 
@@ -675,18 +845,10 @@ export default function PerformanceCenterPage() {
         console.log('[PerformanceCenter] Final result (lines with employees):', result.length);
         setBusinessLinesWithEmployees(result);
 
-        // OPTIMISATION 10K: Ne pas ouvrir toutes les lignes par défaut
-        // Ouvrir seulement la première ligne si elle existe
+        // OPTIMISATION 10K: Virtualisation activée - ouvrir la première ligne par défaut
         if (result.length > 0) {
           setExpandedLines(new Set([result[0].id]));
         }
-
-        // Initialiser la pagination : EMPLOYEES_PER_PAGE par ligne
-        const initialShown: Record<string, number> = {};
-        result.forEach(bl => {
-          initialShown[bl.id] = EMPLOYEES_PER_PAGE;
-        });
-        setEmployeesShown(initialShown);
 
       } catch (error) {
         console.error('Erreur chargement données:', error);
@@ -730,6 +892,10 @@ export default function PerformanceCenterPage() {
     const primeRate = 0.33;
     const tresoRate = 0.67;
 
+    // ✅ CORRECTION AUDIT 04/02/2026: Plafonnement Réalisé ≤ Prévu (rigueur comptable)
+    const prevPrime = objectif * primeRate;
+    const prevTreso = objectif * tresoRate;
+
     return {
       key: kpiType.toLowerCase(),
       label: INDICATOR_LABELS[kpiType.toLowerCase()] || kpiType,
@@ -737,10 +903,10 @@ export default function PerformanceCenterPage() {
       totalFrais,
       objectif,
       economiesRealisees,
-      prevPrime: objectif * primeRate,
-      prevTreso: objectif * tresoRate,
-      realPrime: economiesRealisees * primeRate,
-      realTreso: economiesRealisees * tresoRate
+      prevPrime,
+      prevTreso,
+      realPrime: Math.min(economiesRealisees * primeRate, prevPrime),  // PLAFONNÉ
+      realTreso: Math.min(economiesRealisees * tresoRate, prevTreso)   // PLAFONNÉ
     };
   }
 
@@ -755,6 +921,12 @@ export default function PerformanceCenterPage() {
     const objectif = indData.pprPrevues || 0;
     const economiesRealisees = indData.economiesRealisees || 0;
 
+    // ✅ CORRECTION AUDIT 04/02/2026: Plafonnement Réalisé ≤ Prévu (rigueur comptable)
+    const prevPrime = indData.prevPrime || objectif * primeRate;
+    const prevTreso = indData.prevTreso || objectif * tresoRate;
+    const rawRealPrime = indData.realPrime || economiesRealisees * primeRate;
+    const rawRealTreso = indData.realTreso || economiesRealisees * tresoRate;
+
     return {
       key,
       label: INDICATOR_LABELS[key] || key.toUpperCase(),
@@ -762,30 +934,42 @@ export default function PerformanceCenterPage() {
       totalFrais: 0, // Non disponible dans les données de période
       objectif,
       economiesRealisees,
-      prevPrime: indData.prevPrime || objectif * primeRate,
-      prevTreso: indData.prevTreso || objectif * tresoRate,
-      realPrime: indData.realPrime || economiesRealisees * primeRate,
-      realTreso: indData.realTreso || economiesRealisees * tresoRate
+      prevPrime,
+      prevTreso,
+      realPrime: Math.min(rawRealPrime, prevPrime),  // PLAFONNÉ
+      realTreso: Math.min(rawRealTreso, prevTreso)   // PLAFONNÉ
     };
   }
 
   // Helper pour reconstruire un indicateur depuis les données du bulletin (localStorage)
+  // ✅ CORRECTION AUDIT 05/02/2026: Plafonnement Réalisé ≤ Prévu (rigueur comptable)
   function buildIndicatorFromBulletin(
     key: string,
     indicators: Record<string, any>
   ) {
     const indData = indicators?.[key] || {};
+    const objectif = indData.objectif || 0;
+    const economiesRealisees = indData.economiesRealisees || 0;
+    const primeRate = 0.33;
+    const tresoRate = 0.67;
+
+    // Calculer les valeurs prévues et réalisées
+    const prevPrime = indData.prevPrime || objectif * primeRate;
+    const prevTreso = indData.prevTreso || objectif * tresoRate;
+    const rawRealPrime = indData.realPrime || economiesRealisees * primeRate;
+    const rawRealTreso = indData.realTreso || economiesRealisees * tresoRate;
+
     return {
       key,
       label: INDICATOR_LABELS[key] || key.toUpperCase(),
       totalTemps: indData.totalTemps || 0,
       totalFrais: indData.totalFrais || 0,
-      objectif: indData.objectif || 0,
-      economiesRealisees: indData.economiesRealisees || 0,
-      prevPrime: indData.prevPrime || 0,
-      prevTreso: indData.prevTreso || 0,
-      realPrime: indData.realPrime || 0,
-      realTreso: indData.realTreso || 0
+      objectif,
+      economiesRealisees,
+      prevPrime,
+      prevTreso,
+      realPrime: Math.min(rawRealPrime, prevPrime),  // PLAFONNÉ
+      realTreso: Math.min(rawRealTreso, prevTreso)   // PLAFONNÉ
     };
   }
 
@@ -911,119 +1095,15 @@ export default function PerformanceCenterPage() {
                 </div>
               </CardHeader>
 
-              {/* Tableau des employés - PAGINATION 10K */}
-              {expandedLines.has(businessLine.id) && (() => {
-                const currentShown = employeesShown[businessLine.id] || EMPLOYEES_PER_PAGE;
-                const visibleEmployees = businessLine.employees.slice(0, currentShown);
-                const totalEmployees = businessLine.employees.length;
-                const hasMore = currentShown < totalEmployees;
-                const remaining = totalEmployees - currentShown;
-
-                return (
-                  <CardContent className="p-0">
-                    <div className="overflow-x-auto">
-                      <table className="w-full">
-                        <thead className="bg-slate-100 dark:bg-slate-700/50">
-                          <tr>
-                            <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wider">
-                              Collaborateur
-                            </th>
-                            <th className="px-6 py-3 text-center text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wider">
-                              Note Globale
-                            </th>
-                            <th className="px-6 py-3 text-center text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wider">
-                              Grade
-                            </th>
-                            <th className="px-6 py-3 text-right text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wider">
-                              Bulletin de Performance
-                            </th>
-                          </tr>
-                        </thead>
-                        <tbody className="divide-y divide-slate-200 dark:divide-slate-700">
-                          {visibleEmployees.map(employee => (
-                            <tr
-                              key={employee.id}
-                              className="hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
-                            >
-                              <td className="px-6 py-4">
-                                <div>
-                                  <p className="font-semibold text-slate-900 dark:text-white">
-                                    {employee.name}
-                                  </p>
-                                  <p className="text-sm text-slate-500 dark:text-slate-400">
-                                    {employee.role}
-                                  </p>
-                                </div>
-                              </td>
-                              <td className="px-6 py-4 text-center">
-                                <span className="font-mono font-bold text-lg text-slate-900 dark:text-white">
-                                  {employee.globalNote.toFixed(1)}/10
-                                </span>
-                              </td>
-                              <td className="px-6 py-4 text-center">
-                                <span className={cn(
-                                  "inline-flex items-center justify-center w-10 h-10 rounded-lg text-white font-bold text-sm",
-                                  getGradeColor(employee.grade)
-                                )}>
-                                  {employee.grade}
-                                </span>
-                              </td>
-                              <td className="px-6 py-4 text-right">
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  onClick={() => setSelectedEmployee(employee)}
-                                  className="border-blue-200 dark:border-blue-800 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30"
-                                >
-                                  <FileText className="w-4 h-4 mr-2" />
-                                  Générer Audit
-                                </Button>
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
-
-                    {/* Bouton "Voir plus" pour pagination */}
-                    {hasMore && (
-                      <div className="px-6 py-4 bg-slate-50 dark:bg-slate-800/50 border-t border-slate-200 dark:border-slate-700">
-                        <div className="flex items-center justify-between">
-                          <p className="text-sm text-slate-500 dark:text-slate-400">
-                            Affichage de {currentShown} sur {totalEmployees} collaborateurs
-                          </p>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => {
-                              setEmployeesShown(prev => ({
-                                ...prev,
-                                [businessLine.id]: Math.min(
-                                  currentShown + EMPLOYEES_PER_PAGE,
-                                  totalEmployees
-                                )
-                              }));
-                            }}
-                            className="border-blue-200 dark:border-blue-800 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30"
-                          >
-                            <ChevronDown className="w-4 h-4 mr-2" />
-                            Voir {Math.min(remaining, EMPLOYEES_PER_PAGE)} de plus
-                          </Button>
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Message quand tous les employés sont affichés */}
-                    {!hasMore && totalEmployees > EMPLOYEES_PER_PAGE && (
-                      <div className="px-6 py-3 bg-emerald-50 dark:bg-emerald-900/20 border-t border-emerald-200 dark:border-emerald-800">
-                        <p className="text-sm text-emerald-600 dark:text-emerald-400 text-center">
-                          Tous les {totalEmployees} collaborateurs sont affichés
-                        </p>
-                      </div>
-                    )}
-                  </CardContent>
-                );
-              })()}
+              {/* Tableau des employés - VIRTUALISÉ pour 10K+ employés */}
+              {expandedLines.has(businessLine.id) && (
+                <CardContent className="p-0">
+                  <VirtualizedEmployeeList
+                    employees={businessLine.employees}
+                    onSelectEmployee={setSelectedEmployee}
+                  />
+                </CardContent>
+              )}
             </Card>
           ))
         )}

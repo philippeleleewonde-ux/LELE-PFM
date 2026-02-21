@@ -147,8 +147,9 @@ const KPICard: React.FC<KPICardProps> = ({
         )}
       />
 
-      {/* Icon */}
+      {/* Icon - décoratif */}
       <div
+        aria-hidden="true"
         className={cn(
           "w-10 h-10 rounded-lg flex items-center justify-center mb-3",
           "bg-gradient-to-br",
@@ -233,6 +234,8 @@ export default function ExecutiveSummaryGlobal({
 
   return (
     <motion.section
+      role="region"
+      aria-label="Résumé exécutif des performances - KPIs clés"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       className={cn(

@@ -74,6 +74,8 @@ import { usePerformanceData } from '../contexts/PerformanceDataContext';
 // ✅ TRANSFERT DONNÉES: Import du context GLOBAL pour accès aux grandTotals (TOTAL GÉNÉRAL)
 // Source: PerformanceRecapPage → setPerformanceData() → grandTotals.grandTotalPPR / grandTotals.grandTotalEco
 import { usePerformanceData as useGlobalPerformanceData, type GrandTotals } from '@/contexts/PerformanceDataContext';
+// ✅ VALIDATION RATIO 33%/67%: Import des fonctions de validation Prime/Trésorerie
+import { validatePrimeTresoRatio, PRIME_RATIO, TRESO_RATIO, type RatioValidationResult } from '../types/performanceCenter';
 
 // ============================================
 // TYPES
@@ -130,6 +132,21 @@ interface YearData {
   totalWeeks: number;
 }
 
+/**
+ * ✅ Type pour les entrées de coûts depuis Supabase (module3_cost_entries)
+ */
+interface CostEntryDB {
+  id: string;
+  company_id: string;
+  kpi_type: string;
+  period_start: string;
+  period_end: string;
+  total_amount: number;
+  employee_count?: number;
+  created_at?: string;
+  updated_at?: string;
+}
+
 // ============================================
 // CONSTANTES
 // ============================================
@@ -173,6 +190,34 @@ const INDICATOR_CONFIGS = [
   { key: 'ddp', label: 'Délai Production', icon: Clock, color: 'blue' },
   { key: 'ekh', label: 'Efficacité KH', icon: Target, color: 'purple' }
 ];
+
+/**
+ * ✅ MAPPING EXPLICITE pour éviter la purge Tailwind en production
+ * Les classes dynamiques comme `bg-${color}-100` sont purgées car Tailwind
+ * ne peut pas les détecter statiquement. Ce mapping assure leur inclusion.
+ */
+const INDICATOR_STYLES: Record<string, { bg: string; text: string }> = {
+  orange: {
+    bg: 'bg-orange-100 dark:bg-orange-900/30',
+    text: 'text-orange-600 dark:text-orange-400'
+  },
+  rose: {
+    bg: 'bg-rose-100 dark:bg-rose-900/30',
+    text: 'text-rose-600 dark:text-rose-400'
+  },
+  red: {
+    bg: 'bg-red-100 dark:bg-red-900/30',
+    text: 'text-red-600 dark:text-red-400'
+  },
+  blue: {
+    bg: 'bg-blue-100 dark:bg-blue-900/30',
+    text: 'text-blue-600 dark:text-blue-400'
+  },
+  purple: {
+    bg: 'bg-purple-100 dark:bg-purple-900/30',
+    text: 'text-purple-600 dark:text-purple-400'
+  }
+};
 
 // Seuils de performance
 const THRESHOLDS = {
@@ -362,6 +407,103 @@ const ProgressBar = ({
 };
 
 // ============================================
+// COMPOSANT: Badge Validation Ratio 33%/67%
+// ============================================
+
+/**
+ * ✅ Affiche la validation du ratio Prime (33%) / Trésorerie (67%)
+ * Conforme aux règles LELE HCM de répartition des économies
+ */
+const RatioValidationBadge = ({
+  economiesRealisees,
+  realPrime,
+  realTreso,
+  showDetails = false
+}: {
+  economiesRealisees: number;
+  realPrime: number;
+  realTreso: number;
+  showDetails?: boolean;
+}) => {
+  const validation = validatePrimeTresoRatio(economiesRealisees, realPrime, realTreso);
+
+  if (economiesRealisees <= 0) {
+    return (
+      <div className="flex items-center gap-2 p-2 bg-slate-50 dark:bg-slate-800/50 rounded-lg">
+        <Info className="w-4 h-4 text-slate-400" aria-hidden="true" />
+        <span className="text-xs text-slate-500 dark:text-slate-400">
+          Ratio 33%/67% - En attente de données
+        </span>
+      </div>
+    );
+  }
+
+  return (
+    <div className={cn(
+      "p-3 rounded-lg border",
+      validation.isValid
+        ? "bg-emerald-50 dark:bg-emerald-900/20 border-emerald-200 dark:border-emerald-800"
+        : "bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800"
+    )}>
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          {validation.isValid ? (
+            <CheckCircle className="w-4 h-4 text-emerald-600 dark:text-emerald-400" aria-hidden="true" />
+          ) : (
+            <AlertCircle className="w-4 h-4 text-amber-600 dark:text-amber-400" aria-hidden="true" />
+          )}
+          <span className={cn(
+            "text-xs font-bold",
+            validation.isValid
+              ? "text-emerald-700 dark:text-emerald-300"
+              : "text-amber-700 dark:text-amber-300"
+          )}>
+            Ratio {PRIME_RATIO * 100}% / {TRESO_RATIO * 100}%
+          </span>
+        </div>
+        <Badge variant={validation.isValid ? "default" : "secondary"} className={cn(
+          "text-[10px]",
+          validation.isValid
+            ? "bg-emerald-600 hover:bg-emerald-600"
+            : "bg-amber-600 hover:bg-amber-600 text-white"
+        )}>
+          {validation.isValid ? 'Conforme' : 'À vérifier'}
+        </Badge>
+      </div>
+
+      {showDetails && (
+        <div className="mt-2 pt-2 border-t border-slate-200 dark:border-slate-700 grid grid-cols-2 gap-2 text-xs">
+          <div>
+            <span className="text-slate-500 dark:text-slate-400">Prime: </span>
+            <span className={cn(
+              "font-medium",
+              Math.abs(validation.actualPrimeRatio - PRIME_RATIO) <= 0.01
+                ? "text-emerald-600 dark:text-emerald-400"
+                : "text-amber-600 dark:text-amber-400"
+            )}>
+              {(validation.actualPrimeRatio * 100).toFixed(1)}%
+            </span>
+            <span className="text-slate-400"> (cible: {PRIME_RATIO * 100}%)</span>
+          </div>
+          <div>
+            <span className="text-slate-500 dark:text-slate-400">Tréso: </span>
+            <span className={cn(
+              "font-medium",
+              Math.abs(validation.actualTresoRatio - TRESO_RATIO) <= 0.01
+                ? "text-emerald-600 dark:text-emerald-400"
+                : "text-amber-600 dark:text-amber-400"
+            )}>
+              {(validation.actualTresoRatio * 100).toFixed(1)}%
+            </span>
+            <span className="text-slate-400"> (cible: {TRESO_RATIO * 100}%)</span>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+// ============================================
 // COMPOSANT: KPI Card
 // ============================================
 
@@ -400,8 +542,8 @@ const KPICard = ({
       </div>
       {trend && (
         <div className="flex items-center gap-1 mt-2">
-          {trend === 'up' && <TrendingUp className="w-3 h-3 text-emerald-500" />}
-          {trend === 'down' && <TrendingDown className="w-3 h-3 text-red-500" />}
+          {trend === 'up' && <TrendingUp className="w-3 h-3 text-emerald-500" aria-hidden="true" />}
+          {trend === 'down' && <TrendingDown className="w-3 h-3 text-red-500" aria-hidden="true" />}
           <span className={cn(
             "text-xs",
             trend === 'up' ? 'text-emerald-600' : trend === 'down' ? 'text-red-600' : 'text-slate-500'
@@ -461,10 +603,10 @@ const FilterWidget = ({
         <div className="flex flex-wrap items-center gap-4">
           {/* Filtre Année */}
           <div className="flex items-center gap-2">
-            <Calendar className="w-4 h-4 text-indigo-500" />
-            <span className="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase">Année</span>
+            <Calendar className="w-4 h-4 text-indigo-500" aria-hidden="true" />
+            <span id="year-filter-label" className="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase">Année</span>
             <Select value={selectedYearOffset.toString()} onValueChange={(v) => onYearChange(parseInt(v))}>
-              <SelectTrigger className="w-[120px] h-8 text-sm bg-white dark:bg-slate-800">
+              <SelectTrigger className="w-[120px] h-8 text-sm bg-white dark:bg-slate-800" aria-labelledby="year-filter-label">
                 <SelectValue placeholder="Année" />
               </SelectTrigger>
               <SelectContent>
@@ -482,13 +624,14 @@ const FilterWidget = ({
 
           {/* Filtre Vue */}
           <div className="flex items-center gap-2">
-            <BarChart3 className="w-4 h-4 text-emerald-500" />
-            <span className="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase">Vue</span>
-            <div className="flex bg-white dark:bg-slate-800 rounded-lg p-0.5 border border-slate-200 dark:border-slate-700">
+            <BarChart3 className="w-4 h-4 text-emerald-500" aria-hidden="true" />
+            <span id="view-filter-label" className="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase">Vue</span>
+            <div role="group" aria-labelledby="view-filter-label" className="flex bg-white dark:bg-slate-800 rounded-lg p-0.5 border border-slate-200 dark:border-slate-700">
               {VIEW_MODES.map(mode => (
                 <button
                   key={mode.key}
                   onClick={() => onViewModeChange(mode.key)}
+                  aria-pressed={viewMode === mode.key}
                   className={cn(
                     "px-3 py-1 text-xs font-medium rounded-md transition-all",
                     viewMode === mode.key
@@ -507,10 +650,11 @@ const FilterWidget = ({
 
           {/* Filtre Ligne d'activité */}
           <div className="flex items-center gap-2">
-            <Building2 className="w-4 h-4 text-purple-500" />
-            <span className="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase hidden md:inline">Ligne</span>
+            <Building2 className="w-4 h-4 text-purple-500" aria-hidden="true" />
+            <span id="businessline-filter-label" className="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase hidden md:inline">Ligne</span>
+            <span id="businessline-filter-label-sr" className="sr-only">Ligne d'activité</span>
             <Select value={selectedBusinessLine} onValueChange={onBusinessLineChange}>
-              <SelectTrigger className="w-[160px] h-8 text-sm bg-white dark:bg-slate-800">
+              <SelectTrigger className="w-[160px] h-8 text-sm bg-white dark:bg-slate-800" aria-labelledby="businessline-filter-label-sr">
                 <SelectValue placeholder="Ligne d'activité" />
               </SelectTrigger>
               <SelectContent>
@@ -553,7 +697,7 @@ const FilterWidget = ({
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                   {/* Dropdown Indicateurs de performance */}
                   <div className="flex items-center gap-3">
-                    <TrendingUp className="w-4 h-4 text-orange-500 flex-shrink-0" />
+                    <TrendingUp className="w-4 h-4 text-orange-500 flex-shrink-0" aria-hidden="true" />
                     <div className="flex-1">
                       <Select
                         value={selectedIndicators.length === 1 ? selectedIndicators[0] : (selectedIndicators.length > 1 ? 'multiple' : 'all')}
@@ -858,7 +1002,7 @@ const YearView = ({
                   variant={hasData ? "default" : "outline"}
                 >
                   {hasData ? 'Voir les détails' : 'Planifier'}
-                  <ChevronRight className="w-4 h-4" />
+                  <ChevronRight className="w-4 h-4" aria-hidden="true" />
                 </Button>
               </CardContent>
             </Card>
@@ -902,7 +1046,7 @@ const MonthView = ({
           onClick={onBackToYears}
           className="gap-2"
         >
-          <ArrowLeft className="w-4 h-4" />
+          <ArrowLeft className="w-4 h-4" aria-hidden="true" />
           Retour aux années
         </Button>
         <div className="flex items-center gap-2">
@@ -1064,11 +1208,25 @@ const WeekCell = ({
     return val.toFixed(0);
   };
 
+  // ✅ WCAG: Générer un label accessible pour les lecteurs d'écran
+  const getAriaLabel = () => {
+    const statusText = week.status === 'success' ? 'Objectif atteint' :
+                       week.status === 'warning' ? 'En surveillance' :
+                       week.status === 'critical' ? 'Critique' :
+                       week.status === 'before-launch' ? 'Avant lancement' :
+                       'Planifié';
+    const lockText = week.isLocked ? ', verrouillée' : ', non verrouillée';
+    const currentText = week.isCurrentWeek ? ' (semaine en cours)' : '';
+    return `Semaine ${week.globalWeekNumber}, du ${week.startDate} au ${week.endDate}. ${statusText}${lockText}. Performance: ${percent}%${currentText}`;
+  };
+
   return (
     <motion.button
       onClick={onClick}
       whileHover={{ scale: 1.02 }}
       whileTap={{ scale: 0.98 }}
+      aria-label={getAriaLabel()}
+      aria-pressed={isSelected}
       className={cn(
         "group flex flex-col p-3 rounded-lg border transition-all cursor-pointer w-full relative",
         getStatusColor(),
@@ -1207,8 +1365,8 @@ const WeekDetailPanel = ({
             {month} {year} ({yearLabel}) - Sem. du {weekData.startDate} au {weekData.endDate}
           </p>
         </div>
-        <Button variant="ghost" size="icon" onClick={onClose}>
-          <X className="w-5 h-5" />
+        <Button variant="ghost" size="icon" onClick={onClose} aria-label="Fermer le panneau de détail hebdomadaire">
+          <X className="w-5 h-5" aria-hidden="true" />
         </Button>
       </div>
 
@@ -1224,7 +1382,7 @@ const WeekDetailPanel = ({
                 ? "bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400"
                 : "bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400"
             )}>
-              {weekData.isLocked ? <Lock className="w-5 h-5" /> : <Unlock className="w-5 h-5" />}
+              {weekData.isLocked ? <Lock className="w-5 h-5" aria-hidden="true" /> : <Unlock className="w-5 h-5" aria-hidden="true" />}
             </div>
             <div>
               <p className="font-bold text-sm text-slate-700 dark:text-slate-300">Statut Période</p>
@@ -1371,16 +1529,14 @@ const WeekDetailPanel = ({
                 const indPercent = data.target > 0 ? Math.round((data.actual / data.target) * 100) : 0;
                 const IconComponent = ind.icon;
 
+                const styles = INDICATOR_STYLES[ind.color];
                 return (
                   <div
                     key={ind.key}
                     className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-800/30 rounded-lg"
                   >
-                    <div className={cn(
-                      "p-1.5 rounded-lg",
-                      `bg-${ind.color}-100 dark:bg-${ind.color}-900/30`
-                    )}>
-                      <IconComponent className={cn("w-4 h-4", `text-${ind.color}-600 dark:text-${ind.color}-400`)} />
+                    <div className={cn("p-1.5 rounded-lg", styles.bg)}>
+                      <IconComponent className={cn("w-4 h-4", styles.text)} aria-hidden="true" />
                     </div>
                     <div className="flex-1">
                       <div className="flex items-center justify-between mb-1">
@@ -1496,7 +1652,7 @@ const WeekDetailPanel = ({
         {/* Actions */}
         <div className="space-y-3 pt-4 border-t border-slate-100 dark:border-slate-800">
           <Button variant="outline" className="w-full gap-2">
-            <FileText className="w-4 h-4" />
+            <FileText className="w-4 h-4" aria-hidden="true" />
             Télécharger le Rapport Complet (PDF)
           </Button>
 
@@ -1587,8 +1743,8 @@ const MonthDetailPanel = ({
             {monthData.monthName} {monthData.year} ({monthData.yearLabel})
           </p>
         </div>
-        <Button variant="ghost" size="icon" onClick={onClose} className="text-white hover:bg-white/20">
-          <X className="w-5 h-5" />
+        <Button variant="ghost" size="icon" onClick={onClose} className="text-white hover:bg-white/20" aria-label="Fermer le panneau de détail mensuel">
+          <X className="w-5 h-5" aria-hidden="true" />
         </Button>
       </div>
 
@@ -1606,7 +1762,7 @@ const MonthDetailPanel = ({
                 ? "bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400"
                 : "bg-slate-100 dark:bg-slate-900/30 text-slate-600 dark:text-slate-400"
             )}>
-              {monthData.lockedWeeks === monthData.totalWeeks ? <Lock className="w-5 h-5" /> : <Unlock className="w-5 h-5" />}
+              {monthData.lockedWeeks === monthData.totalWeeks ? <Lock className="w-5 h-5" aria-hidden="true" /> : <Unlock className="w-5 h-5" aria-hidden="true" />}
             </div>
             <div>
               <p className="font-bold text-sm text-slate-700 dark:text-slate-300">Statut du Mois</p>
@@ -1678,9 +1834,9 @@ const MonthDetailPanel = ({
               variance >= 0 ? "bg-emerald-100 dark:bg-emerald-800" : "bg-red-100 dark:bg-red-800"
             )}>
               {variance >= 0 ? (
-                <TrendingUp className={cn("w-5 h-5", variance >= 0 ? "text-emerald-600 dark:text-emerald-400" : "text-red-600 dark:text-red-400")} />
+                <TrendingUp className={cn("w-5 h-5", variance >= 0 ? "text-emerald-600 dark:text-emerald-400" : "text-red-600 dark:text-red-400")} aria-hidden="true" />
               ) : (
-                <TrendingDown className="w-5 h-5 text-red-600 dark:text-red-400" />
+                <TrendingDown className="w-5 h-5 text-red-600 dark:text-red-400" aria-hidden="true" />
               )}
             </div>
           </div>
@@ -1774,14 +1930,12 @@ const MonthDetailPanel = ({
 
                 const indPercent = data.target > 0 ? Math.round((data.actual / data.target) * 100) : 0;
                 const IconComponent = ind.icon;
+                const styles = INDICATOR_STYLES[ind.color];
 
                 return (
                   <div key={ind.key} className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-slate-100 dark:border-slate-700">
-                    <div className={cn(
-                      "p-2 rounded-lg",
-                      `bg-${ind.color}-100 dark:bg-${ind.color}-900/30`
-                    )}>
-                      <IconComponent className={cn("w-4 h-4", `text-${ind.color}-600 dark:text-${ind.color}-400`)} />
+                    <div className={cn("p-2 rounded-lg", styles.bg)}>
+                      <IconComponent className={cn("w-4 h-4", styles.text)} aria-hidden="true" />
                     </div>
                     <div className="flex-1">
                       <div className="flex items-center justify-between mb-1">
@@ -1816,11 +1970,11 @@ const MonthDetailPanel = ({
         {/* Actions */}
         <div className="space-y-3 pt-4 border-t border-slate-100 dark:border-slate-800">
           <Button onClick={onViewWeeks} className="w-full gap-2 bg-indigo-600 hover:bg-indigo-700">
-            <Calendar className="w-4 h-4" />
+            <Calendar className="w-4 h-4" aria-hidden="true" />
             Voir les semaines de {monthData.monthName}
           </Button>
           <Button variant="outline" className="w-full gap-2">
-            <FileText className="w-4 h-4" />
+            <FileText className="w-4 h-4" aria-hidden="true" />
             Télécharger le Rapport Mensuel (PDF)
           </Button>
         </div>
@@ -1855,12 +2009,14 @@ const YearDetailPanel = ({
   yearData,
   currencySymbol,
   onClose,
-  onViewMonths
+  onViewMonths,
+  grandTotals
 }: {
   yearData: YearDetailData | null;
   currencySymbol: string;
   onClose: () => void;
   onViewMonths: () => void;
+  grandTotals?: GrandTotals | null;
 }) => {
   if (!yearData) return null;
 
@@ -1901,8 +2057,8 @@ const YearDetailPanel = ({
             Année {yearData.year} (N+{yearData.yearOffset})
           </p>
         </div>
-        <Button variant="ghost" size="icon" onClick={onClose} className="text-white hover:bg-white/20">
-          <X className="w-5 h-5" />
+        <Button variant="ghost" size="icon" onClick={onClose} className="text-white hover:bg-white/20" aria-label="Fermer le panneau de détail annuel">
+          <X className="w-5 h-5" aria-hidden="true" />
         </Button>
       </div>
 
@@ -1920,7 +2076,7 @@ const YearDetailPanel = ({
                 ? "bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400"
                 : "bg-slate-100 dark:bg-slate-900/30 text-slate-600 dark:text-slate-400"
             )}>
-              {yearData.lockedWeeks === yearData.totalWeeks ? <Lock className="w-5 h-5" /> : <Unlock className="w-5 h-5" />}
+              {yearData.lockedWeeks === yearData.totalWeeks ? <Lock className="w-5 h-5" aria-hidden="true" /> : <Unlock className="w-5 h-5" aria-hidden="true" />}
             </div>
             <div>
               <p className="font-bold text-sm text-slate-700 dark:text-slate-300">Statut Annuel</p>
@@ -1992,9 +2148,9 @@ const YearDetailPanel = ({
               variance >= 0 ? "bg-emerald-100 dark:bg-emerald-800" : "bg-red-100 dark:bg-red-800"
             )}>
               {variance >= 0 ? (
-                <TrendingUp className={cn("w-5 h-5", variance >= 0 ? "text-emerald-600 dark:text-emerald-400" : "text-red-600 dark:text-red-400")} />
+                <TrendingUp className={cn("w-5 h-5", variance >= 0 ? "text-emerald-600 dark:text-emerald-400" : "text-red-600 dark:text-red-400")} aria-hidden="true" />
               ) : (
-                <TrendingDown className="w-5 h-5 text-red-600 dark:text-red-400" />
+                <TrendingDown className="w-5 h-5 text-red-600 dark:text-red-400" aria-hidden="true" />
               )}
             </div>
           </div>
@@ -2079,14 +2235,12 @@ const YearDetailPanel = ({
 
                 const indPercent = data.target > 0 ? Math.round((data.actual / data.target) * 100) : 0;
                 const IconComponent = ind.icon;
+                const styles = INDICATOR_STYLES[ind.color];
 
                 return (
                   <div key={ind.key} className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-slate-100 dark:border-slate-700">
-                    <div className={cn(
-                      "p-2 rounded-lg",
-                      `bg-${ind.color}-100 dark:bg-${ind.color}-900/30`
-                    )}>
-                      <IconComponent className={cn("w-4 h-4", `text-${ind.color}-600 dark:text-${ind.color}-400`)} />
+                    <div className={cn("p-2 rounded-lg", styles.bg)}>
+                      <IconComponent className={cn("w-4 h-4", styles.text)} aria-hidden="true" />
                     </div>
                     <div className="flex-1">
                       <div className="flex items-center justify-between mb-1">
@@ -2118,14 +2272,29 @@ const YearDetailPanel = ({
           </div>
         )}
 
+        {/* ✅ Validation Ratio 33%/67% Prime/Trésorerie */}
+        {grandTotals && (
+          <div>
+            <h4 className="font-bold text-slate-700 dark:text-slate-300 mb-4 text-sm">
+              Répartition Prime / Trésorerie
+            </h4>
+            <RatioValidationBadge
+              economiesRealisees={grandTotals.grandTotalEco * 1000}
+              realPrime={grandTotals.grandTotalRealPrime * 1000}
+              realTreso={grandTotals.grandTotalRealTreso * 1000}
+              showDetails={true}
+            />
+          </div>
+        )}
+
         {/* Actions */}
         <div className="space-y-3 pt-4 border-t border-slate-100 dark:border-slate-800">
           <Button onClick={onViewMonths} className="w-full gap-2 bg-emerald-600 hover:bg-emerald-700">
-            <Calendar className="w-4 h-4" />
+            <Calendar className="w-4 h-4" aria-hidden="true" />
             Voir les 12 mois de {yearData.year}
           </Button>
           <Button variant="outline" className="w-full gap-2">
-            <FileText className="w-4 h-4" />
+            <FileText className="w-4 h-4" aria-hidden="true" />
             Télécharger le Rapport Annuel (PDF)
           </Button>
         </div>
@@ -2290,7 +2459,7 @@ export default function PerformanceCalendarPage() {
     if (!currentCompany?.id) return;
 
     try {
-      console.log('[PerformanceCalendar] 📥 Chargement des données de coûts...');
+      // [DEBUG] console.log('[PerformanceCalendar] 📥 Chargement des données de coûts...');
 
       const { data, error } = await supabase
         .from('module3_cost_entries')
@@ -2306,9 +2475,9 @@ export default function PerformanceCalendarPage() {
       if (data && data.length > 0) {
         // Agréger les données par semaine et par KPI
         const aggregated: WeeklyCostEntry[] = [];
-        const groupedByWeek: Record<string, Record<string, { amount: number; count: number; entry: any }>> = {};
+        const groupedByWeek: Record<string, Record<string, { amount: number; count: number; entry: CostEntryDB }>> = {};
 
-        data.forEach((entry: any) => {
+        (data as CostEntryDB[]).forEach((entry) => {
           const periodStart = new Date(entry.period_start);
           const year = periodStart.getFullYear();
           // Calculer le numéro de semaine ISO
@@ -2357,16 +2526,16 @@ export default function PerformanceCalendarPage() {
         });
 
         setCostEntries(aggregated);
-        console.log('[PerformanceCalendar] ✅ Données de coûts chargées:', aggregated.length, 'entrées agrégées');
+        // [DEBUG] console.log('[PerformanceCalendar] ✅ Données de coûts chargées:', aggregated.length, 'entrées agrégées');
 
         // Debug: Afficher les périodes disponibles pour vérifier le format
         if (aggregated.length > 0) {
           const uniquePeriods = [...new Set(aggregated.map(e => `${e.periodStart} → ${e.periodEnd}`))];
-          console.log('[PerformanceCalendar] 📅 Périodes disponibles:', uniquePeriods.slice(0, 5));
+          // [DEBUG] console.log('[PerformanceCalendar] 📅 Périodes disponibles:', uniquePeriods.slice(0, 5));
         }
       } else {
         setCostEntries([]);
-        console.log('[PerformanceCalendar] ℹ️ Aucune donnée de coûts trouvée');
+        // [DEBUG] console.log('[PerformanceCalendar] ℹ️ Aucune donnée de coûts trouvée');
       }
     } catch (err) {
       console.error('[PerformanceCalendar] ❌ Exception chargement coûts:', err);
@@ -2383,7 +2552,7 @@ export default function PerformanceCalendarPage() {
   useEffect(() => {
     // Attendre que le context soit chargé
     if (contextLoading) {
-      console.log('[PerformanceCalendar] ⏳ En attente du chargement du context...');
+      // [DEBUG] console.log('[PerformanceCalendar] ⏳ En attente du chargement du context...');
       return;
     }
 
@@ -2393,15 +2562,7 @@ export default function PerformanceCalendarPage() {
     const objFromGrandTotals = grandTotals?.grandTotalPPR || 0;
     const realFromGrandTotals = grandTotals?.grandTotalEco || 0;
 
-    // Log pour debug - données du contexte GLOBAL vs module3
     const globalStats = getGlobalStats();
-    console.log('[PerformanceCalendar] 📊 COMPARAISON SOURCES DE DONNÉES:');
-    console.log('  Context GLOBAL (grandTotals) - SOURCE CORRECTE:');
-    console.log('    grandTotalPPR (OBJ):', objFromGrandTotals.toLocaleString() + ' k¥');
-    console.log('    grandTotalEco (RÉAL):', realFromGrandTotals.toLocaleString() + ' k¥');
-    console.log('  Context Module3 (getGlobalStats) - ANCIEN:');
-    console.log('    totalPPR:', (globalStats.totalPPR || 0).toLocaleString() + ' k¥');
-    console.log('    totalEconomies:', (globalStats.totalEconomies || 0).toLocaleString() + ' k¥');
 
     // ✅ OBJ HEBDOMADAIRE: Depuis grandTotals (PRIORITÉ)
     // IMPORTANT: grandTotalPPR est DÉJÀ la valeur de la SEMAINE DE LANCEMENT
@@ -2423,14 +2584,14 @@ export default function PerformanceCalendarPage() {
         if (pprRef > objHebdo) {
           // pprAnnuelReference est ANNUEL, diviser par 52
           objHebdo = pprRef / 52;
-          console.log('[PerformanceCalendar] 📊 Fallback: pprAnnuelReference (annuel):', pprRef);
+          // [DEBUG] console.log('[PerformanceCalendar] 📊 Fallback: pprAnnuelReference (annuel):', pprRef);
         } else if (gainsN1 > objHebdo) {
           // gainsN1 est ANNUEL, diviser par 52
           objHebdo = gainsN1 / 52;
-          console.log('[PerformanceCalendar] 📊 Fallback: gainsN1 (annuel):', gainsN1);
+          // [DEBUG] console.log('[PerformanceCalendar] 📊 Fallback: gainsN1 (annuel):', gainsN1);
         }
       } else {
-        console.log('[PerformanceCalendar] 📊 Fallback: getGlobalStats().totalPPR');
+        // [DEBUG] console.log('[PerformanceCalendar] 📊 Fallback: getGlobalStats().totalPPR');
       }
     }
 
@@ -2472,7 +2633,7 @@ export default function PerformanceCalendarPage() {
     if (realHebdo < 1000) {
       // Essayer getGlobalStats() comme fallback (aussi en k¥ hebdo)
       realHebdo = (globalStats.totalEconomies || 0) * 1000;
-      console.log('[PerformanceCalendar] 📊 Fallback RÉAL: getGlobalStats().totalEconomies');
+      // [DEBUG] console.log('[PerformanceCalendar] 📊 Fallback RÉAL: getGlobalStats().totalEconomies');
     }
 
     // RÉAL par indicateur depuis indicatorsPerformance (contexte GLOBAL)
@@ -2502,15 +2663,6 @@ export default function PerformanceCalendarPage() {
     };
 
     setRealSettings(real);
-
-    console.log('[PerformanceCalendar] ✅ TRANSFERT DIRECT depuis TOTAL GÉNÉRAL (valeurs HEBDO):');
-    console.log('  OBJ (grandTotalPPR):', objHebdo.toLocaleString() + '¥/sem');
-    console.log('  RÉAL (grandTotalEco):', realHebdo.toLocaleString() + '¥/sem');
-
-    // Avertissement si pas de données
-    if (objHebdo === 0) {
-      console.warn('[PerformanceCalendar] ⚠️ Aucun objectif PPR trouvé - Visitez d\'abord PerformanceRecapPage pour charger les données');
-    }
   }, [contextLoading, grandTotals, indicatorsPerformance, getGlobalStats, financialParams]);
 
   // Synchroniser la devise depuis le context
@@ -2522,7 +2674,7 @@ export default function PerformanceCalendarPage() {
 
   // Écouter les événements DATA_ENTERED pour rafraîchir en temps réel
   useCalendarEvent('DATA_ENTERED', (event) => {
-    console.log('[PerformanceCalendar] 📢 Événement DATA_ENTERED reçu:', event.payload);
+    // [DEBUG] console.log('[PerformanceCalendar] 📢 Événement DATA_ENTERED reçu:', event.payload);
     // Rafraîchir les données
     loadCostEntries();
     setLastRefresh(Date.now());
@@ -2533,7 +2685,7 @@ export default function PerformanceCalendarPage() {
 
   // Écouter les verrouillages de période
   useCalendarEvent('PERIOD_LOCKED', (event) => {
-    console.log('[PerformanceCalendar] 🔒 Période verrouillée/déverrouillée:', event.payload);
+    // [DEBUG] console.log('[PerformanceCalendar] 🔒 Période verrouillée/déverrouillée:', event.payload);
     // Rafraîchir les périodes verrouillées
     const locked = launchDateService.getAllLockedPeriodsFlat();
     setLockedPeriods(locked);
@@ -2557,11 +2709,6 @@ export default function PerformanceCalendarPage() {
       const entryDate = new Date(entry.periodStart);
       return entryDate >= weekStartDate && entryDate <= weekEndDate;
     });
-
-    // Debug: logger les correspondances trouvées
-    if (weekEntries.length > 0) {
-      console.log(`[getRealWeekData] Semaine ${globalWeekNum} (${weekStartDate.toLocaleDateString()} - ${weekEndDate.toLocaleDateString()}): ${weekEntries.length} entrées trouvées`);
-    }
 
     // ✅ OBJECTIFS RÉELS depuis company_ppr_settings
     const indicators: Record<string, { target: number; actual: number }> = {
@@ -2669,7 +2816,7 @@ export default function PerformanceCalendarPage() {
           const config = launchDateService.getConfig();
           if (config?.platformLaunchDate) {
             setLaunchDate(new Date(config.platformLaunchDate));
-            console.log('[PerformanceCalendar] ✅ Launch date loaded:', config.platformLaunchDate);
+            // [DEBUG] console.log('[PerformanceCalendar] ✅ Launch date loaded:', config.platformLaunchDate);
           }
 
           // 2. Charger la devise depuis company_performance_scores.factors.selectedCurrency
@@ -2690,7 +2837,7 @@ export default function PerformanceCalendarPage() {
             const factors = scoreData.factors as any;
             if (factors.selectedCurrency) {
               setCurrency(factors.selectedCurrency as Currency);
-              console.log('[PerformanceCalendar] ✅ Currency set to:', factors.selectedCurrency);
+              // [DEBUG] console.log('[PerformanceCalendar] ✅ Currency set to:', factors.selectedCurrency);
             }
           }
 
@@ -2713,7 +2860,7 @@ export default function PerformanceCalendarPage() {
               }))
             ];
             setBusinessLines(realBusinessLines);
-            console.log('[PerformanceCalendar] ✅ Business lines loaded:', blData.length);
+            // [DEBUG] console.log('[PerformanceCalendar] ✅ Business lines loaded:', blData.length);
           }
 
           // ============================================
@@ -2723,13 +2870,13 @@ export default function PerformanceCalendarPage() {
           // ============================================
           // Les données OBJ sont maintenant chargées via useEffect séparé (voir ci-dessous)
           // qui écoute les changements de financialParams du context
-          console.log('[PerformanceCalendar] 📥 OBJ données transférées depuis PerformanceDataContext');
+          // [DEBUG] console.log('[PerformanceCalendar] 📥 OBJ données transférées depuis PerformanceDataContext');
 
           // 5. Charger la dernière semaine complétée (Smart Calendar)
           const completedWeek = await getLastCompletedWeek(currentCompany.id);
           if (completedWeek) {
             setLastCompletedWeek(completedWeek);
-            console.log('[PerformanceCalendar] ✅ Last completed week:', completedWeek.periodLabel);
+            // [DEBUG] console.log('[PerformanceCalendar] ✅ Last completed week:', completedWeek.periodLabel);
           }
         }
 
@@ -2910,40 +3057,53 @@ export default function PerformanceCalendarPage() {
   }, [yearData]);
 
   // Générer les données pour les 3 années (pour YearView)
-  // Utilise baseYear calculé depuis la date de lancement du Widget Smart Calendar
+  // ✅ CORRIGÉ: Utilise FISCAL_MONTHS et getRealWeekDataByPeriod (aligné sur yearData)
   const allYearsData = useMemo((): Record<number, YearData> => {
     const result: Record<number, YearData> = {};
 
+    // Si pas de date de lancement, utiliser un fallback
+    const effectiveLaunchDate = launchDate || new Date(baseYear, 11, 1); // 1er décembre par défaut
+
     [1, 2, 3].forEach(offset => {
-      const yr = baseYear + offset;
+      // ✅ FIX BUG #1: Même formule que yearData
+      const fiscalStartYear = baseYear + (offset - 1);
       let totalTarget = 0;
       let totalActual = 0;
       let lockedWks = 0;
       let totalWks = 0;
       const months: Record<string, MonthData> = {};
 
-      MONTHS_FR.forEach((month, mIndex) => {
+      let globalWeekNum = 0;
+
+      // ✅ FIX BUG #2: Utiliser FISCAL_MONTHS (Décembre → Novembre) au lieu de MONTHS_FR
+      FISCAL_MONTHS.forEach((month, fiscalMonthIndex) => {
         const weeksInMonth: WeekData[] = [];
-        const weeksCount = mIndex === 11 ? 5 : 4;
+        // Nombre de semaines par mois (Décembre et Novembre peuvent avoir 5 semaines)
+        const weeksCount = (fiscalMonthIndex === 0 || fiscalMonthIndex === 11) ? 5 : 4;
 
         for (let w = 1; w <= weeksCount; w++) {
-          const globalWeekNum = (mIndex * 4) + w;
-          if (globalWeekNum > 52) continue;
+          globalWeekNum++;
+          if (globalWeekNum > 52) break;
+
+          // ✅ FIX BUG #3: Utiliser getFiscalWeekDateRange (même que yearData)
+          const { startDate, endDate, periodStart, periodEnd } = getFiscalWeekDateRange(
+            effectiveLaunchDate,
+            offset,
+            globalWeekNum
+          );
 
           const weekKey = `week_${offset}_${globalWeekNum}`;
           const isLocked = lockedPeriods[weekKey] === true ||
                            lockedPeriods[`year_${offset}`] === true;
 
-          // ✅ DONNÉES RÉELLES depuis module3_cost_entries (remplace Math.random())
-          const realData = getRealWeekData(yr, globalWeekNum);
+          // ✅ FIX BUG #3: Utiliser getRealWeekDataByPeriod (même que yearData)
+          const realData = getRealWeekDataByPeriod(periodStart, periodEnd);
           const target = realData.target;
           const actual = realData.actual;
 
-          const { startDate, endDate } = getWeekDateRange(yr, globalWeekNum);
-
           let status: WeekData['status'] = 'planned';
-          if (actual > 0) {
-            const percent = (actual / target) * 100;
+          if (realData.hasData) {
+            const percent = target > 0 ? (actual / target) * 100 : 0;
             if (percent >= THRESHOLDS.SUCCESS) status = 'success';
             else if (percent >= THRESHOLDS.WARNING) status = 'warning';
             else status = 'critical';
@@ -2955,23 +3115,22 @@ export default function PerformanceCalendarPage() {
             lastCompletedWeek.weekNumber === globalWeekNum;
 
           weeksInMonth.push({
-            id: `${yr}-${month.name}-W${w}`,
+            id: `fiscal-${fiscalStartYear}-${month.name}-W${w}`,
             weekNumber: w,
             globalWeekNumber: globalWeekNum,
             target,
             actual,
             isLocked,
-            isCurrentWeek: isCurrentWeek || false, // ✅ Indicateur semaine courante
+            isCurrentWeek: isCurrentWeek || false,
             isBeforeLaunch: false,
             status,
             variance: actual - target,
             variancePercent: target > 0 ? ((actual - target) / target) * 100 : 0,
-            startDate,
-            endDate,
-            // ✅ Utiliser les indicateurs réels
+            startDate: formatDateShort(startDate),
+            endDate: formatDateShort(endDate),
             indicators: realData.indicators as WeekData['indicators'],
             hasRealData: realData.hasData,
-            byBusinessLine: [] // Simplifié pour la vue années
+            byBusinessLine: []
           });
 
           totalTarget += target;
@@ -2988,7 +3147,7 @@ export default function PerformanceCalendarPage() {
       });
 
       result[offset] = {
-        year: yr,
+        year: fiscalStartYear, // ✅ FIX: Utiliser fiscalStartYear au lieu de yr
         yearOffset: offset,
         label: `N+${offset}`,
         months,
@@ -3000,8 +3159,8 @@ export default function PerformanceCalendarPage() {
     });
 
     return result;
-  // ✅ Dépendances incluent maintenant baseYear, getRealWeekData, costEntries et lastCompletedWeek pour données réelles
-  }, [baseYear, lockedPeriods, getRealWeekData, costEntries, lastRefresh, lastCompletedWeek]);
+  // ✅ Dépendances mises à jour pour inclure getRealWeekDataByPeriod et launchDate
+  }, [baseYear, lockedPeriods, getRealWeekDataByPeriod, costEntries, lastRefresh, lastCompletedWeek, launchDate]);
 
   // Handlers de navigation entre vues
   const handleYearClick = useCallback((yearOffset: number) => {
@@ -3017,6 +3176,27 @@ export default function PerformanceCalendarPage() {
         total: monthData.weeks.length
       }));
 
+      // ✅ Agréger les indicateurs de toutes les semaines de l'année
+      const aggregatedIndicators = {
+        abs: { target: 0, actual: 0 },
+        qd: { target: 0, actual: 0 },
+        oa: { target: 0, actual: 0 },
+        ddp: { target: 0, actual: 0 },
+        ekh: { target: 0, actual: 0 }
+      };
+      Object.values(data.months).forEach(monthData => {
+        monthData.weeks.forEach(week => {
+          if (week.indicators) {
+            (['abs', 'qd', 'oa', 'ddp', 'ekh'] as const).forEach(key => {
+              if (week.indicators && week.indicators[key]) {
+                aggregatedIndicators[key].target += week.indicators[key].target;
+                aggregatedIndicators[key].actual += week.indicators[key].actual;
+              }
+            });
+          }
+        });
+      });
+
       setSelectedYearData({
         year: data.year,
         yearOffset: yearOffset,
@@ -3025,7 +3205,8 @@ export default function PerformanceCalendarPage() {
         totalActual: data.totalActual,
         lockedWeeks: data.lockedWeeks,
         totalWeeks: data.totalWeeks,
-        monthsData
+        monthsData,
+        indicators: aggregatedIndicators // ✅ Ajout des indicateurs agrégés
       });
     }
   }, [allYearsData, availableYears]);
@@ -3037,6 +3218,25 @@ export default function PerformanceCalendarPage() {
       const monthData = data.months[monthName];
       const yearInfo = availableYears.find(y => y.offset === selectedYearOffset);
 
+      // ✅ Agréger les indicateurs de toutes les semaines du mois
+      const aggregatedIndicators = {
+        abs: { target: 0, actual: 0 },
+        qd: { target: 0, actual: 0 },
+        oa: { target: 0, actual: 0 },
+        ddp: { target: 0, actual: 0 },
+        ekh: { target: 0, actual: 0 }
+      };
+      monthData.weeks.forEach(week => {
+        if (week.indicators) {
+          (['abs', 'qd', 'oa', 'ddp', 'ekh'] as const).forEach(key => {
+            if (week.indicators && week.indicators[key]) {
+              aggregatedIndicators[key].target += week.indicators[key].target;
+              aggregatedIndicators[key].actual += week.indicators[key].actual;
+            }
+          });
+        }
+      });
+
       setSelectedMonthData({
         monthName,
         year: data.year,
@@ -3045,7 +3245,8 @@ export default function PerformanceCalendarPage() {
         totalActual: monthData.weeks.reduce((sum, w) => sum + w.actual, 0),
         lockedWeeks: monthData.weeks.filter(w => w.isLocked).length,
         totalWeeks: monthData.weeks.length,
-        weeks: monthData.weeks
+        weeks: monthData.weeks,
+        indicators: aggregatedIndicators // ✅ Ajout des indicateurs agrégés
       });
     }
   }, [allYearsData, selectedYearOffset, availableYears]);
@@ -3164,7 +3365,7 @@ export default function PerformanceCalendarPage() {
                 onClick={() => navigate('/modules/module3/global-performance-center')}
                 className="gap-2"
               >
-                <ArrowLeft className="w-4 h-4" />
+                <ArrowLeft className="w-4 h-4" aria-hidden="true" />
                 Retour
               </Button>
               <div>
@@ -3186,11 +3387,11 @@ export default function PerformanceCalendarPage() {
 {/* Actions rapides */}
             <div className="flex items-center gap-2">
               <Button variant="outline" size="sm" className="gap-1.5">
-                <Download className="w-4 h-4" />
+                <Download className="w-4 h-4" aria-hidden="true" />
                 Export
               </Button>
               <Button variant="outline" size="sm" className="gap-1.5">
-                <Printer className="w-4 h-4" />
+                <Printer className="w-4 h-4" aria-hidden="true" />
                 Imprimer
               </Button>
             </div>
@@ -3278,7 +3479,7 @@ export default function PerformanceCalendarPage() {
                       onClick={handleBackToMonths}
                       className="gap-2"
                     >
-                      <ArrowLeft className="w-4 h-4" />
+                      <ArrowLeft className="w-4 h-4" aria-hidden="true" />
                       Retour aux mois
                     </Button>
                     <div className="flex items-center gap-2">
@@ -3402,6 +3603,7 @@ export default function PerformanceCalendarPage() {
               currencySymbol={currencyConfig.symbol}
               onClose={() => setSelectedYearData(null)}
               onViewMonths={handleViewMonthsFromPanel}
+              grandTotals={grandTotals}
             />
           )}
         </AnimatePresence>

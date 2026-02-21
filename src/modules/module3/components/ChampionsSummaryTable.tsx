@@ -141,7 +141,10 @@ export default function ChampionsSummaryTable({
 
       {/* Table */}
       <div className="rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700/50 bg-white dark:bg-slate-900/50">
-        <table className="w-full text-sm">
+        <table className="w-full text-sm" aria-label="Champions et employés à surveiller par indicateur">
+          <caption className="sr-only">
+            Tableau récapitulatif des meilleurs performeurs (champions) et des employés nécessitant un suivi pour chaque indicateur de performance
+          </caption>
           <thead>
             <tr className="bg-gradient-to-r from-slate-100 to-slate-50 dark:from-slate-800 dark:to-slate-800/50">
               <th className="text-left py-3 px-4 font-bold text-slate-700 dark:text-slate-300">
@@ -149,13 +152,13 @@ export default function ChampionsSummaryTable({
               </th>
               <th className="text-left py-3 px-4 font-bold text-emerald-600 dark:text-emerald-400">
                 <div className="flex items-center gap-2">
-                  <Trophy className="w-4 h-4" />
+                  <Trophy className="w-4 h-4" aria-hidden="true" />
                   CHAMPION
                 </div>
               </th>
               <th className="text-left py-3 px-4 font-bold text-amber-600 dark:text-amber-400">
                 <div className="flex items-center gap-2">
-                  <AlertTriangle className="w-4 h-4" />
+                  <AlertTriangle className="w-4 h-4" aria-hidden="true" />
                   À SURVEILLER
                 </div>
               </th>

@@ -14,6 +14,7 @@
  */
 
 import { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { usePerformanceStore } from '@/stores/performance-store';
 import { useEngineStore } from '@/stores/engine-store';
 import { useChallengeStore } from '@/stores/challenge-store';
@@ -122,11 +123,11 @@ export interface FinancialScoreResult {
 const WINDOW = 8; // Rolling window of weeks
 
 const LEVER_CONFIG = {
-  REG: { label: 'Regularite', weight: 0.25, color: '#4ADE80', description: 'Frequence EWMA + intensite + serie comportementale' },
-  PRE: { label: 'Precision', weight: 0.25, color: '#60A5FA', description: 'Respect du budget' },
-  SEC: { label: 'Securite', weight: 0.20, color: '#FDBA74', description: 'Couverture EPR proratee (trimestriel)' },
-  EFF: { label: 'Efficience', weight: 0.15, color: '#A78BFA', description: 'Revenus Fixe/Variable vs prevus (8 sem.)' },
-  LIT: { label: 'Litteratie', weight: 0.15, color: '#FBBF24', description: 'Connaissances OCDE/INFE + engagement + progression' },
+  REG: { weight: 0.25, color: '#4ADE80' },
+  PRE: { weight: 0.25, color: '#60A5FA' },
+  SEC: { weight: 0.20, color: '#FDBA74' },
+  EFF: { weight: 0.15, color: '#A78BFA' },
+  LIT: { weight: 0.15, color: '#FBBF24' },
 } as const;
 
 // ─── Hook ───
@@ -137,6 +138,7 @@ const COICOP_SEMI_ESSENTIEL = ['05', '06', '08'] as const;    // Transport, Comm
 const COICOP_DISCRETIONNAIRE = ['02', '07'] as const;          // Vetements, Loisirs — ajustables, epargne possible
 
 export function useFinancialScore(): FinancialScoreResult {
+  const { t: tp } = useTranslation('performance');
   const records = usePerformanceStore((s) => s.records);
   const engineOutput = useEngineStore((s) => s.engineOutput);
   const lastCalculatedAt = useEngineStore((s) => s.lastCalculatedAt);
@@ -688,7 +690,7 @@ export function useFinancialScore(): FinancialScoreResult {
     // Build lever array with details
     const sharedDetails: LeverDetails = {};
     const levers: LeverScore[] = [
-      { code: 'REG', score: regScore, ...LEVER_CONFIG.REG, details: {
+      { code: 'REG', score: regScore, ...LEVER_CONFIG.REG, label: tp('leverShort.REG'), description: tp('leverDescs.REG'), details: {
         regWeeksWithSavings,
         regTotalWeeks: nbWeeks,
         regEwmaFrequency: Math.round(regEwma * 100),
@@ -698,7 +700,7 @@ export function useFinancialScore(): FinancialScoreResult {
         regStreakScore: Math.round(regStreakVal),
         regHasBeginnerBonus: regHasBonus,
       }},
-      { code: 'PRE', score: preScore, ...LEVER_CONFIG.PRE, details: {
+      { code: 'PRE', score: preScore, ...LEVER_CONFIG.PRE, label: tp('leverShort.PRE'), description: tp('leverDescs.PRE'), details: {
         preAvgExecution,
         preBestWeek,
         preWorstWeek,
@@ -726,7 +728,7 @@ export function useFinancialScore(): FinancialScoreResult {
         prePenaltySemi: Math.round(prePenaltySemi * 100) / 100,
         prePenaltyDisc: Math.round(prePenaltyDisc * 100) / 100,
       }},
-      { code: 'SEC', score: secScore, ...LEVER_CONFIG.SEC, details: {
+      { code: 'SEC', score: secScore, ...LEVER_CONFIG.SEC, label: tp('leverShort.SEC'), description: tp('leverDescs.SEC'), details: {
         secCumulEconomies: cumulEconomies,
         secObjectifAnnuel: objectifAnnuel,
         secPlanYear: planYear,
@@ -736,7 +738,7 @@ export function useFinancialScore(): FinancialScoreResult {
         secCoverageRatio: Math.round(secCoverageRatio * 100) / 100,
         secHasBeginnerBonus,
       }},
-      { code: 'EFF', score: effScore, ...LEVER_CONFIG.EFF, details: {
+      { code: 'EFF', score: effScore, ...LEVER_CONFIG.EFF, label: tp('leverShort.EFF'), description: tp('leverDescs.EFF'), details: {
         effHasTargets,
         effNbWeeks: nbEffWeeks,
         effRealizationFixe: R_fixe !== null ? Math.round(R_fixe * 100) / 100 : undefined,
@@ -749,7 +751,7 @@ export function useFinancialScore(): FinancialScoreResult {
         effTotalExpected8w: totalExpected8w,
         effHasBeginnerBonus,
       }},
-      { code: 'LIT', score: litScore, ...LEVER_CONFIG.LIT, details: {
+      { code: 'LIT', score: litScore, ...LEVER_CONFIG.LIT, label: tp('leverShort.LIT'), description: tp('leverDescs.LIT'), details: {
         litEkhNorm,
         litChallengeScore: challengeRolling8,
         litKnowledgeScore: Math.round(litKnowledge),
@@ -783,5 +785,5 @@ export function useFinancialScore(): FinancialScoreResult {
       weeklyTrend,
       previousScore,
     };
-  }, [records, engineOutput, lastCalculatedAt, challengeRolling8, challengeCompletedCount, incomeTransactions, incomeTargets, allTransactions, wallet.allTimeNet, nowWeek, nowYear]);
+  }, [records, engineOutput, lastCalculatedAt, challengeRolling8, challengeCompletedCount, incomeTransactions, incomeTargets, allTransactions, wallet.allTimeNet, nowWeek, nowYear, tp]);
 }

@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, TextInput, Pressable, StyleSheet } from 'react-native';
 import { Shield, ChevronRight } from 'lucide-react-native';
+import { useTranslation } from 'react-i18next';
 import { AmountInput } from '@/components/tracking/AmountInput';
 
 interface PurchaseInputProps {
@@ -12,6 +13,7 @@ interface PurchaseInputProps {
 }
 
 export function PurchaseInput({ label, amount, onLabelChange, onAmountChange, onNext }: PurchaseInputProps) {
+  const { t } = useTranslation('app');
   const isValid = label.trim().length > 0 && amount > 0;
 
   return (
@@ -20,20 +22,20 @@ export function PurchaseInput({ label, amount, onLabelChange, onAmountChange, on
         <View style={styles.iconCircle}>
           <Shield size={24} color="#A78BFA" />
         </View>
-        <Text style={styles.title}>Anti-achat impulsif</Text>
+        <Text style={styles.title}>{t('impulse.title')}</Text>
       </View>
 
-      <Text style={styles.sectionLabel}>Qu'est-ce que tu veux acheter ?</Text>
+      <Text style={styles.sectionLabel}>{t('impulse.whatToBuy')}</Text>
       <TextInput
         style={styles.textInput}
         value={label}
         onChangeText={onLabelChange}
-        placeholder="Ex: iPhone 17 Pro Max"
+        placeholder={t('impulse.placeholder')}
         placeholderTextColor="#52525B"
         returnKeyType="next"
       />
 
-      <Text style={[styles.sectionLabel, { marginTop: 20 }]}>Combien ca coute ?</Text>
+      <Text style={[styles.sectionLabel, { marginTop: 20 }]}>{t('impulse.howMuch')}</Text>
       <AmountInput value={amount} onChange={onAmountChange} />
 
       <Pressable
@@ -42,7 +44,7 @@ export function PurchaseInput({ label, amount, onLabelChange, onAmountChange, on
         style={[styles.nextBtn, !isValid && styles.nextBtnDisabled]}
       >
         <Text style={[styles.nextBtnText, !isValid && styles.nextBtnTextDisabled]}>
-          Analyser
+          {t('impulse.analyze')}
         </Text>
         <ChevronRight size={18} color={isValid ? '#0F1014' : '#52525B'} />
       </Pressable>

@@ -25,6 +25,7 @@
  */
 
 import { Grade, COICOPCode } from '@/types';
+import i18n from '@/i18n';
 
 // ─── Grade mapping (note 0-10 → Grade) — aligné HCM performanceCenter.ts:207 ───
 
@@ -403,17 +404,49 @@ export function getActiveWeeksForYear(year: number): number[] {
 }
 
 /**
- * Month names in French.
+ * Month names — French fallback array.
+ * @deprecated Prefer getMonthName(index) which uses i18n.
  */
 export const MONTH_NAMES_FR = [
-  'Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin',
-  'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre',
+  'Janvier', 'Fevrier', 'Mars', 'Avril', 'Mai', 'Juin',
+  'Juillet', 'Aout', 'Septembre', 'Octobre', 'Novembre', 'Decembre',
 ];
 
 /**
- * Short month names in French.
+ * Short month names — French fallback array.
+ * @deprecated Prefer getMonthShort(index) which uses i18n.
  */
 export const MONTH_SHORT_FR = [
-  'Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Jun',
-  'Jul', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc',
+  'Jan', 'Fev', 'Mar', 'Avr', 'Mai', 'Jun',
+  'Jul', 'Aou', 'Sep', 'Oct', 'Nov', 'Dec',
 ];
+
+/**
+ * Get localized full month name via i18n.
+ * Falls back to MONTH_NAMES_FR if translation is missing.
+ * @param monthIndex 0-based (0 = January)
+ */
+export function getMonthName(monthIndex: number): string {
+  const key = `tracking:months.${monthIndex}`;
+  const translated = i18n.t(key);
+  // If i18n returns the key itself, fall back to the static array
+  if (translated === key) {
+    return MONTH_NAMES_FR[monthIndex] ?? '';
+  }
+  return translated;
+}
+
+/**
+ * Get localized short month name via i18n.
+ * Falls back to MONTH_SHORT_FR if translation is missing.
+ * @param monthIndex 0-based (0 = January)
+ */
+export function getMonthShort(monthIndex: number): string {
+  const key = `tracking:monthsShort.${monthIndex}`;
+  const translated = i18n.t(key);
+  // If i18n returns the key itself, fall back to the static array
+  if (translated === key) {
+    return MONTH_SHORT_FR[monthIndex] ?? '';
+  }
+  return translated;
+}

@@ -3,15 +3,7 @@
  * Week starts on Monday (day 1), ends on Sunday (day 7).
  */
 
-const MONTH_NAMES_FR = [
-  'Jan', 'Fev', 'Mar', 'Avr', 'Mai', 'Juin',
-  'Juil', 'Aout', 'Sep', 'Oct', 'Nov', 'Dec',
-];
-
-const MONTH_NAMES_FULL_FR = [
-  'Janvier', 'Fevrier', 'Mars', 'Avril', 'Mai', 'Juin',
-  'Juillet', 'Aout', 'Septembre', 'Octobre', 'Novembre', 'Decembre',
-];
+import i18n from '@/i18n';
 
 /**
  * Get ISO 8601 week number for a date.
@@ -76,8 +68,9 @@ export function getWeekLabel(week: number, year: number): string {
   const { start, end } = getWeekDates(week, year);
   const startDay = start.getUTCDate();
   const endDay = end.getUTCDate();
-  const startMonth = MONTH_NAMES_FR[start.getUTCMonth()];
-  const endMonth = MONTH_NAMES_FR[end.getUTCMonth()];
+  const startMonth = i18n.t(`tracking:monthsShort.${start.getUTCMonth()}`);
+  const endMonth = i18n.t(`tracking:monthsShort.${end.getUTCMonth()}`);
+
 
   if (start.getUTCMonth() === end.getUTCMonth()) {
     return `${startDay} - ${endDay} ${endMonth} ${year}`;
@@ -93,14 +86,15 @@ export function getWeekRangeLabel(week: number, year: number): string {
   const { start, end } = getWeekDates(week, year);
   const startDay = start.getUTCDate();
   const endDay = end.getUTCDate();
-  const startMonth = MONTH_NAMES_FULL_FR[start.getUTCMonth()];
-  const endMonth = MONTH_NAMES_FULL_FR[end.getUTCMonth()];
+  const startMonth = i18n.t(`tracking:months.${start.getUTCMonth()}`);
+  const endMonth = i18n.t(`tracking:months.${end.getUTCMonth()}`);
+
   const endYear = end.getUTCFullYear();
 
   if (start.getUTCMonth() === end.getUTCMonth()) {
-    return `du ${startDay} au ${endDay} ${endMonth} ${endYear}`;
+    return `${startDay} - ${endDay} ${endMonth} ${endYear}`;
   }
-  return `du ${startDay} ${startMonth} au ${endDay} ${endMonth} ${endYear}`;
+  return `${startDay} ${startMonth} - ${endDay} ${endMonth} ${endYear}`;
 }
 
 /**

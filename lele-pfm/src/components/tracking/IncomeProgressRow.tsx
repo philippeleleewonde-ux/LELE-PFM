@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Pressable, Text, StyleSheet } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { INCOME_CATEGORIES } from '@/constants/income-categories';
 import { formatCurrency } from '@/services/format-helpers';
 import { IncomeSourceTracking } from '@/hooks/useWeeklyIncome';
@@ -10,6 +11,7 @@ interface IncomeProgressRowProps {
 }
 
 export function IncomeProgressRow({ source, onPress }: IncomeProgressRowProps) {
+  const { t } = useTranslation('tracking');
   const config = INCOME_CATEGORIES[source.code];
   const Icon = config.icon;
   const color = config.color;
@@ -56,7 +58,7 @@ export function IncomeProgressRow({ source, onPress }: IncomeProgressRowProps) {
             <Text style={[styles.typeText, {
               color: config.type === 'Fixe' ? '#60A5FA' : '#FBBF24',
             }]}>
-              {config.type}
+              {t(`types.${config.type}`)}
             </Text>
           </View>
           {source.weeklyExpected > 0 && (

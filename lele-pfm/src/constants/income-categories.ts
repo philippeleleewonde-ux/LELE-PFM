@@ -25,6 +25,7 @@ export type IncomeCode =
 
 export interface IncomeCategoryConfig {
   code: IncomeCode;
+  /** i18n key — use t(`tracking:${label}`) to get translated text */
   label: string;
   icon: typeof Briefcase;
   color: string;
@@ -34,56 +35,56 @@ export interface IncomeCategoryConfig {
 export const INCOME_CATEGORIES: Record<IncomeCode, IncomeCategoryConfig> = {
   salaire: {
     code: 'salaire',
-    label: 'Salaire net',
+    label: 'incomeCategories.salaire',
     icon: Briefcase,
     color: '#60A5FA',
     type: 'Fixe',
   },
   primes: {
     code: 'primes',
-    label: 'Primes / Bonus',
+    label: 'incomeCategories.primes',
     icon: Award,
     color: '#FBBF24',
     type: 'Variable',
   },
   locatifs: {
     code: 'locatifs',
-    label: 'Revenus locatifs',
+    label: 'incomeCategories.locatifs',
     icon: Home,
     color: '#4ADE80',
     type: 'Fixe',
   },
   aides: {
     code: 'aides',
-    label: 'Aides / Allocations',
+    label: 'incomeCategories.aides',
     icon: HandHeart,
     color: '#A78BFA',
     type: 'Variable',
   },
   freelance: {
     code: 'freelance',
-    label: 'Freelance / Missions',
+    label: 'incomeCategories.freelance',
     icon: Laptop,
     color: '#FB923C',
     type: 'Variable',
   },
   dividendes: {
     code: 'dividendes',
-    label: 'Dividendes / Interets',
+    label: 'incomeCategories.dividendes',
     icon: TrendingUp,
     color: '#34D399',
     type: 'Fixe',
   },
   pension: {
     code: 'pension',
-    label: 'Pension',
+    label: 'incomeCategories.pension',
     icon: Shield,
     color: '#F472B6',
     type: 'Fixe',
   },
   autres_revenus: {
     code: 'autres_revenus',
-    label: 'Autres revenus',
+    label: 'incomeCategories.autres_revenus',
     icon: Package,
     color: '#FDE68A',
     type: 'Variable',

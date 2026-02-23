@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Pressable, Text, StyleSheet } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { ChevronLeft, ChevronRight } from 'lucide-react-native';
 import { getWeekRangeLabel } from '@/utils/week-helpers';
 
@@ -12,6 +13,7 @@ interface WeekNavigatorProps {
 }
 
 export function WeekNavigator({ week, year, isCurrentWeek, onPrev, onNext }: WeekNavigatorProps) {
+  const { t } = useTranslation('tracking');
   const rangeLabel = getWeekRangeLabel(week, year);
 
   return (
@@ -24,7 +26,7 @@ export function WeekNavigator({ week, year, isCurrentWeek, onPrev, onNext }: Wee
         <Text style={[styles.dateRange, isCurrentWeek && styles.dateRangeCurrent]}>
           {rangeLabel}
         </Text>
-        <Text style={styles.weekContext}>S{week} {isCurrentWeek ? '· cette semaine' : ''}</Text>
+        <Text style={styles.weekContext}>S{week} {isCurrentWeek ? `· ${t('weekNavigator.thisWeek')}` : ''}</Text>
       </View>
 
       <Pressable onPress={onNext} style={styles.arrow}>

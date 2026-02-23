@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useMemo, useState } from 'react';
 import { View, Text, ScrollView, Animated, StyleSheet, Pressable, LayoutChangeEvent } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { WZ, GlassCard, FadeInView, ZoomInView, PrimaryButton, neonGlow } from '../shared';
 import { useWizardStore } from '@/stores/wizard-store';
 import { useAppStore, ViewMode } from '@/stores/app.store';
@@ -96,7 +97,7 @@ function useConfetti(active: boolean, containerWidth: number) {
   return { pieces, anims };
 }
 
-function getEngagementLevel(formData: {
+function getEngagementLevelKey(formData: {
   ratings: number[];
   risks: Record<string, number>;
   levers: Record<string, number>;
@@ -108,43 +109,25 @@ function getEngagementLevel(formData: {
     : 0;
   const score = ratingTotal + avgLever;
 
-  if (score >= 80) return 'Expert';
-  if (score >= 55) return 'Avancé';
-  if (score >= 30) return 'Intermédiaire';
-  return 'Débutant';
+  if (score >= 80) return 'expert';
+  if (score >= 55) return 'advanced';
+  if (score >= 30) return 'intermediate';
+  return 'beginner';
 }
 
 const VIEW_MODE_OPTIONS: Array<{
   key: ViewMode;
-  label: string;
+  i18nKey: string;
   icon: string;
-  description: string;
   color: string;
 }> = [
-  {
-    key: 'simple',
-    label: 'Débutant',
-    icon: '🌱',
-    description: 'Vue simplifiée, idéale pour commencer',
-    color: WZ.green,
-  },
-  {
-    key: 'expert',
-    label: 'Expert',
-    icon: '📊',
-    description: 'Indicateurs avancés et analyses détaillées',
-    color: WZ.accent,
-  },
-  {
-    key: 'investor',
-    label: 'Investisseur',
-    icon: '🏦',
-    description: 'Vue complète avec outils d\'investissement',
-    color: '#A78BFA',
-  },
+  { key: 'simple', i18nKey: 'simple', icon: '🌱', color: WZ.green },
+  { key: 'expert', i18nKey: 'expert', icon: '📊', color: WZ.accent },
+  { key: 'investor', i18nKey: 'investor', icon: '🏦', color: '#A78BFA' },
 ];
 
 export default function Step7Final({ isActive, onComplete }: Props) {
+  const { t } = useTranslation('wizard');
   const { formData, resetWizard } = useWizardStore();
   const viewMode = useAppStore((s) => s.viewMode);
   const setViewMode = useAppStore((s) => s.setViewMode);
@@ -158,7 +141,7 @@ export default function Step7Final({ isActive, onComplete }: Props) {
 
   const incomeCount = Object.values(formData.incomes).filter((v) => v.amount > 0).length;
   const expenseCount = Object.values(formData.expenses).filter((v) => v.amount > 0).length;
-  const engagement = getEngagementLevel(formData);
+  const engagementKey = getEngagementLevelKey(formData);
 
   // Coherence ratio (Dep/Rev %)
   const totalIncome = Object.values(formData.incomes).reduce((sum, v) => {
@@ -172,11 +155,11 @@ export default function Step7Final({ isActive, onComplete }: Props) {
   const coherenceRatio = totalIncome > 0 ? Math.round((totalExpense / totalIncome) * 100) : 0;
 
   const stats = [
-    { label: 'Profil configuré', value: '\u2713', accent: true },
-    { label: 'Sources de revenus', value: `${incomeCount}`, accent: false },
-    { label: 'Catégories de dépenses', value: `${expenseCount}`, accent: false },
-    { label: 'Ratio Dép./Rev.', value: `${coherenceRatio}%`, accent: false },
-    { label: "Niveau d'engagement", value: engagement, accent: false },
+    { label: t('step8.profileConfigured'), value: '\u2713', accent: true },
+    { label: t('step8.incomeSources'), value: `${incomeCount}`, accent: false },
+    { label: t('step8.expenseCategories'), value: `${expenseCount}`, accent: false },
+    { label: t('step8.expenseRatio'), value: `${coherenceRatio}%`, accent: false },
+    { label: t('step8.engagementLevel'), value: t(`step8.engagement.${engagementKey}`), accent: false },
   ];
 
   return (
@@ -226,9 +209,9 @@ export default function Step7Final({ isActive, onComplete }: Props) {
         </ZoomInView>
 
         <FadeInView active={isActive} delay={500}>
-          <Text style={styles.title}>Wow, profil complet !</Text>
+          <Text style={styles.title}>{t('step8.title')}</Text>
           <Text style={styles.subtitle}>
-            Votre profil financier est prêt. Découvrez votre tableau de bord personnalisé.
+            {t('step8.subtitle')}
           </Text>
         </FadeInView>
 
@@ -253,9 +236,9 @@ export default function Step7Final({ isActive, onComplete }: Props) {
 
         {/* View Mode Selector */}
         <FadeInView active={isActive} delay={1100}>
-          <Text style={styles.modeTitle}>Choisissez votre mode d'affichage</Text>
+          <Text style={styles.modeTitle}>{t('step8.chooseModeTitle')}</Text>
           <Text style={styles.modeSubtitle}>
-            Vous pourrez le changer à tout moment dans les réglages
+            {t('step8.chooseModeSubtitle')}
           </Text>
           <View style={styles.modeGrid}>
             {VIEW_MODE_OPTIONS.map((opt) => {
@@ -274,9 +257,9 @@ export default function Step7Final({ isActive, onComplete }: Props) {
                     styles.modeLabel,
                     isSelected && { color: opt.color },
                   ]}>
-                    {opt.label}
+                    {t(`step8.modes.${opt.i18nKey}`)}
                   </Text>
-                  <Text style={styles.modeDesc}>{opt.description}</Text>
+                  <Text style={styles.modeDesc}>{t(`step8.modes.${opt.i18nKey}Desc`)}</Text>
                 </Pressable>
               );
             })}
@@ -286,7 +269,7 @@ export default function Step7Final({ isActive, onComplete }: Props) {
         {/* CTA Button */}
         <FadeInView active={isActive} delay={1400}>
           <PrimaryButton
-            label="Accéder au Dashboard"
+            label={t('step8.goToDashboard')}
             onPress={onComplete}
             style={styles.ctaButton}
           />
@@ -298,7 +281,7 @@ export default function Step7Final({ isActive, onComplete }: Props) {
             onPress={resetWizard}
             style={({ pressed }) => [styles.resetButton, pressed && { opacity: 0.7 }]}
           >
-            <Text style={styles.resetText}>🔄 Recommencer à zéro</Text>
+            <Text style={styles.resetText}>🔄 {t('step8.resetWizard')}</Text>
           </Pressable>
         </FadeInView>
 

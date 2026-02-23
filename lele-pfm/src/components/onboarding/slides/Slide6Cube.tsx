@@ -1,15 +1,18 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useTranslation } from 'react-i18next';
 import { OB, FadeInView, ZoomInView, OBGlassCard, neonGlow } from '../shared';
 
-const benefits = [
-  { icon: '\u{1F4B0}', title: 'Ton épargne est boostée', desc: 'Ton cashback naturel vient renforcer tes réserves', color: OB.greenLight },
-  { icon: '\u{1F389}', title: 'Tes plaisirs aussi', desc: 'Une partie finance ce qui te fait envie', color: OB.orangeLight },
-  { icon: '\u{1F6E1}\uFE0F', title: 'Sans toucher au vital', desc: 'On ne coupe jamais l\'essentiel', color: OB.blueLight },
-];
-
 export default function Slide6Cube({ isActive }: { isActive: boolean }) {
+  const { t } = useTranslation('onboarding');
+
+  const benefits = [
+    { icon: '\u{1F4B0}', title: t('slide6.benefit1Title'), desc: t('slide6.benefit1Desc'), color: OB.greenLight },
+    { icon: '\u{1F389}', title: t('slide6.benefit2Title'), desc: t('slide6.benefit2Desc'), color: OB.orangeLight },
+    { icon: '\u{1F6E1}\uFE0F', title: t('slide6.benefit3Title'), desc: t('slide6.benefit3Desc'), color: OB.blueLight },
+  ];
+
   return (
     <LinearGradient colors={[OB.darkBg, '#12131A']} style={styles.container}>
       {isActive && (
@@ -24,7 +27,7 @@ export default function Slide6Cube({ isActive }: { isActive: boolean }) {
               </View>
             </ZoomInView>
 
-            <Text style={styles.cardTitle}>Ton cashback naturel travaille pour toi</Text>
+            <Text style={styles.cardTitle}>{t('slide6.cardTitle')}</Text>
 
             {benefits.map((b, i) => (
               <FadeInView key={b.title} active={isActive} delay={400 + i * 150} duration={400} from="left" style={[styles.benefitRow, i < benefits.length - 1 && styles.benefitRowBorder]}>
@@ -42,16 +45,16 @@ export default function Slide6Cube({ isActive }: { isActive: boolean }) {
 
           {/* Text */}
           <FadeInView active={isActive} delay={500}>
-            <Text style={[styles.tagline, neonGlow(OB.accent)]}>Le meilleur des deux mondes</Text>
+            <Text style={[styles.tagline, neonGlow(OB.accent)]}>{t('slide6.tagline')}</Text>
           </FadeInView>
           <FadeInView active={isActive} delay={600}>
             <Text style={styles.heading}>
-              Un cashback qui booste{'\n'}épargne ET plaisirs.
+              {t('slide6.heading')}
             </Text>
           </FadeInView>
           <FadeInView active={isActive} delay={700}>
             <Text style={styles.body}>
-              <Text style={{ color: '#fff', fontWeight: '700' }}>Ton cashback naturel booste ton épargne ET tes plaisirs</Text>, sans effort ni sacrifice.
+              <Text style={{ color: '#fff', fontWeight: '700' }}>{t('slide6.bodyBold')}</Text>{t('slide6.bodyEnd')}
             </Text>
           </FadeInView>
         </>

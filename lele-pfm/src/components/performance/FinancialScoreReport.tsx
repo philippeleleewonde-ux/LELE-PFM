@@ -11,6 +11,7 @@
 
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import {
   Repeat,
   Target,
@@ -33,17 +34,9 @@ const LEVER_ICONS: Record<string, LucideIcon> = {
   LIT: GraduationCap,
 };
 
-const LEVER_NAMES: Record<string, string> = {
-  REG: 'Regularite d\'Epargne',
-  PRE: 'Precision Budgetaire',
-  SEC: 'Securite Financiere',
-  EFF: 'Efficience des Revenus',
-  LIT: 'Litteratie Financiere',
-};
-
 // ─── Data-driven key figures builder ───
 
-function buildKeyFigures(code: string, d: LeverDetails): { label: string; value: string; color: string }[] {
+function buildKeyFigures(code: string, d: LeverDetails, t: (key: string, opts?: any) => string): { label: string; value: string; color: string }[] {
   switch (code) {
     case 'REG': {
       const ewma = d.regEwmaFrequency ?? 0;
@@ -51,13 +44,13 @@ function buildKeyFigures(code: string, d: LeverDetails): { label: string; value:
       const streak = d.regCurrentStreak ?? 0;
       const streakSc = d.regStreakScore ?? 0;
       const items: { label: string; value: string; color: string }[] = [
-        { label: 'Frequence EWMA', value: `${ewma}/100`, color: ewma >= 70 ? '#4ADE80' : ewma >= 40 ? '#FBBF24' : '#F87171' },
-        { label: 'Intensite (note moy.)', value: `${d.regAvgNote ?? 0}/10 → ${intensity}/100`, color: intensity >= 70 ? '#4ADE80' : intensity >= 40 ? '#FBBF24' : '#F87171' },
-        { label: 'Serie en cours', value: `${streak} sem. → ${streakSc}/100`, color: streak >= 4 ? '#4ADE80' : streak >= 2 ? '#FBBF24' : '#F87171' },
-        { label: 'Semaines avec epargne', value: `${d.regWeeksWithSavings ?? 0} / ${d.regTotalWeeks ?? 0}`, color: '#A1A1AA' },
+        { label: t('reg.ewmaFrequency'), value: `${ewma}/100`, color: ewma >= 70 ? '#4ADE80' : ewma >= 40 ? '#FBBF24' : '#F87171' },
+        { label: t('reg.intensity'), value: `${d.regAvgNote ?? 0}/10 → ${intensity}/100`, color: intensity >= 70 ? '#4ADE80' : intensity >= 40 ? '#FBBF24' : '#F87171' },
+        { label: t('reg.currentStreak'), value: `${streak} sem. → ${streakSc}/100`, color: streak >= 4 ? '#4ADE80' : streak >= 2 ? '#FBBF24' : '#F87171' },
+        { label: t('reg.weeksWithSavings'), value: `${d.regWeeksWithSavings ?? 0} / ${d.regTotalWeeks ?? 0}`, color: '#A1A1AA' },
       ];
       if (d.regHasBeginnerBonus) {
-        items.push({ label: 'Bonus debutant', value: '+15 pts', color: '#60A5FA' });
+        items.push({ label: t('reg.beginnerBonus'), value: t('reg.beginnerBonusValue'), color: '#60A5FA' });
       }
       return items;
     }
@@ -72,24 +65,24 @@ function buildKeyFigures(code: string, d: LeverDetails): { label: string; value:
         const sS = d.preScoreSemi ?? 0;
         const sD = d.preScoreDisc ?? 0;
         items.push(
-          { label: `Incompressible (${Math.round((d.preWeightIncomp ?? 0) * 100)}%)`, value: `${sI}/100 · ${incompExec}%`, color: sI >= 80 ? '#4ADE80' : sI >= 50 ? '#FBBF24' : '#F87171' },
-          { label: `Semi-essentiel (${Math.round((d.preWeightSemi ?? 0) * 100)}%)`, value: `${sS}/100 · ${semiExec}%`, color: sS >= 80 ? '#4ADE80' : sS >= 50 ? '#FBBF24' : '#F87171' },
-          { label: `Discretionnaire (${Math.round((d.preWeightDisc ?? 0) * 100)}%)`, value: `${sD}/100 · ${discExec}%`, color: sD >= 80 ? '#4ADE80' : sD >= 50 ? '#FBBF24' : '#F87171' },
-          { label: 'Realisation globale', value: `${avg}%`, color: avg <= 100 && avg >= 80 ? '#4ADE80' : '#FB923C' },
+          { label: `${t('pre.incompressible')} (${Math.round((d.preWeightIncomp ?? 0) * 100)}%)`, value: `${sI}/100 · ${incompExec}%`, color: sI >= 80 ? '#4ADE80' : sI >= 50 ? '#FBBF24' : '#F87171' },
+          { label: `${t('pre.semiEssential')} (${Math.round((d.preWeightSemi ?? 0) * 100)}%)`, value: `${sS}/100 · ${semiExec}%`, color: sS >= 80 ? '#4ADE80' : sS >= 50 ? '#FBBF24' : '#F87171' },
+          { label: `${t('pre.discretionary')} (${Math.round((d.preWeightDisc ?? 0) * 100)}%)`, value: `${sD}/100 · ${discExec}%`, color: sD >= 80 ? '#4ADE80' : sD >= 50 ? '#FBBF24' : '#F87171' },
+          { label: t('pre.globalRealization'), value: `${avg}%`, color: avg <= 100 && avg >= 80 ? '#4ADE80' : '#FB923C' },
         );
         // Volatilite — afficher seulement si penalite active (< 1.0)
         const hasPenalty = (d.prePenaltyIncomp ?? 1) < 0.99 || (d.prePenaltySemi ?? 1) < 0.99 || (d.prePenaltyDisc ?? 1) < 0.99;
         if (hasPenalty) {
           const worstCV = Math.max(d.preCvIncomp ?? 0, d.preCvSemi ?? 0, d.preCvDisc ?? 0);
           const worstPenalty = Math.min(d.prePenaltyIncomp ?? 1, d.prePenaltySemi ?? 1, d.prePenaltyDisc ?? 1);
-          items.push({ label: 'Volatilite max (CV)', value: `${Math.round(worstCV * 100)}%`, color: worstCV > 0.20 ? '#F87171' : worstCV > 0.10 ? '#FBBF24' : '#4ADE80' });
-          items.push({ label: 'Penalite stabilite', value: `×${worstPenalty.toFixed(2)}`, color: worstPenalty < 0.90 ? '#F87171' : '#FBBF24' });
+          items.push({ label: t('pre.maxVolatility'), value: `${Math.round(worstCV * 100)}%`, color: worstCV > 0.20 ? '#F87171' : worstCV > 0.10 ? '#FBBF24' : '#4ADE80' });
+          items.push({ label: t('pre.stabilityPenalty'), value: `×${worstPenalty.toFixed(2)}`, color: worstPenalty < 0.90 ? '#F87171' : '#FBBF24' });
         }
       } else {
-        items.push({ label: 'Plan budgetaire', value: 'Non configure', color: '#F87171' });
+        items.push({ label: t('pre.budgetPlan'), value: t('pre.notConfigured'), color: '#F87171' });
       }
       if (d.preHasBeginnerBonus) {
-        items.push({ label: 'Bonus debutant', value: '+15 pts', color: '#60A5FA' });
+        items.push({ label: t('reg.beginnerBonus'), value: t('reg.beginnerBonusValue'), color: '#60A5FA' });
       }
       return items;
     }
@@ -97,22 +90,22 @@ function buildKeyFigures(code: string, d: LeverDetails): { label: string; value:
       const objectif = d.secObjectifAnnuel ?? 0;
       if (objectif <= 0) {
         return [
-          { label: 'Objectif EPR', value: 'Non defini', color: '#71717A' },
-          { label: 'Score par defaut', value: '40/100 (risque)', color: '#FB923C' },
+          { label: t('sec.eprObjective'), value: t('sec.notDefined'), color: '#71717A' },
+          { label: t('sec.defaultScore'), value: t('sec.defaultScoreRisk'), color: '#FB923C' },
         ];
       }
       const cumul = d.secCumulEconomies ?? 0;
       const prorated = d.secProratedTarget ?? 0;
       const coveragePct = Math.round((d.secCoverageRatio ?? 0) * 100);
       const items: { label: string; value: string; color: string }[] = [
-        { label: 'Epargne nette cumulee', value: formatCurrency(cumul), color: '#4ADE80' },
-        { label: `Objectif prorte An${d.secPlanYear ?? 1} T${d.secQuarter ?? 1}`, value: formatCurrency(prorated), color: '#60A5FA' },
-        { label: 'Ratio de couverture', value: `${coveragePct}%`, color: coveragePct >= 100 ? '#4ADE80' : coveragePct >= 70 ? '#FBBF24' : '#F87171' },
-        { label: `Objectif annuel An${d.secPlanYear ?? 1}`, value: formatCurrency(objectif), color: '#A1A1AA' },
-        { label: 'Avancement', value: `S${d.secWeeksElapsed ?? 0} / 48`, color: '#A1A1AA' },
+        { label: t('sec.cumulSavings'), value: formatCurrency(cumul), color: '#4ADE80' },
+        { label: t('sec.proratedObjective', { planYear: d.secPlanYear ?? 1, quarter: d.secQuarter ?? 1 }), value: formatCurrency(prorated), color: '#60A5FA' },
+        { label: t('sec.coverageRatio'), value: `${coveragePct}%`, color: coveragePct >= 100 ? '#4ADE80' : coveragePct >= 70 ? '#FBBF24' : '#F87171' },
+        { label: t('sec.annualObjective', { planYear: d.secPlanYear ?? 1 }), value: formatCurrency(objectif), color: '#A1A1AA' },
+        { label: t('sec.progress'), value: `S${d.secWeeksElapsed ?? 0} / 48`, color: '#A1A1AA' },
       ];
       if (d.secHasBeginnerBonus) {
-        items.push({ label: 'Bonus debutant', value: '+15 pts', color: '#60A5FA' });
+        items.push({ label: t('reg.beginnerBonus'), value: t('reg.beginnerBonusValue'), color: '#60A5FA' });
       }
       return items;
     }
@@ -120,30 +113,30 @@ function buildKeyFigures(code: string, d: LeverDetails): { label: string; value:
       if (!d.effHasTargets) {
         const hasIncome = (d.effTotalActual8w ?? 0) > 0;
         return [
-          { label: 'Objectifs revenus', value: 'Non configures', color: '#71717A' },
-          { label: 'Score par defaut', value: hasIncome ? '60/100 (suivi actif)' : '50/100 (neutre)', color: '#A78BFA' },
-          { label: 'Fenetre d\'analyse', value: `${d.effNbWeeks ?? 0} semaines`, color: '#A1A1AA' },
+          { label: t('eff.revenueObjectives'), value: t('eff.notConfigured'), color: '#71717A' },
+          { label: t('sec.defaultScore'), value: hasIncome ? t('eff.defaultScoreActive') : t('eff.defaultScoreNeutral'), color: '#A78BFA' },
+          { label: t('eff.analysisWindow'), value: `${d.effNbWeeks ?? 0} ${t('eff.weeks')}`, color: '#A1A1AA' },
         ];
       }
       const actual8w = d.effTotalActual8w ?? 0;
       const expected8w = d.effTotalExpected8w ?? 0;
       const globalPct = expected8w > 0 ? Math.round((actual8w / expected8w) * 100) : 0;
       const items: { label: string; value: string; color: string }[] = [
-        { label: `Revenus reels (${d.effNbWeeks ?? 0} sem.)`, value: formatCurrency(actual8w), color: '#4ADE80' },
-        { label: `Revenus prevus (${d.effNbWeeks ?? 0} sem.)`, value: formatCurrency(expected8w), color: '#60A5FA' },
-        { label: 'Realisation globale', value: `${globalPct}%`, color: globalPct >= 80 ? '#4ADE80' : globalPct >= 50 ? '#FBBF24' : '#F87171' },
+        { label: t('eff.realRevenue', { nbWeeks: d.effNbWeeks ?? 0 }), value: formatCurrency(actual8w), color: '#4ADE80' },
+        { label: t('eff.expectedRevenue', { nbWeeks: d.effNbWeeks ?? 0 }), value: formatCurrency(expected8w), color: '#60A5FA' },
+        { label: t('pre.globalRealization'), value: `${globalPct}%`, color: globalPct >= 80 ? '#4ADE80' : globalPct >= 50 ? '#FBBF24' : '#F87171' },
       ];
       // Show Fixe/Variable decomposition if both exist
       if (d.effScoreFixe !== undefined && d.effScoreVariable !== undefined) {
         const rFixePct = Math.round((d.effRealizationFixe ?? 0) * 100);
         const rVarPct = Math.round((d.effRealizationVariable ?? 0) * 100);
         items.push(
-          { label: `Revenus Fixes (${Math.round((d.effWeightFixe ?? 0) * 100)}%)`, value: `${rFixePct}% → ${d.effScoreFixe}/100`, color: rFixePct >= 90 ? '#4ADE80' : rFixePct >= 70 ? '#FBBF24' : '#F87171' },
-          { label: `Revenus Variables (${Math.round((d.effWeightVariable ?? 0) * 100)}%)`, value: `${rVarPct}% → ${d.effScoreVariable}/100`, color: rVarPct >= 80 ? '#4ADE80' : rVarPct >= 50 ? '#FBBF24' : '#F87171' },
+          { label: t('eff.fixedRevenue', { pct: Math.round((d.effWeightFixe ?? 0) * 100) }), value: `${rFixePct}% → ${d.effScoreFixe}/100`, color: rFixePct >= 90 ? '#4ADE80' : rFixePct >= 70 ? '#FBBF24' : '#F87171' },
+          { label: t('eff.variableRevenue', { pct: Math.round((d.effWeightVariable ?? 0) * 100) }), value: `${rVarPct}% → ${d.effScoreVariable}/100`, color: rVarPct >= 80 ? '#4ADE80' : rVarPct >= 50 ? '#FBBF24' : '#F87171' },
         );
       }
       if (d.effHasBeginnerBonus) {
-        items.push({ label: 'Bonus debutant', value: '+15 pts', color: '#60A5FA' });
+        items.push({ label: t('reg.beginnerBonus'), value: t('reg.beginnerBonusValue'), color: '#60A5FA' });
       }
       return items;
     }
@@ -154,12 +147,12 @@ function buildKeyFigures(code: string, d: LeverDetails): { label: string; value:
       const completed = d.litCompletedCount ?? 0;
       const total = d.litTotalChallenges ?? 48;
       const items: { label: string; value: string; color: string }[] = [
-        { label: 'Connaissances EKH (60%)', value: `${d.litEkhNorm ?? 0}/100`, color: know >= 60 ? '#4ADE80' : know >= 40 ? '#FBBF24' : '#F87171' },
-        { label: 'Engagement defis (25%)', value: `${engage}/100`, color: engage >= 60 ? '#4ADE80' : engage >= 30 ? '#FBBF24' : '#F87171' },
-        { label: 'Progression curriculum (15%)', value: `${completed}/${total} → ${prog}/100`, color: prog >= 50 ? '#4ADE80' : prog >= 25 ? '#FBBF24' : '#F87171' },
+        { label: t('lit.knowledge'), value: `${d.litEkhNorm ?? 0}/100`, color: know >= 60 ? '#4ADE80' : know >= 40 ? '#FBBF24' : '#F87171' },
+        { label: t('lit.engagement'), value: `${engage}/100`, color: engage >= 60 ? '#4ADE80' : engage >= 30 ? '#FBBF24' : '#F87171' },
+        { label: t('lit.progression'), value: `${completed}/${total} → ${prog}/100`, color: prog >= 50 ? '#4ADE80' : prog >= 25 ? '#FBBF24' : '#F87171' },
       ];
       if (d.litFloorActive) {
-        items.push({ label: 'Plancher expert actif', value: `MIN = ${d.litKnowledgeFloor ?? 0}`, color: '#60A5FA' });
+        items.push({ label: t('lit.expertFloor'), value: `MIN = ${d.litKnowledgeFloor ?? 0}`, color: '#60A5FA' });
       }
       return items;
     }
@@ -170,84 +163,86 @@ function buildKeyFigures(code: string, d: LeverDetails): { label: string; value:
 
 // ─── Data-driven comment builder ───
 
-function buildComment(code: string, score: number, d: LeverDetails): string {
+function buildComment(code: string, score: number, d: LeverDetails, t: (key: string, opts?: any) => string): string {
   switch (code) {
     case 'REG': {
-      const t = d.regTotalWeeks ?? 0;
-      if (t === 0) return 'Aucune donnee pour l\'instant. Commence a saisir tes depenses pour activer ce levier.';
+      const tw = d.regTotalWeeks ?? 0;
+      if (tw === 0) return t('reg.commentNoData');
       const ewma = d.regEwmaFrequency ?? 0;
       const streak = d.regCurrentStreak ?? 0;
       const avgN = d.regAvgNote ?? 0;
       if (ewma >= 80 && streak >= 4 && avgN >= 7)
-        return `Excellent : frequence ${ewma}/100, serie de ${streak} semaines, note moyenne ${avgN}/10. Regularite exemplaire — continue ainsi !`;
+        return t('reg.commentExcellent', { ewma, streak, avgN });
       if (ewma >= 60)
-        return `Bonne frequence (${ewma}/100) mais ${streak < 3 ? 'ta serie est trop courte (' + streak + ' sem.)' : 'l\'intensite peut progresser (note moy. ' + avgN + '/10)'}. Vise la constance.`;
+        return streak < 3
+          ? t('reg.commentGoodShortStreak', { ewma, streak })
+          : t('reg.commentGoodLowIntensity', { ewma, avgN });
       if (ewma >= 30)
-        return `Frequence moderee (${ewma}/100). Tu epargnes de facon irreguliere. Meme un petit montant chaque semaine fait la difference.`;
-      return `Frequence faible (${ewma}/100). La regularite est le levier le plus important — vise au moins 4 semaines consecutives.`;
+        return t('reg.commentModerate', { ewma });
+      return t('reg.commentWeak', { ewma });
     }
     case 'PRE': {
-      if (!d.preHasBudget) return 'Aucun budget configure. Sans plan budgetaire, ce levier reste a 0. Configure tes budgets dans le wizard pour activer la precision budgetaire.';
+      if (!d.preHasBudget) return t('pre.commentNoBudget');
       const sI = d.preScoreIncomp ?? 0;
       const sS = d.preScoreSemi ?? 0;
       const sD = d.preScoreDisc ?? 0;
       const rI = d.preRealizationIncomp !== undefined ? Math.round(d.preRealizationIncomp * 100) : 0;
       const rS = d.preRealizationSemi !== undefined ? Math.round(d.preRealizationSemi * 100) : 0;
       const rD = d.preRealizationDisc !== undefined ? Math.round(d.preRealizationDisc * 100) : 0;
-      // Identify weakest tier
       const tiers = [
         { name: 'Incompressible', s: sI, r: rI },
         { name: 'Semi-essentiel', s: sS, r: rS },
         { name: 'Discretionnaire', s: sD, r: rD },
       ];
-      const allGood = tiers.every((t) => t.s >= 80);
+      const allGood = tiers.every((ti) => ti.s >= 80);
       const weakest = tiers.reduce((a, b) => a.s < b.s ? a : b);
-      // Volatility suffix
       const worstPenalty = Math.min(d.prePenaltyIncomp ?? 1, d.prePenaltySemi ?? 1, d.prePenaltyDisc ?? 1);
-      const volSuffix = worstPenalty < 0.95 ? ` Penalite de volatilite active (×${worstPenalty.toFixed(2)}) — tes depenses varient trop d'une semaine a l'autre.` : '';
-      if (allGood) return `Excellente maitrise budgetaire sur les 3 niveaux. Incompressible ${rI}% (${sI}/100), Semi-essentiel ${rS}% (${sS}/100), Discretionnaire ${rD}% (${sD}/100).${volSuffix}`;
-      if (weakest.name === 'Incompressible') return `Attention aux depenses vitales (${rI}% → ${sI}/100) — alimentation, logement et sante depassent le budget. Ces postes sont penalises severement car incompressibles.${volSuffix}`;
-      if (weakest.name === 'Semi-essentiel') return `Les depenses semi-essentielles sont le maillon faible (${rS}% → ${sS}/100) — transport, telecom ou education a revoir. Incompressible OK a ${sI}/100.${volSuffix}`;
-      return `Les depenses discretionnaires plombent ton score (${rD}% → ${sD}/100). Vetements et loisirs : chaque euro economise remonte le score. Incompressible ${sI}/100, Semi-essentiel ${sS}/100.${volSuffix}`;
+      const volSuffix = worstPenalty < 0.95 ? t('pre.volSuffix', { penalty: worstPenalty.toFixed(2) }) : '';
+      if (allGood) return t('pre.commentAllGood', { rI, sI, rS, sS, rD, sD, volSuffix });
+      if (weakest.name === 'Incompressible') return t('pre.commentWeakIncomp', { rI, sI, volSuffix });
+      if (weakest.name === 'Semi-essentiel') return t('pre.commentWeakSemi', { rS, sS, sI, volSuffix });
+      return t('pre.commentWeakDisc', { rD, sD, sI, sS, volSuffix });
     }
     case 'SEC': {
       const obj = d.secObjectifAnnuel ?? 0;
-      if (obj <= 0) return 'Objectif EPR non defini. L\'absence de plan d\'epargne est un facteur de risque — configure tes objectifs dans le wizard (score : 40/100).';
-      const cumul = d.secCumulEconomies ?? 0;
-      const prorated = d.secProratedTarget ?? 0;
+      if (obj <= 0) return t('sec.commentNoObjective');
+      const cumul = formatCurrency(d.secCumulEconomies ?? 0);
+      const prorated = formatCurrency(d.secProratedTarget ?? 0);
       const coveragePct = Math.round((d.secCoverageRatio ?? 0) * 100);
       const weeks = d.secWeeksElapsed ?? 0;
-      const ecart = Math.max(0, prorated - cumul);
-      if (coveragePct >= 120) return `${formatCurrency(cumul)} cumules pour ${formatCurrency(prorated)} attendus a S${weeks} (${coveragePct}%). Nettement en avance — securite financiere solide.`;
-      if (coveragePct >= 100) return `${formatCurrency(cumul)} cumules pour ${formatCurrency(prorated)} attendus a S${weeks} (${coveragePct}%). En avance sur ton plan d'epargne An${d.secPlanYear ?? 1}.`;
-      if (coveragePct >= 70) return `${formatCurrency(cumul)} sur ${formatCurrency(prorated)} attendus a S${weeks} (${coveragePct}%). Retard modere — il manque ${formatCurrency(ecart)} pour etre en ligne.`;
-      if (coveragePct >= 40) return `${formatCurrency(cumul)} sur ${formatCurrency(prorated)} attendus a S${weeks} (${coveragePct}%). En retard significatif — accelere l'epargne pour rattraper ${formatCurrency(ecart)}.`;
-      return `Seulement ${formatCurrency(cumul)} sur ${formatCurrency(prorated)} attendus a S${weeks} (${coveragePct}%). Situation critique — ton matelas de securite est tres insuffisant.`;
+      const ecart = formatCurrency(Math.max(0, (d.secProratedTarget ?? 0) - (d.secCumulEconomies ?? 0)));
+      const planYear = d.secPlanYear ?? 1;
+      if (coveragePct >= 120) return t('sec.commentExcellent', { cumul, prorated, weeks, coveragePct });
+      if (coveragePct >= 100) return t('sec.commentAhead', { cumul, prorated, weeks, coveragePct, planYear });
+      if (coveragePct >= 70) return t('sec.commentModerate', { cumul, prorated, weeks, coveragePct, ecart });
+      if (coveragePct >= 40) return t('sec.commentBehind', { cumul, prorated, weeks, coveragePct, ecart });
+      return t('sec.commentCritical', { cumul, prorated, weeks, coveragePct });
     }
     case 'EFF': {
       if (!d.effHasTargets) {
         const hasIncome = (d.effTotalActual8w ?? 0) > 0;
-        if (hasIncome) return 'Aucun objectif de revenus configure, mais tu enregistres des rentrees. Configure tes sources dans le wizard pour activer le scoring complet (score actuel : 60/100).';
-        return 'Aucun objectif de revenus configure et aucune rentree enregistree. Ajoute tes sources dans le wizard pour activer ce levier (score neutre : 50/100).';
+        return hasIncome ? t('eff.commentNoTargetsWithIncome') : t('eff.commentNoTargetsNoIncome');
       }
       const nbW = d.effNbWeeks ?? 0;
       const actual8w = d.effTotalActual8w ?? 0;
       const expected8w = d.effTotalExpected8w ?? 0;
       const pct = expected8w > 0 ? Math.round((actual8w / expected8w) * 100) : 0;
-      const ecart = Math.abs(actual8w - expected8w);
+      const ecart = formatCurrency(Math.abs(actual8w - expected8w));
+      const actual = formatCurrency(actual8w);
+      const expected = formatCurrency(expected8w);
       // Build Fixe/Variable context
       let typeContext = '';
       if (d.effScoreFixe !== undefined && d.effScoreVariable !== undefined) {
         const rF = Math.round((d.effRealizationFixe ?? 0) * 100);
         const rV = Math.round((d.effRealizationVariable ?? 0) * 100);
-        if (rF < 90 && rV >= 80) typeContext = ' Tes revenus fixes sont en retard — verifie salaire et pensions.';
-        else if (rV < 60 && rF >= 90) typeContext = ' Tes revenus variables sont faibles — primes ou freelance en attente ?';
-        else if (rF < 90 && rV < 60) typeContext = ' Les deux types de revenus sont sous les previsions.';
+        if (rF < 90 && rV >= 80) typeContext = t('eff.typeContextFixeLag');
+        else if (rV < 60 && rF >= 90) typeContext = t('eff.typeContextVarLag');
+        else if (rF < 90 && rV < 60) typeContext = t('eff.typeContextBothLag');
       }
-      if (pct >= 100) return `Sur ${nbW} semaines, ${formatCurrency(actual8w)} recus pour ${formatCurrency(expected8w)} prevus (${pct}%). Tes revenus depassent les previsions !${typeContext}`;
-      if (pct >= 80) return `Sur ${nbW} semaines, ${formatCurrency(actual8w)} recus sur ${formatCurrency(expected8w)} prevus (${pct}%). Quasi dans les clous — il manque ${formatCurrency(ecart)}.${typeContext}`;
-      if (pct >= 50) return `Sur ${nbW} semaines, ${formatCurrency(actual8w)} sur ${formatCurrency(expected8w)} attendus (${pct}%). Ecart de ${formatCurrency(ecart)} a combler.${typeContext}`;
-      return `Sur ${nbW} semaines, seulement ${formatCurrency(actual8w)} sur ${formatCurrency(expected8w)} prevus (${pct}%). Gros ecart de ${formatCurrency(ecart)}.${typeContext}`;
+      if (pct >= 100) return t('eff.commentAbove100', { nbW, actual, expected, pct, typeContext });
+      if (pct >= 80) return t('eff.commentAbove80', { nbW, actual, expected, pct, ecart, typeContext });
+      if (pct >= 50) return t('eff.commentAbove50', { nbW, actual, expected, pct, ecart, typeContext });
+      return t('eff.commentBelow50', { nbW, actual, expected, pct, ecart, typeContext });
     }
     case 'LIT': {
       const know = d.litKnowledgeScore ?? 0;
@@ -255,12 +250,12 @@ function buildComment(code: string, score: number, d: LeverDetails): string {
       const completed = d.litCompletedCount ?? 0;
       const total = d.litTotalChallenges ?? 48;
       if (d.litFloorActive)
-        return `Ton expertise (EKH ${d.litEkhNorm ?? 0}/100) garantit un score plancher. Complete tes defis hebdomadaires (${completed}/${total}) pour depasser ce minimum.`;
+        return t('lit.commentFloor', { ekhNorm: d.litEkhNorm ?? 0, completed, total });
       if (know >= 70 && engage >= 60)
-        return `Bonnes connaissances (${know}/100) et engagement actif (${engage}/100). ${completed}/${total} defis completes — continue a progresser dans le curriculum.`;
+        return t('lit.commentGood', { know, engage, completed, total });
       if (know >= 50)
-        return `Connaissances correctes (${know}/100) mais l'engagement est faible (${engage}/100). Fais tes defis chaque semaine pour booster ce levier.`;
-      return `Connaissances limitees (${know}/100). La litteratie impacte TOUS les autres leviers. Refais le wizard et complete tes defis (${completed}/${total}).`;
+        return t('lit.commentAverage', { know, engage });
+      return t('lit.commentWeak', { know, completed, total });
     }
     default:
       return '';
@@ -269,26 +264,27 @@ function buildComment(code: string, score: number, d: LeverDetails): string {
 
 // ─── Score level ───
 
-function getScoreLevel(score: number): { label: string; color: string } {
-  if (score >= 80) return { label: 'Excellent', color: '#4ADE80' };
-  if (score >= 60) return { label: 'Bien', color: '#60A5FA' };
-  if (score >= 40) return { label: 'Moyen', color: '#FBBF24' };
-  if (score >= 20) return { label: 'Faible', color: '#FB923C' };
-  return { label: 'Critique', color: '#F87171' };
+function getScoreLevel(score: number, t: (key: string) => string): { label: string; color: string } {
+  if (score >= 80) return { label: t('scoreLevel.excellent'), color: '#4ADE80' };
+  if (score >= 60) return { label: t('scoreLevel.good'), color: '#60A5FA' };
+  if (score >= 40) return { label: t('scoreLevel.average'), color: '#FBBF24' };
+  if (score >= 20) return { label: t('scoreLevel.weak'), color: '#FB923C' };
+  return { label: t('scoreLevel.critical'), color: '#F87171' };
 }
 
 // ─── Component ───
 
 export function FinancialScoreReport() {
+  const { t } = useTranslation('performance');
   const { globalScore, grade, levers } = useFinancialScore();
-  const globalLevel = getScoreLevel(globalScore);
+  const globalLevel = getScoreLevel(globalScore, t);
 
   return (
     <View style={styles.container}>
       {/* Global summary */}
       <View style={styles.summaryCard}>
         <View style={styles.summaryRow}>
-          <Text style={styles.summaryLabel}>Score global</Text>
+          <Text style={styles.summaryLabel}>{t('globalScore')}</Text>
           <Text style={[styles.summaryScore, { color: globalLevel.color }]}>
             {globalScore}/100
           </Text>
@@ -304,11 +300,11 @@ export function FinancialScoreReport() {
       {/* Lever rows */}
       {levers.map((lever) => {
         const Icon = LEVER_ICONS[lever.code];
-        const fullName = LEVER_NAMES[lever.code];
+        const fullName = t(`leverNames.${lever.code}`);
         if (!Icon) return null;
 
-        const keyFigures = buildKeyFigures(lever.code, lever.details);
-        const comment = buildComment(lever.code, lever.score, lever.details);
+        const keyFigures = buildKeyFigures(lever.code, lever.details, t);
+        const comment = buildComment(lever.code, lever.score, lever.details, t);
 
         return (
           <View key={lever.code} style={styles.leverCard}>

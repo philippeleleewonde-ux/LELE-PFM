@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Pressable, Text, StyleSheet } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import {
   ShoppingBasket,
   Shirt,
@@ -42,6 +43,7 @@ interface CategoryProgressRowProps {
 }
 
 export function CategoryProgressRow({ category, onPress }: CategoryProgressRowProps) {
+  const { t } = useTranslation('tracking');
   const Icon = ICON_MAP[category.icon] || ShoppingBasket;
   const color = COLOR_MAP[category.code] || '#A1A1AA';
 
@@ -82,7 +84,7 @@ export function CategoryProgressRow({ category, onPress }: CategoryProgressRowPr
             <Text style={[styles.natureText, {
               color: category.nature === 'Essentielle' ? '#F87171' : '#818CF8',
             }]}>
-              {category.nature === 'Essentielle' ? 'Essentiel' : 'Discretion.'}
+              {category.nature === 'Essentielle' ? t('category.essential') : t('category.discretionary')}
             </Text>
           </View>
           {category.weeklyTarget > 0 && (

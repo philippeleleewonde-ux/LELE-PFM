@@ -1,0 +1,539 @@
+{
+  "coicop": {
+    "01": "Alimentation",
+    "02": "Logement",
+    "03": "Transports",
+    "04": "Loisirs",
+    "05": "Habillement",
+    "06": "Communications",
+    "07": "Sant\u00e9",
+    "08": "\u00c9ducation"
+  },
+  "leverNames": {
+    "REG": "Regularite d'Epargne",
+    "PRE": "Precision Budgetaire",
+    "SEC": "Securite Financiere",
+    "EFF": "Efficience des Revenus",
+    "LIT": "Litteratie Financiere"
+  },
+  "leverShort": {
+    "REG": "Regularite",
+    "PRE": "Precision",
+    "SEC": "Securite",
+    "EFF": "Efficience",
+    "LIT": "Litteratie"
+  },
+  "leverDescs": {
+    "REG": "Frequence EWMA + intensite + serie comportementale",
+    "PRE": "Respect du budget",
+    "SEC": "Couverture EPR proratee (trimestriel)",
+    "EFF": "Revenus Fixe/Variable vs prevus (8 sem.)",
+    "LIT": "Connaissances OCDE/INFE + engagement + progression"
+  },
+  "indicatorDescs": {
+    "REG": "Capacite a epargner regulierement",
+    "PRE": "Maitrise de vos dettes et engagements",
+    "SEC": "Protection contre les imprevus",
+    "EFF": "Optimisation de vos sources de revenus",
+    "LIT": "Vos connaissances et reflexes financiers"
+  },
+  "indicatorChallenges": {
+    "REG": "Mettre de cote chaque mois",
+    "PRE": "Respecter votre budget chaque semaine",
+    "SEC": "Renforcer vos protections",
+    "EFF": "Diversifier et stabiliser vos revenus",
+    "LIT": "Ameliorer vos competences financieres"
+  },
+  "yearCard": {
+    "cashback": "Ton cashback cette annee",
+    "boostSavings": "Booste ton epargne",
+    "boostFun": "Booste tes plaisirs",
+    "monthly": "Mensuel",
+    "weekly": "Hebdo"
+  },
+  "indicatorCard": {
+    "yearGoal": "Objectif An {{year}}",
+    "perMonth": "Par mois",
+    "quarterlyDistribution": "Repartition trimestrielle",
+    "improvementNeed": "Besoin d'amelioration"
+  },
+  "scoreRing": {
+    "subtitle": "Score financier dynamique"
+  },
+  "scoreLevel": {
+    "excellent": "Excellent",
+    "veryGood": "Tr\u00e8s bien",
+    "good": "Bien",
+    "average": "Moyen",
+    "weak": "Faible",
+    "critical": "Critique"
+  },
+  "globalScore": "Score global",
+  "nature": {
+    "essential": "Indispensable",
+    "comfort": "Confort"
+  },
+  "reg": {
+    "ewmaFrequency": "Frequence EWMA",
+    "intensity": "Intensite (note moy.)",
+    "currentStreak": "Serie en cours",
+    "weeksWithSavings": "Semaines avec epargne",
+    "beginnerBonus": "Bonus debutant",
+    "beginnerBonusValue": "+15 pts",
+    "commentNoData": "Aucune donnee pour l'instant. Commence a saisir tes depenses pour activer ce levier.",
+    "commentExcellent": "Excellent : frequence {{ewma}}/100, serie de {{streak}} semaines, note moyenne {{avgN}}/10. Regularite exemplaire \u2014 continue ainsi !",
+    "commentGoodShortStreak": "Bonne frequence ({{ewma}}/100) mais ta serie est trop courte ({{streak}} sem.). Vise la constance.",
+    "commentGoodLowIntensity": "Bonne frequence ({{ewma}}/100) mais l'intensite peut progresser (note moy. {{avgN}}/10). Vise la constance.",
+    "commentModerate": "Frequence moderee ({{ewma}}/100). Tu epargnes de facon irreguliere. Meme un petit montant chaque semaine fait la difference.",
+    "commentWeak": "Frequence faible ({{ewma}}/100). La regularite est le levier le plus important \u2014 vise au moins 4 semaines consecutives."
+  },
+  "pre": {
+    "incompressible": "Incompressible",
+    "semiEssential": "Semi-essentiel",
+    "discretionary": "Discretionnaire",
+    "globalRealization": "Realisation globale",
+    "maxVolatility": "Volatilite max (CV)",
+    "stabilityPenalty": "Penalite stabilite",
+    "budgetPlan": "Plan budgetaire",
+    "notConfigured": "Non configure",
+    "commentNoBudget": "Aucun budget configure. Sans plan budgetaire, ce levier reste a 0. Configure tes budgets dans le wizard pour activer la precision budgetaire.",
+    "commentAllGood": "Excellente maitrise budgetaire sur les 3 niveaux. Incompressible {{rI}}% ({{sI}}/100), Semi-essentiel {{rS}}% ({{sS}}/100), Discretionnaire {{rD}}% ({{sD}}/100).{{volSuffix}}",
+    "commentWeakIncomp": "Attention aux depenses vitales ({{rI}}% \u2192 {{sI}}/100) \u2014 alimentation, logement et sante depassent le budget. Ces postes sont penalises severement car incompressibles.{{volSuffix}}",
+    "commentWeakSemi": "Les depenses semi-essentielles sont le maillon faible ({{rS}}% \u2192 {{sS}}/100) \u2014 transport, telecom ou education a revoir. Incompressible OK a {{sI}}/100.{{volSuffix}}",
+    "commentWeakDisc": "Les depenses discretionnaires plombent ton score ({{rD}}% \u2192 {{sD}}/100). Vetements et loisirs : chaque euro economise remonte le score. Incompressible {{sI}}/100, Semi-essentiel {{sS}}/100.{{volSuffix}}",
+    "volSuffix": " Penalite de volatilite active (\u00d7{{penalty}}) \u2014 tes depenses varient trop d'une semaine a l'autre."
+  },
+  "sec": {
+    "eprObjective": "Objectif EPR",
+    "notDefined": "Non defini",
+    "defaultScore": "Score par defaut",
+    "defaultScoreRisk": "40/100 (risque)",
+    "cumulSavings": "Epargne nette cumulee",
+    "proratedObjective": "Objectif prorte An{{planYear}} T{{quarter}}",
+    "coverageRatio": "Ratio de couverture",
+    "annualObjective": "Objectif annuel An{{planYear}}",
+    "progress": "Avancement",
+    "commentNoObjective": "Objectif EPR non defini. L'absence de plan d'epargne est un facteur de risque \u2014 configure tes objectifs dans le wizard (score : 40/100).",
+    "commentExcellent": "{{cumul}} cumules pour {{prorated}} attendus a S{{weeks}} ({{coveragePct}}%). Nettement en avance \u2014 securite financiere solide.",
+    "commentAhead": "{{cumul}} cumules pour {{prorated}} attendus a S{{weeks}} ({{coveragePct}}%). En avance sur ton plan d'epargne An{{planYear}}.",
+    "commentModerate": "{{cumul}} sur {{prorated}} attendus a S{{weeks}} ({{coveragePct}}%). Retard modere \u2014 il manque {{ecart}} pour etre en ligne.",
+    "commentBehind": "{{cumul}} sur {{prorated}} attendus a S{{weeks}} ({{coveragePct}}%). En retard significatif \u2014 accelere l'epargne pour rattraper {{ecart}}.",
+    "commentCritical": "Seulement {{cumul}} sur {{prorated}} attendus a S{{weeks}} ({{coveragePct}}%). Situation critique \u2014 ton matelas de securite est tres insuffisant."
+  },
+  "eff": {
+    "revenueObjectives": "Objectifs revenus",
+    "notConfigured": "Non configures",
+    "defaultScoreActive": "60/100 (suivi actif)",
+    "defaultScoreNeutral": "50/100 (neutre)",
+    "analysisWindow": "Fenetre d'analyse",
+    "weeks": "semaines",
+    "realRevenue": "Revenus reels ({{nbWeeks}} sem.)",
+    "expectedRevenue": "Revenus prevus ({{nbWeeks}} sem.)",
+    "fixedRevenue": "Revenus Fixes ({{pct}}%)",
+    "variableRevenue": "Revenus Variables ({{pct}}%)",
+    "commentNoTargetsWithIncome": "Aucun objectif de revenus configure, mais tu enregistres des rentrees. Configure tes sources dans le wizard pour activer le scoring complet (score actuel : 60/100).",
+    "commentNoTargetsNoIncome": "Aucun objectif de revenus configure et aucune rentree enregistree. Ajoute tes sources dans le wizard pour activer ce levier (score neutre : 50/100).",
+    "commentAbove100": "Sur {{nbW}} semaines, {{actual}} recus pour {{expected}} prevus ({{pct}}%). Tes revenus depassent les previsions !{{typeContext}}",
+    "commentAbove80": "Sur {{nbW}} semaines, {{actual}} recus sur {{expected}} prevus ({{pct}}%). Quasi dans les clous \u2014 il manque {{ecart}}.{{typeContext}}",
+    "commentAbove50": "Sur {{nbW}} semaines, {{actual}} sur {{expected}} attendus ({{pct}}%). Ecart de {{ecart}} a combler.{{typeContext}}",
+    "commentBelow50": "Sur {{nbW}} semaines, seulement {{actual}} sur {{expected}} prevus ({{pct}}%). Gros ecart de {{ecart}}.{{typeContext}}",
+    "typeContextFixeLag": " Tes revenus fixes sont en retard \u2014 verifie salaire et pensions.",
+    "typeContextVarLag": " Tes revenus variables sont faibles \u2014 primes ou freelance en attente ?",
+    "typeContextBothLag": " Les deux types de revenus sont sous les previsions."
+  },
+  "lit": {
+    "knowledge": "Connaissances EKH (60%)",
+    "engagement": "Engagement defis (25%)",
+    "progression": "Progression curriculum (15%)",
+    "expertFloor": "Plancher expert actif",
+    "commentFloor": "Ton expertise (EKH {{ekhNorm}}/100) garantit un score plancher. Complete tes defis hebdomadaires ({{completed}}/{{total}}) pour depasser ce minimum.",
+    "commentGood": "Bonnes connaissances ({{know}}/100) et engagement actif ({{engage}}/100). {{completed}}/{{total}} defis completes \u2014 continue a progresser dans le curriculum.",
+    "commentAverage": "Connaissances correctes ({{know}}/100) mais l'engagement est faible ({{engage}}/100). Fais tes defis chaque semaine pour booster ce levier.",
+    "commentWeak": "Connaissances limitees ({{know}}/100). La litteratie impacte TOUS les autres leviers. Refais le wizard et complete tes defis ({{completed}}/{{total}})."
+  },
+  "categoryRow": {
+    "cashbackPossible": "Cashback possible {{pct}}"
+  },
+  "actions": {
+    "noAction": "Aucune action \u00e0 faire pour le moment",
+    "budget": "Budget",
+    "margin": "Marge de man\u0153uvre",
+    "annualTarget": "Objectif An {{year}}"
+  },
+  "varDistribution": {
+    "invisibleCosts": "Co\u00fbts invisibles",
+    "visibleCosts": "Co\u00fbts visibles",
+    "variation": "Variation",
+    "maxCostLabel": "Co\u00fbt max.",
+    "yourMaxCost": "Votre co\u00fbt maximum",
+    "maxCostHint": "C'est le montant maximum que votre gestion peut vous co\u00fbter.",
+    "personalAdjustment": "Ajustement personnel",
+    "revenueVariation": "Variation revenus",
+    "expenseVariation": "Variation d\u00e9penses"
+  },
+  "economicBreakdown": {
+    "costOrigins": "D'o\u00f9 viennent les co\u00fbts",
+    "revenueCosts": "Co\u00fbts c\u00f4t\u00e9 revenus",
+    "expenseCosts": "Co\u00fbts c\u00f4t\u00e9 d\u00e9penses",
+    "financeBalance": "\u00c9quilibre finances",
+    "balanceGood": "Bravo, vos finances sont bien \u00e9quilibr\u00e9es !",
+    "balanceWarning": "Attention, vous d\u00e9pensez beaucoup par rapport \u00e0 vos revenus",
+    "balanceAlert": "Alerte : vous d\u00e9pensez plus que ce que vous gagnez"
+  },
+  "savingsPlan": {
+    "success": "Succ\u00e8s",
+    "cashbackProbability": "Probabilit\u00e9 de cashback",
+    "onTrack": "Vous \u00eates sur la bonne voie !",
+    "canImprove": "Des progr\u00e8s sont possibles",
+    "actFast": "Il faut agir rapidement",
+    "inflationImpact": "Impact de l'inflation",
+    "cashback": "Cashback",
+    "boostSavings": "Booste \u00e9pargne",
+    "boostPleasures": "Booste plaisirs",
+    "monthly": "Mensuel"
+  },
+  "drivingDashboard": {
+    "year": "An {{n}}",
+    "quarters": "Trimestres \u2014 {{yearLabel}}",
+    "months": "Mois \u2014 {{quarterLabel}} ({{amount}})",
+    "monthLabel": "Mois {{n}}",
+    "weeks": "Semaines \u2014 {{monthLabel}}",
+    "weekLabel": "Sem. {{n}}",
+    "weekSummary": "4 sem. \u00d7 {{weekly}} = {{monthly}}"
+  },
+  "objectifVsRealise": {
+    "globalProgress": "Progression globale",
+    "annualObjective": "Objectif annuel",
+    "realized": "Realise",
+    "expectedSuffix": "sur {{prorataPercent}}% attendu",
+    "vsProrata": "vs prorata",
+    "byPeriod": "Par periode",
+    "weekly": "Hebdo",
+    "monthlyLabel": "Mensuel",
+    "quarterLabel": "Trim. T{{quarter}}",
+    "annual": "Annuel",
+    "byCategory": "Par categorie",
+    "byIndicator": "Par indicateur",
+    "statusAhead": "En avance",
+    "statusOnTrack": "Dans les temps",
+    "statusBehind": "En retard"
+  },
+  "indicators": {
+    "noIndicator": "Aucun indicateur calcul\u00e9",
+    "recovery": "R\u00e9cup\u00e9ration",
+    "potentialYear": "Potentiel An {{year}}",
+    "indicatorsCount": "Indicateurs",
+    "annualTarget": "Objectif An {{year}}",
+    "perMonth": "Par mois",
+    "quarterlyDistribution": "R\u00e9partition trimestrielle",
+    "improvementNeed": "Besoin d'am\u00e9lioration"
+  },
+  "investmentPortfolio": {
+    "configureProfile": "Configurez votre profil investisseur dans les r\u00e9glages pour voir cette section.",
+    "howToRead": "Comment lire cette section ?",
+    "introText": "En analysant vos revenus et depenses, l'application estime que vous pourriez investir {{monthly}}/mois. Les chiffres ci-dessous simulent ce qui se passerait si vous le faisiez pendant 3 ans.",
+    "introDetail": "{{ratio}}% de votre epargne dedie a l'investissement",
+    "whereIsYourMoney": "Ou est place votre argent ?",
+    "productsHint": "Les produits dans lesquels vous investissez et leur rendement annuel.",
+    "noAllocation": "Aucune allocation calculee",
+    "averageReturn": "Gain moyen attendu",
+    "projection3y": "Projection sur 3 ans",
+    "projectionHint": "Simulation : si vous investissez {{monthly}}/mois pendant 36 mois a {{annualReturn}}%/an.",
+    "yourMoneyInvested": "Votre argent place",
+    "investedHint": "{{monthly}}/mois x 36 mois",
+    "gainsGenerated": "Gains generes",
+    "gainsHint": "Ce que votre placement vous rapporte en plus",
+    "totalIn3y": "Total dans 3 ans",
+    "totalHint": "Votre argent + les gains cumules",
+    "realValue": "Valeur reelle",
+    "realValueHint": "Pouvoir d'achat reel (les prix augmentent de ~3%/an)",
+    "investVsSleep": "Investir vs. laisser dormir son argent",
+    "comparisonHint": "Comparaison : que se passe-t-il si vous placez la meme somme sur un livret epargne classique ?",
+    "classicSavings": "Epargne classique",
+    "classicSavingsHint": "Livret a ~3%/an",
+    "investmentLabel": "Investissement",
+    "investmentHint": "Votre portefeuille",
+    "investBetter": "En investissant, vous gagnez plus qu'en laissant votre argent sur un simple livret.",
+    "livretBetter": "Avec ce portefeuille, un livret classique serait plus avantageux.",
+    "disclaimer": "Simulation indicative basee sur vos donnees. Les rendements passes ne garantissent pas les rendements futurs. Consultez un conseiller avant d'investir."
+  },
+  "allWeather": {
+    "configureProfile": "Configurez votre profil investisseur pour voir l'analyse All-Weather.",
+    "macroResilience": "R\u00e9sistance aux sc\u00e9narios macro",
+    "recommendations": "Recommandations",
+    "assetLabels": {
+      "savings_account": "Compte \u00e9pargne",
+      "term_deposit": "D\u00e9p\u00f4t \u00e0 terme",
+      "government_bonds": "Obligations d'\u00c9tat",
+      "corporate_bonds": "Obligations entreprise",
+      "stock_index": "Indice boursier",
+      "local_stocks": "Actions locales",
+      "real_estate_fund": "Fonds immobilier",
+      "gold": "Or",
+      "crypto": "Crypto",
+      "tontine": "Tontine",
+      "micro_enterprise": "Micro-entreprise",
+      "money_market": "March\u00e9 mon\u00e9taire",
+      "sukuk": "Sukuk",
+      "mutual_fund": "Fonds commun"
+    }
+  },
+  "kelly": {
+    "configureProfile": "Configurez votre profil investisseur et vos allocations pour voir le dimensionnement Kelly.",
+    "positionSizing": "Dimensionnement par position",
+    "optimal": "\u2713 Optimal",
+    "overweight": "\u2191 Surpondere",
+    "underweight": "\u2193 Sous-pondere",
+    "current": "Actuel",
+    "kellyLabel": "Kelly",
+    "kellyMaxPosition": "Kelly max/position",
+    "optimalPositions": "Positions optimales",
+    "kellyExplanation": "Le critere de Kelly calcule la taille optimale de chaque position pour maximiser la croissance a long terme sans risque de ruine. Le demi-Kelly est recommande pour plus de securite."
+  },
+  "factorAnalysis": {
+    "configureProfile": "Configurez votre profil investisseur pour voir l'analyse factorielle.",
+    "factorExposure": "Exposition aux facteurs",
+    "high": "Forte",
+    "moderate": "Mod\u00e9r\u00e9e",
+    "low": "Faible",
+    "factorBalance": "\u00c9quilibre factoriel"
+  },
+  "monteCarlo": {
+    "configureProfile": "Configurez votre profil investisseur dans les reglages pour voir cette section.",
+    "noAllocation": "Aucune allocation disponible pour la simulation.",
+    "distribution": "Distribution sur 36 mois (1000 scenarios)",
+    "bestCase": "Meilleur cas (95%)",
+    "favorable": "Favorable (75%)",
+    "median": "Median (50%)",
+    "unfavorable": "Defavorable (25%)",
+    "worstCase": "Pire cas (5%)",
+    "investedCapital": "Capital investi",
+    "riskMetrics": "Metriques de risque",
+    "lossProb": "Probabilite de perte",
+    "expectedGain": "Esperance de gain",
+    "confidenceInterval": "Intervalle de confiance 90%",
+    "disclaimer": "Base sur 1000 simulations stochastiques utilisant la volatilite historique de vos actifs. Les resultats passes ne garantissent pas les performances futures."
+  },
+  "stressTest": {
+    "configurePortfolio": "Configurez votre portefeuille d'investissement pour simuler les stress tests historiques.",
+    "portfolioImpact": "Impact sur votre portefeuille",
+    "maxLoss": "Perte maximale",
+    "recovery": "Recuperation",
+    "totalReturn": "Rendement total",
+    "survives": "SURVIT",
+    "damaged": "ENDOMMAGE",
+    "criticalVerdict": "CRITIQUE",
+    "simplifiedPath": "Trajectoire simplifiee",
+    "start": "Depart",
+    "trough": "Creux",
+    "final": "Final",
+    "bestAsset": "Meilleur actif",
+    "worstAsset": "Pire actif",
+    "months": "mois"
+  },
+  "macro": {
+    "configureProfile": "Configurez votre profil investisseur dans les reglages pour voir cette section.",
+    "noAllocation": "Aucune allocation configuree.",
+    "hypothesis": "Hypothese",
+    "variation": "Variation",
+    "portfolioImpact": "Impact portefeuille",
+    "currentReturn": "Rendement actuel",
+    "adjustedReturn": "Rendement ajuste",
+    "perAssetImpact": "Impact par actif",
+    "favorable": "Favorable",
+    "unfavorable": "Defavorable",
+    "neutral": "Neutre",
+    "disclaimer": "Simulation basee sur les sensibilites historiques moyennes. Les impacts reels peuvent varier selon les conditions de marche specifiques."
+  },
+  "behavioral": {
+    "configureProfile": "Configurez votre profil investisseur dans les reglages pour voir l'analyse comportementale.",
+    "behavioralAnalysis": "Analyse Comportementale",
+    "mainRisks": "Principaux risques",
+    "allBiases": "Tous les biais",
+    "score": "Score",
+    "advice": "Conseil",
+    "disclaimer": "Analyse basee sur votre allocation actuelle. Les biais comportementaux sont des tendances cognitives normales \u2014 les reconnaitre est la premiere etape pour les corriger."
+  },
+  "preMortem": {
+    "configureProfile": "Configurez votre profil investisseur dans les r\u00e9glages pour voir l'analyse pr\u00e9-mortem.",
+    "noScenario": "Aucun sc\u00e9nario de d\u00e9faillance identifi\u00e9 pour votre portefeuille actuel.",
+    "title": "Analyse Pr\u00e9-Mortem",
+    "subtitle": "Et si votre plan \u00e9chouait ?",
+    "subtitleHint": "Anticipez les risques avant qu'ils ne se r\u00e9alisent.",
+    "survivalProbability": "Probabilit\u00e9 de survie",
+    "riskPrefix": "Risque",
+    "mainThreats": "Menaces principales",
+    "triggers": "D\u00e9clencheurs",
+    "countermeasure": "Parade",
+    "actionPlan": "Plan d'action",
+    "disclaimerNote": "Cette analyse est indicative et bas\u00e9e sur des probabilit\u00e9s historiques. Elle ne constitue pas un conseil en investissement.",
+    "impactLow": "Faible",
+    "impactMedium": "Moyen",
+    "impactHigh": "\u00c9lev\u00e9",
+    "impactCritical": "Critique",
+    "riskLow": "Faible",
+    "riskModerate": "Mod\u00e9r\u00e9",
+    "riskElevated": "\u00c9lev\u00e9",
+    "riskHigh": "Tr\u00e8s \u00e9lev\u00e9"
+  },
+  "psychScore": {
+    "configureProfile": "Configurez votre profil investisseur et vos allocations pour voir votre score psychologique ACE.",
+    "aceDimensions": "Dimensions ACE",
+    "strengths": "Forces",
+    "improvements": "Axes d'amelioration",
+    "recommendation": "Recommandation",
+    "disclaimer": "Le score ACE mesure votre maturite psychologique d'investisseur a travers la conscience, la maitrise et l'execution. Il evolue avec vos allocations."
+  },
+  "taxOptimization": {
+    "configureProfile": "Configurez votre profil investisseur dans les r\u00e9glages pour voir l'analyse fiscale.",
+    "taxEfficiency": "Efficacit\u00e9 fiscale",
+    "taxEfficiencyPercent": "{{score}}% d'efficacit\u00e9 fiscale",
+    "grossToNet": "Rendement brut {{gross}}% \u2192 net {{net}}% (perte fiscale: {{drag}}%)",
+    "perAssetDetail": "D\u00e9tail par actif",
+    "optimizationStrategies": "Strat\u00e9gies d'optimisation",
+    "potentialSaving": "\u00c9conomie potentielle : ~{{saving}}%/an",
+    "disclaimer": "Estimations indicatives, consultez un conseiller fiscal pour votre situation personnelle.",
+    "easy": "Facile",
+    "moderate": "Mod\u00e9r\u00e9",
+    "advanced": "Avanc\u00e9"
+  },
+  "emergingMarkets": {
+    "configureProfile": "Configurez votre profil investisseur dans les r\u00e9glages pour voir le radar des march\u00e9s \u00e9mergents.",
+    "radar": "Radar March\u00e9s \u00c9mergents",
+    "geoDiversification": "Diversification g\u00e9ographique",
+    "emergingExposure": "Exposition \u00e9mergents",
+    "bestOpportunity": "Meilleure opportunit\u00e9",
+    "opportunityScore": "Score d'opportunit\u00e9 : {{score}}/100",
+    "recommendations": "Recommandations",
+    "opportunity": "Opportunit\u00e9",
+    "yourExposure": "Votre exposition",
+    "alignment": "Alignement",
+    "outlook": {
+      "bullish": "Haussier",
+      "neutral": "Neutre",
+      "cautious": "Prudent"
+    },
+    "disclaimer": "Analyse bas\u00e9e sur les tendances macro\u00e9conomiques 2024-2026. Ne constitue pas un conseil en investissement."
+  },
+  "regulatory": {
+    "configureProfile": "Configurez votre profil investisseur dans les r\u00e9glages pour voir l'analyse r\u00e9glementaire.",
+    "noAllocation": "Aucune allocation \u00e0 analyser.",
+    "violations": "violation",
+    "violationsPlural": "violations",
+    "warnings": "avertissement",
+    "warningsPlural": "avertissements",
+    "criticalViolations": "Violations critiques",
+    "recommendedActions": "Actions recommand\u00e9es",
+    "disclaimer": "Analyse indicative, consultez un professionnel pour la conformit\u00e9 r\u00e9glementaire de vos investissements."
+  },
+  "coach": {
+    "configureProfile": "Configurez votre profil investisseur pour activer le coach.",
+    "noQuestions": "Aucune question a vous poser pour le moment. Votre portefeuille semble equilibre.",
+    "title": "Coach Socratique",
+    "subtitle": "Questionnez vos choix d'investissement",
+    "subtitleHint": "Des questions pour affiner votre reflexion financiere.",
+    "levelPrefix": "Niveau",
+    "points": "point",
+    "pointsPlural": "points",
+    "questions": "Questions ({{count}})",
+    "showAnswer": "Voir la reponse",
+    "hideAnswer": "Masquer la reponse",
+    "recommendationLabel": "Recommandation",
+    "footerText": "Le coach socratique vous aide a reflechir, pas a decider. Chaque question est une invitation a approfondir votre comprehension de vos choix financiers.",
+    "footerDisclaimer": "Cette analyse est indicative et ne constitue pas un conseil en investissement.",
+    "priority": {
+      "critical": "Critique",
+      "important": "Important",
+      "educational": "Educatif"
+    },
+    "category": {
+      "risk": "Risque",
+      "diversification": "Diversification",
+      "bias": "Biais",
+      "tax": "Fiscalite",
+      "strategy": "Strategie",
+      "psychology": "Psychologie"
+    },
+    "level": {
+      "debutant": "Debutant",
+      "intermediaire": "Intermediaire",
+      "avance": "Avance"
+    }
+  },
+  "wisdom": {
+    "configureProfile": "Configurez votre profil investisseur et vos allocations pour voir la synthese globale.",
+    "pillarScores": "Scores par pilier",
+    "strengths": "Forces",
+    "risks": "Risques",
+    "actionPlan": "Plan d'action prioritaire",
+    "urgent": "Urgent",
+    "medium": "Moyen",
+    "low": "Faible",
+    "disclaimer": "Cette synthese agrege les resultats de 12 moteurs d'analyse independants. Elle evolue avec vos allocations et ne constitue pas un conseil en investissement."
+  },
+  "scoreRing": {
+    "dynamicFinancialScore": "Score financier dynamique"
+  },
+  "scoreHero": {
+    "yourFinancialScore": "Votre score financier"
+  },
+  "yearCard": {
+    "cashbackThisYear": "Ton cashback cette ann\u00e9e",
+    "boostSavings": "Booste ton \u00e9pargne",
+    "boostPleasures": "Booste tes plaisirs",
+    "monthlyLabel": "Mensuel",
+    "weeklyLabel": "Hebdo"
+  },
+  "indicatorCard": {
+    "annualTarget": "Objectif An {{year}}",
+    "perMonth": "Par mois",
+    "quarterlyDistribution": "R\u00e9partition trimestrielle",
+    "improvementNeed": "Besoin d'am\u00e9lioration"
+  },
+  "kpi": {
+    "invisibleCosts": "Co\u00fbts invisibles",
+    "invisibleCostsTooltip": "Ce que ta gestion te co\u00fbte sans que tu le voies.",
+    "visibleCosts": "Co\u00fbts visibles",
+    "visibleCostsTooltip": "Ce que ta gestion te co\u00fbte de mani\u00e8re \u00e9vidente.",
+    "maxCost": "Co\u00fbt maximum",
+    "maxCostTooltip": "Le maximum que ta gestion peut te co\u00fbter.",
+    "toleratedCosts": "Co\u00fbts tol\u00e9r\u00e9s",
+    "toleratedCostsTooltip": "Ce que tu as accept\u00e9 de payer jusqu'ici.",
+    "invisibleCashback": "Cashback invisible",
+    "invisibleCashbackTooltip": "L'argent cach\u00e9 dans tes d\u00e9penses, r\u00e9cup\u00e9rable.",
+    "projectedCosts3y": "Co\u00fbts projet\u00e9s sur 3 ans",
+    "projectedCosts3yTooltip": "Ce que \u00e7a va te co\u00fbter si rien ne change."
+  },
+  "yearPlan": {
+    "year1": "An 1",
+    "year2": "An 2",
+    "year3": "An 3"
+  },
+  "premortem": {
+    "noProfile": "Configurez votre profil investisseur dans les reglages pour voir l'analyse pre-mortem.",
+    "noFailures": "Aucun scenario de defaillance identifie pour votre portefeuille actuel.",
+    "title": "Analyse Pre-Mortem",
+    "subtitle": "Et si votre plan echouait ?",
+    "description": "Anticipez les risques avant qu'ils ne se realisent.",
+    "survivalLabel": "Probabilite de survie",
+    "riskPrefix": "Risque",
+    "mainThreats": "Menaces principales",
+    "triggers": "Declencheurs",
+    "mitigation": "Parade",
+    "actionPlan": "Plan d'action",
+    "disclaimer": "Cette analyse est indicative et basee sur des probabilites historiques. Elle ne constitue pas un conseil en investissement.",
+    "impact": { "low": "Faible", "medium": "Moyen", "high": "Eleve", "critical": "Critique" },
+    "risk": { "low": "Faible", "moderate": "Modere", "elevated": "Eleve", "high": "Tres eleve" }
+  },
+  "compliance": {
+    "noProfile": "Configurez votre profil investisseur dans les reglages pour voir l'analyse reglementaire.",
+    "noAllocations": "Aucune allocation a analyser.",
+    "violationCount": "{{count}} violation",
+    "violationCount_plural": "{{count}} violations",
+    "warningCount": "{{count}} avertissement",
+    "warningCount_plural": "{{count}} avertissements",
+    "criticalViolations": "Violations critiques",
+    "recommendedActions": "Actions recommandees",
+    "disclaimer": "Analyse indicative, consultez un professionnel pour la conformite reglementaire de vos investissements."
+  }
+}

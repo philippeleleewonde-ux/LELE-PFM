@@ -3,7 +3,7 @@ import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 type Theme = 'light' | 'dark' | 'auto';
-type Language = 'fr' | 'en';
+export type Language = 'fr' | 'en' | 'es' | 'pt';
 export type ViewMode = 'simple' | 'expert' | 'investor';
 
 interface AppState {
@@ -11,12 +11,14 @@ interface AppState {
   language: Language;
   isOnboarded: boolean;
   isSetupComplete: boolean;
+  isLanguageSet: boolean;
   biometricEnabled: boolean;
   notificationsEnabled: boolean;
   viewMode: ViewMode;
 
   // Actions
   setTheme: (theme: Theme) => void;
+  setLanguageSet: (set: boolean) => void;
   setLanguage: (language: Language) => void;
   setOnboarded: (onboarded: boolean) => void;
   setSetupComplete: (complete: boolean) => void;
@@ -31,6 +33,7 @@ const initialState = {
   language: 'fr' as Language,
   isOnboarded: false,
   isSetupComplete: false,
+  isLanguageSet: false,
   biometricEnabled: false,
   notificationsEnabled: true,
   viewMode: 'simple' as ViewMode,
@@ -44,6 +47,8 @@ export const useAppStore = create<AppState>()(
       setTheme: (theme) => set({ theme }),
 
       setLanguage: (language) => set({ language }),
+
+      setLanguageSet: (isSet) => set({ isLanguageSet: isSet }),
 
       setOnboarded: (onboarded) => set({ isOnboarded: onboarded }),
 
@@ -63,6 +68,7 @@ export const useAppStore = create<AppState>()(
       partialize: (state) => ({
         isOnboarded: state.isOnboarded,
         isSetupComplete: state.isSetupComplete,
+        isLanguageSet: state.isLanguageSet,
         theme: state.theme,
         language: state.language,
         biometricEnabled: state.biometricEnabled,

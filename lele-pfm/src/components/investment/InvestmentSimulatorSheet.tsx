@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { View, Text, StyleSheet, Pressable, ScrollView, Modal, useWindowDimensions } from 'react-native';
 import { X, TrendingUp, PiggyBank, ArrowRight } from 'lucide-react-native';
+import { useTranslation } from 'react-i18next';
 import { useInvestmentStore } from '@/stores/investment-store';
 import { useEngineStore } from '@/stores/engine-store';
 import { formatCurrency } from '@/services/format-helpers';
@@ -17,6 +18,7 @@ interface Props {
 }
 
 export function InvestmentSimulatorSheet({ visible, onClose }: Props) {
+  const { t } = useTranslation('app');
   const { width, height } = useWindowDimensions();
   const isSmall = width < 360;
   const allocations = useInvestmentStore((s) => s.allocations);
@@ -57,7 +59,7 @@ export function InvestmentSimulatorSheet({ visible, onClose }: Props) {
         <View style={[styles.sheet, { maxHeight: height * (isSmall ? 0.95 : 0.9) }]}>
           {/* Header */}
           <View style={styles.header}>
-            <Text style={styles.title}>Simulateur investissement</Text>
+            <Text style={styles.title}>{t('investment.simulatorTitle')}</Text>
             <Pressable onPress={onClose} hitSlop={12}>
               <X size={22} color={PF.textSecondary} />
             </Pressable>
@@ -66,7 +68,7 @@ export function InvestmentSimulatorSheet({ visible, onClose }: Props) {
           <ScrollView style={[styles.scroll, { paddingHorizontal: isSmall ? 14 : 20 }]} showsVerticalScrollIndicator={false}>
             {/* Montant mensuel */}
             <View style={styles.infoCard}>
-              <Text style={styles.infoLabel}>Investissement mensuel</Text>
+              <Text style={styles.infoLabel}>{t('investment.monthlyInvestment')}</Text>
               <Text style={[styles.infoValue, isSmall && { fontSize: 22 }]}>{formatCurrency(monthlyAmount)}</Text>
             </View>
 
@@ -79,7 +81,7 @@ export function InvestmentSimulatorSheet({ visible, onClose }: Props) {
                   style={[styles.horizonPill, horizon === h && styles.horizonPillActive]}
                 >
                   <Text style={[styles.horizonText, horizon === h && styles.horizonTextActive]}>
-                    {h} mois
+                    {t('investment.months', { count: h })}
                   </Text>
                 </Pressable>
               ))}
@@ -88,27 +90,27 @@ export function InvestmentSimulatorSheet({ visible, onClose }: Props) {
             {/* Projection results */}
             {lastProjection && (
               <View style={styles.resultsCard}>
-                <Text style={styles.resultsTitle}>Projection à {horizon} mois</Text>
+                <Text style={styles.resultsTitle}>{t('investment.projectionTitle', { horizon })}</Text>
                 <View style={styles.resultsRow}>
                   <View style={styles.resultItem}>
-                    <Text style={styles.resultLabel}>Capital investi</Text>
+                    <Text style={styles.resultLabel}>{t('investment.investedCapital')}</Text>
                     <Text style={styles.resultValue}>{formatCurrency(lastProjection.invested)}</Text>
                   </View>
                   <View style={styles.resultItem}>
-                    <Text style={styles.resultLabel}>Rendements</Text>
+                    <Text style={styles.resultLabel}>{t('investment.returns')}</Text>
                     <Text style={[styles.resultValue, { color: '#4ADE80' }]}>
                       +{formatCurrency(lastProjection.returns)}
                     </Text>
                   </View>
                   <View style={styles.resultItem}>
-                    <Text style={styles.resultLabel}>Total</Text>
+                    <Text style={styles.resultLabel}>{t('investment.totalLabel')}</Text>
                     <Text style={[styles.resultValue, { color: '#FBBF24' }]}>
                       {formatCurrency(lastProjection.total)}
                     </Text>
                   </View>
                 </View>
                 <Text style={styles.inflationNote}>
-                  Ajusté inflation : {formatCurrency(lastProjection.inflationAdjusted)}
+                  {t('investment.inflationAdjusted', { amount: formatCurrency(lastProjection.inflationAdjusted) })}
                 </Text>
               </View>
             )}
@@ -116,7 +118,7 @@ export function InvestmentSimulatorSheet({ visible, onClose }: Props) {
             {/* Simple text-based chart */}
             {chartPoints.length > 0 && (
               <View style={styles.chartCard}>
-                <Text style={styles.chartTitle}>Évolution du capital</Text>
+                <Text style={styles.chartTitle}>{t('investment.capitalEvolution')}</Text>
                 {chartPoints.map((p) => {
                   const maxTotal = chartPoints[chartPoints.length - 1]?.total ?? 1;
                   const barWidth = (p.total / maxTotal) * 100;
@@ -134,11 +136,11 @@ export function InvestmentSimulatorSheet({ visible, onClose }: Props) {
                 <View style={styles.chartLegend}>
                   <View style={styles.legendItem}>
                     <View style={[styles.legendDot, { backgroundColor: '#60A5FA' }]} />
-                    <Text style={styles.legendText}>Investi</Text>
+                    <Text style={styles.legendText}>{t('investment.invested')}</Text>
                   </View>
                   <View style={styles.legendItem}>
                     <View style={[styles.legendDot, { backgroundColor: '#4ADE80' }]} />
-                    <Text style={styles.legendText}>Rendements</Text>
+                    <Text style={styles.legendText}>{t('investment.returnsLegend')}</Text>
                   </View>
                 </View>
               </View>
@@ -147,17 +149,17 @@ export function InvestmentSimulatorSheet({ visible, onClose }: Props) {
             {/* Comparison */}
             {comparison && (
               <View style={styles.comparisonCard}>
-                <Text style={styles.comparisonTitle}>Épargne simple vs Investissement</Text>
+                <Text style={styles.comparisonTitle}>{t('investment.savingsVsInvestment')}</Text>
                 <View style={styles.comparisonRow}>
                   <View style={styles.compItem}>
                     <PiggyBank size={16} color="#A78BFA" />
-                    <Text style={styles.compLabel}>Livret</Text>
+                    <Text style={styles.compLabel}>{t('investment.savingsBook')}</Text>
                     <Text style={styles.compValue}>{formatCurrency(comparison.savings36m)}</Text>
                   </View>
                   <ArrowRight size={16} color="#52525B" />
                   <View style={styles.compItem}>
                     <TrendingUp size={16} color="#4ADE80" />
-                    <Text style={styles.compLabel}>Investi</Text>
+                    <Text style={styles.compLabel}>{t('investment.investedLabel')}</Text>
                     <Text style={[styles.compValue, { color: '#4ADE80' }]}>
                       {formatCurrency(comparison.investment36m)}
                     </Text>
@@ -172,7 +174,7 @@ export function InvestmentSimulatorSheet({ visible, onClose }: Props) {
             {/* Allocations */}
             {allocations.length > 0 && (
               <View style={styles.allocCard}>
-                <Text style={styles.allocTitle}>Allocation recommandée</Text>
+                <Text style={styles.allocTitle}>{t('investment.recommendedAllocation')}</Text>
                 {allocations.map((a) => (
                   <View key={a.product.code} style={styles.allocRow}>
                     <View style={styles.allocLeft}>

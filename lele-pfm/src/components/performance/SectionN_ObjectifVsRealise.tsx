@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { useObjectifVsRealise, ObjectifVsRealise, IndicatorOvR } from '@/hooks/useObjectifVsRealise';
 import { PerfGlassCard, PF, FadeInView } from './shared';
 import { ProgressBar } from '@/components/charts/ProgressBar';
@@ -29,20 +30,21 @@ function statusColor(status: 'ahead' | 'on_track' | 'behind'): string {
   }
 }
 
-function statusLabel(status: 'ahead' | 'on_track' | 'behind'): string {
+function statusLabelKey(status: 'ahead' | 'on_track' | 'behind'): string {
   switch (status) {
     case 'ahead':
-      return 'En avance';
+      return 'objectifVsRealise.statusAhead';
     case 'on_track':
-      return 'Dans les temps';
+      return 'objectifVsRealise.statusOnTrack';
     case 'behind':
-      return 'En retard';
+      return 'objectifVsRealise.statusBehind';
   }
 }
 
 // ─── GlobalProgressCard ───
 
 function GlobalProgressCard({ data }: { data: ObjectifVsRealise }) {
+  const { t } = useTranslation('performance');
   const { annual, planYear, weeksElapsed, totalWeeksInYear } = data;
   const prorataPercent = ((weeksElapsed / totalWeeksInYear) * 100).toFixed(1);
   const color = statusColor(annual.status);
@@ -50,18 +52,18 @@ function GlobalProgressCard({ data }: { data: ObjectifVsRealise }) {
   return (
     <PerfGlassCard style={s.heroCard}>
       <View style={s.heroHeader}>
-        <Text style={s.heroTitle}>Progression globale</Text>
+        <Text style={s.heroTitle}>{t('objectifVsRealise.globalProgress')}</Text>
         <View style={[s.yearBadge, { borderColor: PF.accent + '40' }]}>
-          <Text style={s.yearBadgeText}>An {planYear}</Text>
+          <Text style={s.yearBadgeText}>{t('drivingDashboard.year', { n: planYear })}</Text>
         </View>
       </View>
 
       <View style={s.heroRow}>
-        <Text style={s.heroLabel}>Objectif annuel</Text>
+        <Text style={s.heroLabel}>{t('objectifVsRealise.annualObjective')}</Text>
         <Text style={s.heroValue}>{formatCurrency(annual.objectif)}</Text>
       </View>
       <View style={s.heroRow}>
-        <Text style={s.heroLabel}>Realise</Text>
+        <Text style={s.heroLabel}>{t('objectifVsRealise.realized')}</Text>
         <Text style={[s.heroValue, { color }]}>{formatCurrency(annual.realise)}</Text>
       </View>
 
@@ -75,18 +77,18 @@ function GlobalProgressCard({ data }: { data: ObjectifVsRealise }) {
 
       <View style={s.heroRow}>
         <Text style={s.heroSub}>
-          {formatPercent(annual.progression)} sur {prorataPercent}% attendu
+          {formatPercent(annual.progression)} {t('objectifVsRealise.expectedSuffix', { prorataPercent })}
         </Text>
         <View style={[s.statusPill, { backgroundColor: color + '20' }]}>
           <Text style={[s.statusPillText, { color }]}>
-            {statusIcon(annual.status)} {statusLabel(annual.status)}
+            {statusIcon(annual.status)} {t(statusLabelKey(annual.status))}
           </Text>
         </View>
       </View>
 
       {annual.ecart !== 0 && (
         <Text style={[s.ecartText, { color: annual.ecart >= 0 ? PF.green : PF.red }]}>
-          {annual.ecart >= 0 ? '+' : ''}{formatCurrency(annual.ecart)} vs prorata
+          {annual.ecart >= 0 ? '+' : ''}{formatCurrency(annual.ecart)} {t('objectifVsRealise.vsProrata')}
         </Text>
       )}
     </PerfGlassCard>
@@ -120,32 +122,33 @@ function PeriodRow({ label, objectif, realise, progression, status }: PeriodRowP
 }
 
 function PeriodRows({ data }: { data: ObjectifVsRealise }) {
+  const { t } = useTranslation('performance');
   return (
     <PerfGlassCard style={s.sectionCard}>
-      <Text style={s.sectionTitle}>Par periode</Text>
+      <Text style={s.sectionTitle}>{t('objectifVsRealise.byPeriod')}</Text>
       <PeriodRow
-        label="Hebdo"
+        label={t('objectifVsRealise.weekly')}
         objectif={data.weekly.objectif}
         realise={data.weekly.realise}
         progression={data.weekly.progression}
         status={data.weekly.status}
       />
       <PeriodRow
-        label="Mensuel"
+        label={t('objectifVsRealise.monthlyLabel')}
         objectif={data.monthly.objectif}
         realise={data.monthly.realise}
         progression={data.monthly.progression}
         status={data.monthly.status}
       />
       <PeriodRow
-        label={`Trim. T${data.quarterly.quarter}`}
+        label={t('objectifVsRealise.quarterLabel', { quarter: data.quarterly.quarter })}
         objectif={data.quarterly.objectif}
         realise={data.quarterly.realise}
         progression={data.quarterly.progression}
         status={data.quarterly.status}
       />
       <PeriodRow
-        label="Annuel"
+        label={t('objectifVsRealise.annual')}
         objectif={data.annual.objectif}
         realise={data.annual.realise}
         progression={data.annual.progression}
@@ -202,9 +205,10 @@ function CategoryRow({
 }
 
 function CategoryBreakdown({ data }: { data: ObjectifVsRealise }) {
+  const { t } = useTranslation('performance');
   return (
     <PerfGlassCard style={s.sectionCard}>
-      <Text style={s.sectionTitle}>Par categorie</Text>
+      <Text style={s.sectionTitle}>{t('objectifVsRealise.byCategory')}</Text>
       {data.byCategory.map((cat, i) => (
         <CategoryRow key={cat.code} {...cat} />
       ))}
@@ -215,6 +219,7 @@ function CategoryBreakdown({ data }: { data: ObjectifVsRealise }) {
 // ─── IndicatorBreakdown ───
 
 function IndicatorItem({ ind }: { ind: IndicatorOvR }) {
+  const { t } = useTranslation('performance');
   const annualColor = statusColor(ind.annual.status);
 
   return (
@@ -239,7 +244,7 @@ function IndicatorItem({ ind }: { ind: IndicatorOvR }) {
 
       {/* Period rows: Hebdo / Mensuel / Annuel */}
       <View style={s.indPeriodRow}>
-        <Text style={s.indPeriodLabel}>Hebdo</Text>
+        <Text style={s.indPeriodLabel}>{t('objectifVsRealise.weekly')}</Text>
         <Text style={s.indPeriodValues}>
           {formatCurrency(ind.weekly.realise)} / {formatCurrency(ind.weekly.objectif)}
         </Text>
@@ -252,7 +257,7 @@ function IndicatorItem({ ind }: { ind: IndicatorOvR }) {
       </View>
 
       <View style={s.indPeriodRow}>
-        <Text style={s.indPeriodLabel}>Mensuel</Text>
+        <Text style={s.indPeriodLabel}>{t('objectifVsRealise.monthlyLabel')}</Text>
         <Text style={s.indPeriodValues}>
           {formatCurrency(ind.monthly.realise)} / {formatCurrency(ind.monthly.objectif)}
         </Text>
@@ -265,7 +270,7 @@ function IndicatorItem({ ind }: { ind: IndicatorOvR }) {
       </View>
 
       <View style={s.indPeriodRow}>
-        <Text style={s.indPeriodLabel}>Annuel</Text>
+        <Text style={s.indPeriodLabel}>{t('objectifVsRealise.annual')}</Text>
         <Text style={s.indPeriodValues}>
           {formatCurrency(ind.annual.realise)} / {formatCurrency(ind.annual.objectif)}
         </Text>
@@ -280,7 +285,7 @@ function IndicatorItem({ ind }: { ind: IndicatorOvR }) {
       {/* Ecart vs prorata */}
       {ind.annual.ecart !== 0 && (
         <Text style={[s.indEcart, { color: ind.annual.ecart >= 0 ? PF.green : PF.red }]}>
-          {ind.annual.ecart >= 0 ? '+' : ''}{formatCurrency(ind.annual.ecart)} vs prorata
+          {ind.annual.ecart >= 0 ? '+' : ''}{formatCurrency(ind.annual.ecart)} {t('objectifVsRealise.vsProrata')}
         </Text>
       )}
     </PerfGlassCard>
@@ -288,11 +293,12 @@ function IndicatorItem({ ind }: { ind: IndicatorOvR }) {
 }
 
 function IndicatorBreakdown({ data }: { data: ObjectifVsRealise }) {
+  const { t } = useTranslation('performance');
   if (data.byIndicator.length === 0) return null;
 
   return (
     <View style={s.indSection}>
-      <Text style={s.sectionTitle}>Par indicateur</Text>
+      <Text style={s.sectionTitle}>{t('objectifVsRealise.byIndicator')}</Text>
       {data.byIndicator.map((ind, i) => (
         <FadeInView key={ind.code} delay={i * 60}>
           <IndicatorItem ind={ind} />

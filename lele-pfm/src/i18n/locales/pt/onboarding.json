@@ -1,0 +1,102 @@
+{
+  "buttons": {
+    "0": "Me mostra!",
+    "1": "E depois?",
+    "2": "Continua!",
+    "3": "Mais!",
+    "4": "Quase la...",
+    "5": "Ultima!",
+    "6": "Bora comecar!"
+  },
+  "skip": "Pular a intro",
+  "slide1": {
+    "title": "Voce gasta.",
+    "titleHighlight": "E se voce ganhasse gastando?",
+    "subtitle": "LELE PFM transforma seus gastos em riqueza.",
+    "headerBefore": "Hoje",
+    "headerAfter": "Com LELE",
+    "comp1Before": "Voce gasta e perde",
+    "comp1After": "Voce gasta e ganha",
+    "comp2Before": "Voce sofre no fim do mes",
+    "comp2After": "Voce constroi seu pe-de-meia",
+    "comp3Before": "Voce corta sem saber",
+    "comp3After": "A gente mostra onde agir",
+    "comp4Before": "Zero metodo",
+    "comp4After": "Um plano de 3 anos"
+  },
+  "slide2": {
+    "cardTitle": "A gente faz algumas perguntas",
+    "step1Label": "Seu perfil",
+    "step1Desc": "Idade, situacao, profissao",
+    "step2Label": "Suas rendas",
+    "step2Desc": "Salario, negocios, beneficios",
+    "step3Label": "Seus gastos",
+    "step3Desc": "Por categoria",
+    "step4Label": "Seu historico",
+    "step4Desc": "3 a 5 anos de dados",
+    "resultTitle": "O motor analisa tudo",
+    "resultSub": "e detecta suas economias escondidas",
+    "tagline": "A gente identifica como voce gasta",
+    "heading": "Algumas perguntas.\nRespostas poderosas.",
+    "bodyBold": "Voce nos conta como vive",
+    "bodyEnd": ", a gente calcula como voce pode viver melhor. Sem julgamento, so numeros."
+  },
+  "slide3": {
+    "scoreLabel": "Seu diagnostico de saude financeira",
+    "kpi1": "Custos invisiveis",
+    "kpi2": "Custo maximo",
+    "kpi3": "Cashback escondido",
+    "tagline": "Seu diagnostico num piscar de olhos",
+    "heading": "Um score. Uma nota.\nA verdade sobre suas financas.",
+    "bodyBold": "De E a A+",
+    "bodyEnd": ", sua nota diz onde voce esta. Nao pra julgar, mas pra saber exatamente por onde comecar."
+  },
+  "slide4": {
+    "cardTitle": "Cashback por categoria",
+    "cat1": "Lazer & saidas",
+    "cat2": "Alimentacao",
+    "cat3": "Transporte",
+    "cat4": "Habitacao",
+    "hintHigh": "Cashback alto",
+    "hintMedium": "Cashback medio",
+    "hintLow": "Pouco cashback",
+    "tagline": "Cada gasto passa pelo scanner",
+    "heading": "A gente mostra exatamente\nonde esta seu cashback.",
+    "bodyBold": "Cada categoria esconde um cashback.",
+    "bodyEnd": " A gente identifica as que escondem mais cashback, sem mexer no essencial."
+  },
+  "slide5": {
+    "cardTitle": "Seu pe-de-meia vai crescendo",
+    "year1": "Ano 1",
+    "year2": "Ano 2",
+    "year3": "Ano 3",
+    "treasureTitle": "Seu cashback natural",
+    "treasureSub": "vai enchendo ano apos ano",
+    "tagline": "Um plano. Tres anos. Seu cashback.",
+    "heading": "Em 3 anos, voce cria\nseu pe-de-meia.",
+    "bodyBold": "Todo mes, seu cashback cresce.",
+    "bodyEnd": " A gente define metas progressivas pra turbinar sua poupanca sem forcar."
+  },
+  "slide6": {
+    "cardTitle": "Seu cashback natural trabalha pra voce",
+    "benefit1Title": "Sua poupanca e turbinada",
+    "benefit1Desc": "Seu cashback natural vem reforcar suas reservas",
+    "benefit2Title": "Seus prazeres tambem",
+    "benefit2Desc": "Uma parte financia o que voce quer",
+    "benefit3Title": "Sem mexer no essencial",
+    "benefit3Desc": "A gente nunca corta o que e vital",
+    "tagline": "O melhor dos dois mundos",
+    "heading": "Um cashback que turbina\npoupanca E prazeres.",
+    "bodyBold": "Seu cashback natural turbina sua poupanca E seus prazeres",
+    "bodyEnd": ", sem esforco e sem sacrificio."
+  },
+  "slide7": {
+    "heading": "5 minutos.\nDepois, a gente decola.",
+    "step1": "5 minutos pro seu diagnostico",
+    "step2": "Seu score e sua nota na hora",
+    "step3": "Seu pe-de-meia calculado pra 3 anos",
+    "step4": "Suas metas concretas por mes",
+    "step5": "Voce decola rumo a sua liberdade financeira",
+    "bottomTagline": "Seu futuro financeiro comeca aqui."
+  }
+}

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, Pressable, StyleSheet } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { ChevronRight, ChevronDown } from 'lucide-react-native';
 import { ProgressBar } from '../charts/ProgressBar';
 import { PerfGlassCard, PF } from './shared';
@@ -31,6 +32,7 @@ interface DrillLevel {
 }
 
 export function SectionG_DrivingDashboard(props: SectionGProps) {
+  const { t } = useTranslation('performance');
   const [drill, setDrill] = useState<DrillLevel>({
     yearIndex: null,
     quarterIndex: null,
@@ -38,9 +40,9 @@ export function SectionG_DrivingDashboard(props: SectionGProps) {
   });
 
   const years = [
-    { label: 'An 1', epr: props.eprN1, color: PF.cyan },
-    { label: 'An 2', epr: props.eprN2, color: PF.blue },
-    { label: 'An 3', epr: props.eprN3, color: PF.green },
+    { label: t('drivingDashboard.year', { n: 1 }), epr: props.eprN1, color: PF.cyan },
+    { label: t('drivingDashboard.year', { n: 2 }), epr: props.eprN2, color: PF.blue },
+    { label: t('drivingDashboard.year', { n: 3 }), epr: props.eprN3, color: PF.green },
   ];
 
   const selectedYear = drill.yearIndex !== null ? years[drill.yearIndex] : null;
@@ -54,7 +56,7 @@ export function SectionG_DrivingDashboard(props: SectionGProps) {
   const weeklyAmount = monthlyAmount / 4;
 
   // Labels mois : Mois 1-12 selon le trimestre
-  const getMonthLabel = (qi: number, mi: number) => `Mois ${qi * 3 + mi + 1}`;
+  const getMonthLabel = (qi: number, mi: number) => t('drivingDashboard.monthLabel', { n: qi * 3 + mi + 1 });
 
   return (
     <View style={styles.container}>
@@ -89,7 +91,7 @@ export function SectionG_DrivingDashboard(props: SectionGProps) {
       {/* ──── Niveau 2 : Trimestriel ──── */}
       {selectedYear && (
         <PerfGlassCard style={styles.quarterCard}>
-          <Text style={styles.sectionTitle}>Trimestres — {selectedYear.label}</Text>
+          <Text style={styles.sectionTitle}>{t('drivingDashboard.quarters', { yearLabel: selectedYear.label })}</Text>
           {QUARTER_WEIGHTS.map((q, qi) => {
             const isActive = drill.quarterIndex === qi;
             return (
@@ -126,7 +128,7 @@ export function SectionG_DrivingDashboard(props: SectionGProps) {
       {selectedYear && selectedQuarter && (
         <PerfGlassCard style={styles.monthlyCard}>
           <Text style={styles.sectionTitle}>
-            Mois — {selectedQuarter.label} ({formatCurrency(quarterAmount)})
+            {t('drivingDashboard.months', { quarterLabel: selectedQuarter.label, amount: formatCurrency(quarterAmount) })}
           </Text>
           {[0, 1, 2].map((mi) => {
             const isActive = drill.monthIndex === mi;
@@ -165,12 +167,12 @@ export function SectionG_DrivingDashboard(props: SectionGProps) {
       {selectedYear && drill.monthIndex !== null && (
         <PerfGlassCard style={styles.weeklyCard}>
           <Text style={styles.sectionTitle}>
-            Semaines — {getMonthLabel(drill.quarterIndex!, drill.monthIndex)}
+            {t('drivingDashboard.weeks', { monthLabel: getMonthLabel(drill.quarterIndex!, drill.monthIndex) })}
           </Text>
           {[1, 2, 3, 4].map((w) => (
             <View key={w} style={styles.weekRow}>
               <View style={[styles.weekDot, { backgroundColor: selectedYear.color }]} />
-              <Text style={styles.weekLabel}>Sem. {w}</Text>
+              <Text style={styles.weekLabel}>{t('drivingDashboard.weekLabel', { n: w })}</Text>
               <View style={{ flex: 1 }}>
                 <ProgressBar progress={25} color={selectedYear.color} height={3} />
               </View>
@@ -181,7 +183,7 @@ export function SectionG_DrivingDashboard(props: SectionGProps) {
           ))}
           <View style={styles.weekSummary}>
             <Text style={styles.weekSummaryText}>
-              4 sem. × {formatCurrency(weeklyAmount)} = {formatCurrency(monthlyAmount)}
+              {t('drivingDashboard.weekSummary', { weekly: formatCurrency(weeklyAmount), monthly: formatCurrency(monthlyAmount) })}
             </Text>
           </View>
         </PerfGlassCard>

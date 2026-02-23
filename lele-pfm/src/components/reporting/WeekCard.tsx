@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, Pressable, StyleSheet } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { getGradeColor, getNoteColor } from '@/domain/calculators/weekly-savings-engine';
 import { WeekCalendarEntry } from '@/hooks/usePerformanceCalendar';
 import { getWeekLabel } from '@/utils/week-helpers';
@@ -23,6 +24,7 @@ function getCardColors(entry: WeekCalendarEntry) {
 }
 
 export function WeekCard({ entry, isCurrentWeek, onPress }: WeekCardProps) {
+  const { t } = useTranslation('tracking');
   const { week, year, budget, spent, savings, hasTransactions } = entry;
   const colors = getCardColors(entry);
 
@@ -79,8 +81,8 @@ export function WeekCard({ entry, isCurrentWeek, onPress }: WeekCardProps) {
           <Text style={styles.progressPct}>{progressPercent}%</Text>
         </View>
         <View style={styles.budgetRow}>
-          <Text style={styles.budgetLabel}>Budget: {formatCurrency(budget)}</Text>
-          <Text style={styles.spentLabel}>Depense: {formatCurrency(spent)}</Text>
+          <Text style={styles.budgetLabel}>{t('reporting.budget')}: {formatCurrency(budget)}</Text>
+          <Text style={styles.spentLabel}>{t('reporting.expenseShort')}: {formatCurrency(spent)}</Text>
         </View>
       </View>
     </Pressable>

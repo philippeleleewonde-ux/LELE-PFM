@@ -1,6 +1,7 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { View, Text, StyleSheet, Pressable, Animated, ScrollView, Platform, LayoutChangeEvent } from 'react-native';
-import { WZ, WIZARD_STEP_COUNT, WIZARD_STEP_LABELS, AmbientSpotlights, neonGlow } from './shared';
+import { useTranslation } from 'react-i18next';
+import { WZ, WIZARD_STEP_COUNT, AmbientSpotlights, neonGlow } from './shared';
 import { useWizardStore } from '@/stores/wizard-store';
 import Step1Profile from './steps/Step1Profile';
 import Step2Flows from './steps/Step2Flows';
@@ -17,6 +18,7 @@ interface Props {
 }
 
 export default function SetupWizardScreen({ onComplete }: Props) {
+  const { t } = useTranslation('wizard');
   const { currentStep, setStep } = useWizardStore();
   const { isInvestor } = useViewMode();
   const scrollRef = useRef<ScrollView>(null);
@@ -70,7 +72,7 @@ export default function SetupWizardScreen({ onComplete }: Props) {
         <View style={styles.headerTop}>
           {currentStep > 0 && !isLast ? (
             <Pressable onPress={goBack} hitSlop={12} style={styles.backButton}>
-              <Text style={styles.backText}>← Retour</Text>
+              <Text style={styles.backText}>{t('nav.back')}</Text>
             </Pressable>
           ) : (
             <View style={styles.backPlaceholder} />
@@ -79,7 +81,7 @@ export default function SetupWizardScreen({ onComplete }: Props) {
             {currentStep + 1}/{WIZARD_STEP_COUNT}
           </Text>
         </View>
-        <Text style={[styles.stepLabel, neonGlow(WZ.accent)]}>{WIZARD_STEP_LABELS[currentStep]}</Text>
+        <Text style={[styles.stepLabel, neonGlow(WZ.accent)]}>{t(`stepLabels.${currentStep}`)}</Text>
         {/* Progress bar */}
         <View style={styles.progressTrack}>
           <Animated.View style={[styles.progressFill, { width: progressWidth }]} />
@@ -120,7 +122,7 @@ export default function SetupWizardScreen({ onComplete }: Props) {
                 onPress={goBack}
                 style={({ pressed }) => [styles.backBottomButton, pressed && styles.backBottomButtonPressed]}
               >
-                <Text style={styles.backBottomText}>← Retour</Text>
+                <Text style={styles.backBottomText}>{t('nav.back')}</Text>
               </Pressable>
             )}
             <Pressable
@@ -131,11 +133,11 @@ export default function SetupWizardScreen({ onComplete }: Props) {
                 pressed && styles.nextButtonPressed,
               ]}
             >
-              <Text style={styles.nextButtonText}>Continuer</Text>
+              <Text style={styles.nextButtonText}>{t('nav.continue')}</Text>
             </Pressable>
           </View>
           <Text style={styles.stepHint}>
-            {currentStep === 0 ? 'Parle-nous de toi' : `Étape ${currentStep + 1} sur ${WIZARD_STEP_COUNT}`}
+            {currentStep === 0 ? t('nav.tellUsAboutYou') : t('nav.stepXofY', { step: currentStep + 1, total: WIZARD_STEP_COUNT })}
           </Text>
         </View>
       )}

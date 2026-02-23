@@ -1,6 +1,7 @@
 import React, { useCallback } from 'react';
 import { View, Text, ScrollView, StyleSheet } from 'react-native';
 import Slider from '@react-native-community/slider';
+import { useTranslation } from 'react-i18next';
 import { WZ, GlassCard, FadeInView, neonGlow } from '../shared';
 import { useWizardStore } from '@/stores/wizard-store';
 
@@ -10,60 +11,28 @@ interface Props {
 
 interface Lever {
   key: string;
-  label: string;
-  dimension: string;
-  tip: string;
 }
 
 const LEVERS: Lever[] = [
-  {
-    key: 'formation',
-    label: 'Formation',
-    dimension: 'Compétences',
-    tip: 'Chaque compétence acquise augmente votre valeur sur le marché.',
-  },
-  {
-    key: 'epargne_auto',
-    label: 'Épargne auto',
-    dimension: 'Sécurité',
-    tip: 'Automatiser son épargne, c\'est se payer en premier.',
-  },
-  {
-    key: 'negociation',
-    label: 'Négociation salariale',
-    dimension: 'Revenus',
-    tip: 'Une négociation réussie impacte toute votre carrière.',
-  },
-  {
-    key: 'reduction_depenses',
-    label: 'Réduction dépenses',
-    dimension: 'Maîtrise',
-    tip: 'Chaque euro économisé est un euro qui travaille pour vous.',
-  },
-  {
-    key: 'side_project',
-    label: 'Side project',
-    dimension: 'Diversification',
-    tip: 'Diversifier ses revenus, c\'est diversifier sa sécurité.',
-  },
-  {
-    key: 'investissement',
-    label: 'Investissement',
-    dimension: 'Croissance',
-    tip: 'Le temps est votre meilleur allié pour faire fructifier votre capital.',
-  },
+  { key: 'formation' },
+  { key: 'epargne_auto' },
+  { key: 'negociation' },
+  { key: 'reduction_depenses' },
+  { key: 'side_project' },
+  { key: 'investissement' },
 ];
 
 const DIMENSION_COLORS: Record<string, string> = {
-  'Compétences': '#FBBF24',
-  'Sécurité': '#4ADE80',
-  Revenus: '#FFD700',
-  'Maîtrise': '#F97316',
-  Diversification: '#D9A11B',
-  Croissance: '#FBBF24',
+  formation: '#FBBF24',
+  epargne_auto: '#4ADE80',
+  negociation: '#FFD700',
+  reduction_depenses: '#F97316',
+  side_project: '#D9A11B',
+  investissement: '#FBBF24',
 };
 
 export default function Step6Levers({ isActive }: Props) {
+  const { t } = useTranslation('wizard');
   const { formData, updateFormData } = useWizardStore();
   const levers = formData.levers;
 
@@ -80,25 +49,25 @@ export default function Step6Levers({ isActive }: Props) {
       showsVerticalScrollIndicator={false}
     >
       <FadeInView active={isActive} delay={0}>
-        <Text style={styles.title}>Vos leviers d'action</Text>
+        <Text style={styles.title}>{t('step6.title')}</Text>
         <Text style={styles.subtitle}>
-          Quel effort êtes-vous prêt(e) à fournir sur chaque levier ?
+          {t('step6.subtitle')}
         </Text>
       </FadeInView>
 
       {LEVERS.map((lever, index) => {
         const value = levers[lever.key] ?? 0;
-        const dimColor = DIMENSION_COLORS[lever.dimension] ?? WZ.accent;
+        const dimColor = DIMENSION_COLORS[lever.key] ?? WZ.accent;
 
         return (
           <FadeInView key={lever.key} active={isActive} delay={100 + index * 80}>
             <GlassCard style={styles.card}>
               <View style={styles.cardHeader}>
-                <Text style={styles.leverName}>{lever.label}</Text>
+                <Text style={styles.leverName}>{t('step6.levers.' + lever.key)}</Text>
                 <View style={[styles.dimensionBadge, { backgroundColor: dimColor + '22' }]}>
                   <View style={[styles.dimensionDot, { backgroundColor: dimColor, shadowColor: dimColor, shadowOpacity: 0.6, shadowRadius: 4, shadowOffset: { width: 0, height: 0 } }]} />
                   <Text style={[styles.dimensionText, { color: dimColor }]}>
-                    {lever.dimension}
+                    {t('step6.levers.' + lever.key + 'Dim')}
                   </Text>
                 </View>
               </View>
@@ -134,7 +103,7 @@ export default function Step6Levers({ isActive }: Props) {
 
               <View style={styles.tipRow}>
                 <Text style={styles.tipIcon}>💡</Text>
-                <Text style={styles.tipText}>{lever.tip}</Text>
+                <Text style={styles.tipText}>{t('step6.levers.' + lever.key + 'Tip')}</Text>
               </View>
             </GlassCard>
           </FadeInView>

@@ -2,6 +2,7 @@
  * Transforms EngineOutput into display-ready objects for each performance section.
  */
 import { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useEngineStore } from '@/stores/engine-store';
 import { EngineOutput, CategoryVentilation, IndicatorDistribution } from '@/types/engine';
 import { formatCurrency, formatPercent, formatGrade } from '@/services/format-helpers';
@@ -93,6 +94,7 @@ export interface PerformanceData {
 }
 
 export function usePerformanceData(): PerformanceData | null {
+  const { t } = useTranslation('performance');
   const engineOutput = useEngineStore((s) => s.engineOutput);
   const currency = useEngineStore((s) => s.currency);
 
@@ -104,8 +106,8 @@ export function usePerformanceData(): PerformanceData | null {
     const kpis: KPIItem[] = [
       {
         key: 'potential',
-        label: 'Coûts invisibles',
-        tooltip: 'Ce que ta gestion te coûte sans que tu le voies.',
+        label: t('kpi.invisibleCosts'),
+        tooltip: t('kpi.invisibleCostsTooltip'),
         value: formatCurrency(o.step1.total_potential),
         rawValue: o.step1.total_potential,
         alertLevel: 'green',
@@ -113,8 +115,8 @@ export function usePerformanceData(): PerformanceData | null {
       },
       {
         key: 'el',
-        label: 'Coûts visibles',
-        tooltip: 'Ce que ta gestion te coûte de manière évidente.',
+        label: t('kpi.visibleCosts'),
+        tooltip: t('kpi.visibleCostsTooltip'),
         value: formatCurrency(o.step2.total_el),
         rawValue: o.step2.total_el,
         alertLevel: 'red',
@@ -122,8 +124,8 @@ export function usePerformanceData(): PerformanceData | null {
       },
       {
         key: 'var95',
-        label: 'Coût maximum',
-        tooltip: 'Le maximum que ta gestion peut te coûter.',
+        label: t('kpi.maxCost'),
+        tooltip: t('kpi.maxCostTooltip'),
         value: formatCurrency(o.step6.var95),
         rawValue: o.step6.var95,
         alertLevel: 'yellow',
@@ -131,8 +133,8 @@ export function usePerformanceData(): PerformanceData | null {
       },
       {
         key: 'historical',
-        label: 'Coûts tolérés',
-        tooltip: 'Ce que tu as accepté de payer jusqu\'ici.',
+        label: t('kpi.toleratedCosts'),
+        tooltip: t('kpi.toleratedCostsTooltip'),
         value: formatCurrency(o.step5.percentile_5),
         rawValue: o.step5.percentile_5,
         alertLevel: 'orange',
@@ -140,8 +142,8 @@ export function usePerformanceData(): PerformanceData | null {
       },
       {
         key: 'prl',
-        label: 'Cashback invisible',
-        tooltip: 'L\'argent caché dans tes dépenses, récupérable.',
+        label: t('kpi.invisibleCashback'),
+        tooltip: t('kpi.invisibleCashbackTooltip'),
         value: formatCurrency(o.step7.prl),
         rawValue: o.step7.prl,
         alertLevel: 'violet',
@@ -149,8 +151,8 @@ export function usePerformanceData(): PerformanceData | null {
       },
       {
         key: 'el36m',
-        label: 'Coûts projetés sur 3 ans',
-        tooltip: 'Ce que ça va te coûter si rien ne change.',
+        label: t('kpi.projectedCosts3y'),
+        tooltip: t('kpi.projectedCosts3yTooltip'),
         value: formatCurrency(o.step8.el_36m),
         rawValue: o.step8.el_36m,
         alertLevel: 'cyan',
@@ -162,7 +164,7 @@ export function usePerformanceData(): PerformanceData | null {
     const triennialPlan: YearPlan[] = [
       {
         year: 1,
-        label: 'An 1',
+        label: t('yearPlan.year1'),
         recoveryPercent: 30,
         epr: o.step9.epr_n1,
         epargne: o.step9.epargne_n1,
@@ -172,7 +174,7 @@ export function usePerformanceData(): PerformanceData | null {
       },
       {
         year: 2,
-        label: 'An 2',
+        label: t('yearPlan.year2'),
         recoveryPercent: 60,
         epr: o.step9.epr_n2,
         epargne: o.step9.epargne_n2,
@@ -182,7 +184,7 @@ export function usePerformanceData(): PerformanceData | null {
       },
       {
         year: 3,
-        label: 'An 3',
+        label: t('yearPlan.year3'),
         recoveryPercent: 100,
         epr: o.step9.epr_n3,
         epargne: o.step9.epargne_n3,
@@ -208,7 +210,7 @@ export function usePerformanceData(): PerformanceData | null {
     const catEntries = Object.entries(o.step10.by_category);
     const categories: CategoryItem[] = catEntries.map(([code, cat]) => ({
       code,
-      label: COICOP_LABELS[code] || `Cat. ${code}`,
+      label: COICOP_LABELS[code] ? t(COICOP_LABELS[code]) : `Cat. ${code}`,
       budgetRate: cat.budget_rate,
       elasticity: cat.elasticity,
       nature: cat.nature,
@@ -226,9 +228,9 @@ export function usePerformanceData(): PerformanceData | null {
       const def = PFM_INDICATORS.find((p) => p.code === ind.code);
       return {
         code: ind.code,
-        name: def?.name ?? ind.code,
-        description: def?.description ?? '',
-        challenge: def?.challenge ?? '',
+        name: t(`leverNames.${ind.code}`, { defaultValue: def?.name ?? ind.code }),
+        description: t(`indicatorDescs.${ind.code}`, { defaultValue: def?.description ?? '' }),
+        challenge: t(`indicatorChallenges.${ind.code}`, { defaultValue: def?.challenge ?? '' }),
         icon: def?.icon ?? 'HelpCircle',
         color: def?.color ?? '#FFFFFF',
         rate: ind.rate,
@@ -262,5 +264,5 @@ export function usePerformanceData(): PerformanceData | null {
       indicators,
       eprByYear: { n1: o.step9.epr_n1, n2: o.step9.epr_n2, n3: o.step9.epr_n3 },
     };
-  }, [engineOutput, currency]);
+  }, [engineOutput, currency, t]);
 }

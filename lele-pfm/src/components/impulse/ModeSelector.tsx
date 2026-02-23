@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, Pressable, StyleSheet } from 'react-native';
 import { Crown, Target, ChevronLeft } from 'lucide-react-native';
+import { useTranslation } from 'react-i18next';
 import { useEngineStore } from '@/stores/engine-store';
 
 interface ModeSelectorProps {
@@ -16,6 +17,7 @@ function formatAmount(n: number): string {
 }
 
 export function ModeSelector({ label, amount, onSelectWealth, onSelectControl, onBack }: ModeSelectorProps) {
+  const { t } = useTranslation('app');
   const currency = useEngineStore((s) => s.currency) || 'FCFA';
 
   return (
@@ -24,7 +26,7 @@ export function ModeSelector({ label, amount, onSelectWealth, onSelectControl, o
         {label} — {formatAmount(amount)} {currency}
       </Text>
 
-      <Text style={styles.question}>Quel est ton objectif ?</Text>
+      <Text style={styles.question}>{t('impulse.objective')}</Text>
 
       {/* Wealth card */}
       <Pressable onPress={onSelectWealth} style={[styles.card, styles.cardWealth]}>
@@ -33,11 +35,11 @@ export function ModeSelector({ label, amount, onSelectWealth, onSelectControl, o
             <Crown size={22} color="#FBBF24" />
           </View>
           <Text style={[styles.cardTitle, { color: '#FBBF24' }]}>
-            Je veux devenir riche
+            {t('impulse.wealthTitle')}
           </Text>
         </View>
         <Text style={styles.cardDesc}>
-          Verifier si tu peux te l'offrir 10 fois
+          {t('impulse.wealthDesc')}
         </Text>
       </Pressable>
 
@@ -48,17 +50,17 @@ export function ModeSelector({ label, amount, onSelectWealth, onSelectControl, o
             <Target size={22} color="#A78BFA" />
           </View>
           <Text style={[styles.cardTitle, { color: '#A78BFA' }]}>
-            Je veux maitriser mes depenses
+            {t('impulse.controlTitle')}
           </Text>
         </View>
         <Text style={styles.cardDesc}>
-          Simuler l'impact sur ton budget
+          {t('impulse.controlDesc')}
         </Text>
       </Pressable>
 
       <Pressable onPress={onBack} style={styles.backBtn}>
         <ChevronLeft size={16} color="#A1A1AA" />
-        <Text style={styles.backText}>Retour</Text>
+        <Text style={styles.backText}>{t('impulse.back')}</Text>
       </Pressable>
     </View>
   );

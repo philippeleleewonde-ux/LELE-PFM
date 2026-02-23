@@ -1,5 +1,6 @@
 import React, { useMemo, useState, useRef, useEffect } from 'react';
 import { View, Text, StyleSheet, Pressable, Animated } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { PF, PerfGlassCard } from './shared';
 import { useInvestmentStore } from '@/stores/investment-store';
 import {
@@ -9,6 +10,8 @@ import {
   type QuestionCategory,
   type SocraticSession,
 } from '@/domain/calculators/socratic-coach-engine';
+
+type TFunction = (key: string, options?: Record<string, unknown>) => string;
 
 // ─── Color / Label Helpers ───
 
@@ -23,43 +26,16 @@ function priorityColor(p: QuestionPriority): string {
   }
 }
 
-function priorityLabel(p: QuestionPriority): string {
-  switch (p) {
-    case 'critical':
-      return 'Critique';
-    case 'important':
-      return 'Important';
-    case 'educational':
-      return 'Educatif';
-  }
+function priorityLabel(p: QuestionPriority, t: TFunction): string {
+  return t(`coach.priority.${p}`);
 }
 
-function categoryLabel(c: QuestionCategory): string {
-  switch (c) {
-    case 'risk':
-      return 'Risque';
-    case 'diversification':
-      return 'Diversification';
-    case 'bias':
-      return 'Biais';
-    case 'tax':
-      return 'Fiscalite';
-    case 'strategy':
-      return 'Strategie';
-    case 'psychology':
-      return 'Psychologie';
-  }
+function categoryLabel(c: QuestionCategory, t: TFunction): string {
+  return t(`coach.category.${c}`);
 }
 
-function levelLabel(level: SocraticSession['coachingLevel']): string {
-  switch (level) {
-    case 'debutant':
-      return 'Debutant';
-    case 'intermediaire':
-      return 'Intermediaire';
-    case 'avance':
-      return 'Avance';
-  }
+function levelLabel(level: SocraticSession['coachingLevel'], t: TFunction): string {
+  return t(`coach.level.${level}`);
 }
 
 function levelColor(level: SocraticSession['coachingLevel']): string {
@@ -75,7 +51,7 @@ function levelColor(level: SocraticSession['coachingLevel']): string {
 
 // ─── Question Card ───
 
-function QuestionCard({ question }: { question: SocraticQuestion }) {
+function QuestionCard({ question, t }: { question: SocraticQuestion; t: TFunction }) {
   const [expanded, setExpanded] = useState(false);
   const animOpacity = useRef(new Animated.Value(0)).current;
   const animHeight = useRef(new Animated.Value(0)).current;
@@ -103,12 +79,12 @@ function QuestionCard({ question }: { question: SocraticQuestion }) {
       <View style={styles.badgeRow}>
         <View style={[styles.priorityBadge, { backgroundColor: pColor + '20' }]}>
           <Text style={[styles.priorityBadgeText, { color: pColor }]}>
-            {priorityLabel(question.priority)}
+            {priorityLabel(question.priority, t)}
           </Text>
         </View>
         <View style={styles.categoryBadge}>
           <Text style={styles.categoryBadgeText}>
-            {categoryLabel(question.category)}
+            {categoryLabel(question.category, t)}
           </Text>
         </View>
       </View>
@@ -122,7 +98,7 @@ function QuestionCard({ question }: { question: SocraticQuestion }) {
         style={styles.toggleButton}
       >
         <Text style={styles.toggleText}>
-          {expanded ? 'Masquer la reponse' : 'Voir la reponse'}
+          {expanded ? t('coach.hideAnswer') : t('coach.showAnswer')}
         </Text>
       </Pressable>
 
@@ -134,7 +110,7 @@ function QuestionCard({ question }: { question: SocraticQuestion }) {
 
           {/* Recommendation card (gold-bordered like PreMortem mitigation) */}
           <View style={styles.recommendationCard}>
-            <Text style={styles.recommendationLabel}>Recommandation</Text>
+            <Text style={styles.recommendationLabel}>{t('coach.recommendationLabel')}</Text>
             <Text style={styles.recommendationText}>
               {question.recommendation}
             </Text>
@@ -151,6 +127,7 @@ function QuestionCard({ question }: { question: SocraticQuestion }) {
 // ─── Main Component ───
 
 export function SectionAB_SocraticCoach() {
+  const { t } = useTranslation('performance');
   const allocations = useInvestmentStore((s) => s.allocations);
   const investorProfile = useInvestmentStore((s) => s.investorProfile);
 
@@ -164,7 +141,7 @@ export function SectionAB_SocraticCoach() {
     return (
       <PerfGlassCard>
         <Text style={styles.emptyText}>
-          Configurez votre profil investisseur pour activer le coach.
+          {t('coach.configureProfile')}
         </Text>
       </PerfGlassCard>
     );
@@ -174,8 +151,7 @@ export function SectionAB_SocraticCoach() {
     return (
       <PerfGlassCard>
         <Text style={styles.emptyText}>
-          Aucune question a vous poser pour le moment. Votre portefeuille semble
-          equilibre.
+          {t('coach.noQuestions')}
         </Text>
       </PerfGlassCard>
     );
@@ -187,12 +163,12 @@ export function SectionAB_SocraticCoach() {
     <View style={styles.container}>
       {/* Header card */}
       <PerfGlassCard style={styles.section}>
-        <Text style={styles.sectionTitle}>Coach Socratique</Text>
+        <Text style={styles.sectionTitle}>{t('coach.title')}</Text>
         <Text style={styles.subtitle}>
-          Questionnez vos choix d'investissement
+          {t('coach.subtitle')}
         </Text>
         <Text style={styles.subtitleMuted}>
-          Des questions pour affiner votre reflexion financiere.
+          {t('coach.subtitleHint')}
         </Text>
 
         {/* Level + Focus area row */}
@@ -202,7 +178,7 @@ export function SectionAB_SocraticCoach() {
               style={[styles.levelBadge, { backgroundColor: lvlColor + '20' }]}
             >
               <Text style={[styles.levelBadgeText, { color: lvlColor }]}>
-                Niveau {levelLabel(session.coachingLevel)}
+                {t('coach.levelPrefix')} {levelLabel(session.coachingLevel, t)}
               </Text>
             </View>
             <Text style={styles.focusText}>{session.focusArea}</Text>
@@ -212,7 +188,7 @@ export function SectionAB_SocraticCoach() {
               {session.totalIssuesDetected}
             </Text>
             <Text style={styles.issueCountLabel}>
-              point{session.totalIssuesDetected !== 1 ? 's' : ''}
+              {session.totalIssuesDetected !== 1 ? t('coach.pointsPlural') : t('coach.points')}
             </Text>
           </View>
         </View>
@@ -224,11 +200,11 @@ export function SectionAB_SocraticCoach() {
       {/* Questions list */}
       <PerfGlassCard style={styles.section}>
         <Text style={styles.sectionTitle}>
-          Questions ({session.questions.length})
+          {t('coach.questions', { count: session.questions.length })}
         </Text>
         <View style={styles.questionList}>
           {session.questions.map((q) => (
-            <QuestionCard key={q.id} question={q} />
+            <QuestionCard key={q.id} question={q} t={t} />
           ))}
         </View>
       </PerfGlassCard>
@@ -236,13 +212,10 @@ export function SectionAB_SocraticCoach() {
       {/* Footer */}
       <PerfGlassCard style={styles.section}>
         <Text style={styles.footerText}>
-          Le coach socratique vous aide a reflechir, pas a decider. Chaque
-          question est une invitation a approfondir votre comprehension de vos
-          choix financiers.
+          {t('coach.footerText')}
         </Text>
         <Text style={styles.footerMuted}>
-          Cette analyse est indicative et ne constitue pas un conseil en
-          investissement.
+          {t('coach.footerDisclaimer')}
         </Text>
       </PerfGlassCard>
     </View>

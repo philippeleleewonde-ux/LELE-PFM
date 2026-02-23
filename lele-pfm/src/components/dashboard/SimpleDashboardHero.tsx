@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react';
 import { View, Text, StyleSheet, useWindowDimensions } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { formatCurrency } from '@/services/format-helpers';
 import { getGradeColor } from '@/domain/calculators/weekly-savings-engine';
@@ -12,43 +13,8 @@ import { usePerformanceStore } from '@/stores/performance-store';
 
 // ─── Financial Tips by Score Range ───
 
-const TIPS: Record<string, string[]> = {
-  critical: [
-    "Priorite absolue : identifiez vos 3 plus grosses depenses et reduisez-les de 10%.",
-    "Commencez petit : mettez de cote meme 500 FCFA par jour. La regularite est la cle.",
-    "Chaque depense non essentielle est une opportunite d'epargne. Analysez vos achats.",
-    "Creez un budget d'urgence : listez uniquement vos depenses vitales cette semaine.",
-    "Notez chaque depense pendant 7 jours. La prise de conscience est le premier pas.",
-  ],
-  weak: [
-    "Vous progressez ! Fixez-vous un objectif d'epargne hebdomadaire, meme modeste.",
-    "Astuce : attendez 48h avant tout achat non essentiel. 70% seront evites.",
-    "Identifiez vos abonnements inutiles. Chaque petit montant compte sur l'annee.",
-    "Preparez vos repas : la restauration pese lourd sur le budget sans qu'on le remarque.",
-    "Definissez un jour sans depense par semaine. Votre portefeuille vous remerciera.",
-  ],
-  average: [
-    "Bon travail ! Pour passer au niveau superieur, augmentez votre epargne de 5% cette semaine.",
-    "Vous etes sur la bonne voie. Essayez de ne pas toucher a vos economies pendant 1 mois.",
-    "Conseil d'expert : automatisez votre epargne des la reception de vos revenus.",
-    "Diversifiez vos efforts : reduisez 2 categories au lieu d'une seule pour plus d'impact.",
-    "Comparez vos depenses ce mois-ci vs le mois dernier. Les tendances revelent des opportunites.",
-  ],
-  good: [
-    "Excellent parcours ! Vous etes au-dessus de la moyenne. Visez les 80/100 ce mois-ci.",
-    "Votre discipline paye. Pensez a investir votre surplus d'epargne pour le faire fructifier.",
-    "Bravo ! Maintenez ce rythme et vous atteindrez votre objectif EPR en avance.",
-    "A ce niveau, chaque point gagne demande plus d'effort. Concentrez-vous sur les details.",
-    "Vous etes en bonne voie. Fixez-vous un objectif : terminer le mois sans depassement.",
-  ],
-  excellent: [
-    "Chapeau ! Vous etes un modele de gestion financiere. Continuez sur cette lancee !",
-    "Performance remarquable ! Pensez a des objectifs long terme : immobilier, placement.",
-    "Vous maitrisez vos finances. C'est le moment d'optimiser : negociez vos contrats.",
-    "Score exceptionnel ! Votre discipline financiere est votre plus grand atout.",
-    "Vous faites partie des meilleurs gestionnaires. Inspirez votre entourage !",
-  ],
-};
+const SCORE_RANGES = ['critical', 'weak', 'average', 'good', 'excellent'] as const;
+const TIPS_PER_RANGE = 5;
 
 function getScoreRange(score: number): string {
   if (score <= 20) return 'critical';
@@ -58,14 +24,13 @@ function getScoreRange(score: number): string {
   return 'excellent';
 }
 
-function getDailyTip(score: number): string {
+function getDailyTipIndex(score: number): { range: string; index: number } {
   const range = getScoreRange(score);
-  const tips = TIPS[range];
   const now = new Date();
   const dayOfYear = Math.floor(
     (now.getTime() - new Date(now.getFullYear(), 0, 0).getTime()) / 86400000,
   );
-  return tips[dayOfYear % tips.length];
+  return { range, index: dayOfYear % TIPS_PER_RANGE };
 }
 
 // ─── Component ───
@@ -93,6 +58,7 @@ export function SimpleDashboardHero({
   planYear,
   currentQuarter,
 }: Props) {
+  const { t } = useTranslation('app');
   const { width } = useWindowDimensions();
   const isSmall = width < 360;
   const remaining = Math.max(0, weeklyBudget - weeklySpent);
@@ -100,7 +66,9 @@ export function SimpleDashboardHero({
   const progressPercent =
     weeklyBudget > 0 ? Math.min((weeklySpent / weeklyBudget) * 100, 100) : 0;
   const weekRange = getWeekRangeLabel(currentWeek, currentYear);
-  const tip = useMemo(() => getDailyTip(score), [score]);
+  const tipInfo = useMemo(() => getDailyTipIndex(score), [score]);
+  const tips = t(`dashboard.tips.${tipInfo.range}`, { returnObjects: true }) as string[];
+  const tip = Array.isArray(tips) ? tips[tipInfo.index] : '';
   const hasWeeklyData = usePerformanceStore((s) => s.records.length > 0);
 
   return (
@@ -110,7 +78,7 @@ export function SimpleDashboardHero({
     >
       {/* Top bar: date + grade */}
       <View style={styles.topBar}>
-        <Text style={styles.dateRange}>Semaine {weekRange}</Text>
+        <Text style={styles.dateRange}>{t('dashboard.weekLabel', { range: weekRange })}</Text>
         <View
           style={[
             styles.gradeBadge,
@@ -142,20 +110,20 @@ export function SimpleDashboardHero({
               </Text>
               <Text style={styles.scoreMax}>/100</Text>
             </View>
-            <Text style={styles.scoreLabel}>Score financier</Text>
+            <Text style={styles.scoreLabel}>{t('dashboard.scoreLabel')}</Text>
           </>
         )}
         <Text style={styles.scoreSubtitle}>
           {savings.budgetRespecte
-            ? 'Vous etes dans les clous !'
-            : 'Attention au depassement'}
+            ? t('dashboard.onTrack')
+            : t('dashboard.overspending')}
         </Text>
       </View>
 
       {/* Key numbers */}
       <View style={styles.numbersRow}>
         <View style={styles.numberBox}>
-          <Text style={styles.numberLabel}>Reste a depenser</Text>
+          <Text style={styles.numberLabel}>{t('dashboard.remainingToBudget')}</Text>
           <Text
             style={[
               styles.numberValue,
@@ -168,7 +136,7 @@ export function SimpleDashboardHero({
         </View>
         <View style={styles.separator} />
         <View style={styles.numberBox}>
-          <Text style={styles.numberLabel}>Economise</Text>
+          <Text style={styles.numberLabel}>{t('dashboard.saved')}</Text>
           <Text
             style={[
               styles.numberValue,
@@ -219,14 +187,14 @@ export function SimpleDashboardHero({
         />
       </View>
       <Text style={styles.barLabel}>
-        {formatCurrency(weeklySpent)} depense sur {formatCurrency(weeklyBudget)}
+        {t('dashboard.spentOf', { spent: formatCurrency(weeklySpent), budget: formatCurrency(weeklyBudget) })}
       </Text>
 
       {/* Gold Tip Section */}
       <View style={styles.tipSection}>
         <View style={styles.tipHeader}>
           <Lightbulb size={14} color="#FBBF24" />
-          <Text style={styles.tipHeaderText}>Conseil du jour</Text>
+          <Text style={styles.tipHeaderText}>{t('dashboard.tipOfTheDay')}</Text>
         </View>
         <Text style={styles.tipText}>{tip}</Text>
       </View>

@@ -1,0 +1,1253 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LELE PFM — Onboarding Preview</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', -apple-system, sans-serif;
+    background: #0F172A;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    color: #F8FAFC;
+    overflow: hidden;
+  }
+
+  .phone-frame {
+    width: 390px;
+    height: 844px;
+    background: #0F172A;
+    border-radius: 44px;
+    border: 3px solid #334155;
+    overflow: hidden;
+    position: relative;
+    box-shadow: 0 0 80px rgba(59, 130, 246, 0.15);
+  }
+
+  .notch {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 160px;
+    height: 34px;
+    background: #0F172A;
+    border-radius: 0 0 20px 20px;
+    z-index: 100;
+  }
+
+  .slides-container {
+    width: 100%;
+    height: 100%;
+    position: relative;
+  }
+
+  .slide {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 32px 120px;
+    opacity: 0;
+    transform: translateX(100%);
+    transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    pointer-events: none;
+  }
+
+  .slide.active {
+    opacity: 1;
+    transform: translateX(0);
+    pointer-events: all;
+  }
+
+  .slide.exit-left {
+    opacity: 0;
+    transform: translateX(-100%);
+  }
+
+  /* ===== SLIDE 0: WELCOME ===== */
+  .slide-welcome {
+    background: linear-gradient(160deg, #0F172A 0%, #1E293B 50%, #0F172A 100%);
+    text-align: center;
+  }
+
+  .logo-container {
+    margin-bottom: 32px;
+    animation: float 3s ease-in-out infinite;
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+  }
+
+  .logo-circle {
+    width: 120px; height: 120px;
+    border-radius: 30px;
+    background: linear-gradient(135deg, #3B82F6, #8B5CF6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 48px;
+    font-weight: 800;
+    color: white;
+    box-shadow: 0 16px 48px rgba(59, 130, 246, 0.3);
+    margin: 0 auto;
+  }
+
+  .welcome-title {
+    font-size: 32px;
+    font-weight: 800;
+    margin-bottom: 16px;
+    background: linear-gradient(135deg, #60A5FA, #A78BFA);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .welcome-subtitle {
+    font-size: 17px;
+    color: #94A3B8;
+    line-height: 1.6;
+    max-width: 300px;
+    margin: 0 auto 40px;
+  }
+
+  .welcome-subtitle strong {
+    color: #F8FAFC;
+    -webkit-text-fill-color: initial;
+  }
+
+  .comparison-box {
+    background: rgba(30, 41, 59, 0.8);
+    border-radius: 16px;
+    padding: 20px;
+    width: 100%;
+    max-width: 310px;
+    border: 1px solid #334155;
+  }
+
+  .comparison-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 0;
+  }
+
+  .comparison-row:first-child {
+    padding-bottom: 14px;
+    border-bottom: 1px solid #334155;
+    margin-bottom: 6px;
+  }
+
+  .comp-icon { font-size: 22px; width: 32px; text-align: center; }
+
+  .comp-label { font-size: 14px; color: #94A3B8; flex: 1; }
+  .comp-label.highlight { color: #60A5FA; font-weight: 600; }
+
+  .comp-tag {
+    font-size: 11px;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-weight: 600;
+  }
+  .comp-tag.old { background: rgba(239,68,68,0.15); color: #F87171; }
+  .comp-tag.new { background: rgba(34,197,94,0.15); color: #4ADE80; }
+
+  /* ===== SLIDE FEATURE (generic) ===== */
+  .slide-feature {
+    text-align: center;
+  }
+
+  .feature-visual {
+    width: 100%;
+    max-width: 300px;
+    margin-bottom: 40px;
+  }
+
+  .slide-number {
+    font-size: 13px;
+    font-weight: 700;
+    color: #3B82F6;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 12px;
+  }
+
+  .slide-title {
+    font-size: 26px;
+    font-weight: 800;
+    line-height: 1.25;
+    margin-bottom: 16px;
+    max-width: 320px;
+  }
+
+  .slide-desc {
+    font-size: 16px;
+    line-height: 1.6;
+    color: #94A3B8;
+    max-width: 300px;
+    margin: 0 auto;
+  }
+
+  .slide-desc strong { color: #F8FAFC; }
+
+  /* ===== PROBLEM CONTEXT ===== */
+  .problem-context {
+    text-align: center;
+    margin-bottom: 16px;
+    padding: 14px 18px;
+    background: rgba(30, 41, 59, 0.6);
+    border-radius: 14px;
+    border: 1px solid rgba(51, 65, 85, 0.5);
+    max-width: 310px;
+    width: 100%;
+  }
+
+  .problem-emoji { font-size: 26px; margin-bottom: 6px; }
+
+  .problem-text {
+    font-size: 14px;
+    color: #94A3B8;
+    line-height: 1.5;
+  }
+
+  .problem-text strong { color: #F87171; }
+
+  .slide-feature {
+    padding-top: 50px !important;
+  }
+
+  .slide-feature .feature-visual {
+    margin-bottom: 24px;
+  }
+
+  /* ===== GAP BADGE ===== */
+  .gap-badge {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 4px 12px;
+    border-radius: 20px;
+    background: rgba(250, 204, 21, 0.12);
+    color: #FACC15;
+    border: 1px solid rgba(250, 204, 21, 0.25);
+    margin-bottom: 8px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  /* ===== CUMUL COUNTER (Slide 1) ===== */
+  .cumul-row {
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+    margin-top: 12px;
+  }
+
+  .cumul-item {
+    text-align: center;
+    padding: 6px 10px;
+    background: rgba(34, 197, 94, 0.08);
+    border-radius: 10px;
+    border: 1px solid rgba(34, 197, 94, 0.15);
+  }
+
+  .cumul-period {
+    font-size: 9px;
+    color: #64748B;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 2px;
+  }
+
+  .cumul-value {
+    font-size: 15px;
+    font-weight: 800;
+    color: #4ADE80;
+  }
+
+  .cumul-value.annual {
+    color: #FACC15;
+    font-size: 17px;
+  }
+
+  /* ===== BREAKDOWN CARD (Slide 5) ===== */
+  .breakdown-card {
+    background: #1E293B;
+    border-radius: 16px;
+    padding: 16px;
+    width: 100%;
+    border: 1px solid #334155;
+    text-align: left;
+  }
+
+  .breakdown-row { margin-bottom: 14px; }
+  .breakdown-row:last-child { margin-bottom: 0; }
+
+  .breakdown-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
+  }
+
+  .breakdown-cat {
+    font-size: 13px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .breakdown-total { font-size: 13px; font-weight: 700; }
+
+  .breakdown-bar {
+    height: 10px;
+    border-radius: 5px;
+    display: flex;
+    overflow: hidden;
+    margin-bottom: 5px;
+    background: #334155;
+  }
+
+  .breakdown-essential {
+    background: linear-gradient(90deg, #3B82F6, #60A5FA);
+    border-radius: 5px 0 0 5px;
+  }
+
+  .breakdown-envie {
+    background: linear-gradient(90deg, #F97316, #FB923C);
+  }
+
+  .breakdown-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+  }
+
+  .breakdown-labels .essential { color: #60A5FA; }
+  .breakdown-labels .envie { color: #FB923C; }
+
+  /* ===== VISUAL: SLIDE 1 — EPR ===== */
+  .receipt-card {
+    background: #1E293B;
+    border-radius: 16px;
+    padding: 20px;
+    width: 100%;
+    border: 1px solid #334155;
+    text-align: left;
+  }
+
+  .receipt-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px dashed #475569;
+  }
+
+  .receipt-icon { font-size: 28px; }
+  .receipt-name { font-size: 15px; font-weight: 600; }
+  .receipt-amount { font-size: 20px; font-weight: 700; }
+
+  .savings-reveal {
+    background: linear-gradient(135deg, rgba(34,197,94,0.1), rgba(34,197,94,0.05));
+    border: 1px solid rgba(34,197,94,0.3);
+    border-radius: 12px;
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    animation: pulse-green 2s ease-in-out infinite;
+  }
+
+  @keyframes pulse-green {
+    0%, 100% { border-color: rgba(34,197,94,0.3); }
+    50% { border-color: rgba(34,197,94,0.6); }
+  }
+
+  .savings-icon { font-size: 28px; }
+  .savings-text { flex: 1; }
+  .savings-label { font-size: 12px; color: #4ADE80; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; }
+  .savings-value { font-size: 22px; font-weight: 800; color: #4ADE80; }
+  .savings-detail { font-size: 11px; color: #94A3B8; margin-top: 2px; }
+
+  /* ===== VISUAL: SLIDE 2 — EKH ===== */
+  .level-card {
+    background: #1E293B;
+    border-radius: 16px;
+    padding: 24px;
+    width: 100%;
+    border: 1px solid #334155;
+  }
+
+  .level-header {
+    text-align: center;
+    margin-bottom: 20px;
+  }
+
+  .level-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 14px;
+    font-weight: 700;
+    padding: 6px 14px;
+    border-radius: 20px;
+    margin-bottom: 8px;
+  }
+
+  .level-score {
+    font-size: 48px;
+    font-weight: 800;
+    margin: 4px 0;
+  }
+
+  .level-sublabel {
+    font-size: 13px;
+    color: #94A3B8;
+  }
+
+  .xp-bar-bg {
+    height: 10px;
+    background: #334155;
+    border-radius: 5px;
+    margin: 16px 0 8px;
+    overflow: hidden;
+  }
+
+  .xp-bar-fill {
+    height: 100%;
+    border-radius: 5px;
+    background: linear-gradient(90deg, #3B82F6, #8B5CF6);
+    animation: grow-bar 2s ease-out forwards;
+    width: 0%;
+  }
+
+  @keyframes grow-bar { to { width: 72%; } }
+
+  .xp-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    color: #64748B;
+  }
+
+  .week-grades {
+    display: flex;
+    gap: 6px;
+    justify-content: center;
+    margin-top: 18px;
+  }
+
+  .week-dot {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 700;
+    flex-direction: column;
+  }
+
+  .week-dot .wk { font-size: 8px; font-weight: 400; opacity: 0.7; }
+
+  .wg-c { background: rgba(234,136,12,0.15); color: #FB923C; }
+  .wg-b { background: rgba(22,163,74,0.15); color: #4ADE80; }
+  .wg-a { background: rgba(30,64,175,0.15); color: #60A5FA; }
+  .wg-ap { background: rgba(255,215,0,0.15); color: #FFD700; }
+  .wg-now { background: rgba(139,92,246,0.2); color: #A78BFA; border: 1px dashed #A78BFA; }
+
+  /* ===== VISUAL: SLIDE 3 — WATERFALL ===== */
+  .jars-row {
+    display: flex;
+    gap: 10px;
+    width: 100%;
+    justify-content: center;
+  }
+
+  .jar {
+    width: 68px;
+    text-align: center;
+  }
+
+  .jar-glass {
+    width: 56px;
+    height: 80px;
+    margin: 0 auto 8px;
+    border-radius: 0 0 12px 12px;
+    border: 2px solid;
+    border-top: none;
+    position: relative;
+    overflow: hidden;
+    background: rgba(15,23,42,0.5);
+  }
+
+  .jar-liquid {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    border-radius: 0 0 10px 10px;
+  }
+
+  .jar-p1 .jar-glass { border-color: #3B82F6; }
+  .jar-p1 .jar-liquid { background: linear-gradient(180deg, rgba(59,130,246,0.6), #3B82F6); animation: fill-jar 1.5s ease-out 0.2s forwards; }
+  .jar-p2 .jar-glass { border-color: #F97316; }
+  .jar-p2 .jar-liquid { background: linear-gradient(180deg, rgba(249,115,22,0.6), #F97316); animation: fill-jar 1.5s ease-out 0.6s forwards; }
+  .jar-p3 .jar-glass { border-color: #22C55E; }
+  .jar-p3 .jar-liquid { background: linear-gradient(180deg, rgba(34,197,94,0.6), #22C55E); animation: fill-jar 1.5s ease-out 1.0s forwards; }
+  .jar-p4 .jar-glass { border-color: #EC4899; }
+  .jar-p4 .jar-liquid { background: linear-gradient(180deg, rgba(236,72,153,0.6), #EC4899); animation: fill-jar 1.5s ease-out 1.4s forwards; }
+
+  @keyframes fill-jar { from { height: 0%; } to { height: var(--fill); } }
+
+  .jar-label { font-size: 11px; font-weight: 600; line-height: 1.3; }
+  .jar-pct { font-size: 11px; color: #64748B; margin-top: 2px; }
+
+  .jar-arrow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    color: #475569;
+    padding-top: 30px;
+  }
+
+  /* ===== VISUAL: SLIDE 4 — WEEKLY ===== */
+  .calendar-mini {
+    background: #1E293B;
+    border-radius: 16px;
+    padding: 18px;
+    width: 100%;
+    border: 1px solid #334155;
+  }
+
+  .cal-month { font-size: 15px; font-weight: 700; margin-bottom: 14px; text-align: center; }
+
+  .cal-weeks {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .cal-week {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border-radius: 12px;
+    background: rgba(51, 65, 85, 0.3);
+  }
+
+  .cal-week.current {
+    background: rgba(59, 130, 246, 0.1);
+    border: 1px solid rgba(59, 130, 246, 0.3);
+  }
+
+  .cal-week.future { opacity: 0.4; }
+
+  .cal-wk-num { font-size: 12px; font-weight: 700; width: 46px; color: #94A3B8; }
+  .cal-wk-dates { font-size: 12px; color: #64748B; flex: 1; }
+
+  .cal-wk-grade {
+    font-size: 13px;
+    font-weight: 800;
+    padding: 3px 10px;
+    border-radius: 8px;
+  }
+
+  .cal-wk-score {
+    font-size: 12px;
+    font-weight: 600;
+    width: 36px;
+    text-align: right;
+  }
+
+  /* ===== VISUAL: SLIDE 5 — 3D ===== */
+  .cube-scene {
+    width: 200px;
+    height: 200px;
+    perspective: 600px;
+    margin: 0 auto 16px;
+  }
+
+  .cube {
+    width: 100%; height: 100%;
+    position: relative;
+    transform-style: preserve-3d;
+    animation: rotate-cube 8s linear infinite;
+    transform: rotateX(-20deg) rotateY(30deg);
+  }
+
+  @keyframes rotate-cube {
+    from { transform: rotateX(-20deg) rotateY(0deg); }
+    to { transform: rotateX(-20deg) rotateY(360deg); }
+  }
+
+  .cube-face {
+    position: absolute;
+    width: 160px; height: 160px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 700;
+    border: 2px solid;
+    left: 20px; top: 20px;
+    text-align: center;
+    line-height: 1.3;
+    padding: 10px;
+  }
+
+  .face-quoi {
+    background: rgba(59,130,246,0.12);
+    border-color: rgba(59,130,246,0.4);
+    color: #60A5FA;
+    transform: translateZ(80px);
+  }
+
+  .face-ou {
+    background: rgba(249,115,22,0.12);
+    border-color: rgba(249,115,22,0.4);
+    color: #FB923C;
+    transform: rotateY(90deg) translateZ(80px);
+  }
+
+  .face-comment {
+    background: rgba(139,92,246,0.12);
+    border-color: rgba(139,92,246,0.4);
+    color: #A78BFA;
+    transform: rotateX(90deg) translateZ(80px);
+  }
+
+  .face-back {
+    background: rgba(34,197,94,0.06);
+    border-color: rgba(34,197,94,0.2);
+    transform: rotateY(180deg) translateZ(80px);
+  }
+  .face-left {
+    background: rgba(236,72,153,0.06);
+    border-color: rgba(236,72,153,0.2);
+    transform: rotateY(-90deg) translateZ(80px);
+  }
+  .face-bottom {
+    background: rgba(6,182,212,0.06);
+    border-color: rgba(6,182,212,0.2);
+    transform: rotateX(-90deg) translateZ(80px);
+  }
+
+  .dim-tags {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .dim-tag {
+    font-size: 12px;
+    font-weight: 600;
+    padding: 6px 14px;
+    border-radius: 20px;
+  }
+
+  .dim-tag.quoi { background: rgba(59,130,246,0.15); color: #60A5FA; }
+  .dim-tag.ou { background: rgba(249,115,22,0.15); color: #FB923C; }
+  .dim-tag.comment { background: rgba(139,92,246,0.15); color: #A78BFA; }
+
+  /* ===== SLIDE CTA ===== */
+  .slide-cta {
+    background: linear-gradient(160deg, #0F172A, #1E293B);
+    text-align: center;
+  }
+
+  .cta-features {
+    list-style: none;
+    text-align: left;
+    margin: 24px 0 40px;
+    width: 100%;
+    max-width: 300px;
+  }
+
+  .cta-features li {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 0;
+    font-size: 14px;
+    color: #CBD5E1;
+    border-bottom: 1px solid rgba(51,65,85,0.5);
+  }
+
+  .cta-features li:last-child { border: none; }
+
+  .cta-check {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: rgba(34,197,94,0.15);
+    color: #4ADE80;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    flex-shrink: 0;
+  }
+
+  /* ===== NAVIGATION ===== */
+  .nav-area {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 20px 32px 40px;
+    z-index: 50;
+  }
+
+  .dots {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    margin-bottom: 20px;
+  }
+
+  .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 4px;
+    background: #475569;
+    transition: all 0.3s;
+    cursor: pointer;
+  }
+
+  .dot.active {
+    width: 28px;
+    background: #3B82F6;
+  }
+
+  .nav-buttons {
+    display: flex;
+    gap: 12px;
+  }
+
+  .btn-skip {
+    flex: 1;
+    padding: 16px;
+    border: 1px solid #475569;
+    border-radius: 14px;
+    background: transparent;
+    color: #94A3B8;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.2s;
+  }
+
+  .btn-skip:hover { background: rgba(51,65,85,0.5); }
+
+  .btn-next {
+    flex: 2;
+    padding: 16px;
+    border: none;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #3B82F6, #8B5CF6);
+    color: white;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.2s;
+    box-shadow: 0 4px 16px rgba(59, 130, 246, 0.3);
+  }
+
+  .btn-next:hover { transform: translateY(-1px); box-shadow: 0 6px 24px rgba(59, 130, 246, 0.4); }
+
+  .btn-start {
+    width: 100%;
+    padding: 18px;
+    border: none;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #22C55E, #16A34A);
+    color: white;
+    font-size: 17px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+    box-shadow: 0 4px 16px rgba(34, 197, 94, 0.3);
+    transition: all 0.2s;
+  }
+
+  .btn-start:hover { transform: translateY(-1px); box-shadow: 0 6px 24px rgba(34, 197, 94, 0.4); }
+
+  /* ===== RESPONSIVE ===== */
+  @media (max-width: 420px) {
+    .phone-frame {
+      width: 100vw;
+      height: 100vh;
+      border-radius: 0;
+      border: none;
+    }
+  }
+
+  /* Preview label */
+  .preview-label {
+    position: fixed;
+    top: 16px;
+    left: 16px;
+    font-family: 'Inter', sans-serif;
+    font-size: 11px;
+    color: #64748B;
+    background: #1E293B;
+    padding: 6px 12px;
+    border-radius: 8px;
+    border: 1px solid #334155;
+    z-index: 1000;
+  }
+
+  @media (max-width: 420px) { .preview-label { display: none; } }
+</style>
+</head>
+<body>
+
+<div class="preview-label">LELE PFM — Onboarding Preview</div>
+
+<div class="phone-frame">
+  <div class="notch"></div>
+  <div class="slides-container" id="slidesContainer">
+
+    <!-- ===== SLIDE 0: WELCOME ===== -->
+    <div class="slide slide-welcome active" data-index="0">
+      <div class="logo-container">
+        <div class="logo-circle">PFM</div>
+      </div>
+      <div class="welcome-title">LELE PFM</div>
+      <div class="welcome-subtitle">
+        Tu travailles, tu gagnes ta vie...<br>
+        mais <strong>comment tu pilotes tes économies</strong> ?
+      </div>
+      <div class="comparison-box">
+        <div class="comparison-row">
+          <div class="comp-icon">😩</div>
+          <div class="comp-label">Ce que tu vis aujourd'hui</div>
+          <div class="comp-tag old">Flou</div>
+        </div>
+        <div class="comparison-row">
+          <div class="comp-icon">💡</div>
+          <div class="comp-label highlight">Ce qu'on va construire ensemble</div>
+          <div class="comp-tag new">Clarté</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== SLIDE 1: EPR — Hidden Savings ===== -->
+    <div class="slide slide-feature" data-index="1" style="background: linear-gradient(180deg, #0F172A, #0B1120);">
+      <div class="problem-context">
+        <div class="problem-emoji">💡</div>
+        <div class="problem-text">
+          Avec ce que tu as dépensé cette semaine,<br>
+          est-ce que tu sais que <strong>chaque dépense cache une économie</strong> ?
+        </div>
+      </div>
+      <div class="feature-visual">
+        <div class="receipt-card">
+          <div class="receipt-header">
+            <div style="display:flex;align-items:center;gap:10px;">
+              <div class="receipt-icon">🛒</div>
+              <div>
+                <div class="receipt-name">Courses Carrefour</div>
+                <div style="font-size:12px;color:#64748B;">Samedi · Alimentation</div>
+              </div>
+            </div>
+            <div class="receipt-amount">-87€</div>
+          </div>
+          <div class="savings-reveal">
+            <div class="savings-icon">💰</div>
+            <div class="savings-text">
+              <div class="savings-label">Psst... tu aurais pu garder</div>
+              <div class="savings-value">19€</div>
+              <div class="savings-detail">On t'explique comment juste ici</div>
+            </div>
+          </div>
+        </div>
+        <div class="cumul-row">
+          <div class="cumul-item">
+            <div class="cumul-period">Cette semaine</div>
+            <div class="cumul-value">19€</div>
+          </div>
+          <div class="cumul-item">
+            <div class="cumul-period">Ce mois</div>
+            <div class="cumul-value">76€</div>
+          </div>
+          <div class="cumul-item">
+            <div class="cumul-period">Cette année</div>
+            <div class="cumul-value annual">988€</div>
+          </div>
+        </div>
+      </div>
+      <div class="gap-badge">Aucune app ne fait ça</div>
+      <div class="slide-title">19€ cette semaine.<br>988€ sur l'année.</div>
+      <div class="slide-desc">
+        Les autres te disent combien tu as <strong>dépensé</strong>.
+        Nous, on te révèle combien tu aurais pu <strong>garder</strong>. Sur 1 an, ça change tout.
+      </div>
+    </div>
+
+    <!-- ===== SLIDE 2: EKH — Skill Level ===== -->
+    <div class="slide slide-feature" data-index="2" style="background: linear-gradient(180deg, #0F172A, #0D1324);">
+      <div class="problem-context">
+        <div class="problem-emoji">🧠</div>
+        <div class="problem-text">
+          Tout le monde parle d'<strong>intelligence financière</strong>...<br>
+          mais est-ce que tu sais <strong>à quel niveau tu te situes</strong> ?
+        </div>
+      </div>
+      <div class="feature-visual">
+        <div class="level-card">
+          <div class="level-header">
+            <div class="level-badge" style="background:rgba(30,64,175,0.2);color:#60A5FA;">⭐ Niveau A — Bravo !</div>
+            <div class="level-score" style="color:#60A5FA;">8.2<span style="font-size:20px;color:#64748B">/10</span></div>
+            <div class="level-sublabel">Tu gères de mieux en mieux !</div>
+          </div>
+          <div class="xp-bar-bg">
+            <div class="xp-bar-fill"></div>
+          </div>
+          <div class="xp-labels">
+            <span>Quand tu as commencé</span>
+            <span>Bientôt A+ ! 🚀</span>
+          </div>
+          <div class="week-grades">
+            <div class="week-dot wg-c"><span class="wk">S1</span>C</div>
+            <div class="week-dot wg-c"><span class="wk">S2</span>C</div>
+            <div class="week-dot wg-b"><span class="wk">S3</span>B</div>
+            <div class="week-dot wg-b"><span class="wk">S4</span>B</div>
+            <div class="week-dot wg-a"><span class="wk">S5</span>A</div>
+            <div class="week-dot wg-a"><span class="wk">S6</span>A</div>
+            <div class="week-dot wg-now"><span class="wk">S7</span>?</div>
+          </div>
+        </div>
+      </div>
+      <div class="gap-badge">La 1ère app qui te note</div>
+      <div class="slide-title">Ton intelligence financière<br>a enfin un score.</div>
+      <div class="slide-desc">
+        De <strong>E à A+</strong>, tu vois exactement où tu en es.
+        Et surtout : tu vois comment tu <strong>progresses</strong>, semaine après semaine. Aucune app ne mesure ça.
+      </div>
+    </div>
+
+    <!-- ===== SLIDE 3: WATERFALL ===== -->
+    <div class="slide slide-feature" data-index="3" style="background: linear-gradient(180deg, #0F172A, #0D1120);">
+      <div class="problem-context">
+        <div class="problem-emoji">🎯</div>
+        <div class="problem-text">
+          Chaque semaine, tu sauras <strong>exactement quoi économiser</strong><br>
+          et <strong>comment le répartir</strong>.
+        </div>
+      </div>
+      <div class="feature-visual">
+        <div style="text-align:center;margin-bottom:12px;">
+          <div style="font-size:11px;color:#FACC15;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:4px;">Remplissage par priorité</div>
+          <div style="font-size:24px;font-weight:800;color:#4ADE80;">342€ économisés</div>
+        </div>
+        <div class="jars-row">
+          <div class="jar jar-p1">
+            <div class="jar-glass">
+              <div class="jar-liquid" style="--fill: 100%;"></div>
+            </div>
+            <div class="jar-label" style="color:#60A5FA;">🛡️ Sécurité</div>
+            <div class="jar-pct" style="color:#4ADE80;font-weight:700;">✓ plein</div>
+          </div>
+          <div class="jar-arrow" style="font-size:11px;line-height:1.3;">surplus<br>→</div>
+          <div class="jar jar-p2">
+            <div class="jar-glass">
+              <div class="jar-liquid" style="--fill: 80%;"></div>
+            </div>
+            <div class="jar-label" style="color:#FB923C;">💳 Dettes</div>
+            <div class="jar-pct">120€</div>
+          </div>
+          <div class="jar-arrow" style="font-size:11px;line-height:1.3;">surplus<br>→</div>
+          <div class="jar jar-p3">
+            <div class="jar-glass">
+              <div class="jar-liquid" style="--fill: 45%;"></div>
+            </div>
+            <div class="jar-label" style="color:#4ADE80;">📈 Projets</div>
+            <div class="jar-pct">68€</div>
+          </div>
+          <div class="jar-arrow" style="font-size:11px;line-height:1.3;">surplus<br>→</div>
+          <div class="jar jar-p4">
+            <div class="jar-glass">
+              <div class="jar-liquid" style="--fill: 25%;"></div>
+            </div>
+            <div class="jar-label" style="color:#F472B6;">🎉 Plaisir</div>
+            <div class="jar-pct">51€</div>
+          </div>
+        </div>
+      </div>
+      <div class="gap-badge">Priorité automatique</div>
+      <div class="slide-title">Ton épargne se remplit<br>dans l'ordre.</div>
+      <div class="slide-desc">
+        La sécurité se remplit <strong>en premier</strong>. Quand elle déborde,
+        le surplus va aux dettes, puis projets, puis plaisir. <strong>Automatique.</strong>
+      </div>
+    </div>
+
+    <!-- ===== SLIDE 4: WEEKLY ===== -->
+    <div class="slide slide-feature" data-index="4" style="background: linear-gradient(180deg, #0F172A, #0C1121);">
+      <div class="problem-context">
+        <div class="problem-emoji">😰</div>
+        <div class="problem-text">
+          Tu fais tes comptes <strong>en fin de mois</strong>.<br>
+          Résultat : tu découvres les dégâts <strong>quand c'est trop tard pour agir</strong>.
+        </div>
+      </div>
+      <div class="feature-visual">
+        <div class="calendar-mini">
+          <div class="cal-month">Ta semaine en un clin d'oeil</div>
+          <div class="cal-weeks">
+            <div class="cal-week">
+              <div class="cal-wk-num">Sem 05</div>
+              <div class="cal-wk-dates">27 jan — 2 fév</div>
+              <div class="cal-wk-grade" style="background:rgba(30,64,175,0.15);color:#60A5FA;">A</div>
+              <div class="cal-wk-score" style="color:#60A5FA;">8.3</div>
+            </div>
+            <div class="cal-week">
+              <div class="cal-wk-num">Sem 06</div>
+              <div class="cal-wk-dates">3 — 9 fév</div>
+              <div class="cal-wk-grade" style="background:rgba(255,215,0,0.15);color:#FFD700;">A+</div>
+              <div class="cal-wk-score" style="color:#FFD700;">9.1</div>
+            </div>
+            <div class="cal-week current">
+              <div class="cal-wk-num" style="color:#60A5FA;">Sem 07</div>
+              <div class="cal-wk-dates">10 — 16 fév</div>
+              <div class="cal-wk-grade" style="background:rgba(139,92,246,0.15);color:#A78BFA;">...</div>
+              <div class="cal-wk-score" style="color:#A78BFA;">→</div>
+            </div>
+            <div class="cal-week future">
+              <div class="cal-wk-num">Sem 08</div>
+              <div class="cal-wk-dates">17 — 23 fév</div>
+              <div class="cal-wk-grade" style="background:rgba(71,85,105,0.2);color:#64748B;">—</div>
+              <div class="cal-wk-score"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="gap-badge">52 bilans par an au lieu de 12</div>
+      <div class="slide-title">7 jours pour agir.<br>Pas 30.</div>
+      <div class="slide-desc">
+        <strong>Chaque semaine, une note, un bilan.</strong> En 7 jours, tu as encore le temps de corriger.
+        En 30 ? Le mois est déjà fini.
+      </div>
+    </div>
+
+    <!-- ===== SLIDE 5: 3D ANALYSIS ===== -->
+    <div class="slide slide-feature" data-index="5" style="background: linear-gradient(180deg, #0F172A, #0D1125);">
+      <div class="problem-context">
+        <div class="problem-emoji">🔎</div>
+        <div class="problem-text">
+          Tu vois tes dépenses en liste : courses, transport, loisirs...<br>
+          Mais <strong>combien étaient vraiment nécessaires</strong> ?<br>
+          Et combien étaient juste <strong>des envies du moment</strong> ?
+        </div>
+      </div>
+      <div class="feature-visual">
+        <div class="breakdown-card">
+          <div class="breakdown-row">
+            <div class="breakdown-header">
+              <div class="breakdown-cat">🛒 Alimentation</div>
+              <div class="breakdown-total">200€</div>
+            </div>
+            <div class="breakdown-bar">
+              <div class="breakdown-essential" style="width:70%;"></div>
+              <div class="breakdown-envie" style="width:30%;"></div>
+            </div>
+            <div class="breakdown-labels">
+              <span class="essential">Essentiel · 140€</span>
+              <span class="envie">Envies · 60€</span>
+            </div>
+          </div>
+          <div class="breakdown-row">
+            <div class="breakdown-header">
+              <div class="breakdown-cat">🚗 Transport</div>
+              <div class="breakdown-total">85€</div>
+            </div>
+            <div class="breakdown-bar">
+              <div class="breakdown-essential" style="width:88%;"></div>
+              <div class="breakdown-envie" style="width:12%;"></div>
+            </div>
+            <div class="breakdown-labels">
+              <span class="essential">Essentiel · 75€</span>
+              <span class="envie">Envies · 10€</span>
+            </div>
+          </div>
+          <div class="breakdown-row">
+            <div class="breakdown-header">
+              <div class="breakdown-cat">🎮 Loisirs</div>
+              <div class="breakdown-total">120€</div>
+            </div>
+            <div class="breakdown-bar">
+              <div class="breakdown-essential" style="width:25%;"></div>
+              <div class="breakdown-envie" style="width:75%;"></div>
+            </div>
+            <div class="breakdown-labels">
+              <span class="essential">Essentiel · 30€</span>
+              <span class="envie">Envies · 90€</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="gap-badge">Impossible ailleurs</div>
+      <div class="slide-title">200€ en courses.<br>60€ c'étaient des envies.</div>
+      <div class="slide-desc">
+        On croise <strong>3 questions</strong> sur chaque dépense.
+        Résultat : tu sais <strong>exactement où agir</strong> pour économiser.
+      </div>
+    </div>
+
+    <!-- ===== SLIDE 6: CTA ===== -->
+    <div class="slide slide-cta" data-index="6">
+      <div class="logo-container" style="margin-bottom:20px;">
+        <div class="logo-circle" style="width:80px;height:80px;font-size:32px;border-radius:22px;">PFM</div>
+      </div>
+      <div class="slide-title" style="font-size:26px;">5 innovations qu'aucune app<br>ne propose. Sauf celle-ci.</div>
+      <ul class="cta-features">
+        <li>
+          <div class="cta-check">💰</div>
+          <span><strong>988€/an</strong> d'économies cachées, révélées</span>
+        </li>
+        <li>
+          <div class="cta-check">🧠</div>
+          <span>Ton <strong>score d'intelligence financière</strong>, mesuré</span>
+        </li>
+        <li>
+          <div class="cta-check">🎯</div>
+          <span>Ton épargne <strong>répartie automatiquement</strong> par priorité</span>
+        </li>
+        <li>
+          <div class="cta-check">📅</div>
+          <span><strong>52 bilans/an</strong> au lieu de 12. Tu gardes le contrôle</span>
+        </li>
+        <li>
+          <div class="cta-check">🔍</div>
+          <span>Essentiel vs envies : enfin <strong>la vraie réponse</strong></span>
+        </li>
+      </ul>
+    </div>
+
+  </div>
+
+  <!-- Navigation -->
+  <div class="nav-area">
+    <div class="dots" id="dots"></div>
+    <div class="nav-buttons" id="navButtons">
+      <button class="btn-skip" id="btnSkip" onclick="skip()">Passer</button>
+      <button class="btn-next" id="btnNext" onclick="next()">Montre-moi ! →</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const TOTAL_SLIDES = 7;
+  let current = 0;
+
+  function renderDots() {
+    const container = document.getElementById('dots');
+    container.innerHTML = '';
+    for (let i = 0; i < TOTAL_SLIDES; i++) {
+      const dot = document.createElement('div');
+      dot.className = 'dot' + (i === current ? ' active' : '');
+      dot.onclick = () => goTo(i);
+      container.appendChild(dot);
+    }
+  }
+
+  function updateNav() {
+    const btnSkip = document.getElementById('btnSkip');
+    const btnNext = document.getElementById('btnNext');
+    const navButtons = document.getElementById('navButtons');
+
+    if (current === TOTAL_SLIDES - 1) {
+      navButtons.innerHTML = '<button class="btn-start" onclick="startApp()">Je me lance ! 🚀</button>';
+    } else if (current === 0) {
+      navButtons.innerHTML = `
+        <button class="btn-skip" onclick="skip()">Passer</button>
+        <button class="btn-next" onclick="next()">Montre-moi ! →</button>
+      `;
+    } else {
+      navButtons.innerHTML = `
+        <button class="btn-skip" onclick="prev()">← Retour</button>
+        <button class="btn-next" onclick="next()">Et ensuite ? →</button>
+      `;
+    }
+  }
+
+  function goTo(index) {
+    const slides = document.querySelectorAll('.slide');
+    slides.forEach((s, i) => {
+      s.classList.remove('active', 'exit-left');
+      if (i < index) s.classList.add('exit-left');
+    });
+    slides[index].classList.add('active');
+    current = index;
+    renderDots();
+    updateNav();
+  }
+
+  function next() {
+    if (current < TOTAL_SLIDES - 1) goTo(current + 1);
+  }
+
+  function prev() {
+    if (current > 0) goTo(current - 1);
+  }
+
+  function skip() {
+    goTo(TOTAL_SLIDES - 1);
+  }
+
+  function startApp() {
+    alert('🎉 Top ! On configure ton profil en 2 minutes...\n\n(En production : router.push("/profile/edit"))');
+  }
+
+  // Touch/swipe support
+  let touchStartX = 0;
+  let touchEndX = 0;
+
+  document.querySelector('.slides-container').addEventListener('touchstart', (e) => {
+    touchStartX = e.changedTouches[0].screenX;
+  }, { passive: true });
+
+  document.querySelector('.slides-container').addEventListener('touchend', (e) => {
+    touchEndX = e.changedTouches[0].screenX;
+    const diff = touchStartX - touchEndX;
+    if (Math.abs(diff) > 50) {
+      if (diff > 0) next();
+      else prev();
+    }
+  }, { passive: true });
+
+  // Keyboard support
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight' || e.key === ' ') next();
+    if (e.key === 'ArrowLeft') prev();
+  });
+
+  // Init
+  renderDots();
+  updateNav();
+</script>
+</body>
+</html>

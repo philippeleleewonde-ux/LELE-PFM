@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { PF, PerfGlassCard } from './shared';
 import { useInvestmentStore } from '@/stores/investment-store';
 import {
@@ -18,17 +19,18 @@ function outlookColor(outlook: RegionOutlook): string {
   }
 }
 
-function outlookLabel(outlook: RegionOutlook): string {
+function outlookLabel(outlook: RegionOutlook, t: (key: string) => string): string {
   switch (outlook) {
-    case 'bullish': return 'Haussier';
-    case 'neutral': return 'Neutre';
-    case 'cautious': return 'Prudent';
+    case 'bullish': return t('emergingMarkets.outlook.bullish');
+    case 'neutral': return t('emergingMarkets.outlook.neutral');
+    case 'cautious': return t('emergingMarkets.outlook.cautious');
   }
 }
 
 // ─── Component ───
 
 export function SectionZ_EmergingMarkets() {
+  const { t } = useTranslation('performance');
   const allocations = useInvestmentStore((s) => s.allocations);
   const investorProfile = useInvestmentStore((s) => s.investorProfile);
 
@@ -38,7 +40,7 @@ export function SectionZ_EmergingMarkets() {
     return (
       <PerfGlassCard>
         <Text style={styles.emptyText}>
-          Configurez votre profil investisseur dans les r{'\u00e9'}glages pour voir le radar des march{'\u00e9'}s {'\u00e9'}mergents.
+          {t('emergingMarkets.configureProfile')}
         </Text>
       </PerfGlassCard>
     );
@@ -48,16 +50,16 @@ export function SectionZ_EmergingMarkets() {
     <View style={styles.container}>
       {/* Score header */}
       <PerfGlassCard style={styles.section}>
-        <Text style={styles.sectionTitle}>Radar March{'\u00e9'}s {'\u00c9'}mergents</Text>
+        <Text style={styles.sectionTitle}>{t('emergingMarkets.radar')}</Text>
         <View style={styles.scoreRow}>
           <View style={styles.scoreItem}>
-            <Text style={styles.scoreLabel}>Diversification g{'\u00e9'}ographique</Text>
+            <Text style={styles.scoreLabel}>{t('emergingMarkets.geoDiversification')}</Text>
             <Text style={[styles.scoreValue, { color: diversificationColor(analysis.diversificationScore) }]}>
               {analysis.diversificationScore}/100
             </Text>
           </View>
           <View style={styles.scoreItem}>
-            <Text style={styles.scoreLabel}>Exposition {'\u00e9'}mergents</Text>
+            <Text style={styles.scoreLabel}>{t('emergingMarkets.emergingExposure')}</Text>
             <Text style={[styles.scoreValue, { color: PF.accent }]}>
               {analysis.totalEmergingExposure}%
             </Text>
@@ -73,13 +75,13 @@ export function SectionZ_EmergingMarkets() {
 
       {/* Top opportunity highlight */}
       <PerfGlassCard style={styles.section}>
-        <Text style={styles.sectionTitle}>Meilleure opportunit{'\u00e9'}</Text>
+        <Text style={styles.sectionTitle}>{t('emergingMarkets.bestOpportunity')}</Text>
         <View style={styles.highlightRow}>
           <Text style={styles.highlightEmoji}>{analysis.topOpportunity.emoji}</Text>
           <View style={styles.highlightInfo}>
             <Text style={styles.highlightName}>{analysis.topOpportunity.name}</Text>
             <Text style={[styles.highlightScore, { color: PF.green }]}>
-              Score d'opportunit{'\u00e9'} : {analysis.topOpportunity.opportunityScore}/100
+              {t('emergingMarkets.opportunityScore', { score: analysis.topOpportunity.opportunityScore })}
             </Text>
           </View>
         </View>
@@ -89,7 +91,7 @@ export function SectionZ_EmergingMarkets() {
       {/* Recommendations */}
       {analysis.recommendations.length > 0 && (
         <PerfGlassCard style={styles.section}>
-          <Text style={styles.sectionTitle}>Recommandations</Text>
+          <Text style={styles.sectionTitle}>{t('emergingMarkets.recommendations')}</Text>
           {analysis.recommendations.map((rec, i) => (
             <View key={i} style={styles.recRow}>
               <Text style={styles.recNumber}>{i + 1}.</Text>
@@ -101,7 +103,7 @@ export function SectionZ_EmergingMarkets() {
 
       {/* Footer */}
       <Text style={styles.footer}>
-        Analyse bas{'\u00e9'}e sur les tendances macro{'\u00e9'}conomiques 2024-2026. Ne constitue pas un conseil en investissement.
+        {t('emergingMarkets.disclaimer')}
       </Text>
     </View>
   );
@@ -110,6 +112,7 @@ export function SectionZ_EmergingMarkets() {
 // ─── Region Card ───
 
 function RegionCard({ data }: { data: RegionExposure }) {
+  const { t } = useTranslation('performance');
   const { region, portfolioExposure, alignmentScore, recommendation } = data;
   const oColor = outlookColor(region.outlook);
 
@@ -121,7 +124,7 @@ function RegionCard({ data }: { data: RegionExposure }) {
         <View style={styles.regionTitleBlock}>
           <Text style={styles.regionName}>{region.name}</Text>
           <View style={[styles.outlookBadge, { backgroundColor: oColor + '20' }]}>
-            <Text style={[styles.outlookBadgeText, { color: oColor }]}>{outlookLabel(region.outlook)}</Text>
+            <Text style={[styles.outlookBadgeText, { color: oColor }]}>{outlookLabel(region.outlook, t)}</Text>
           </View>
         </View>
       </View>
@@ -135,7 +138,7 @@ function RegionCard({ data }: { data: RegionExposure }) {
 
       {/* Opportunity bar */}
       <View style={styles.barContainer}>
-        <Text style={styles.barLabel}>Opportunit{'\u00e9'}</Text>
+        <Text style={styles.barLabel}>{t('emergingMarkets.opportunity')}</Text>
         <View style={styles.barTrack}>
           <View style={[styles.barFill, { width: `${region.opportunityScore}%`, backgroundColor: oColor }]} />
         </View>
@@ -144,13 +147,13 @@ function RegionCard({ data }: { data: RegionExposure }) {
 
       {/* Exposure + alignment */}
       <View style={styles.exposureRow}>
-        <Text style={styles.exposureLabel}>Votre exposition</Text>
+        <Text style={styles.exposureLabel}>{t('emergingMarkets.yourExposure')}</Text>
         <Text style={[styles.exposureValue, { color: portfolioExposure > 0 ? PF.accent : PF.textMuted }]}>
           {portfolioExposure > 0 ? `${portfolioExposure}%` : '--'}
         </Text>
       </View>
       <View style={styles.exposureRow}>
-        <Text style={styles.exposureLabel}>Alignement</Text>
+        <Text style={styles.exposureLabel}>{t('emergingMarkets.alignment')}</Text>
         <Text style={[styles.exposureValue, { color: alignmentScore >= 50 ? PF.green : PF.textSecondary }]}>
           {alignmentScore}%
         </Text>

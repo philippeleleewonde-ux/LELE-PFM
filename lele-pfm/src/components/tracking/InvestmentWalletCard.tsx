@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { View, Text, StyleSheet, Pressable } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { TrendingUp, PieChart, Calculator } from 'lucide-react-native';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { useInvestmentStore } from '@/stores/investment-store';
@@ -9,6 +10,7 @@ import { portfolioReturn, simulateInvestment } from '@/domain/calculators/invest
 import { InvestmentSimulatorSheet } from '@/components/investment/InvestmentSimulatorSheet';
 
 export function InvestmentWalletCard() {
+  const { t } = useTranslation('app');
   const investorProfile = useInvestmentStore((s) => s.investorProfile);
   const allocations = useInvestmentStore((s) => s.allocations);
   const totalInvested = useInvestmentStore((s) => s.getTotalInvested)();
@@ -45,16 +47,16 @@ export function InvestmentWalletCard() {
           <View style={styles.iconBox}>
             <TrendingUp size={16} color="#FBBF24" />
           </View>
-          <Text style={styles.title}>Mon portefeuille</Text>
+          <Text style={styles.title}>{t('investment.walletTitle')}</Text>
         </View>
 
         <View style={styles.mainRow}>
           <View style={styles.mainStat}>
-            <Text style={styles.mainLabel}>Capital investi</Text>
+            <Text style={styles.mainLabel}>{t('investment.investedCapital')}</Text>
             <Text style={styles.mainValue}>{formatCurrency(totalInvested)}</Text>
           </View>
           <View style={styles.mainStat}>
-            <Text style={styles.mainLabel}>Rendement</Text>
+            <Text style={styles.mainLabel}>{t('investment.returns')}</Text>
             <Text style={[styles.mainValue, { color: '#4ADE80' }]}>
               {annualReturn.toFixed(1)}%/an
             </Text>
@@ -63,13 +65,13 @@ export function InvestmentWalletCard() {
 
         <View style={styles.projRow}>
           <View style={styles.projItem}>
-            <Text style={styles.projLabel}>+12 mois</Text>
+            <Text style={styles.projLabel}>{t('investment.months', { count: 12 })}</Text>
             <Text style={[styles.projValue, { color: '#4ADE80' }]}>
               +{formatCurrency(returns12m)}
             </Text>
           </View>
           <View style={styles.projItem}>
-            <Text style={styles.projLabel}>+36 mois</Text>
+            <Text style={styles.projLabel}>{t('investment.months', { count: 36 })}</Text>
             <Text style={[styles.projValue, { color: '#22D3EE' }]}>
               +{formatCurrency(returns36m)}
             </Text>
@@ -91,7 +93,7 @@ export function InvestmentWalletCard() {
 
         <Pressable onPress={() => setShowSimulator(true)} style={styles.simButton}>
           <Calculator size={14} color="#FBBF24" />
-          <Text style={styles.simText}>Simuler</Text>
+          <Text style={styles.simText}>{t('investment.simulatorTitle')}</Text>
         </Pressable>
       </GlassCard>
 

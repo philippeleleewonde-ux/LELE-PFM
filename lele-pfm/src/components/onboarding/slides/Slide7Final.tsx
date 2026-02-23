@@ -1,17 +1,20 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useTranslation } from 'react-i18next';
 import { OB, FadeInView, ZoomInView, neonGlow } from '../shared';
 
-const steps = [
-  { icon: '\u{23F1}\uFE0F', text: '5 minutes pour ton diagnostic' },
-  { icon: '\u{1F4CA}', text: 'Ton score et ton grade instantanement' },
-  { icon: '\u{1F4B0}', text: 'Ton pactole calcule sur 3 ans' },
-  { icon: '\u{1F3AF}', text: 'Tes objectifs concrets par mois' },
-  { icon: '\u{1F680}', text: 'Tu decolles vers ta liberte financiere' },
-];
-
 export default function Slide7Final({ isActive }: { isActive: boolean }) {
+  const { t } = useTranslation('onboarding');
+
+  const steps = [
+    { icon: '\u{23F1}\uFE0F', text: t('slide7.step1') },
+    { icon: '\u{1F4CA}', text: t('slide7.step2') },
+    { icon: '\u{1F4B0}', text: t('slide7.step3') },
+    { icon: '\u{1F3AF}', text: t('slide7.step4') },
+    { icon: '\u{1F680}', text: t('slide7.step5') },
+  ];
+
   return (
     <LinearGradient colors={[OB.darkBg, OB.darkBgAlt]} style={styles.container}>
       {isActive && (
@@ -26,7 +29,7 @@ export default function Slide7Final({ isActive }: { isActive: boolean }) {
           {/* Title */}
           <FadeInView active={isActive} delay={300}>
             <Text style={styles.heading}>
-              5 minutes.{'\n'}Ensuite, on decolle.
+              {t('slide7.heading')}
             </Text>
           </FadeInView>
 
@@ -34,7 +37,7 @@ export default function Slide7Final({ isActive }: { isActive: boolean }) {
           <View style={styles.stepsList}>
             {steps.map((s, i) => (
               <FadeInView
-                key={s.text}
+                key={i}
                 active={isActive}
                 delay={500 + i * 100}
                 duration={400}
@@ -52,7 +55,7 @@ export default function Slide7Final({ isActive }: { isActive: boolean }) {
           {/* Bottom tagline */}
           <FadeInView active={isActive} delay={1100}>
             <Text style={[styles.bottomTagline, neonGlow(OB.gold)]}>
-              Ton futur financier commence ici.
+              {t('slide7.bottomTagline')}
             </Text>
           </FadeInView>
         </>

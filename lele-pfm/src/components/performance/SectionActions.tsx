@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { ProgressBar } from '../charts/ProgressBar';
 import { PerfGlassCard, PF, COICOP_LABELS, COICOP_COLORS } from './shared';
 import { CategoryItem } from '@/hooks/usePerformanceData';
@@ -11,6 +12,7 @@ interface SectionActionsProps {
 }
 
 export function SectionActions({ year, categories }: SectionActionsProps) {
+  const { t } = useTranslation('performance');
   // Only show categories with elasticity > 0 (compression potential)
   const actionable = categories
     .filter((cat) => cat.elasticity > 0)
@@ -19,7 +21,7 @@ export function SectionActions({ year, categories }: SectionActionsProps) {
   if (actionable.length === 0) {
     return (
       <View style={styles.empty}>
-        <Text style={styles.emptyText}>Aucune action à faire pour le moment</Text>
+        <Text style={styles.emptyText}>{t('actions.noAction')}</Text>
       </View>
     );
   }
@@ -51,7 +53,7 @@ export function SectionActions({ year, categories }: SectionActionsProps) {
               <Text style={styles.catLabel} numberOfLines={1}>{cat.label}</Text>
               <View style={[styles.natureBadge, { backgroundColor: isEssential ? PF.blue + '20' : PF.violet + '20' }]}>
                 <Text style={[styles.natureText, { color: isEssential ? PF.blue : PF.violet }]}>
-                  {isEssential ? 'Indispensable' : 'Confort'}
+                  {isEssential ? t('nature.essential') : t('nature.comfort')}
                 </Text>
               </View>
             </View>
@@ -59,15 +61,15 @@ export function SectionActions({ year, categories }: SectionActionsProps) {
             {/* Budget rate + elasticity */}
             <View style={styles.metricsRow}>
               <View style={styles.metric}>
-                <Text style={styles.metricLabel}>Budget</Text>
+                <Text style={styles.metricLabel}>{t('actions.budget')}</Text>
                 <Text style={[styles.metricValue, { color }]}>{formatPercent(cat.budgetRate, 1)}</Text>
               </View>
               <View style={styles.metric}>
-                <Text style={styles.metricLabel}>Marge de manœuvre</Text>
+                <Text style={styles.metricLabel}>{t('actions.margin')}</Text>
                 <Text style={[styles.metricValue, { color: PF.violet }]}>{formatPercent(cat.elasticity, 0)}</Text>
               </View>
               <View style={styles.metric}>
-                <Text style={styles.metricLabel}>Objectif An {year}</Text>
+                <Text style={styles.metricLabel}>{t('actions.annualTarget', { year })}</Text>
                 <Text style={[styles.metricValue, { color: PF.accent }]}>{formatCurrency(annualTarget)}</Text>
               </View>
             </View>

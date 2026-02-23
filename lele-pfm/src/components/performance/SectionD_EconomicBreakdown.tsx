@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { DonutChart } from '../charts/DonutChart';
 import { ProgressBar } from '../charts/ProgressBar';
 import { PerfGlassCard, PF, COICOP_LABELS, COICOP_COLORS } from './shared';
@@ -14,6 +15,7 @@ interface SectionDProps {
 }
 
 export function SectionD_EconomicBreakdown({ categories, elRevenue, elExpense, coherenceRatio }: SectionDProps) {
+  const { t } = useTranslation('performance');
   const donutData = categories.map((cat) => ({
     label: cat.label,
     value: cat.budgetRate,
@@ -37,13 +39,13 @@ export function SectionD_EconomicBreakdown({ categories, elRevenue, elExpense, c
         data={donutData}
         size={150}
         strokeWidth={18}
-        centerLabel="Budget"
+        centerLabel={t('actions.budget')}
         centerValue="100%"
       />
 
       {/* EL Split bar */}
       <PerfGlassCard style={styles.splitCard}>
-        <Text style={styles.splitTitle}>D'où viennent les coûts</Text>
+        <Text style={styles.splitTitle}>{t('economicBreakdown.costOrigins')}</Text>
         <View style={styles.stackedBar}>
           <View style={[styles.barSegment, { flex: elRevPercent, backgroundColor: PF.blue }]} />
           <View style={[styles.barSegment, { flex: elExpPercent, backgroundColor: PF.red }]} />
@@ -51,12 +53,12 @@ export function SectionD_EconomicBreakdown({ categories, elRevenue, elExpense, c
         <View style={styles.splitLabels}>
           <View style={styles.splitItem}>
             <View style={[styles.dot, { backgroundColor: PF.blue }]} />
-            <Text style={styles.splitLabel}>Coûts côté revenus</Text>
+            <Text style={styles.splitLabel}>{t('economicBreakdown.revenueCosts')}</Text>
             <Text style={styles.splitValue}>{formatCurrency(elRevenue)}</Text>
           </View>
           <View style={styles.splitItem}>
             <View style={[styles.dot, { backgroundColor: PF.red }]} />
-            <Text style={styles.splitLabel}>Coûts côté dépenses</Text>
+            <Text style={styles.splitLabel}>{t('economicBreakdown.expenseCosts')}</Text>
             <Text style={styles.splitValue}>{formatCurrency(elExpense)}</Text>
           </View>
         </View>
@@ -65,7 +67,7 @@ export function SectionD_EconomicBreakdown({ categories, elRevenue, elExpense, c
       {/* Coherence ratio */}
       <PerfGlassCard style={styles.coherenceCard}>
         <View style={styles.coherenceHeader}>
-          <Text style={styles.coherenceTitle}>Équilibre finances</Text>
+          <Text style={styles.coherenceTitle}>{t('economicBreakdown.financeBalance')}</Text>
           <Text style={[styles.coherenceValue, { color: coherenceColor }]}>
             {formatPercent(coherenceRatio, 1)}
           </Text>
@@ -77,10 +79,10 @@ export function SectionD_EconomicBreakdown({ categories, elRevenue, elExpense, c
         />
         <Text style={styles.coherenceHint}>
           {coherenceRatio < 85
-            ? 'Bravo, vos finances sont bien équilibrées !'
+            ? t('economicBreakdown.balanceGood')
             : coherenceRatio <= 100
-            ? 'Attention, vous dépensez beaucoup par rapport à vos revenus'
-            : 'Alerte : vous dépensez plus que ce que vous gagnez'}
+            ? t('economicBreakdown.balanceWarning')
+            : t('economicBreakdown.balanceAlert')}
         </Text>
       </PerfGlassCard>
     </View>

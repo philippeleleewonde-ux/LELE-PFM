@@ -1,9 +1,10 @@
 import React, { useState, useMemo } from 'react';
 import { View, Text, Pressable, Modal, ScrollView, StyleSheet, useWindowDimensions } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { X, PiggyBank, Wallet, Calendar, Banknote } from 'lucide-react-native';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { formatCurrency } from '@/services/format-helpers';
-import { getGradeColor, MONTH_NAMES_FR } from '@/domain/calculators/weekly-savings-engine';
+import { getGradeColor } from '@/domain/calculators/weekly-savings-engine';
 import type { SavingsWallet, YearBucket } from '@/hooks/useSavingsWallet';
 import { getWeekLabel } from '@/utils/week-helpers';
 
@@ -16,6 +17,7 @@ interface SavingsDetailSheetProps {
 }
 
 export function SavingsDetailSheet({ visible, wallet, onClose }: SavingsDetailSheetProps) {
+  const { t } = useTranslation('tracking');
   const { width, height } = useWindowDimensions();
   const isSmall = width < 360;
   const [filter, setFilter] = useState<FilterMode>('month');
@@ -37,7 +39,7 @@ export function SavingsDetailSheet({ visible, wallet, onClose }: SavingsDetailSh
           <View style={styles.header}>
             <View style={styles.headerLeft}>
               <Calendar size={18} color="#FBBF24" />
-              <Text style={styles.headerTitle}>Historique des economies</Text>
+              <Text style={styles.headerTitle}>{t('savingsHistory.title')}</Text>
             </View>
             <Pressable onPress={onClose} style={styles.closeBtn}>
               <X size={20} color="#A1A1AA" />
@@ -53,7 +55,7 @@ export function SavingsDetailSheet({ visible, wallet, onClose }: SavingsDetailSh
                 style={[styles.pill, filter === mode && styles.pillActive]}
               >
                 <Text style={[styles.pillText, filter === mode && styles.pillTextActive]}>
-                  {mode === 'week' ? 'Semaine' : mode === 'month' ? 'Mois' : 'Annee'}
+                  {mode === 'week' ? t('savingsHistory.weekFilter') : mode === 'month' ? t('savingsHistory.monthFilter') : t('savingsHistory.yearFilter')}
                 </Text>
               </Pressable>
             ))}
@@ -64,7 +66,7 @@ export function SavingsDetailSheet({ visible, wallet, onClose }: SavingsDetailSh
             {filter === 'week' && (
               <>
                 {wallet.allWeeksSorted.length === 0 && (
-                  <Text style={styles.emptyText}>Aucune semaine enregistree.</Text>
+                  <Text style={styles.emptyText}>{t('savingsHistory.emptyWeek')}</Text>
                 )}
                 {wallet.allWeeksSorted.map((r) => (
                   <PeriodRow
@@ -85,12 +87,12 @@ export function SavingsDetailSheet({ visible, wallet, onClose }: SavingsDetailSh
             {filter === 'month' && (
               <>
                 {wallet.byMonth.length === 0 && (
-                  <Text style={styles.emptyText}>Aucun mois enregistre.</Text>
+                  <Text style={styles.emptyText}>{t('savingsHistory.emptyMonth')}</Text>
                 )}
                 {wallet.byMonth.map((m) => (
                   <PeriodRow
                     key={`${m.year}-${m.month}`}
-                    label={MONTH_NAMES_FR[m.month - 1]}
+                    label={t(`months.${m.month - 1}`)}
                     sublabel={`${m.year} - ${m.nbSemaines} sem.`}
                     economies={m.economies}
                     economiesReelles={m.economiesReelles}
@@ -106,7 +108,7 @@ export function SavingsDetailSheet({ visible, wallet, onClose }: SavingsDetailSh
             {filter === 'year' && (
               <>
                 {yearEntries.length === 0 && (
-                  <Text style={styles.emptyText}>Aucune annee enregistree.</Text>
+                  <Text style={styles.emptyText}>{t('savingsHistory.emptyYear')}</Text>
                 )}
                 {yearEntries.map(({ year, bucket }) => {
                   const net = bucket.economies - bucket.depassement;
@@ -114,14 +116,14 @@ export function SavingsDetailSheet({ visible, wallet, onClose }: SavingsDetailSh
                     <View key={year} style={styles.yearRow}>
                       <View style={styles.yearLeft}>
                         <Text style={[styles.yearLabel, isSmall && { fontSize: 14 }]}>{year}</Text>
-                        <Text style={styles.yearSub}>{bucket.nbSemaines} semaines</Text>
+                        <Text style={styles.yearSub}>{bucket.nbSemaines} {t('savingsHistory.weeks')}</Text>
                       </View>
                       <View style={styles.yearRight}>
                         <Text style={[styles.yearValue, { color: net >= 0 ? '#4ADE80' : '#F87171' }]}>
                           {net >= 0 ? '+' : ''}{formatCurrency(net)}
                         </Text>
                         <Text style={styles.yearDist}>
-                          Ep. {formatCurrency(bucket.epargne)} | Pl. {formatCurrency(bucket.discretionnaire)}
+                          {t('savingsHistory.savingsShort')} {formatCurrency(bucket.epargne)} | {t('savingsHistory.funShort')} {formatCurrency(bucket.discretionnaire)}
                         </Text>
                       </View>
                     </View>
@@ -134,14 +136,14 @@ export function SavingsDetailSheet({ visible, wallet, onClose }: SavingsDetailSh
             {wallet.allTimeNonDepense > 0 && (
               <View style={[styles.nonDepenseCard, isSmall && { paddingHorizontal: 10 }]}>
                 <Banknote size={14} color="#60A5FA" />
-                <Text style={styles.nonDepenseLabel}>Argent non depense (cumul)</Text>
+                <Text style={styles.nonDepenseLabel}>{t('savingsHistory.cumulUnsaved')}</Text>
                 <Text style={styles.nonDepenseValue}>{formatCurrency(wallet.allTimeNonDepense)}</Text>
               </View>
             )}
 
             {/* All-time Total (cashback) */}
             <GlassCard variant="dark" style={styles.totalCard}>
-              <Text style={styles.totalLabel}>ECONOMIES VALIDEES</Text>
+              <Text style={styles.totalLabel}>{t('savingsHistory.validatedSavings')}</Text>
               <Text style={[styles.totalValue, { color: wallet.allTimeNet >= 0 ? '#4ADE80' : '#F87171', fontSize: isSmall ? 18 : 20 }]}>
                 {wallet.allTimeNet >= 0 ? '+' : ''}{formatCurrency(wallet.allTimeNet)}
               </Text>
@@ -156,9 +158,9 @@ export function SavingsDetailSheet({ visible, wallet, onClose }: SavingsDetailSh
                 </View>
               </View>
               <Text style={styles.totalSub}>
-                {wallet.nbSemainesTotal} semaines depuis{' '}
+                {wallet.nbSemainesTotal} {t('savingsHistory.weeksSince')}{' '}
                 {wallet.firstRecordDate
-                  ? new Date(wallet.firstRecordDate).toLocaleDateString('fr-FR', { month: 'short', year: 'numeric' })
+                  ? new Date(wallet.firstRecordDate).toLocaleDateString(undefined, { month: 'short', year: 'numeric' })
                   : '—'}
               </Text>
             </GlassCard>

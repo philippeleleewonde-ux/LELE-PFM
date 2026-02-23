@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { PF, PerfGlassCard } from './shared';
 import { useInvestmentStore } from '@/stores/investment-store';
 import { calculateACE, ACEDimension, ACEFactor } from '@/domain/calculators/ace-score-engine';
@@ -85,6 +86,7 @@ function FactorRow({ factor }: { factor: ACEFactor }) {
 // ─── Dimension Detail Card ───
 
 function DimensionDetail({ dim }: { dim: ACEDimension }) {
+  const { t } = useTranslation('performance');
   const letter = dim.dimension === 'awareness' ? 'A' : dim.dimension === 'control' ? 'C' : 'E';
 
   return (
@@ -96,7 +98,7 @@ function DimensionDetail({ dim }: { dim: ACEDimension }) {
         ))}
       </View>
       <View style={styles.recoCard}>
-        <Text style={styles.recoLabel}>Recommandation</Text>
+        <Text style={styles.recoLabel}>{t('psychScore.recommendation')}</Text>
         <Text style={styles.recoText}>{dim.recommendation}</Text>
       </View>
     </PerfGlassCard>
@@ -106,6 +108,7 @@ function DimensionDetail({ dim }: { dim: ACEDimension }) {
 // ─── Main Section ───
 
 export function SectionX_PsychScore() {
+  const { t } = useTranslation('performance');
   const allocations = useInvestmentStore((s) => s.allocations);
   const investorProfile = useInvestmentStore((s) => s.investorProfile);
 
@@ -118,7 +121,7 @@ export function SectionX_PsychScore() {
     return (
       <PerfGlassCard>
         <Text style={styles.emptyText}>
-          Configurez votre profil investisseur et vos allocations pour voir votre score psychologique ACE.
+          {t('psychScore.configureProfile')}
         </Text>
       </PerfGlassCard>
     );
@@ -145,7 +148,7 @@ export function SectionX_PsychScore() {
 
       {/* 3 Dimension summary rows */}
       <PerfGlassCard style={styles.section}>
-        <Text style={styles.sectionTitle}>Dimensions ACE</Text>
+        <Text style={styles.sectionTitle}>{t('psychScore.aceDimensions')}</Text>
         <DimensionRow dim={ace.awareness} />
         <DimensionRow dim={ace.control} />
         <DimensionRow dim={ace.execution} />
@@ -153,7 +156,7 @@ export function SectionX_PsychScore() {
 
       {/* Strengths & Improvements */}
       <PerfGlassCard style={styles.section}>
-        <Text style={styles.sectionTitle}>Forces</Text>
+        <Text style={styles.sectionTitle}>{t('psychScore.strengths')}</Text>
         {ace.strengths.map((s, i) => (
           <View key={i} style={styles.bulletRow}>
             <View style={[styles.bulletDot, { backgroundColor: PF.green }]} />
@@ -161,7 +164,7 @@ export function SectionX_PsychScore() {
           </View>
         ))}
 
-        <Text style={[styles.sectionTitle, { marginTop: 16 }]}>Axes d'amelioration</Text>
+        <Text style={[styles.sectionTitle, { marginTop: 16 }]}>{t('psychScore.improvements')}</Text>
         {ace.improvements.map((s, i) => (
           <View key={i} style={styles.bulletRow}>
             <View style={[styles.bulletDot, { backgroundColor: PF.orange }]} />
@@ -177,7 +180,7 @@ export function SectionX_PsychScore() {
 
       {/* Footer */}
       <Text style={styles.footerText}>
-        Le score ACE mesure votre maturite psychologique d'investisseur a travers la conscience, la maitrise et l'execution. Il evolue avec vos allocations.
+        {t('psychScore.disclaimer')}
       </Text>
     </View>
   );

@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, Pressable, StyleSheet } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { Trash2 } from 'lucide-react-native';
 import { Transaction } from '@/types';
 import { formatCurrency } from '@/services/format-helpers';
@@ -10,11 +11,11 @@ interface DailyTransactionRowProps {
 }
 
 export function DailyTransactionRow({ transaction, onDelete }: DailyTransactionRowProps) {
-  // Format date as "Lun 10 Fev"
+  const { t } = useTranslation('app');
   const d = new Date(transaction.transaction_date);
-  const dayNames = ['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'];
-  const monthNames = ['Jan', 'Fev', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Aout', 'Sep', 'Oct', 'Nov', 'Dec'];
-  const dateLabel = `${dayNames[d.getDay()]} ${d.getDate()} ${monthNames[d.getMonth()]}`;
+  const dayKeys = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'] as const;
+  const monthKeys = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'] as const;
+  const dateLabel = `${t(`days.${dayKeys[d.getDay()]}`)} ${d.getDate()} ${t(`months.${monthKeys[d.getMonth()]}`)}`;
 
   return (
     <View style={styles.container}>

@@ -1,5 +1,6 @@
 import React from 'react';
 import { ScrollView, View, Text, Pressable, Alert, Platform, StyleSheet } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { useRouter } from 'expo-router';
 import { useAuthStore } from '../../stores/auth.store';
 import { useAppStore } from '../../stores/app.store';
@@ -29,6 +30,7 @@ import { InvestmentSummaryCard } from '../../components/dashboard/InvestmentSumm
 import { IncomeVsExpenseCard } from '../../components/dashboard/IncomeVsExpenseCard';
 
 export default function DashboardScreen() {
+  const { t } = useTranslation('app');
   const router = useRouter();
   const user = useAuthStore((s) => s.user);
   const engineOutput = useEngineStore((s) => s.engineOutput);
@@ -52,16 +54,16 @@ export default function DashboardScreen() {
     };
 
     if (Platform.OS === 'web') {
-      if (window.confirm('Repartir de zero ?\nToutes les donnees seront effacees (onboarding, wizard, resultats).')) {
+      if (window.confirm(`${t('dashboard.resetTitle')} ?\n${t('dashboard.resetMessage')}`)) {
         doReset();
       }
     } else {
       Alert.alert(
-        'Repartir de zero',
-        'Toutes les donnees seront effacees (onboarding, wizard, resultats).',
+        t('dashboard.resetTitle'),
+        t('dashboard.resetMessage'),
         [
-          { text: 'Annuler', style: 'cancel' },
-          { text: 'Confirmer', style: 'destructive', onPress: doReset },
+          { text: t('dashboard.cancel'), style: 'cancel' },
+          { text: t('dashboard.confirm'), style: 'destructive', onPress: doReset },
         ]
       );
     }
@@ -79,7 +81,7 @@ export default function DashboardScreen() {
       <ScrollView className="flex-1" contentContainerStyle={{ paddingBottom: 100 }}>
 
         <HomeHeader
-          userName={user?.firstName || 'Utilisateur'}
+          userName={user?.firstName || t('dashboard.user')}
           onNotificationPress={() => console.log('Notifications')}
         />
 
@@ -125,31 +127,27 @@ export default function DashboardScreen() {
                 <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10 }}>
                   <KPICard
                     icon={TrendingUp}
-                    label="Coûts invisibles"
+                    label={t('dashboard.invisibleCosts')}
                     value={formatCurrency(engineOutput.step1.total_potential)}
                     alertLevel="green"
-                    tooltip="Ce que ta gestion te coûte sans que tu le voies."
                   />
                   <KPICard
                     icon={AlertTriangle}
-                    label="Coûts visibles"
+                    label={t('dashboard.visibleCosts')}
                     value={formatCurrency(engineOutput.step2.total_el)}
                     alertLevel="red"
-                    tooltip="Ce que ta gestion te coûte de manière évidente."
                   />
                   <KPICard
                     icon={Shield}
-                    label="Coût maximum"
+                    label={t('dashboard.maxCost')}
                     value={formatCurrency(engineOutput.step6.var95)}
                     alertLevel="yellow"
-                    tooltip="Le maximum que ta gestion peut te coûter."
                   />
                   <KPICard
                     icon={Wallet}
-                    label="Trésor invisible"
+                    label={t('dashboard.invisibleTreasure')}
                     value={formatCurrency(engineOutput.step7.prl)}
                     alertLevel="cyan"
-                    tooltip="L'argent caché dans tes dépenses, récupérable."
                   />
                 </View>
               </View>
@@ -159,7 +157,7 @@ export default function DashboardScreen() {
             <View className="px-6 mb-8">
               <Pressable onPress={() => router.push('/(tabs)/performance')} style={{ backgroundColor: '#FBBF24', borderRadius: 14, paddingVertical: 14, paddingHorizontal: 20, flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 8 }}>
                 <Text style={{ color: '#0F1014', fontSize: 15, fontWeight: '800' }}>
-                  {isSimple ? 'Voir mes resultats' : 'Voir mon analyse complete'}
+                  {isSimple ? t('dashboard.seeResults') : t('dashboard.seeAnalysis')}
                 </Text>
                 <ArrowUpRight size={18} color="#0F1014" />
               </Pressable>
@@ -170,7 +168,7 @@ export default function DashboardScreen() {
             <BalanceCards />
             <View className="px-6 mb-8">
               <GlassCard className="flex-row justify-between items-center py-4 px-6">
-                <Text className="text-white font-semibold">Vue détaillée</Text>
+                <Text className="text-white font-semibold">{t('dashboard.detailedView')}</Text>
                 <ArrowUpRight size={20} color="white" />
               </GlassCard>
             </View>
@@ -183,7 +181,7 @@ export default function DashboardScreen() {
             <GlassCard variant="dark">
               <View style={miniStyles.row}>
                 <View style={miniStyles.left}>
-                  <Text style={miniStyles.label}>Semaine {getWeekRangeLabel(currentWeek, currentYear)} · An{weeklyTracking.planYear} T{weeklyTracking.currentQuarter}</Text>
+                  <Text style={miniStyles.label}>{t('dashboard.week')} {getWeekRangeLabel(currentWeek, currentYear)} · An{weeklyTracking.planYear} T{weeklyTracking.currentQuarter}</Text>
                   <Text style={miniStyles.amounts}>
                     <Text style={{ color: weeklyTracking.isOnTrack ? '#4ADE80' : '#F87171', fontWeight: '800' }}>
                       {formatCurrency(weeklyTracking.weeklySpent)}
@@ -218,9 +216,9 @@ export default function DashboardScreen() {
                 <View style={miniStyles.savingsRow}>
                   <Award size={12} color="#4ADE80" />
                   <Text style={miniStyles.savingsText}>
-                    {formatCurrency(weeklyTracking.savings.economies)} economise
+                    {formatCurrency(weeklyTracking.savings.economies)} {t('dashboard.saved')}
                     {weeklyTracking.savings.eprProvision >= weeklyTracking.savings.weeklyTarget
-                      ? ' (EPR atteint)'
+                      ? ` (${t('dashboard.eprReached')})`
                       : ` (EPR ${Math.round((weeklyTracking.savings.eprProvision / weeklyTracking.savings.weeklyTarget) * 100)}%)`
                     }
                   </Text>
@@ -250,7 +248,7 @@ export default function DashboardScreen() {
           <Pressable onPress={handleResetAll}>
             <GlassCard className="flex-row justify-center items-center py-4 px-6" style={{ borderColor: '#F87171', borderWidth: 1 }}>
               <RotateCcw size={18} color="#F87171" />
-              <Text style={{ color: '#F87171', fontWeight: '600', marginLeft: 8 }}>Repartir de zero</Text>
+              <Text style={{ color: '#F87171', fontWeight: '600', marginLeft: 8 }}>{t('dashboard.resetTitle')}</Text>
             </GlassCard>
           </Pressable>
         </View>

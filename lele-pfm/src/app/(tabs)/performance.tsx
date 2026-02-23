@@ -1,5 +1,6 @@
 import React from 'react';
 import { ScrollView, View, Text, Pressable, StyleSheet } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { useRouter } from 'expo-router';
 import {
   BarChart3,
@@ -72,6 +73,7 @@ import { useViewMode } from '../../hooks/useViewMode';
 import { SectionEvolution } from '../../components/performance/SectionEvolution';
 
 export default function PerformanceScreen() {
+  const { t } = useTranslation('app');
   const router = useRouter();
   const data = usePerformanceData();
   const { showSection, isInvestor } = useViewMode();
@@ -82,10 +84,10 @@ export default function PerformanceScreen() {
       <View style={styles.emptyContainer}>
         <View style={styles.emptyCard}>
           <BarChart3 size={48} color={PF.textMuted} />
-          <Text style={styles.emptyTitle}>Aucune analyse disponible</Text>
-          <Text style={styles.emptyText}>Complétez votre profil pour découvrir votre analyse financière</Text>
+          <Text style={styles.emptyTitle}>{t('performance.emptyTitle')}</Text>
+          <Text style={styles.emptyText}>{t('performance.emptyMessage')}</Text>
           <Pressable style={styles.ctaButton} onPress={() => router.push('/setup-wizard')}>
-            <Text style={styles.ctaText}>Commencer</Text>
+            <Text style={styles.ctaText}>{t('performance.emptyButton')}</Text>
           </Pressable>
         </View>
       </View>
@@ -118,7 +120,7 @@ export default function PerformanceScreen() {
         {/* Section: Rapport Score Dynamique (only when weekly data exists) */}
         {hasWeeklyData && (
           <CollapsibleSection
-            title="Rapport Score Dynamique"
+            title={t('performance.sections.financialScore')}
             icon={Radar}
             iconColor={PF.accent}
             defaultOpen
@@ -130,7 +132,7 @@ export default function PerformanceScreen() {
         {/* Section: Evolution Hebdomadaire (only when weekly data exists) */}
         {hasWeeklyData && (
           <CollapsibleSection
-            title="Evolution Hebdomadaire"
+            title={t('performance.sections.weeklyEvolution')}
             icon={TrendingUp}
             iconColor={PF.green}
           >
@@ -140,7 +142,7 @@ export default function PerformanceScreen() {
 
         {/* Section: Performance Calendar — Objectif vs Réalisé */}
         <CollapsibleSection
-          title="Calendrier de performance"
+          title={t('performance.sections.performanceCalendar')}
           icon={CalendarDays}
           iconColor={PF.neonCyan}
           defaultOpen
@@ -150,7 +152,7 @@ export default function PerformanceScreen() {
 
         {/* Section N - Objectif vs Realise */}
         <CollapsibleSection
-          title="Objectif vs Realise"
+          title={t('performance.sections.objectiveVsActual')}
           icon={ClipboardCheck}
           iconColor={PF.green}
           defaultOpen
@@ -161,7 +163,7 @@ export default function PerformanceScreen() {
         {/* Section A - KPIs (expert + investor) */}
         {showSection(['expert', 'investor']) && (
           <CollapsibleSection
-            title="Vos chiffres clés"
+            title={t('performance.sections.keyFigures')}
             icon={BarChart3}
             iconColor={PF.green}
           >
@@ -172,7 +174,7 @@ export default function PerformanceScreen() {
         {/* Section B - Triennial Plan (expert + investor) */}
         {showSection(['expert', 'investor']) && (
           <CollapsibleSection
-            title="Votre cashback sur 3 ans"
+            title={t('performance.sections.cashback3Years')}
             icon={Target}
             iconColor={PF.cyan}
           >
@@ -183,7 +185,7 @@ export default function PerformanceScreen() {
         {/* Section C - VaR Distribution (expert only) */}
         {showSection(['expert']) && (
           <CollapsibleSection
-            title="Comprendre vos coûts"
+            title={t('performance.sections.understandCosts')}
             icon={PieChart}
             iconColor={PF.yellow}
           >
@@ -193,7 +195,7 @@ export default function PerformanceScreen() {
 
         {/* Section D - Economic Breakdown (all modes) */}
         <CollapsibleSection
-          title="Où va votre argent"
+          title={t('performance.sections.whereMoneyGoes')}
           icon={Layers}
           iconColor={PF.blue}
         >
@@ -208,7 +210,7 @@ export default function PerformanceScreen() {
         {/* Section E - Risk Thresholds (expert + investor) */}
         {showSection(['expert', 'investor']) && (
           <CollapsibleSection
-            title="Votre cashback par catégorie"
+            title={t('performance.sections.cashbackByCategory')}
             icon={ShieldAlert}
             iconColor={PF.orange}
           >
@@ -219,7 +221,7 @@ export default function PerformanceScreen() {
         {/* Section F - Savings Plan (expert + investor) */}
         {showSection(['expert', 'investor']) && (
           <CollapsibleSection
-            title="Votre cashback progressif"
+            title={t('performance.sections.progressiveCashback')}
             icon={PiggyBank}
             iconColor={PF.violet}
           >
@@ -244,7 +246,7 @@ export default function PerformanceScreen() {
 
         {/* Section G - Driving Dashboard (all modes) */}
         <CollapsibleSection
-          title="Vos objectifs concrets"
+          title={t('performance.sections.concreteGoals')}
           icon={Gauge}
           iconColor={PF.accent}
         >
@@ -263,7 +265,7 @@ export default function PerformanceScreen() {
 
         {/* Section H - Actions An 1 (all modes) */}
         <CollapsibleSection
-          title="Que faire cette année"
+          title={t('performance.sections.whatToDoThisYear')}
           icon={Zap}
           iconColor={PF.cyan}
         >
@@ -273,7 +275,7 @@ export default function PerformanceScreen() {
         {/* Section I - Actions An 2 (expert + investor) */}
         {showSection(['expert', 'investor']) && (
           <CollapsibleSection
-            title="Que faire l'année prochaine"
+            title={t('performance.sections.whatToDoNextYear')}
             icon={Rocket}
             iconColor={PF.blue}
           >
@@ -284,7 +286,7 @@ export default function PerformanceScreen() {
         {/* Section J - Actions An 3 (expert + investor) */}
         {showSection(['expert', 'investor']) && (
           <CollapsibleSection
-            title="Que faire dans 3 ans"
+            title={t('performance.sections.whatToDoIn3Years')}
             icon={Trophy}
             iconColor={PF.green}
           >
@@ -295,7 +297,7 @@ export default function PerformanceScreen() {
         {/* Section K - Défis Indicateurs An 1 (expert + investor) */}
         {showSection(['expert', 'investor']) && data.indicators.length > 0 && (
           <CollapsibleSection
-            title="Vos défis An 1"
+            title={t('performance.sections.challengesYear1')}
             icon={Brain}
             iconColor={PF.accent}
           >
@@ -310,7 +312,7 @@ export default function PerformanceScreen() {
         {/* Section L - Défis Indicateurs An 2 (expert + investor) */}
         {showSection(['expert', 'investor']) && data.indicators.length > 0 && (
           <CollapsibleSection
-            title="Vos défis An 2"
+            title={t('performance.sections.challengesYear2')}
             icon={Award}
             iconColor={PF.violet}
           >
@@ -325,7 +327,7 @@ export default function PerformanceScreen() {
         {/* Section M - Défis Indicateurs An 3 (expert + investor) */}
         {showSection(['expert', 'investor']) && data.indicators.length > 0 && (
           <CollapsibleSection
-            title="Vos défis An 3"
+            title={t('performance.sections.challengesYear3')}
             icon={Star}
             iconColor={PF.gold}
           >
@@ -340,7 +342,7 @@ export default function PerformanceScreen() {
         {/* Section O - Investment Portfolio (investor only) */}
         {isInvestor && (
           <CollapsibleSection
-            title="Portefeuille investissement"
+            title={t('performance.sections.investmentPortfolio')}
             icon={Briefcase}
             iconColor={PF.yellow}
           >
@@ -351,7 +353,7 @@ export default function PerformanceScreen() {
         {/* Section P - All-Weather Analysis (investor only) */}
         {isInvestor && (
           <CollapsibleSection
-            title="Analyse All-Weather"
+            title={t('performance.sections.allWeatherAnalysis')}
             icon={Shield}
             iconColor={PF.gold}
           >
@@ -362,7 +364,7 @@ export default function PerformanceScreen() {
         {/* Section Q - Kelly Criterion (investor only) */}
         {isInvestor && (
           <CollapsibleSection
-            title="Dimensionnement Kelly"
+            title={t('performance.sections.kellySizing')}
             icon={Calculator}
             iconColor={PF.accent}
           >
@@ -373,7 +375,7 @@ export default function PerformanceScreen() {
         {/* Section R - Factor Analysis (investor only) */}
         {isInvestor && (
           <CollapsibleSection
-            title="Analyse Factorielle"
+            title={t('performance.sections.factorAnalysis')}
             icon={Layers3}
             iconColor={PF.blue}
           >
@@ -384,7 +386,7 @@ export default function PerformanceScreen() {
         {/* Section S - Monte Carlo Simulation (investor only) */}
         {isInvestor && (
           <CollapsibleSection
-            title="Simulation Monte Carlo"
+            title={t('performance.sections.monteCarlo')}
             icon={Dices}
             iconColor={PF.violet}
           >
@@ -395,7 +397,7 @@ export default function PerformanceScreen() {
         {/* Section T - Historical Stress Test (investor only) */}
         {isInvestor && (
           <CollapsibleSection
-            title="Stress Test Historique"
+            title={t('performance.sections.historicalStress')}
             icon={History}
             iconColor={PF.orange}
           >
@@ -406,7 +408,7 @@ export default function PerformanceScreen() {
         {/* Section U - Macro Scenarios (investor only) */}
         {isInvestor && (
           <CollapsibleSection
-            title="Scénarios Macro"
+            title={t('performance.sections.macroScenarios')}
             icon={TrendingDown}
             iconColor={PF.red}
           >
@@ -417,7 +419,7 @@ export default function PerformanceScreen() {
         {/* Section V - Behavioral Biases (investor only) */}
         {isInvestor && (
           <CollapsibleSection
-            title="Analyse Comportementale"
+            title={t('performance.sections.behavioralAnalysis')}
             icon={ShieldCheck}
             iconColor={PF.cyan}
           >
@@ -428,7 +430,7 @@ export default function PerformanceScreen() {
         {/* Section W - Pre-Mortem Analysis (investor only) */}
         {isInvestor && (
           <CollapsibleSection
-            title="Analyse Pré-Mortem"
+            title={t('performance.sections.preMortem')}
             icon={Skull}
             iconColor={PF.orange}
           >
@@ -439,7 +441,7 @@ export default function PerformanceScreen() {
         {/* Section X - ACE Psychological Score (investor only) */}
         {isInvestor && (
           <CollapsibleSection
-            title="Score Psychologique ACE"
+            title={t('performance.sections.aceScore')}
             icon={BrainCircuit}
             iconColor={PF.accent}
           >
@@ -450,7 +452,7 @@ export default function PerformanceScreen() {
         {/* Section Y - Tax Optimization (investor only) */}
         {isInvestor && (
           <CollapsibleSection
-            title="Optimisation Fiscale"
+            title={t('performance.sections.taxOptimization')}
             icon={Receipt}
             iconColor={PF.yellow}
           >
@@ -461,7 +463,7 @@ export default function PerformanceScreen() {
         {/* Section Z - Emerging Markets Radar (investor only) */}
         {isInvestor && (
           <CollapsibleSection
-            title="Radar Marchés Émergents"
+            title={t('performance.sections.emergingMarkets')}
             icon={Globe}
             iconColor={PF.green}
           >
@@ -472,7 +474,7 @@ export default function PerformanceScreen() {
         {/* Section AA - Regulatory Compliance (investor only) */}
         {isInvestor && (
           <CollapsibleSection
-            title="Conformité Réglementaire"
+            title={t('performance.sections.compliance')}
             icon={Scale}
             iconColor={PF.violet}
           >
@@ -483,7 +485,7 @@ export default function PerformanceScreen() {
         {/* Section AB - Socratic Coach (investor only) */}
         {isInvestor && (
           <CollapsibleSection
-            title="Coach Socratique"
+            title={t('performance.sections.socraticCoach')}
             icon={MessageCircleQuestion}
             iconColor={PF.accent}
           >
@@ -494,7 +496,7 @@ export default function PerformanceScreen() {
         {/* Section AC - Wisdom Synthesis (investor only) */}
         {isInvestor && (
           <CollapsibleSection
-            title="Synthèse Globale"
+            title={t('performance.sections.globalSynthesis')}
             icon={Sparkles}
             iconColor={PF.gold}
             defaultOpen

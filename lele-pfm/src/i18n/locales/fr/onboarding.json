@@ -1,0 +1,102 @@
+{
+  "buttons": {
+    "0": "Montre-moi !",
+    "1": "Et ensuite ?",
+    "2": "Continue !",
+    "3": "Encore !",
+    "4": "Presque...",
+    "5": "Derniere !",
+    "6": "Je me lance !"
+  },
+  "skip": "Passer l'intro",
+  "slide1": {
+    "title": "Tu depenses.",
+    "titleHighlight": "Et si tu gagnais en depensant ?",
+    "subtitle": "LELE PFM transforme tes depenses en richesse.",
+    "headerBefore": "Aujourd'hui",
+    "headerAfter": "Avec LELE",
+    "comp1Before": "Tu depenses et tu perds",
+    "comp1After": "Tu depenses et tu gagnes",
+    "comp2Before": "Tu subis tes fins de mois",
+    "comp2After": "Tu construis ton pactole",
+    "comp3Before": "Tu coupes sans savoir",
+    "comp3After": "On te montre ou agir",
+    "comp4Before": "Zero methode",
+    "comp4After": "Un plan sur 3 ans"
+  },
+  "slide2": {
+    "cardTitle": "On te pose quelques questions",
+    "step1Label": "Ton profil",
+    "step1Desc": "Age, situation, metier",
+    "step2Label": "Tes revenus",
+    "step2Desc": "Salaire, business, aides",
+    "step3Label": "Tes depenses",
+    "step3Desc": "Par categorie",
+    "step4Label": "Ton historique",
+    "step4Desc": "3 a 5 ans de donnees",
+    "resultTitle": "Le moteur analyse tout",
+    "resultSub": "et detecte tes economies cachees",
+    "tagline": "On identifie comment tu depenses",
+    "heading": "Quelques questions.\nDes reponses puissantes.",
+    "bodyBold": "Tu nous dis comment tu vis",
+    "bodyEnd": ", on calcule comment tu peux vivre mieux. Pas de jugement, juste des chiffres."
+  },
+  "slide3": {
+    "scoreLabel": "Ton bilan de sante financiere",
+    "kpi1": "Coûts invisibles",
+    "kpi2": "Coût maximum",
+    "kpi3": "Cashback caché",
+    "tagline": "Ton bilan en un clin d'oeil",
+    "heading": "Un score. Un grade.\nLa verite sur tes finances.",
+    "bodyBold": "De E a A+",
+    "bodyEnd": ", ton grade te dit ou tu en es. Pas pour te juger, mais pour savoir exactement par ou commencer."
+  },
+  "slide4": {
+    "cardTitle": "Cashback par catégorie",
+    "cat1": "Sorties & loisirs",
+    "cat2": "Alimentation",
+    "cat3": "Transport",
+    "cat4": "Logement",
+    "hintHigh": "Gros cashback",
+    "hintMedium": "Cashback moyen",
+    "hintLow": "Peu de cashback",
+    "tagline": "Chaque dépense passée au scanner",
+    "heading": "On te dit exactement\noù est ton cashback.",
+    "bodyBold": "Chaque catégorie cache un cashback.",
+    "bodyEnd": " On identifie celles qui cachent le plus de cashback, sans toucher à l'essentiel."
+  },
+  "slide5": {
+    "cardTitle": "Ton pactole se construit",
+    "year1": "An 1",
+    "year2": "An 2",
+    "year3": "An 3",
+    "treasureTitle": "Ton cashback naturel",
+    "treasureSub": "se remplit année après année",
+    "tagline": "Un plan. Trois ans. Ton cashback.",
+    "heading": "En 3 ans, tu crées\nton pactole.",
+    "bodyBold": "Chaque mois, ton cashback grossit.",
+    "bodyEnd": " On te fixe des objectifs progressifs pour booster ton épargne sans forcer."
+  },
+  "slide6": {
+    "cardTitle": "Ton cashback naturel travaille pour toi",
+    "benefit1Title": "Ton épargne est boostée",
+    "benefit1Desc": "Ton cashback naturel vient renforcer tes réserves",
+    "benefit2Title": "Tes plaisirs aussi",
+    "benefit2Desc": "Une partie finance ce qui te fait envie",
+    "benefit3Title": "Sans toucher au vital",
+    "benefit3Desc": "On ne coupe jamais l'essentiel",
+    "tagline": "Le meilleur des deux mondes",
+    "heading": "Un cashback qui booste\népargne ET plaisirs.",
+    "bodyBold": "Ton cashback naturel booste ton épargne ET tes plaisirs",
+    "bodyEnd": ", sans effort ni sacrifice."
+  },
+  "slide7": {
+    "heading": "5 minutes.\nEnsuite, on decolle.",
+    "step1": "5 minutes pour ton diagnostic",
+    "step2": "Ton score et ton grade instantanement",
+    "step3": "Ton pactole calcule sur 3 ans",
+    "step4": "Tes objectifs concrets par mois",
+    "step5": "Tu decolles vers ta liberte financiere",
+    "bottomTagline": "Ton futur financier commence ici."
+  }
+}

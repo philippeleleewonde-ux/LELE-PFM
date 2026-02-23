@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   View,
   Text,
@@ -28,76 +29,16 @@ const COUNTRY_TO_CURRENCY: Record<string, string> = {
   LB: 'LBP', AE: 'AED', SA: 'SAR',
 };
 
-const CURRENCIES = [
-  { code: 'FCFA', label: 'Franc CFA' },
-  { code: 'EUR', label: 'Euro' },
-  { code: 'USD', label: 'Dollar US' },
-  { code: 'GBP', label: 'Livre sterling' },
-  { code: 'CHF', label: 'Franc suisse' },
-  { code: 'MAD', label: 'Dirham marocain' },
-  { code: 'TND', label: 'Dinar tunisien' },
-  { code: 'DZD', label: 'Dinar algérien' },
-  { code: 'NGN', label: 'Naira' },
-  { code: 'GHS', label: 'Cedi' },
-  { code: 'KES', label: 'Shilling kenyan' },
-  { code: 'ZAR', label: 'Rand' },
-  { code: 'CDF', label: 'Franc congolais' },
-  { code: 'GNF', label: 'Franc guinéen' },
-  { code: 'CAD', label: 'Dollar canadien' },
-  { code: 'BRL', label: 'Real brésilien' },
-  { code: 'INR', label: 'Roupie indienne' },
-  { code: 'HTG', label: 'Gourde haïtienne' },
-];
+// ─── Constants (keys only — labels come from i18n) ───
 
-// ─── Constants ───
-
-const PROFILES = [
-  'Salarié',
-  'Indépendant',
-  'Fonctionnaire',
-  'Étudiant',
-  'Retraité',
-  'Entrepreneur',
-  'Intérimaire',
-  'Auto-entrepreneur',
-  'Sans emploi',
-  'Cadre',
-  'Profession libérale',
-  'Agriculteur',
+const PROFILE_KEYS = [
+  'salarie', 'independant', 'fonctionnaire', 'etudiant', 'retraite', 'entrepreneur',
+  'interimaire', 'autoEntrepreneur', 'sansEmploi', 'cadre', 'professionLiberale', 'agriculteur',
 ] as const;
 
-const SITUATIONS = [
-  'Célibataire',
-  'En couple',
-  'Pacsé(e)',
-  'Marié(e)',
-  'Séparé(e)',
-  'Divorcé(e)',
-  'Veuf/Veuve',
+const SITUATION_KEYS = [
+  'celibataire', 'enCouple', 'pacse', 'marie', 'separe', 'divorce', 'veuf',
 ] as const;
-
-// Pays regroupés par région pour le sélecteur
-const COUNTRY_GROUPS: Array<{ label: string; codes: string[] }> = [
-  { label: 'Afrique de l\'Ouest', codes: ['CI', 'SN', 'ML', 'BF', 'NE', 'TG', 'BJ', 'GW'] },
-  { label: 'Afrique Centrale', codes: ['CM', 'GA', 'CG', 'TD', 'CF', 'GQ'] },
-  { label: 'Afrique (autres)', codes: ['NG', 'GH', 'KE', 'ZA', 'CD', 'GN', 'ET', 'TZ', 'RW'] },
-  { label: 'Maghreb', codes: ['MA', 'TN', 'DZ'] },
-  { label: 'Europe', codes: ['FR', 'BE', 'CH', 'DE', 'GB', 'IT', 'ES', 'PT'] },
-  { label: 'Amériques', codes: ['US', 'CA', 'BR', 'MX', 'HT'] },
-  { label: 'Asie & Moyen-Orient', codes: ['IN', 'CN', 'JP', 'VN', 'PH', 'BD', 'PK', 'LB', 'AE', 'SA'] },
-];
-
-const URBAN_RURAL_OPTIONS = [
-  { key: 'urban' as const, label: 'Urbain', icon: '🏙️' },
-  { key: 'rural' as const, label: 'Rural', icon: '🌾' },
-];
-
-const INCOME_SOURCE_OPTIONS = [
-  { key: 'formal' as const, label: 'Formel', desc: 'Salaire fixe, contrat' },
-  { key: 'mixed' as const, label: 'Mixte', desc: 'Salaire + activité annexe' },
-  { key: 'informal' as const, label: 'Informel', desc: 'Commerce, artisanat' },
-  { key: 'seasonal' as const, label: 'Saisonnier', desc: 'Agriculture, BTP' },
-];
 
 // ─── Component ───
 
@@ -107,6 +48,7 @@ interface Step1ProfileProps {
 
 export default function Step1Profile({ isActive }: Step1ProfileProps) {
   const { formData, updateFormData } = useWizardStore();
+  const { t } = useTranslation('wizard');
   const [countryOpen, setCountryOpen] = useState(false);
   const [currencyOpen, setCurrencyOpen] = useState(false);
 
@@ -118,6 +60,51 @@ export default function Step1Profile({ isActive }: Step1ProfileProps) {
   const selectedUrbanRural = formData.urbanRural || 'urban';
   const selectedIncomeSource = formData.incomeSource || 'formal';
   const extendedFamily = formData.extendedFamilyObligations ?? false;
+
+  // ─── Arrays that depend on t() ───
+
+  const CURRENCIES = [
+    { code: 'FCFA', label: t('step1.currencies.FCFA') },
+    { code: 'EUR', label: t('step1.currencies.EUR') },
+    { code: 'USD', label: t('step1.currencies.USD') },
+    { code: 'GBP', label: t('step1.currencies.GBP') },
+    { code: 'CHF', label: t('step1.currencies.CHF') },
+    { code: 'MAD', label: t('step1.currencies.MAD') },
+    { code: 'TND', label: t('step1.currencies.TND') },
+    { code: 'DZD', label: t('step1.currencies.DZD') },
+    { code: 'NGN', label: t('step1.currencies.NGN') },
+    { code: 'GHS', label: t('step1.currencies.GHS') },
+    { code: 'KES', label: t('step1.currencies.KES') },
+    { code: 'ZAR', label: t('step1.currencies.ZAR') },
+    { code: 'CDF', label: t('step1.currencies.CDF') },
+    { code: 'GNF', label: t('step1.currencies.GNF') },
+    { code: 'CAD', label: t('step1.currencies.CAD') },
+    { code: 'BRL', label: t('step1.currencies.BRL') },
+    { code: 'INR', label: t('step1.currencies.INR') },
+    { code: 'HTG', label: t('step1.currencies.HTG') },
+  ];
+
+  const COUNTRY_GROUPS: Array<{ label: string; codes: string[] }> = [
+    { label: t('step1.countryGroups.westAfrica'), codes: ['CI', 'SN', 'ML', 'BF', 'NE', 'TG', 'BJ', 'GW'] },
+    { label: t('step1.countryGroups.centralAfrica'), codes: ['CM', 'GA', 'CG', 'TD', 'CF', 'GQ'] },
+    { label: t('step1.countryGroups.otherAfrica'), codes: ['NG', 'GH', 'KE', 'ZA', 'CD', 'GN', 'ET', 'TZ', 'RW'] },
+    { label: t('step1.countryGroups.maghreb'), codes: ['MA', 'TN', 'DZ'] },
+    { label: t('step1.countryGroups.europe'), codes: ['FR', 'BE', 'CH', 'DE', 'GB', 'IT', 'ES', 'PT'] },
+    { label: t('step1.countryGroups.americas'), codes: ['US', 'CA', 'BR', 'MX', 'HT'] },
+    { label: t('step1.countryGroups.asiaMiddleEast'), codes: ['IN', 'CN', 'JP', 'VN', 'PH', 'BD', 'PK', 'LB', 'AE', 'SA'] },
+  ];
+
+  const URBAN_RURAL_OPTIONS = [
+    { key: 'urban' as const, label: t('step1.urbanRural.urban'), icon: '🏙️' },
+    { key: 'rural' as const, label: t('step1.urbanRural.rural'), icon: '🌾' },
+  ];
+
+  const INCOME_SOURCE_OPTIONS = [
+    { key: 'formal' as const, label: t('step1.incomeSources.formal'), desc: t('step1.incomeSources.formalDesc') },
+    { key: 'mixed' as const, label: t('step1.incomeSources.mixed'), desc: t('step1.incomeSources.mixedDesc') },
+    { key: 'informal' as const, label: t('step1.incomeSources.informal'), desc: t('step1.incomeSources.informalDesc') },
+    { key: 'seasonal' as const, label: t('step1.incomeSources.seasonal'), desc: t('step1.incomeSources.seasonalDesc') },
+  ];
 
   const selectedCurrency = formData.currency || COUNTRY_TO_CURRENCY[selectedCountry] || 'FCFA';
   const currencyLabel = CURRENCIES.find((c) => c.code === selectedCurrency)?.label ?? selectedCurrency;
@@ -143,25 +130,25 @@ export default function Step1Profile({ isActive }: Step1ProfileProps) {
           style={({ pressed }) => [styles.demoButton, pressed && styles.demoButtonPressed]}
         >
           <Shuffle size={16} color="#D9A11B" />
-          <Text style={styles.demoButtonText}>Donnees de demo</Text>
+          <Text style={styles.demoButtonText}>{t('step1.demoButton')}</Text>
         </Pressable>
       </FadeInView>
 
       {/* ── Professional Profile ── */}
       <FadeInView active={isActive} delay={0}>
         <GlassCard style={styles.section}>
-          <Text style={styles.sectionTitle}>Profil professionnel</Text>
+          <Text style={styles.sectionTitle}>{t('step1.professionalProfile')}</Text>
           <Text style={styles.sectionSubtitle}>
-            Sélectionnez votre situation professionnelle actuelle
+            {t('step1.selectProfession')}
           </Text>
 
           <View style={styles.profileGrid}>
-            {PROFILES.map((profile) => {
-              const isSelected = selectedJob === profile;
+            {PROFILE_KEYS.map((key) => {
+              const isSelected = selectedJob === key;
               return (
                 <Pressable
-                  key={profile}
-                  onPress={() => updateFormData({ job: profile })}
+                  key={key}
+                  onPress={() => updateFormData({ job: key })}
                   style={[
                     styles.profileButton,
                     isSelected && styles.profileButtonSelected,
@@ -173,7 +160,7 @@ export default function Step1Profile({ isActive }: Step1ProfileProps) {
                       isSelected && styles.profileButtonTextSelected,
                     ]}
                   >
-                    {profile}
+                    {t(`step1.profiles.${key}`)}
                   </Text>
                 </Pressable>
               );
@@ -185,15 +172,15 @@ export default function Step1Profile({ isActive }: Step1ProfileProps) {
       {/* ── Family Situation ── */}
       <FadeInView active={isActive} delay={100}>
         <GlassCard style={styles.section}>
-          <Text style={styles.sectionTitle}>Situation familiale</Text>
+          <Text style={styles.sectionTitle}>{t('step1.familySituation')}</Text>
 
           <View style={styles.situationRow}>
-            {SITUATIONS.map((situation) => {
-              const isSelected = selectedSituation === situation;
+            {SITUATION_KEYS.map((key) => {
+              const isSelected = selectedSituation === key;
               return (
                 <Pressable
-                  key={situation}
-                  onPress={() => updateFormData({ situation })}
+                  key={key}
+                  onPress={() => updateFormData({ situation: key })}
                   style={[
                     styles.situationButton,
                     isSelected && styles.situationButtonSelected,
@@ -205,7 +192,7 @@ export default function Step1Profile({ isActive }: Step1ProfileProps) {
                       isSelected && styles.situationButtonTextSelected,
                     ]}
                   >
-                    {situation}
+                    {t(`step1.situations.${key}`)}
                   </Text>
                 </Pressable>
               );
@@ -220,12 +207,12 @@ export default function Step1Profile({ isActive }: Step1ProfileProps) {
           <View style={styles.inputRow}>
             {/* Age */}
             <View style={styles.inputGroup}>
-              <Text style={styles.inputLabel}>Âge</Text>
+              <Text style={styles.inputLabel}>{t('step1.age')}</Text>
               <TextInput
                 style={styles.textInput}
                 value={age}
                 onChangeText={(value) => updateFormData({ age: value })}
-                placeholder="Ex: 32"
+                placeholder={t('step1.agePlaceholder')}
                 placeholderTextColor={WZ.textMuted}
                 keyboardType="numeric"
                 maxLength={3}
@@ -234,12 +221,12 @@ export default function Step1Profile({ isActive }: Step1ProfileProps) {
 
             {/* Dependents */}
             <View style={styles.inputGroup}>
-              <Text style={styles.inputLabel}>Personnes à charge</Text>
+              <Text style={styles.inputLabel}>{t('step1.dependents')}</Text>
               <TextInput
                 style={styles.textInput}
                 value={dependents}
                 onChangeText={(value) => updateFormData({ dependents: value })}
-                placeholder="Ex: 2"
+                placeholder={t('step1.dependentsPlaceholder')}
                 placeholderTextColor={WZ.textMuted}
                 keyboardType="numeric"
                 maxLength={2}
@@ -254,7 +241,7 @@ export default function Step1Profile({ isActive }: Step1ProfileProps) {
         <GlassCard style={styles.section}>
           <View style={styles.sectionHeader}>
             <Globe size={18} color={WZ.accent} />
-            <Text style={styles.sectionTitle}>Pays de résidence</Text>
+            <Text style={styles.sectionTitle}>{t('step1.countryOfResidence')}</Text>
           </View>
 
           <Pressable
@@ -313,7 +300,7 @@ export default function Step1Profile({ isActive }: Step1ProfileProps) {
         <GlassCard style={styles.section}>
           <View style={styles.sectionHeader}>
             <Banknote size={18} color={WZ.gold} />
-            <Text style={styles.sectionTitle}>Devise</Text>
+            <Text style={styles.sectionTitle}>{t('step1.currency')}</Text>
           </View>
 
           <Pressable
@@ -362,7 +349,7 @@ export default function Step1Profile({ isActive }: Step1ProfileProps) {
         <GlassCard style={styles.section}>
           <View style={styles.sectionHeader}>
             <MapPin size={18} color={WZ.neonLime} />
-            <Text style={styles.sectionTitle}>Zone de résidence</Text>
+            <Text style={styles.sectionTitle}>{t('step1.residenceZone')}</Text>
           </View>
 
           <View style={styles.toggleRow}>
@@ -393,7 +380,7 @@ export default function Step1Profile({ isActive }: Step1ProfileProps) {
         <GlassCard style={styles.section}>
           <View style={styles.sectionHeader}>
             <Briefcase size={18} color={WZ.gold} />
-            <Text style={styles.sectionTitle}>Source principale de revenus</Text>
+            <Text style={styles.sectionTitle}>{t('step1.mainIncomeSource')}</Text>
           </View>
 
           <View style={styles.incomeSourceGrid}>
@@ -424,10 +411,10 @@ export default function Step1Profile({ isActive }: Step1ProfileProps) {
         <GlassCard style={styles.section}>
           <View style={styles.sectionHeader}>
             <Users size={18} color={WZ.neonPurple} />
-            <Text style={styles.sectionTitle}>Obligations familiales élargies</Text>
+            <Text style={styles.sectionTitle}>{t('step1.extendedFamilyObligations')}</Text>
           </View>
           <Text style={styles.sectionSubtitle}>
-            Participez-vous à des tontines, envois d'argent à la famille élargie, ou autres solidarités communautaires ?
+            {t('step1.extendedFamilyDesc')}
           </Text>
 
           <View style={styles.toggleRow}>
@@ -439,7 +426,7 @@ export default function Step1Profile({ isActive }: Step1ProfileProps) {
                 styles.toggleButtonText,
                 extendedFamily && styles.toggleButtonTextSelected,
               ]}>
-                Oui
+                {t('step1.yes')}
               </Text>
             </Pressable>
             <Pressable
@@ -450,7 +437,7 @@ export default function Step1Profile({ isActive }: Step1ProfileProps) {
                 styles.toggleButtonText,
                 !extendedFamily && styles.toggleButtonTextSelected,
               ]}>
-                Non
+                {t('step1.no')}
               </Text>
             </Pressable>
           </View>
@@ -460,7 +447,7 @@ export default function Step1Profile({ isActive }: Step1ProfileProps) {
       {/* ── Tip ── */}
       <FadeInView active={isActive} delay={500}>
         <TipBox
-          text="Ces informations permettent de personnaliser vos recommandations financières et d'adapter les calculs à votre situation réelle, où que vous soyez dans le monde."
+          text={t('step1.tip')}
           style={styles.tipBox}
         />
       </FadeInView>

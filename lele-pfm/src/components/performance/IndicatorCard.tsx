@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import {
   PiggyBank,
   Target,
@@ -27,6 +28,7 @@ interface Props {
 }
 
 export function IndicatorCard({ indicator, year }: Props) {
+  const { t } = useTranslation('performance');
   const Icon = ICON_MAP[indicator.icon] ?? HelpCircle;
   const epr = year === 1 ? indicator.eprN1 : year === 2 ? indicator.eprN2 : indicator.eprN3;
   const monthly = year === 1 ? indicator.monthlyTargetN1 : year === 2 ? indicator.monthlyTargetN2 : indicator.monthlyTargetN3;
@@ -52,7 +54,7 @@ export function IndicatorCard({ indicator, year }: Props) {
 
       {/* Objectif annuel */}
       <View style={styles.targetRow}>
-        <Text style={styles.targetLabel}>Objectif An {year}</Text>
+        <Text style={styles.targetLabel}>{t('indicatorCard.yearGoal', { year })}</Text>
         <Text style={[styles.targetValue, { color: indicator.color }]}>
           {formatCurrency(epr)}
         </Text>
@@ -60,13 +62,13 @@ export function IndicatorCard({ indicator, year }: Props) {
 
       {/* Objectif mensuel */}
       <View style={styles.targetRow}>
-        <Text style={styles.targetLabel}>Par mois</Text>
+        <Text style={styles.targetLabel}>{t('indicatorCard.perMonth')}</Text>
         <Text style={styles.monthlyValue}>{formatCurrency(monthly)}</Text>
       </View>
 
       {/* Barres trimestrielles */}
       <View style={styles.quarterlyContainer}>
-        <Text style={styles.quarterlyTitle}>Répartition trimestrielle</Text>
+        <Text style={styles.quarterlyTitle}>{t('indicatorCard.quarterlyDistribution')}</Text>
         <View style={styles.quarterlyRow}>
           {(['T1', 'T2', 'T3', 'T4'] as const).map((q, i) => {
             const val = quarterly[q];
@@ -98,7 +100,7 @@ export function IndicatorCard({ indicator, year }: Props) {
 
       {/* Poids brut */}
       <View style={styles.weightRow}>
-        <Text style={styles.weightLabel}>Besoin d'amélioration</Text>
+        <Text style={styles.weightLabel}>{t('indicatorCard.improvementNeed')}</Text>
         <View style={styles.weightBar}>
           <View
             style={[

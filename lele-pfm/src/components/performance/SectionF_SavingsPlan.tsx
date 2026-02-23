@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { ProgressRing } from './ProgressRing';
 import { PerfGlassCard, PF } from './shared';
 import { formatCurrency, formatPercent } from '@/services/format-helpers';
@@ -22,12 +23,13 @@ interface SectionFProps {
 }
 
 export function SectionF_SavingsPlan(props: SectionFProps) {
+  const { t } = useTranslation('performance');
   const pobColor = props.pob >= 70 ? PF.green : props.pob >= 40 ? PF.orange : PF.red;
 
   const rows = [
-    { label: 'An 1', epr: props.eprN1, epargne: props.epargneN1, discr: props.discretionnaireN1, monthly: props.monthlyTargetN1 },
-    { label: 'An 2', epr: props.eprN2, epargne: props.epargneN2, discr: props.discretionnaireN2, monthly: props.monthlyTargetN2 },
-    { label: 'An 3', epr: props.eprN3, epargne: props.epargneN3, discr: props.discretionnaireN3, monthly: props.monthlyTargetN3 },
+    { label: t('drivingDashboard.year', { n: 1 }), epr: props.eprN1, epargne: props.epargneN1, discr: props.discretionnaireN1, monthly: props.monthlyTargetN1 },
+    { label: t('drivingDashboard.year', { n: 2 }), epr: props.eprN2, epargne: props.epargneN2, discr: props.discretionnaireN2, monthly: props.monthlyTargetN2 },
+    { label: t('drivingDashboard.year', { n: 3 }), epr: props.eprN3, epargne: props.epargneN3, discr: props.discretionnaireN3, monthly: props.monthlyTargetN3 },
   ];
 
   return (
@@ -37,16 +39,16 @@ export function SectionF_SavingsPlan(props: SectionFProps) {
         <ProgressRing progress={props.pob} size={100} strokeWidth={10} color={pobColor}>
           <View style={{ alignItems: 'center' }}>
             <Text style={[styles.pobValue, { color: pobColor }]}>{formatPercent(props.pob, 0)}</Text>
-            <Text style={styles.pobLabel}>Succès</Text>
+            <Text style={styles.pobLabel}>{t('savingsPlan.success')}</Text>
           </View>
         </ProgressRing>
         <View style={styles.pobInfo}>
-          <Text style={styles.infoLabel}>Probabilité de cashback</Text>
+          <Text style={styles.infoLabel}>{t('savingsPlan.cashbackProbability')}</Text>
           <Text style={styles.infoHint}>
-            {props.pob >= 70 ? 'Vous êtes sur la bonne voie !' : props.pob >= 40 ? 'Des progrès sont possibles' : 'Il faut agir rapidement'}
+            {props.pob >= 70 ? t('savingsPlan.onTrack') : props.pob >= 40 ? t('savingsPlan.canImprove') : t('savingsPlan.actFast')}
           </Text>
           <View style={{ marginTop: 8 }}>
-            <Text style={styles.infoLabel}>Impact de l'inflation</Text>
+            <Text style={styles.infoLabel}>{t('savingsPlan.inflationImpact')}</Text>
             <Text style={[styles.infoValue, { color: PF.cyan }]}>{formatCurrency(props.inflationAdjusted)}</Text>
           </View>
         </View>
@@ -57,10 +59,10 @@ export function SectionF_SavingsPlan(props: SectionFProps) {
         {/* Header */}
         <View style={styles.tableHeader}>
           <Text style={[styles.th, { flex: 0.8 }]}></Text>
-          <Text style={styles.th}>Cashback</Text>
-          <Text style={styles.th}>Booste épargne</Text>
-          <Text style={styles.th}>Booste plaisirs</Text>
-          <Text style={styles.th}>Mensuel</Text>
+          <Text style={styles.th}>{t('savingsPlan.cashback')}</Text>
+          <Text style={styles.th}>{t('savingsPlan.boostSavings')}</Text>
+          <Text style={styles.th}>{t('savingsPlan.boostPleasures')}</Text>
+          <Text style={styles.th}>{t('savingsPlan.monthly')}</Text>
         </View>
         {/* Rows */}
         {rows.map((row) => (

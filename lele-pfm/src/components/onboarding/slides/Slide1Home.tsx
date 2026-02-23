@@ -1,16 +1,19 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useTranslation } from 'react-i18next';
 import { OB, FadeInView, ZoomInView, OBGlassCard, neonGlow } from '../shared';
 
-const comparisons = [
-  { avant: 'Tu depenses et tu perds', apres: 'Tu depenses et tu gagnes', icon: '💸' },
-  { avant: 'Tu subis tes fins de mois', apres: 'Tu construis ton pactole', icon: '🏦' },
-  { avant: 'Tu coupes sans savoir', apres: 'On te montre ou agir', icon: '🎯' },
-  { avant: 'Zero methode', apres: 'Un plan sur 3 ans', icon: '📈' },
-];
-
 export default function Slide1Home({ isActive }: { isActive: boolean }) {
+  const { t } = useTranslation('onboarding');
+
+  const comparisons = [
+    { avant: t('slide1.comp1Before'), apres: t('slide1.comp1After'), icon: '💸' },
+    { avant: t('slide1.comp2Before'), apres: t('slide1.comp2After'), icon: '🏦' },
+    { avant: t('slide1.comp3Before'), apres: t('slide1.comp3After'), icon: '🎯' },
+    { avant: t('slide1.comp4Before'), apres: t('slide1.comp4After'), icon: '📈' },
+  ];
+
   return (
     <LinearGradient colors={[OB.darkBg, OB.darkBgAlt]} style={styles.container}>
       {isActive && (
@@ -25,15 +28,15 @@ export default function Slide1Home({ isActive }: { isActive: boolean }) {
           {/* Title */}
           <FadeInView active={isActive} delay={300}>
             <Text style={styles.title}>
-              Tu depenses.{'\n'}
-              <Text style={styles.titleGradient}>Et si tu gagnais en depensant ?</Text>
+              {t('slide1.title')}{'\n'}
+              <Text style={styles.titleGradient}>{t('slide1.titleHighlight')}</Text>
             </Text>
           </FadeInView>
 
           {/* Subtitle */}
           <FadeInView active={isActive} delay={500}>
             <Text style={styles.subtitle}>
-              LELE PFM transforme tes depenses en richesse.
+              {t('slide1.subtitle')}
             </Text>
           </FadeInView>
 
@@ -41,8 +44,8 @@ export default function Slide1Home({ isActive }: { isActive: boolean }) {
           <FadeInView active={isActive} delay={700} style={styles.compBox}>
             <OBGlassCard style={styles.compBoxInner}>
             <View style={styles.compHeader}>
-              <Text style={[styles.compHeaderText, { color: OB.textMuted }]}>Aujourd'hui</Text>
-              <Text style={[styles.compHeaderText, { color: OB.blue, ...neonGlow(OB.accent) }]}>Avec LELE</Text>
+              <Text style={[styles.compHeaderText, { color: OB.textMuted }]}>{t('slide1.headerBefore')}</Text>
+              <Text style={[styles.compHeaderText, { color: OB.blue, ...neonGlow(OB.accent) }]}>{t('slide1.headerAfter')}</Text>
             </View>
             {comparisons.map((c, i) => (
               <FadeInView key={c.icon} active={isActive} delay={800 + i * 100} duration={400} from="top" style={[styles.compRow, i < comparisons.length - 1 && styles.compRowBorder]}>

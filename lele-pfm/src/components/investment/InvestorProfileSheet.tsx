@@ -9,6 +9,7 @@ import {
   useWindowDimensions,
 } from 'react-native';
 import { X, TrendingUp, Shield, Zap, Clock, Calendar, Hourglass } from 'lucide-react-native';
+import { useTranslation } from 'react-i18next';
 import { useInvestmentStore } from '@/stores/investment-store';
 import { useWizardStore } from '@/stores/wizard-store';
 import { useEngineStore } from '@/stores/engine-store';
@@ -55,6 +56,7 @@ function ChoiceCard({ icon, label, description, selected, color, onPress, compac
 }
 
 export function InvestorProfileSheet({ visible, onClose }: Props) {
+  const { t } = useTranslation('app');
   const setInvestorProfile = useInvestmentStore((s) => s.setInvestorProfile);
   const setAllocations = useInvestmentStore((s) => s.setAllocations);
   const existingProfile = useInvestmentStore((s) => s.investorProfile);
@@ -118,13 +120,13 @@ export function InvestorProfileSheet({ visible, onClose }: Props) {
           <View style={[styles.header, isSmall && { paddingHorizontal: 12, paddingTop: 12 }]}>
             <View style={styles.handle} />
             <View style={styles.headerRow}>
-              <Text style={[styles.title, isSmall && { fontSize: 16 }]}>Profil investisseur</Text>
+              <Text style={[styles.title, isSmall && { fontSize: 16 }]}>{t('investment.profileTitle')}</Text>
               <Pressable onPress={onClose} style={styles.closeBtn}>
                 <X size={isSmall ? 18 : 20} color="#A1A1AA" />
               </Pressable>
             </View>
             <Text style={[styles.subtitle, isSmall && { fontSize: 11 }]}>
-              Configurez votre profil pour recevoir des recommandations personnalisées
+              {t('investment.profileSubtitle')}
             </Text>
           </View>
 
@@ -135,13 +137,13 @@ export function InvestorProfileSheet({ visible, onClose }: Props) {
           >
             {/* Risk Tolerance */}
             <Text style={[styles.sectionTitle, isSmall && { fontSize: 13, marginTop: 12 }]}>
-              Tolérance au risque
+              {t('investment.riskTolerance')}
             </Text>
             <View style={styles.choices}>
               <ChoiceCard
                 icon={<Shield size={iconSize} color="#4ADE80" />}
-                label="Prudent"
-                description="Capital garanti, rendement modéré"
+                label={t('investment.conservative')}
+                description={t('investment.conservativeDesc')}
                 selected={risk === 'conservative'}
                 color="#4ADE80"
                 onPress={() => setRisk('conservative')}
@@ -149,8 +151,8 @@ export function InvestorProfileSheet({ visible, onClose }: Props) {
               />
               <ChoiceCard
                 icon={<TrendingUp size={iconSize} color="#60A5FA" />}
-                label="Équilibré"
-                description="Mix sécurité et performance"
+                label={t('investment.balanced')}
+                description={t('investment.balancedDesc')}
                 selected={risk === 'moderate'}
                 color="#60A5FA"
                 onPress={() => setRisk('moderate')}
@@ -158,8 +160,8 @@ export function InvestorProfileSheet({ visible, onClose }: Props) {
               />
               <ChoiceCard
                 icon={<Zap size={iconSize} color="#FBBF24" />}
-                label="Dynamique"
-                description="Rendement élevé, volatilité acceptée"
+                label={t('investment.dynamic')}
+                description={t('investment.dynamicDesc')}
                 selected={risk === 'aggressive'}
                 color="#FBBF24"
                 onPress={() => setRisk('aggressive')}
@@ -169,13 +171,13 @@ export function InvestorProfileSheet({ visible, onClose }: Props) {
 
             {/* Horizon */}
             <Text style={[styles.sectionTitle, isSmall && { fontSize: 13 }]}>
-              Horizon d'investissement
+              {t('investment.investmentHorizon')}
             </Text>
             <View style={styles.choices}>
               <ChoiceCard
                 icon={<Clock size={iconSize} color="#FB923C" />}
-                label="Court terme"
-                description="Moins de 2 ans"
+                label={t('investment.shortTerm')}
+                description={t('investment.shortTermDesc')}
                 selected={horizon === 'short'}
                 color="#FB923C"
                 onPress={() => setHorizon('short')}
@@ -183,8 +185,8 @@ export function InvestorProfileSheet({ visible, onClose }: Props) {
               />
               <ChoiceCard
                 icon={<Calendar size={iconSize} color="#A78BFA" />}
-                label="Moyen terme"
-                description="2 à 5 ans"
+                label={t('investment.mediumTerm')}
+                description={t('investment.mediumTermDesc')}
                 selected={horizon === 'medium'}
                 color="#A78BFA"
                 onPress={() => setHorizon('medium')}
@@ -192,8 +194,8 @@ export function InvestorProfileSheet({ visible, onClose }: Props) {
               />
               <ChoiceCard
                 icon={<Hourglass size={iconSize} color="#22D3EE" />}
-                label="Long terme"
-                description="Plus de 5 ans"
+                label={t('investment.longTerm')}
+                description={t('investment.longTermDesc')}
                 selected={horizon === 'long'}
                 color="#22D3EE"
                 onPress={() => setHorizon('long')}
@@ -202,12 +204,12 @@ export function InvestorProfileSheet({ visible, onClose }: Props) {
             </View>
 
             {/* Sharia */}
-            <Text style={[styles.sectionTitle, isSmall && { fontSize: 13 }]}>Finance islamique</Text>
+            <Text style={[styles.sectionTitle, isSmall && { fontSize: 13 }]}>{t('investment.islamicFinance')}</Text>
             <View style={styles.choices}>
               <ChoiceCard
                 icon={<Text style={{ fontSize: isSmall ? 14 : 18, color: '#4ADE80' }}>{'\u2713'}</Text>}
-                label="Obligatoire"
-                description="Uniquement des produits conformes"
+                label={t('investment.required')}
+                description={t('investment.requiredDesc')}
                 selected={sharia === 'required'}
                 color="#4ADE80"
                 onPress={() => setSharia('required')}
@@ -215,8 +217,8 @@ export function InvestorProfileSheet({ visible, onClose }: Props) {
               />
               <ChoiceCard
                 icon={<Text style={{ fontSize: isSmall ? 14 : 18, color: '#60A5FA' }}>{'\u2248'}</Text>}
-                label="Préféré"
-                description="Privilégier si possible"
+                label={t('investment.preferred')}
+                description={t('investment.preferredDesc')}
                 selected={sharia === 'preferred'}
                 color="#60A5FA"
                 onPress={() => setSharia('preferred')}
@@ -224,8 +226,8 @@ export function InvestorProfileSheet({ visible, onClose }: Props) {
               />
               <ChoiceCard
                 icon={<Text style={{ fontSize: isSmall ? 14 : 18, color: '#A1A1AA' }}>{'\u00D7'}</Text>}
-                label="Indifférent"
-                description="Tous les produits"
+                label={t('investment.indifferent')}
+                description={t('investment.indifferentDesc')}
                 selected={sharia === 'not_required'}
                 color="#A1A1AA"
                 onPress={() => setSharia('not_required')}
@@ -235,7 +237,7 @@ export function InvestorProfileSheet({ visible, onClose }: Props) {
 
             {/* Investment Ratio */}
             <Text style={[styles.sectionTitle, isSmall && { fontSize: 13 }]}>
-              Part investissement ({investRatio}%)
+              {t('investment.investmentShare', { ratio: investRatio })}
             </Text>
             <View style={[styles.ratioCard, isSmall && { padding: 12 }]}>
               <View style={[styles.ratioRow, isMedium && { gap: 6 }]}>
@@ -262,13 +264,13 @@ export function InvestorProfileSheet({ visible, onClose }: Props) {
                 ))}
               </View>
               <Text style={[styles.ratioHint, isSmall && { fontSize: 10 }]}>
-                Épargne {67 - investRatio}% · Investissement {investRatio}% · Plaisir 33%
+                {t('investment.ratioHint', { savings: 67 - investRatio, investment: investRatio })}
               </Text>
             </View>
 
             {/* Save Button */}
             <Pressable onPress={handleSave} style={[styles.saveButton, isSmall && { paddingVertical: 14 }]}>
-              <Text style={[styles.saveText, isSmall && { fontSize: 14 }]}>Valider mon profil</Text>
+              <Text style={[styles.saveText, isSmall && { fontSize: 14 }]}>{t('investment.validateProfile')}</Text>
             </Pressable>
           </ScrollView>
         </View>

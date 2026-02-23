@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
+import { useTranslation } from 'react-i18next';
 import { useAppStore } from '@/stores/app.store';
 import { useWizardStore } from '@/stores/wizard-store';
 import { useEngineCalculation } from '@/hooks/useEngineCalculation';
@@ -9,6 +10,7 @@ import SetupWizardScreen from '@/components/setup-wizard/SetupWizardScreen';
 import { WZ } from '@/components/setup-wizard/shared';
 
 export default function SetupWizardRoute() {
+  const { t } = useTranslation('wizard');
   const router = useRouter();
   const setSetupComplete = useAppStore((s) => s.setSetupComplete);
   const formData = useWizardStore((s) => s.formData);
@@ -33,8 +35,8 @@ export default function SetupWizardRoute() {
       <View style={styles.overlay}>
         <View style={styles.loaderCard}>
           <ActivityIndicator size="large" color={WZ.accent} />
-          <Text style={styles.loaderText}>Analyse en cours...</Text>
-          <Text style={styles.loaderSub}>Calcul de votre profil financier</Text>
+          <Text style={styles.loaderText}>{t('loading.analyzing')}</Text>
+          <Text style={styles.loaderSub}>{t('loading.calculatingProfile')}</Text>
         </View>
       </View>
     );

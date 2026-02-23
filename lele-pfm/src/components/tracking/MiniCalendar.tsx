@@ -1,12 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { View, Text, Pressable, StyleSheet } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { ChevronLeft, ChevronRight } from 'lucide-react-native';
-
-const MONTH_NAMES = [
-  'Janvier', 'Fevrier', 'Mars', 'Avril', 'Mai', 'Juin',
-  'Juillet', 'Aout', 'Septembre', 'Octobre', 'Novembre', 'Decembre',
-];
-const DAY_LABELS = ['Lu', 'Ma', 'Me', 'Je', 'Ve', 'Sa', 'Di'];
 
 interface MiniCalendarProps {
   selected: Date | null;
@@ -15,6 +10,9 @@ interface MiniCalendarProps {
 }
 
 export function MiniCalendar({ selected, onSelect, minDate }: MiniCalendarProps) {
+  const { t } = useTranslation('tracking');
+  const monthNames = Array.from({ length: 12 }, (_, i) => t(`months.${i}`));
+  const dayLabels = Array.from({ length: 7 }, (_, i) => t(`daysShort.${i}`));
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   const min = minDate ?? today;
@@ -104,7 +102,7 @@ export function MiniCalendar({ selected, onSelect, minDate }: MiniCalendarProps)
           <ChevronLeft size={18} color={canGoBack ? '#E4E4E7' : '#3F3F46'} />
         </Pressable>
         <Text style={styles.monthLabel}>
-          {MONTH_NAMES[viewMonth]} {viewYear}
+          {monthNames[viewMonth]} {viewYear}
         </Text>
         <Pressable onPress={goForward} style={styles.navBtn}>
           <ChevronRight size={18} color="#E4E4E7" />
@@ -113,8 +111,8 @@ export function MiniCalendar({ selected, onSelect, minDate }: MiniCalendarProps)
 
       {/* Day-of-week headers */}
       <View style={styles.weekRow}>
-        {DAY_LABELS.map((d) => (
-          <View key={d} style={styles.dayHeaderCell}>
+        {dayLabels.map((d, i) => (
+          <View key={i} style={styles.dayHeaderCell}>
             <Text style={styles.dayHeaderText}>{d}</Text>
           </View>
         ))}

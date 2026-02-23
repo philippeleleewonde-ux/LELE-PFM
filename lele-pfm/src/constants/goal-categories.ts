@@ -29,6 +29,7 @@ export type GoalIcon =
 
 export interface GoalCategoryConfig {
   code: GoalIcon;
+  /** i18n key — use t(`tracking:${label}`) to get translated text */
   label: string;
   icon: typeof Plane;
   color: string;
@@ -37,61 +38,61 @@ export interface GoalCategoryConfig {
 export const GOAL_CATEGORIES: Record<GoalIcon, GoalCategoryConfig> = {
   voyage: {
     code: 'voyage',
-    label: 'Voyage',
+    label: 'goalCategories.voyage',
     icon: Plane,
     color: '#60A5FA',
   },
   maison: {
     code: 'maison',
-    label: 'Logement',
+    label: 'goalCategories.maison',
     icon: Home,
     color: '#4ADE80',
   },
   voiture: {
     code: 'voiture',
-    label: 'Vehicule',
+    label: 'goalCategories.voiture',
     icon: Car,
     color: '#FBBF24',
   },
   education: {
     code: 'education',
-    label: 'Education',
+    label: 'goalCategories.education',
     icon: GraduationCap,
     color: '#A78BFA',
   },
   cadeau: {
     code: 'cadeau',
-    label: 'Cadeau',
+    label: 'goalCategories.cadeau',
     icon: Gift,
     color: '#FB923C',
   },
   tech: {
     code: 'tech',
-    label: 'Tech',
+    label: 'goalCategories.tech',
     icon: Smartphone,
     color: '#22D3EE',
   },
   sante: {
     code: 'sante',
-    label: 'Sante',
+    label: 'goalCategories.sante',
     icon: Heart,
     color: '#F472B6',
   },
   luxe: {
     code: 'luxe',
-    label: 'Plaisir',
+    label: 'goalCategories.luxe',
     icon: Gem,
     color: '#FDE68A',
   },
   urgence: {
     code: 'urgence',
-    label: 'Urgence',
+    label: 'goalCategories.urgence',
     icon: Umbrella,
     color: '#34D399',
   },
   autre: {
     code: 'autre',
-    label: 'Autre',
+    label: 'goalCategories.autre',
     icon: Target,
     color: '#A1A1AA',
   },

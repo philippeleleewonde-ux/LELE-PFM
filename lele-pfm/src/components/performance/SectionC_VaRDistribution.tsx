@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { DonutChart } from '../charts/DonutChart';
 import { PerfGlassCard, PF } from './shared';
 import { VarDistribution } from '@/hooks/usePerformanceData';
@@ -10,10 +11,11 @@ interface SectionCProps {
 }
 
 export function SectionC_VaRDistribution({ data }: SectionCProps) {
+  const { t } = useTranslation('performance');
   const donutData = [
-    { label: 'Coûts invisibles', value: Math.abs(data.ul), color: PF.orange },
-    { label: 'Coûts visibles', value: Math.abs(data.el), color: PF.red },
-    { label: 'Variation', value: Math.abs(data.volatility) * 100, color: PF.violet },
+    { label: t('varDistribution.invisibleCosts'), value: Math.abs(data.ul), color: PF.orange },
+    { label: t('varDistribution.visibleCosts'), value: Math.abs(data.el), color: PF.red },
+    { label: t('varDistribution.variation'), value: Math.abs(data.volatility) * 100, color: PF.violet },
   ];
 
   return (
@@ -24,32 +26,32 @@ export function SectionC_VaRDistribution({ data }: SectionCProps) {
         size={150}
         strokeWidth={18}
         centerValue={formatCurrency(data.var95)}
-        centerLabel="Coût max."
+        centerLabel={t('varDistribution.maxCostLabel')}
       />
 
       {/* Summary card */}
       <PerfGlassCard style={styles.summaryCard}>
-        <Text style={styles.summaryTitle}>Votre coût maximum</Text>
+        <Text style={styles.summaryTitle}>{t('varDistribution.yourMaxCost')}</Text>
         <Text style={[styles.summaryValue, { color: PF.yellow }]}>
           {formatCurrency(data.var95)}
         </Text>
         <Text style={styles.summaryHint}>
-          C'est le montant maximum que votre gestion peut vous coûter.
+          {t('varDistribution.maxCostHint')}
         </Text>
       </PerfGlassCard>
 
       {/* Context info */}
       <View style={styles.infoRow}>
         <PerfGlassCard style={styles.infoCard}>
-          <Text style={styles.infoLabel}>Ajustement personnel</Text>
+          <Text style={styles.infoLabel}>{t('varDistribution.personalAdjustment')}</Text>
           <Text style={[styles.infoValue, { color: PF.accent }]}>{data.coefficientContextuel.toFixed(2)}</Text>
         </PerfGlassCard>
         <PerfGlassCard style={styles.infoCard}>
-          <Text style={styles.infoLabel}>Variation revenus</Text>
+          <Text style={styles.infoLabel}>{t('varDistribution.revenueVariation')}</Text>
           <Text style={[styles.infoValue, { color: PF.green }]}>{formatPercent(data.revenueVolatility)}</Text>
         </PerfGlassCard>
         <PerfGlassCard style={styles.infoCard}>
-          <Text style={styles.infoLabel}>Variation dépenses</Text>
+          <Text style={styles.infoLabel}>{t('varDistribution.expenseVariation')}</Text>
           <Text style={[styles.infoValue, { color: PF.orange }]}>{formatPercent(data.expenseVolatility)}</Text>
         </PerfGlassCard>
       </View>

@@ -2,16 +2,18 @@ import React from 'react';
 import { View, ScrollView, Text, Pressable } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Plus } from 'lucide-react-native';
+import { useTranslation } from 'react-i18next';
 import { GlassCard } from '../ui/GlassCard';
 import { NeonText, Caption, H2 } from '../ui/Typography';
 
 export function BalanceCards() {
+    const { t } = useTranslation('app');
     return (
         <View className="px-6 mb-8">
             <View className="flex-row justify-between items-center mb-4">
-                <H2>Comptes</H2>
+                <H2>{t('dashboard.accounts')}</H2>
                 <Pressable className="flex-row items-center gap-2 bg-white/10 px-3 py-1.5 rounded-full border border-white/5">
-                    <Text className="text-white text-xs font-semibold">Ajouter</Text>
+                    <Text className="text-white text-xs font-semibold">{t('dashboard.addAccount')}</Text>
                     <View className="bg-gold rounded-full p-0.5">
                         <Plus size={12} color="black" />
                     </View>
@@ -48,7 +50,7 @@ export function BalanceCards() {
                     <View className="absolute right-0 top-0 bottom-0 w-1/3 bg-black/20" />
                     <View className="p-1">
                         <NeonText color="cyan" className="text-3xl font-bold tracking-widest">0 FCFA</NeonText>
-                        <Caption className="text-white/60">Solde total</Caption>
+                        <Caption className="text-white/60">{t('dashboard.totalBalance')}</Caption>
                     </View>
                     <View className="flex-row justify-between items-end">
                         <View>

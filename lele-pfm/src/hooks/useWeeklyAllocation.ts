@@ -12,7 +12,7 @@
  *   ├── Niveau 2 : SURPLUS = economies - EPR
  *   │
  *   │   ├── Poche PROJETS (objectifs d'epargne)
- *   │   │   = contributions aux goals cette semaine
+ *   │   │   = contributions manuelles + auto-allocations
  *   │   │   Plafonne au surplus disponible
  *   │   │
  *   │   ├── Poche EPARGNE (67% du reste)
@@ -26,7 +26,7 @@
  */
 
 import { useMemo } from 'react';
-import { useSavingsGoalStore } from '@/stores/savings-goal-store';
+import { useSavingsGoalStore, AllocationMode } from '@/stores/savings-goal-store';
 import { useImpulseStore } from '@/stores/impulse-store';
 import { useInvestmentStore } from '@/stores/investment-store';
 import { WeeklySavingsResult } from '@/domain/calculators/weekly-savings-engine';
@@ -46,6 +46,16 @@ export interface GoalAllocation {
   amount: number;
 }
 
+export interface PendingAutoAllocation {
+  goalId: string;
+  goalName: string;
+  desiredAmount: number;
+  allocatedAmount: number;
+  mode: AllocationMode;
+  weekKey: string;
+  alreadyDone: boolean;
+}
+
 export interface WeeklyAllocation {
   // ── Source ──
   economies: number;
@@ -62,7 +72,11 @@ export interface WeeklyAllocation {
   goalAllocations: GoalAllocation[];
   totalGoals: number;
 
-  // ── Distribution du reste (surplus - goals) ──
+  // ── Auto-allocations (pur calcul, pas de side-effect) ──
+  pendingAutoAllocations: PendingAutoAllocation[];
+  totalPendingAuto: number;
+
+  // ── Distribution du reste (surplus - goals - pendingAuto) ──
   remainder: number;
   epargne: number;        // 67% du remainder
   investissement: number; // part investissement (si profil investisseur)
@@ -101,7 +115,7 @@ export function useWeeklyAllocation(
     // ── Niveau 1 : EPR ──
     const eprAtteint = eprProvision >= weeklyTarget;
 
-    // ── Niveau 2 : Goal contributions this week ──
+    // ── Niveau 2 : Manual goal contributions this week ──
     const goalAllocations: GoalAllocation[] = [];
     let rawGoalTotal = 0;
 
@@ -127,8 +141,87 @@ export function useWeeklyAllocation(
     // Cap goal contributions to surplus
     const totalGoals = Math.min(rawGoalTotal, surplus);
 
+    // ── Niveau 2b : Auto-allocations (pure calculation) ──
+    const weekKey = `Auto S${week}-${year}`;
+    const pendingAutoAllocations: PendingAutoAllocation[] = [];
+
+    const activeAutoGoals = goals.filter(
+      (g) => !g.isCompleted && g.allocation && g.allocation.mode !== 'manual'
+    );
+
+    for (const goal of activeAutoGoals) {
+      const { allocation } = goal;
+      const totalContributed = goal.contributions.reduce((s, c) => s + c.amount, 0);
+      const remaining = Math.max(0, goal.targetAmount - totalContributed);
+      if (remaining <= 0) continue;
+
+      // Check if already done for this week
+      const alreadyDone = goal.contributions.some(
+        (c) => c.source === 'auto' && c.label === weekKey
+      );
+
+      let desiredAmount = 0;
+
+      switch (allocation.mode) {
+        case 'fixed':
+          desiredAmount = Math.min(allocation.fixedAmount ?? 0, remaining);
+          break;
+
+        case 'deadline': {
+          if (!goal.deadline) break;
+          const deadlineDate = new Date(goal.deadline);
+          const now = new Date();
+          const msPerWeek = 7 * 24 * 60 * 60 * 1000;
+          const weeksToDeadline = Math.max(1, Math.ceil((deadlineDate.getTime() - now.getTime()) / msPerWeek));
+          desiredAmount = Math.min(Math.ceil(remaining / weeksToDeadline), remaining);
+          break;
+        }
+
+        case 'percent':
+          desiredAmount = Math.min(
+            Math.round(surplus * (allocation.percentAmount ?? 0) / 100),
+            remaining
+          );
+          break;
+      }
+
+      if (desiredAmount > 0) {
+        pendingAutoAllocations.push({
+          goalId: goal.id,
+          goalName: goal.name,
+          desiredAmount,
+          allocatedAmount: desiredAmount, // will be prorated below if needed
+          mode: allocation.mode,
+          weekKey,
+          alreadyDone,
+        });
+      }
+    }
+
+    // Prorate if total desired exceeds available surplus (after manual goals)
+    const availableSurplusForAuto = Math.max(0, surplus - totalGoals);
+    const totalDesired = pendingAutoAllocations
+      .filter((p) => !p.alreadyDone)
+      .reduce((s, p) => s + p.desiredAmount, 0);
+
+    if (totalDesired > availableSurplusForAuto && totalDesired > 0) {
+      const ratio = availableSurplusForAuto / totalDesired;
+      for (const p of pendingAutoAllocations) {
+        if (!p.alreadyDone) {
+          p.allocatedAmount = Math.round(p.desiredAmount * ratio);
+        }
+      }
+    }
+
+    // Total pending auto (only not-yet-done entries count towards remainder reduction)
+    const totalPendingAuto = pendingAutoAllocations
+      .filter((p) => !p.alreadyDone)
+      .reduce((s, p) => s + p.allocatedAmount, 0);
+
     // ── Niveau 3 : Distribution du reste ──
-    const remainder = Math.max(0, surplus - totalGoals);
+    // Note: already-done auto allocations are already counted in goalAllocations
+    // since they exist as real contributions. Only pending ones reduce remainder.
+    const remainder = Math.max(0, surplus - totalGoals - totalPendingAuto);
     const investRatio = investmentRatio / 100;
     const effectiveEpargneRatio = EPARGNE_RATIO - investRatio;
 
@@ -147,7 +240,7 @@ export function useWeeklyAllocation(
 
     // ── Informationnel ──
     const economiesIfNoImpulse = economies + impulseTotal;
-    const availableForGoals = Math.max(0, surplus - totalGoals);
+    const availableForGoals = Math.max(0, surplus - totalGoals - totalPendingAuto);
 
     // Total epargne = EPR provision + epargne from distribution
     const totalEpargne = eprProvision + epargne;
@@ -160,6 +253,8 @@ export function useWeeklyAllocation(
       surplus,
       goalAllocations,
       totalGoals,
+      pendingAutoAllocations,
+      totalPendingAuto,
       remainder,
       epargne,
       investissement,

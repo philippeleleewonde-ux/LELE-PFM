@@ -6,6 +6,7 @@
 import React, { useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, Animated } from 'react-native';
 import { Flame, Trophy } from 'lucide-react-native';
+import { useTranslation } from 'react-i18next';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { useWeeklyEvolution } from '@/hooks/useWeeklyEvolution';
 
@@ -14,7 +15,7 @@ import { useWeeklyEvolution } from '@/hooks/useWeeklyEvolution';
 interface StreakRowDef {
   key: string;
   color: string;
-  label: (n: number) => string;
+  labelKey: string;
   getValue: (streaks: {
     budgetStreak: number;
     savingsStreak: number;
@@ -26,19 +27,19 @@ const STREAK_ROWS: StreakRowDef[] = [
   {
     key: 'budget',
     color: '#4ADE80',
-    label: (n) => `${n} semaine${n > 1 ? 's' : ''} budget respecte`,
+    labelKey: 'evolution.budgetStreak',
     getValue: (s) => s.budgetStreak,
   },
   {
     key: 'savings',
     color: '#60A5FA',
-    label: (n) => `${n} semaine${n > 1 ? 's' : ''} epargne positive`,
+    labelKey: 'evolution.savingsStreak',
     getValue: (s) => s.savingsStreak,
   },
   {
     key: 'score',
     color: '#FBBF24',
-    label: (n) => `${n} semaine${n > 1 ? 's' : ''} score > 60`,
+    labelKey: 'evolution.scoreStreak',
     getValue: (s) => s.scoreAbove60Streak,
   },
 ];
@@ -46,6 +47,7 @@ const STREAK_ROWS: StreakRowDef[] = [
 // ─── Component ───
 
 export function StreaksCard() {
+  const { t } = useTranslation('app');
   const { streaks, totalWeeks, hasData } = useWeeklyEvolution();
   const fadeAnim = useRef(new Animated.Value(0)).current;
 
@@ -68,7 +70,7 @@ export function StreaksCard() {
         {/* Header */}
         <View style={styles.header}>
           <Flame size={18} color="#FB923C" />
-          <Text style={styles.headerLabel}>SERIES EN COURS</Text>
+          <Text style={styles.headerLabel}>{t('evolution.streaksHeader')}</Text>
         </View>
 
         {/* Streak rows */}
@@ -91,7 +93,7 @@ export function StreaksCard() {
                     isMuted && styles.streakTextMuted,
                   ]}
                 >
-                  {row.label(value)}
+                  {t(row.labelKey, { count: value })}
                 </Text>
               </View>
             );
@@ -104,8 +106,7 @@ export function StreaksCard() {
             <View style={styles.recordRow}>
               <Trophy size={14} color="#FFD700" />
               <Text style={styles.recordText}>
-                Record : {streaks.bestBudgetStreak} semaine
-                {streaks.bestBudgetStreak > 1 ? 's' : ''} (budget)
+                {t('evolution.recordStreak', { count: streaks.bestBudgetStreak })}
               </Text>
             </View>
           </View>

@@ -1,11 +1,13 @@
 import React, { useMemo, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, Pressable } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { PF, PerfGlassCard } from './shared';
 import { useInvestmentStore } from '@/stores/investment-store';
 import { stressTestPortfolio } from '@/domain/calculators/stress-test-engine';
 import { HISTORICAL_CRISES } from '@/domain/models/historical-scenarios';
 
 export function SectionT_StressTest() {
+  const { t } = useTranslation('performance');
   const allocations = useInvestmentStore((s) => s.allocations);
   const [selectedId, setSelectedId] = useState(HISTORICAL_CRISES[0].id);
 
@@ -20,7 +22,7 @@ export function SectionT_StressTest() {
     return (
       <PerfGlassCard>
         <Text style={styles.emptyText}>
-          Configurez votre portefeuille d'investissement pour simuler les stress tests historiques.
+          {t('stressTest.configurePortfolio')}
         </Text>
       </PerfGlassCard>
     );
@@ -68,21 +70,21 @@ export function SectionT_StressTest() {
           </PerfGlassCard>
 
           <PerfGlassCard>
-            <Text style={styles.sectionTitle}>Impact sur votre portefeuille</Text>
+            <Text style={styles.sectionTitle}>{t('stressTest.portfolioImpact')}</Text>
 
             {/* Big drawdown number */}
             <Text style={[styles.bigNumber, { color: verdictColor }]}>
               {selectedResult.portfolioMaxDrawdown.toFixed(1)}%
             </Text>
-            <Text style={styles.bigLabel}>Perte maximale</Text>
+            <Text style={styles.bigLabel}>{t('stressTest.maxLoss')}</Text>
 
             {/* Recovery and total return */}
             <View style={styles.metricsRow}>
               <View style={styles.metricItem}>
                 <Text style={styles.metricValue}>
-                  {selectedResult.portfolioRecoveryMonths.toFixed(0)} mois
+                  {selectedResult.portfolioRecoveryMonths.toFixed(0)} {t('stressTest.months')}
                 </Text>
-                <Text style={styles.metricLabel}>Recuperation</Text>
+                <Text style={styles.metricLabel}>{t('stressTest.recovery')}</Text>
               </View>
               <View style={styles.metricItem}>
                 <Text
@@ -97,7 +99,7 @@ export function SectionT_StressTest() {
                   {selectedResult.portfolioTotalReturn >= 0 ? '+' : ''}
                   {selectedResult.portfolioTotalReturn.toFixed(1)}%
                 </Text>
-                <Text style={styles.metricLabel}>Rendement total</Text>
+                <Text style={styles.metricLabel}>{t('stressTest.totalReturn')}</Text>
               </View>
             </View>
 
@@ -110,10 +112,10 @@ export function SectionT_StressTest() {
             >
               <Text style={[styles.verdictText, { color: verdictColor }]}>
                 {selectedResult.verdict === 'survives'
-                  ? 'SURVIT'
+                  ? t('stressTest.survives')
                   : selectedResult.verdict === 'damaged'
-                    ? 'ENDOMMAGE'
-                    : 'CRITIQUE'}
+                    ? t('stressTest.damaged')
+                    : t('stressTest.criticalVerdict')}
               </Text>
             </View>
             <Text style={styles.verdictExpl}>{selectedResult.verdictText}</Text>
@@ -121,18 +123,18 @@ export function SectionT_StressTest() {
 
           {/* Simplified path visualization */}
           <PerfGlassCard>
-            <Text style={styles.sectionTitle}>Trajectoire simplifiee</Text>
+            <Text style={styles.sectionTitle}>{t('stressTest.simplifiedPath')}</Text>
             <View style={styles.pathRow}>
               <View style={styles.pathNode}>
                 <Text style={styles.pathValue}>100</Text>
-                <Text style={styles.pathLabel}>Depart</Text>
+                <Text style={styles.pathLabel}>{t('stressTest.start')}</Text>
               </View>
               <Text style={styles.pathArrow}>--v--</Text>
               <View style={styles.pathNode}>
                 <Text style={[styles.pathValue, { color: PF.red }]}>
                   {(100 + selectedResult.portfolioMaxDrawdown).toFixed(0)}
                 </Text>
-                <Text style={styles.pathLabel}>Creux</Text>
+                <Text style={styles.pathLabel}>{t('stressTest.trough')}</Text>
               </View>
               <Text style={styles.pathArrow}>--^--</Text>
               <View style={styles.pathNode}>
@@ -147,7 +149,7 @@ export function SectionT_StressTest() {
                 >
                   {(100 + selectedResult.portfolioTotalReturn).toFixed(0)}
                 </Text>
-                <Text style={styles.pathLabel}>Final</Text>
+                <Text style={styles.pathLabel}>{t('stressTest.final')}</Text>
               </View>
             </View>
           </PerfGlassCard>
@@ -155,7 +157,7 @@ export function SectionT_StressTest() {
           {/* Best/worst asset */}
           <PerfGlassCard>
             <View style={styles.assetRow}>
-              <Text style={styles.assetLabel}>Meilleur actif</Text>
+              <Text style={styles.assetLabel}>{t('stressTest.bestAsset')}</Text>
               <Text style={[styles.assetValue, { color: PF.green }]}>
                 {selectedResult.bestAsset.name} (+{selectedResult.bestAsset.totalReturn}%)
               </Text>

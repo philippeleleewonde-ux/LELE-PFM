@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { PF, PerfGlassCard } from './shared';
 import { useInvestmentStore } from '@/stores/investment-store';
 import {
@@ -7,23 +8,23 @@ import {
   type ScenarioProtection,
 } from '@/domain/calculators/all-weather-engine';
 
-// ─── Asset label map (for adjustments display) ───
+// ─── Asset label keys (for adjustments display via i18n) ───
 
-const ASSET_LABELS: Record<string, string> = {
-  savings_account: 'Compte \u00e9pargne',
-  term_deposit: 'D\u00e9p\u00f4t \u00e0 terme',
-  government_bonds: 'Obligations d\'\u00c9tat',
-  corporate_bonds: 'Obligations entreprise',
-  stock_index: 'Indice boursier',
-  local_stocks: 'Actions locales',
-  real_estate_fund: 'Fonds immobilier',
-  gold: 'Or',
-  crypto: 'Crypto',
-  tontine: 'Tontine',
-  micro_enterprise: 'Micro-entreprise',
-  money_market: 'March\u00e9 mon\u00e9taire',
-  sukuk: 'Sukuk',
-  mutual_fund: 'Fonds commun',
+const ASSET_LABEL_KEYS: Record<string, string> = {
+  savings_account: 'allWeather.assetLabels.savings_account',
+  term_deposit: 'allWeather.assetLabels.term_deposit',
+  government_bonds: 'allWeather.assetLabels.government_bonds',
+  corporate_bonds: 'allWeather.assetLabels.corporate_bonds',
+  stock_index: 'allWeather.assetLabels.stock_index',
+  local_stocks: 'allWeather.assetLabels.local_stocks',
+  real_estate_fund: 'allWeather.assetLabels.real_estate_fund',
+  gold: 'allWeather.assetLabels.gold',
+  crypto: 'allWeather.assetLabels.crypto',
+  tontine: 'allWeather.assetLabels.tontine',
+  micro_enterprise: 'allWeather.assetLabels.micro_enterprise',
+  money_market: 'allWeather.assetLabels.money_market',
+  sukuk: 'allWeather.assetLabels.sukuk',
+  mutual_fund: 'allWeather.assetLabels.mutual_fund',
 };
 
 // ─── Status rendering ───
@@ -47,6 +48,7 @@ function statusColor(status: ScenarioProtection['status']): string {
 // ─── Component ───
 
 export function SectionP_AllWeather() {
+  const { t } = useTranslation('performance');
   const allocations = useInvestmentStore((s) => s.allocations);
   const investorProfile = useInvestmentStore((s) => s.investorProfile);
 
@@ -59,7 +61,7 @@ export function SectionP_AllWeather() {
     return (
       <PerfGlassCard>
         <Text style={styles.emptyText}>
-          Configurez votre profil investisseur pour voir l'analyse All-Weather.
+          {t('allWeather.configureProfile')}
         </Text>
       </PerfGlassCard>
     );
@@ -69,7 +71,7 @@ export function SectionP_AllWeather() {
     <View style={styles.container}>
       {/* Scenario resilience */}
       <PerfGlassCard style={styles.section}>
-        <Text style={styles.sectionTitle}>R\u00e9sistance aux sc\u00e9narios macro</Text>
+        <Text style={styles.sectionTitle}>{t('allWeather.macroResilience')}</Text>
         <View style={styles.scenarioList}>
           {analysis.scenarios.map((s) => (
             <View key={s.scenario} style={styles.scenarioRow}>
@@ -95,7 +97,7 @@ export function SectionP_AllWeather() {
 
         {/* Overall score */}
         <View style={styles.overallRow}>
-          <Text style={styles.overallLabel}>Score global</Text>
+          <Text style={styles.overallLabel}>{t('globalScore')}</Text>
           <Text
             style={[
               styles.overallValue,
@@ -120,13 +122,13 @@ export function SectionP_AllWeather() {
       {/* Suggested adjustments */}
       {analysis.suggestedAdjustments.length > 0 && (
         <PerfGlassCard style={styles.section}>
-          <Text style={styles.sectionTitle}>Recommandations</Text>
+          <Text style={styles.sectionTitle}>{t('allWeather.recommendations')}</Text>
           <View style={styles.adjustmentList}>
             {analysis.suggestedAdjustments.map((adj) => (
               <View key={adj.asset} style={styles.adjustmentRow}>
                 <View style={styles.adjustmentHeader}>
                   <Text style={styles.adjustmentAsset}>
-                    {ASSET_LABELS[adj.asset] ?? adj.asset}
+                    {ASSET_LABEL_KEYS[adj.asset] ? t(ASSET_LABEL_KEYS[adj.asset]) : adj.asset}
                   </Text>
                   <View style={styles.adjustmentWeights}>
                     <Text style={styles.weightCurrent}>{adj.currentWeight}%</Text>

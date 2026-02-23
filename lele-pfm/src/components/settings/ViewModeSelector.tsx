@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, Pressable, StyleSheet } from 'react-native';
 import { BlurView } from 'expo-blur';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useTranslation } from 'react-i18next';
 import { useViewMode } from '@/hooks/useViewMode';
 import { ViewMode } from '@/stores/app.store';
 import { useInvestmentStore } from '@/stores/investment-store';
@@ -10,8 +11,8 @@ import { InvestorProfileSheet } from '@/components/investment/InvestorProfileShe
 interface ModeOption {
   mode: ViewMode;
   emoji: string;
-  label: string;
-  subtitle: string;
+  labelKey: string;
+  subtitleKey: string;
   color: string;
 }
 
@@ -19,27 +20,28 @@ const MODE_OPTIONS: ModeOption[] = [
   {
     mode: 'simple',
     emoji: '\u{1F7E2}',
-    label: 'Essentiel',
-    subtitle: 'Suivi simplifié de vos finances',
+    labelKey: 'settings.viewModes.simple',
+    subtitleKey: 'settings.viewModes.simpleSubtitle',
     color: '#4ADE80',
   },
   {
     mode: 'expert',
     emoji: '\u{1F535}',
-    label: 'Avancé',
-    subtitle: 'Toutes les métriques et analyses',
+    labelKey: 'settings.viewModes.expert',
+    subtitleKey: 'settings.viewModes.expertSubtitle',
     color: '#60A5FA',
   },
   {
     mode: 'investor',
     emoji: '\u{1F7E1}',
-    label: 'Placement',
-    subtitle: 'Économies + projections investissement',
+    labelKey: 'settings.viewModes.investor',
+    subtitleKey: 'settings.viewModes.investorSubtitle',
     color: '#FBBF24',
   },
 ];
 
 export function ViewModeSelector() {
+  const { t } = useTranslation('app');
   const { viewMode, setViewMode } = useViewMode();
   const investorProfile = useInvestmentStore((s) => s.investorProfile);
   const [showProfileSheet, setShowProfileSheet] = useState(false);
@@ -80,11 +82,11 @@ export function ViewModeSelector() {
               <View style={styles.topRow}>
                 <Text style={styles.emoji}>{opt.emoji}</Text>
                 <Text style={[styles.label, isActive && { color: opt.color }]}>
-                  {opt.label}
+                  {t(opt.labelKey)}
                 </Text>
               </View>
               <Text style={[styles.subtitle, isActive && { color: '#E4E4E7' }]}>
-                {opt.subtitle}
+                {t(opt.subtitleKey)}
               </Text>
               {isActive && (
                 <View style={[styles.activeDot, { backgroundColor: opt.color }]} />

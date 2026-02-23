@@ -9,7 +9,8 @@ import {
   StyleSheet,
   useWindowDimensions,
 } from 'react-native';
-import { X, PartyPopper, Info } from 'lucide-react-native';
+import { X, PartyPopper, Info, Zap } from 'lucide-react-native';
+import { useTranslation } from 'react-i18next';
 import { useSavingsGoalStore } from '@/stores/savings-goal-store';
 import { formatCurrency } from '@/services/format-helpers';
 import { AmountInput } from './AmountInput';
@@ -26,9 +27,13 @@ interface ContributeGoalModalProps {
 }
 
 export function ContributeGoalModal({ visible, goalId, goalName, remaining, onClose }: ContributeGoalModalProps) {
+  const { t } = useTranslation('tracking');
   const { width, height } = useWindowDimensions();
   const isSmall = width < 360;
   const addContribution = useSavingsGoalStore((s) => s.addContribution);
+  const goals = useSavingsGoalStore((s) => s.goals);
+  const goal = goalId ? goals.find((g) => g.id === goalId) : null;
+  const hasAutoAllocation = goal?.allocation && goal.allocation.mode !== 'manual';
   const translateY = useRef(new Animated.Value(height)).current;
 
   // Get available surplus from allocation waterfall
@@ -91,16 +96,16 @@ export function ContributeGoalModal({ visible, goalId, goalName, remaining, onCl
           {showCongrats ? (
             <View style={styles.congratsContainer}>
               <PartyPopper size={48} color="#FBBF24" />
-              <Text style={styles.congratsTitle}>Objectif atteint !</Text>
+              <Text style={styles.congratsTitle}>{t('goals.goalReached')}</Text>
               <Text style={styles.congratsText}>{goalName}</Text>
             </View>
           ) : (
             <>
               <View style={styles.header}>
                 <View style={styles.headerLeft}>
-                  <Text style={styles.title}>Contribuer</Text>
+                  <Text style={styles.title}>{t('goals.contribute')}</Text>
                   <Text style={styles.subtitle} numberOfLines={1}>
-                    {goalName} — Reste {formatCurrency(Math.max(0, remaining))}
+                    {goalName} — {t('goals.remaining', { amount: formatCurrency(Math.max(0, remaining)) })}
                   </Text>
                 </View>
                 <Pressable onPress={onClose} style={styles.closeBtn}>
@@ -109,12 +114,22 @@ export function ContributeGoalModal({ visible, goalId, goalName, remaining, onCl
               </View>
 
               <View style={[styles.body, { paddingHorizontal: isSmall ? 14 : 20 }]}>
+                {/* Auto-allocation banner */}
+                {hasAutoAllocation && (
+                  <View style={styles.autoBanner}>
+                    <Zap size={12} color="#A78BFA" />
+                    <Text style={styles.autoBannerText}>
+                      {t('goals.autoAllocationActive')}
+                    </Text>
+                  </View>
+                )}
+
                 {/* Surplus info */}
                 {availableSurplus > 0 && (
                   <View style={styles.surplusInfo}>
                     <Info size={12} color="#22D3EE" />
                     <Text style={styles.surplusText}>
-                      Surplus disponible : {formatCurrency(availableSurplus)}
+                      {t('goals.availableSurplus', { amount: formatCurrency(availableSurplus) })}
                     </Text>
                   </View>
                 )}
@@ -122,27 +137,27 @@ export function ContributeGoalModal({ visible, goalId, goalName, remaining, onCl
                   <View style={styles.surplusWarning}>
                     <Info size={12} color="#FBBF24" />
                     <Text style={styles.surplusWarningText}>
-                      Pas de surplus disponible cette semaine
+                      {t('goals.noSurplusAvailable')}
                     </Text>
                   </View>
                 )}
 
-                <Text style={styles.sectionLabel}>Montant</Text>
+                <Text style={styles.sectionLabel}>{t('addExpense.amount')}</Text>
                 <AmountInput value={amount} onChange={setAmount} />
 
                 {/* Over-surplus warning */}
                 {isOverSurplus && (
                   <Text style={styles.overSurplusText}>
-                    Depasse le surplus disponible ({formatCurrency(availableSurplus)})
+                    {t('goals.exceedsSurplus', { amount: formatCurrency(availableSurplus) })}
                   </Text>
                 )}
 
-                <Text style={[styles.sectionLabel, { marginTop: 16 }]}>Description</Text>
+                <Text style={[styles.sectionLabel, { marginTop: 16 }]}>{t('addExpense.description')}</Text>
                 <TextInput
                   style={styles.textInput}
                   value={label}
                   onChangeText={setLabel}
-                  placeholder="Ex: Salaire Mars, Bonus..."
+                  placeholder={t('goals.contributePlaceholder')}
                   placeholderTextColor="#52525B"
                   returnKeyType="done"
                 />
@@ -154,7 +169,7 @@ export function ContributeGoalModal({ visible, goalId, goalName, remaining, onCl
                 style={[styles.submitBtn, !isValid && styles.submitBtnDisabled]}
               >
                 <Text style={[styles.submitText, !isValid && styles.submitTextDisabled]}>
-                  Contribuer
+                  {t('goals.contribute')}
                 </Text>
               </Pressable>
             </>
@@ -277,6 +292,24 @@ const styles = StyleSheet.create({
   congratsText: {
     color: '#A1A1AA',
     fontSize: 14,
+  },
+  autoBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: 'rgba(167,139,250,0.06)',
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    marginBottom: 14,
+    borderWidth: 1,
+    borderColor: 'rgba(167,139,250,0.15)',
+  },
+  autoBannerText: {
+    color: '#A78BFA',
+    fontSize: 12,
+    fontWeight: '600',
+    flex: 1,
   },
   surplusInfo: {
     flexDirection: 'row',

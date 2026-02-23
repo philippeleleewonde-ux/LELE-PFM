@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, Pressable } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { PF, PerfGlassCard } from './shared';
 import { useInvestmentStore } from '@/stores/investment-store';
 import {
@@ -10,6 +11,7 @@ import {
 } from '@/domain/calculators/macro-scenario-engine';
 
 export function SectionU_MacroScenarios() {
+  const { t } = useTranslation('performance');
   const allocations = useInvestmentStore((s) => s.allocations);
   const investorProfile = useInvestmentStore((s) => s.investorProfile);
   const [selectedIndex, setSelectedIndex] = useState(0);
@@ -23,7 +25,7 @@ export function SectionU_MacroScenarios() {
     return (
       <PerfGlassCard>
         <Text style={styles.emptyText}>
-          Configurez votre profil investisseur dans les reglages pour voir cette section.
+          {t('macro.configureProfile')}
         </Text>
       </PerfGlassCard>
     );
@@ -32,7 +34,7 @@ export function SectionU_MacroScenarios() {
   if (!result) {
     return (
       <PerfGlassCard>
-        <Text style={styles.emptyText}>Aucune allocation configuree.</Text>
+        <Text style={styles.emptyText}>{t('macro.noAllocation')}</Text>
       </PerfGlassCard>
     );
   }
@@ -47,10 +49,10 @@ export function SectionU_MacroScenarios() {
         : PF.textSecondary;
   const verdictLabel =
     result.verdict === 'favorable'
-      ? 'Favorable'
+      ? t('macro.favorable')
       : result.verdict === 'unfavorable'
-        ? 'Defavorable'
-        : 'Neutre';
+        ? t('macro.unfavorable')
+        : t('macro.neutral');
 
   return (
     <View style={styles.container}>
@@ -78,7 +80,7 @@ export function SectionU_MacroScenarios() {
 
       {/* Hypothesis summary */}
       <PerfGlassCard style={styles.section}>
-        <Text style={styles.sectionTitle}>Hypothese</Text>
+        <Text style={styles.sectionTitle}>{t('macro.hypothesis')}</Text>
         <View style={styles.hypoRow}>
           <Text style={styles.hypoLabel}>{varMeta.label}</Text>
           <Text style={styles.hypoValues}>
@@ -88,13 +90,13 @@ export function SectionU_MacroScenarios() {
           </Text>
         </View>
         <Text style={styles.hypoDelta}>
-          Variation : {hypothesis.delta > 0 ? '+' : ''}{hypothesis.delta}pp
+          {t('macro.variation')} : {hypothesis.delta > 0 ? '+' : ''}{hypothesis.delta}pp
         </Text>
       </PerfGlassCard>
 
       {/* Portfolio impact */}
       <PerfGlassCard style={styles.section}>
-        <Text style={styles.sectionTitle}>Impact portefeuille</Text>
+        <Text style={styles.sectionTitle}>{t('macro.portfolioImpact')}</Text>
         <View style={styles.impactCenter}>
           <Text style={[styles.impactValue, { color: verdictColor }]}>
             {result.portfolioImpact >= 0 ? '+' : ''}{result.portfolioImpact.toFixed(2)}%
@@ -105,11 +107,11 @@ export function SectionU_MacroScenarios() {
         </View>
         <View style={styles.returnRow}>
           <View style={styles.returnItem}>
-            <Text style={styles.returnLabel}>Rendement actuel</Text>
+            <Text style={styles.returnLabel}>{t('macro.currentReturn')}</Text>
             <Text style={styles.returnValue}>{result.portfolioBaseReturn.toFixed(1)}%</Text>
           </View>
           <View style={styles.returnItem}>
-            <Text style={styles.returnLabel}>Rendement ajuste</Text>
+            <Text style={styles.returnLabel}>{t('macro.adjustedReturn')}</Text>
             <Text style={[styles.returnValue, { color: verdictColor }]}>
               {result.portfolioAdjustedReturn.toFixed(1)}%
             </Text>
@@ -120,7 +122,7 @@ export function SectionU_MacroScenarios() {
 
       {/* Per-asset impacts */}
       <PerfGlassCard style={styles.section}>
-        <Text style={styles.sectionTitle}>Impact par actif</Text>
+        <Text style={styles.sectionTitle}>{t('macro.perAssetImpact')}</Text>
         <View style={styles.assetList}>
           {result.assetImpacts.map((ai, idx) => {
             const impactColor =
@@ -151,8 +153,7 @@ export function SectionU_MacroScenarios() {
 
       {/* Info footer */}
       <Text style={styles.footerText}>
-        Simulation basee sur les sensibilites historiques moyennes. Les impacts reels
-        peuvent varier selon les conditions de marche specifiques.
+        {t('macro.disclaimer')}
       </Text>
     </View>
   );

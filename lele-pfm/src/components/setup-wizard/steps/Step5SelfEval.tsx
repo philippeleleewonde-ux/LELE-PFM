@@ -1,5 +1,6 @@
 import React, { useCallback } from 'react';
 import { View, Text, ScrollView, Pressable, StyleSheet } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { WZ, GlassCard, FadeInView, neonGlow } from '../shared';
 import { useWizardStore } from '@/stores/wizard-store';
 
@@ -7,15 +8,8 @@ interface Props {
   isActive: boolean;
 }
 
-const QUESTIONS = [
-  'Je contrôle bien mes dépenses au quotidien',
-  "J'arrive à épargner régulièrement",
-  'Je me sens serein(e) face à un imprévu financier',
-  'Je sais exactement où va mon argent chaque mois',
-  "J'ai une vision claire de mes objectifs financiers",
-];
-
 export default function Step5SelfEval({ isActive }: Props) {
+  const { t } = useTranslation('wizard');
   const { formData, updateFormData } = useWizardStore();
   const ratings = formData.ratings;
 
@@ -32,22 +26,22 @@ export default function Step5SelfEval({ isActive }: Props) {
       showsVerticalScrollIndicator={false}
     >
       <FadeInView active={isActive} delay={0}>
-        <Text style={styles.title}>Auto-évaluation</Text>
+        <Text style={styles.title}>{t('step5.title')}</Text>
         <Text style={styles.subtitle}>
-          Comment évaluez-vous vos habitudes financières ?
+          {t('step5.subtitle')}
         </Text>
       </FadeInView>
 
-      {QUESTIONS.map((question, qIndex) => {
+      {[0, 1, 2, 3, 4].map((qIndex) => {
         const currentRating = ratings[qIndex] ?? 0;
 
         return (
           <FadeInView key={qIndex} active={isActive} delay={100 + qIndex * 80}>
             <GlassCard style={styles.card}>
               <Text style={styles.questionNumber}>
-                {qIndex + 1}/{QUESTIONS.length}
+                {qIndex + 1}/5
               </Text>
-              <Text style={styles.questionText}>{question}</Text>
+              <Text style={styles.questionText}>{t(`step5.questions.${qIndex}`)}</Text>
 
               <View style={styles.starsRow}>
                 {[1, 2, 3, 4, 5].map((star) => {
@@ -78,11 +72,7 @@ export default function Step5SelfEval({ isActive }: Props) {
 
               {currentRating > 0 && (
                 <Text style={styles.ratingLabel}>
-                  {currentRating === 1 && 'Pas du tout'}
-                  {currentRating === 2 && 'Un peu'}
-                  {currentRating === 3 && 'Moyennement'}
-                  {currentRating === 4 && 'Plutôt oui'}
-                  {currentRating === 5 && 'Tout à fait'}
+                  {t(`step5.ratings.${currentRating}`)}
                 </Text>
               )}
             </GlassCard>
@@ -93,7 +83,7 @@ export default function Step5SelfEval({ isActive }: Props) {
       {/* Summary */}
       <FadeInView active={isActive} delay={600}>
         <View style={styles.summaryCard}>
-          <Text style={styles.summaryTitle}>Votre score</Text>
+          <Text style={styles.summaryTitle}>{t('step5.yourScore')}</Text>
           <View style={styles.summaryRow}>
             <Text style={styles.summaryScore}>
               {ratings.reduce((a, b) => a + b, 0)}

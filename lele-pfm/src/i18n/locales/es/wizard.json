@@ -1,0 +1,353 @@
+{
+  "stepLabels": {
+    "0": "Perfil",
+    "1": "Ingresos y Gastos",
+    "2": "Historial",
+    "3": "Riesgos",
+    "4": "Autoevaluacion",
+    "5": "Palancas",
+    "6": "Inversion",
+    "7": "Listo!"
+  },
+  "nav": {
+    "back": "← Volver",
+    "continue": "Continuar",
+    "tellUsAboutYou": "Cuentanos sobre ti",
+    "stepXofY": "Paso {{step}} de {{total}}"
+  },
+  "loading": {
+    "analyzing": "Analizando...",
+    "calculatingProfile": "Calculando tu perfil financiero"
+  },
+  "step1": {
+    "demoButton": "Datos de demo",
+    "professionalProfile": "Perfil profesional",
+    "selectProfession": "Selecciona tu situacion profesional actual",
+    "familySituation": "Situacion familiar",
+    "age": "Edad",
+    "dependents": "Personas a cargo",
+    "agePlaceholder": "Ej: 32",
+    "dependentsPlaceholder": "Ej: 2",
+    "countryOfResidence": "Pais de residencia",
+    "currency": "Moneda",
+    "residenceZone": "Zona de residencia",
+    "mainIncomeSource": "Fuente principal de ingresos",
+    "extendedFamilyObligations": "Obligaciones familiares extendidas",
+    "extendedFamilyDesc": "Participas en tontinas, envios de dinero a la familia extendida u otras solidaridades comunitarias?",
+    "yes": "Si",
+    "no": "No",
+    "tip": "Esta informacion permite personalizar tus recomendaciones financieras y adaptar los calculos a tu situacion real, estes donde estes en el mundo.",
+    "profiles": {
+      "salarie": "Asalariado",
+      "independant": "Independiente",
+      "fonctionnaire": "Funcionario",
+      "etudiant": "Estudiante",
+      "retraite": "Jubilado",
+      "entrepreneur": "Emprendedor",
+      "interimaire": "Trabajador temporal",
+      "autoEntrepreneur": "Autonomo",
+      "sansEmploi": "Desempleado",
+      "cadre": "Ejecutivo",
+      "professionLiberale": "Profesion liberal",
+      "agriculteur": "Agricultor"
+    },
+    "situations": {
+      "celibataire": "Soltero/a",
+      "enCouple": "En pareja",
+      "pacse": "Union civil",
+      "marie": "Casado/a",
+      "separe": "Separado/a",
+      "divorce": "Divorciado/a",
+      "veuf": "Viudo/a"
+    },
+    "countryGroups": {
+      "westAfrica": "Africa Occidental",
+      "centralAfrica": "Africa Central",
+      "otherAfrica": "Africa (otros)",
+      "maghreb": "Magreb",
+      "europe": "Europa",
+      "americas": "Americas",
+      "asiaMiddleEast": "Asia y Medio Oriente"
+    },
+    "urbanRural": {
+      "urban": "Urbano",
+      "rural": "Rural"
+    },
+    "incomeSources": {
+      "formal": "Formal",
+      "formalDesc": "Salario fijo, contrato",
+      "mixed": "Mixto",
+      "mixedDesc": "Salario + actividad secundaria",
+      "informal": "Informal",
+      "informalDesc": "Comercio, artesania",
+      "seasonal": "Estacional",
+      "seasonalDesc": "Agricultura, construccion"
+    },
+    "currencies": {
+      "FCFA": "Franco CFA",
+      "EUR": "Euro",
+      "USD": "Dolar estadounidense",
+      "GBP": "Libra esterlina",
+      "CHF": "Franco suizo",
+      "MAD": "Dirham marroqui",
+      "TND": "Dinar tunecino",
+      "DZD": "Dinar argelino",
+      "NGN": "Naira",
+      "GHS": "Cedi",
+      "KES": "Chelin keniano",
+      "ZAR": "Rand",
+      "CDF": "Franco congoleno",
+      "GNF": "Franco guineano",
+      "CAD": "Dolar canadiense",
+      "BRL": "Real brasileno",
+      "INR": "Rupia india",
+      "HTG": "Gourde haitiano"
+    }
+  },
+  "step2": {
+    "incomeTitle": "INGRESOS",
+    "incomeSubtitle": "Fuentes de ingresos con certeza y progresion",
+    "expenseTitle": "GASTOS",
+    "expenseSubtitle": "Categorias COICOP con tipo, naturaleza y compresion",
+    "frequency": "Frecuencia",
+    "monthly": "Mensual",
+    "annual": "Anual",
+    "certainty": "Certeza",
+    "growth": "Progresion",
+    "perYear": "%/ano",
+    "fixed": "Fijos",
+    "variable": "Variables",
+    "totalPerMonth": "Total /mes",
+    "essential": "Esenciales",
+    "discretionary": "Discrecional",
+    "fixedIncome": "Ing. Fijos",
+    "variableIncome": "Ing. Variables",
+    "expenses": "Gastos",
+    "deficit": "Deficit",
+    "remaining": "Restante",
+    "compressionPotential": "Potencial de compresion",
+    "essentialShort": "Esenc.",
+    "discretionaryShort": "Discrecional",
+    "tip": "Los ingresos anuales (bonos, dividendos) se convierten automaticamente en equivalente mensual. Ajusta la certeza y la progresion para un calculo mas preciso.",
+    "incomeSources": {
+      "salaire": "Salario neto",
+      "primes": "Bonos / Primas",
+      "locatifs": "Ingresos por alquiler",
+      "aides": "Ayudas / Subsidios",
+      "freelance": "Freelance / Misiones",
+      "dividendes": "Dividendos / Intereses",
+      "pension": "Pension",
+      "autres_revenus": "Otros ingresos"
+    },
+    "certaintyLevels": {
+      "garanti": "Garantizado",
+      "probable": "Probable",
+      "incertain": "Incierto"
+    },
+    "expenseCategories": {
+      "logement": "Vivienda",
+      "alimentation": "Alimentacion",
+      "transport": "Transporte",
+      "sante": "Salud",
+      "telecom": "Telecom y Suscripciones",
+      "education": "Educacion",
+      "loisirs": "Ocio y Salidas",
+      "habillement": "Ropa y Varios"
+    },
+    "types": {
+      "Fixe": "Fijo",
+      "Variable": "Variable"
+    }
+  },
+  "step3": {
+    "title": "Historial financiero",
+    "subtitle": "Ingresa tus ingresos y gastos de los ultimos 5 anos",
+    "autoFillBanner": "Prellenado a partir de tus ingresos y gastos.\nCorrige con tus datos reales si lo deseas.",
+    "yearHeader": "Ano",
+    "incomeHeader": "Ingresos",
+    "expensesHeader": "Gastos",
+    "trendTitle": "Analisis de tendencia",
+    "revenueGrowth": "Crecimiento de ingresos",
+    "expenseGrowth": "Crecimiento de gastos",
+    "expenseToIncomeRatio": "Relacion gastos / ingresos",
+    "healthy": "Saludable",
+    "caution": "Precaucion",
+    "critical": "Critico",
+    "tip": "5 anos de historial permiten calcular tu tendencia financiera, tu volatilidad y tu capacidad de ahorro (norma Basilea III).",
+    "engagementTitle": "Nivel de compromiso",
+    "engagementSubtitle": "Como evaluas tu gestion financiera?",
+    "engagementLevels": {
+      "beginner": "Principiante",
+      "beginnerDesc": "Apenas estoy empezando",
+      "curious": "Curioso",
+      "curiousDesc": "Me interesa el tema",
+      "active": "Activo",
+      "activeDesc": "Ya gestiono mis finanzas",
+      "expert": "Experto",
+      "expertDesc": "Domino mis finanzas"
+    }
+  },
+  "step4": {
+    "title": "Evaluacion de riesgos",
+    "subtitle": "Evalua tu nivel de exposicion en cada area",
+    "riskLevels": {
+      "stable": "Estable",
+      "moderate": "Moderado",
+      "watch": "A vigilar"
+    },
+    "domains": {
+      "emploi": "Empleo",
+      "emploiDesc": "Estabilidad profesional",
+      "logement": "Vivienda",
+      "logementDesc": "Situacion inmobiliaria",
+      "sante": "Salud",
+      "santeDesc": "Cobertura y gastos medicos",
+      "endettement": "Endeudamiento",
+      "endettementDesc": "Nivel de endeudamiento",
+      "epargne": "Ahorro",
+      "epargneDesc": "Capacidad de ahorro",
+      "juridique": "Juridico",
+      "juridiqueDesc": "Exposicion juridica"
+    }
+  },
+  "step5": {
+    "title": "Autoevaluacion",
+    "subtitle": "Como evaluas tus habitos financieros?",
+    "questions": {
+      "0": "Controlo bien mis gastos diarios",
+      "1": "Logro ahorrar regularmente",
+      "2": "Me siento tranquilo/a ante un imprevisto financiero",
+      "3": "Se exactamente a donde va mi dinero cada mes",
+      "4": "Tengo una vision clara de mis objetivos financieros"
+    },
+    "ratings": {
+      "1": "Para nada",
+      "2": "Un poco",
+      "3": "Moderadamente",
+      "4": "Bastante",
+      "5": "Totalmente"
+    },
+    "yourScore": "Tu puntaje"
+  },
+  "step6": {
+    "title": "Tus palancas de accion",
+    "subtitle": "Que esfuerzo estas dispuesto/a a hacer en cada palanca?",
+    "levers": {
+      "formation": "Formacion",
+      "formationDim": "Competencias",
+      "formationTip": "Cada competencia adquirida aumenta tu valor en el mercado.",
+      "epargne_auto": "Ahorro automatico",
+      "epargne_autoDim": "Seguridad",
+      "epargne_autoTip": "Automatizar tu ahorro es pagarte a ti mismo primero.",
+      "negociation": "Negociacion salarial",
+      "negociationDim": "Ingresos",
+      "negociationTip": "Una negociacion exitosa impacta toda tu carrera.",
+      "reduction_depenses": "Reduccion de gastos",
+      "reduction_depensesDim": "Control",
+      "reduction_depensesTip": "Cada peso ahorrado es un peso que trabaja para ti.",
+      "side_project": "Proyecto paralelo",
+      "side_projectDim": "Diversificacion",
+      "side_projectTip": "Diversificar tus ingresos es diversificar tu seguridad.",
+      "investissement": "Inversion",
+      "investissementDim": "Crecimiento",
+      "investissementTip": "El tiempo es tu mejor aliado para hacer crecer tu capital."
+    }
+  },
+  "voice": {
+    "title": "Entrada por voz",
+    "confirm": "Confirmar",
+    "unsupported": "Reconocimiento de voz no disponible",
+    "unsupportedHint": "Usa Chrome o Edge en computadora",
+    "listening": "Escuchando...",
+    "tapToSpeak": "Toca para hablar",
+    "retry": "Reintentar",
+    "redo": "Repetir",
+    "validate": "Validar",
+    "amount": "Monto",
+    "category": "Categoria",
+    "description": "Descripcion",
+    "descriptionPlaceholder": "Ej: Supermercado, Taxi...",
+    "transcript": "Transcripcion",
+    "auto": "(auto)",
+    "close": "Cerrar"
+  },
+  "step7": {
+    "riskTolerance": "Tolerancia al riesgo",
+    "conservative": "Prudente",
+    "conservativeDesc": "Capital garantizado, rendimiento moderado",
+    "moderate": "Equilibrado",
+    "moderateDesc": "Mix de seguridad y rendimiento",
+    "aggressive": "Dinamico",
+    "aggressiveDesc": "Alto rendimiento, volatilidad aceptada",
+    "investmentHorizon": "Horizonte de inversion",
+    "shortTerm": "Corto plazo",
+    "shortTermDesc": "Menos de 2 anos",
+    "mediumTerm": "Mediano plazo",
+    "mediumTermDesc": "2 a 5 anos",
+    "longTerm": "Largo plazo",
+    "longTermDesc": "Mas de 5 anos",
+    "islamicFinance": "Finanzas islamicas",
+    "shariaRequired": "Obligatorio",
+    "shariaRequiredDesc": "Solo productos conformes",
+    "shariaPreferred": "Preferido",
+    "shariaPreferredDesc": "Priorizar si es posible",
+    "shariaNotRequired": "Indiferente",
+    "shariaNotRequiredDesc": "Todos los productos",
+    "investmentShare": "Proporcion de inversion ({{ratio}}%)",
+    "ratioHint": "Ahorro {{savings}}% · Inversion {{invest}}% · Placer 33%",
+    "validateProfile": "Validar mi perfil",
+    "skipStep": "Omitir este paso"
+  },
+  "step8": {
+    "title": "Wow, perfil completo!",
+    "subtitle": "Tu perfil financiero esta listo. Descubre tu panel personalizado.",
+    "profileConfigured": "Perfil configurado",
+    "incomeSources": "Fuentes de ingresos",
+    "expenseCategories": "Categorias de gastos",
+    "expenseRatio": "Relacion Gas./Ing.",
+    "engagementLevel": "Nivel de compromiso",
+    "engagement": {
+      "expert": "Experto",
+      "advanced": "Avanzado",
+      "intermediate": "Intermedio",
+      "beginner": "Principiante"
+    },
+    "chooseModeTitle": "Elige tu modo de visualizacion",
+    "chooseModeSubtitle": "Puedes cambiarlo en cualquier momento en los ajustes",
+    "modes": {
+      "simple": "Principiante",
+      "simpleDesc": "Vista simplificada, ideal para empezar",
+      "expert": "Experto",
+      "expertDesc": "Indicadores avanzados y analisis detallados",
+      "investor": "Inversor",
+      "investorDesc": "Vista completa con herramientas de inversion"
+    },
+    "goToDashboard": "Ir al Panel",
+    "resetWizard": "Empezar de cero"
+  },
+  "incomeSource": {
+    "salaire": "Salario neto",
+    "primes": "Primas / Bonos",
+    "locatifs": "Ingresos por alquiler",
+    "aides": "Ayudas / Asignaciones",
+    "freelance": "Freelance / Misiones",
+    "dividendes": "Dividendos / Intereses",
+    "pension": "Pension",
+    "autres_revenus": "Otros ingresos"
+  },
+  "certainty": {
+    "garanti": "Garantizado",
+    "probable": "Probable",
+    "incertain": "Incierto"
+  },
+  "expenseCategory": {
+    "logement": "Vivienda",
+    "alimentation": "Alimentacion",
+    "transport": "Transporte",
+    "sante": "Salud",
+    "telecom": "Telecom y Suscripciones",
+    "education": "Educacion",
+    "loisirs": "Ocio y Salidas",
+    "habillement": "Vestimenta y Varios"
+  }
+}

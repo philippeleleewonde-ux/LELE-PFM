@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { ProgressBar } from '../charts/ProgressBar';
 import { PF, COICOP_COLORS } from './shared';
 import { formatPercent } from '@/services/format-helpers';
@@ -13,9 +14,10 @@ interface CategoryRowProps {
 }
 
 export function CategoryRow({ code, label, budgetRate, elasticity, nature }: CategoryRowProps) {
+  const { t } = useTranslation('performance');
   const color = COICOP_COLORS[code] || PF.textMuted;
   const isEssential = nature === 'Essentielle';
-  const displayNature = isEssential ? 'Indispensable' : 'Confort';
+  const displayNature = isEssential ? t('nature.essential') : t('nature.comfort');
 
   return (
     <View style={styles.row}>
@@ -28,7 +30,7 @@ export function CategoryRow({ code, label, budgetRate, elasticity, nature }: Cat
       <View style={styles.badges}>
         <View style={[styles.badge, { backgroundColor: PF.violet + '20' }]}>
           <Text style={[styles.badgeText, { color: PF.violet }]}>
-            Cashback possible {formatPercent(elasticity, 0)}
+            {t('categoryRow.cashbackPossible', { pct: formatPercent(elasticity, 0) })}
           </Text>
         </View>
         <View style={[styles.badge, { backgroundColor: isEssential ? PF.blue + '20' : PF.violet + '20' }]}>

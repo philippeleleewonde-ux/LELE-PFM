@@ -8,6 +8,7 @@
 
 import React, { useEffect, useRef } from 'react';
 import { Animated, View, Text, StyleSheet } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import Svg, { Circle, Path } from 'react-native-svg';
 import { ChevronUp, ChevronDown, Minus } from 'lucide-react-native';
 import { useFinancialScore } from '@/hooks/useFinancialScore';
@@ -53,6 +54,7 @@ interface FinancialScoreRingProps {
 // ─── Component ───
 
 export function FinancialScoreRing({ compact = false }: FinancialScoreRingProps) {
+  const { t } = useTranslation('performance');
   const { globalScore, grade, levers, weeklyTrend } = useFinancialScore();
   const gradeInfo = formatGrade(grade);
 
@@ -217,7 +219,7 @@ export function FinancialScoreRing({ compact = false }: FinancialScoreRingProps)
 
       {/* Subtitle */}
       {!compact && (
-        <Text style={styles.subtitle}>Score financier dynamique</Text>
+        <Text style={styles.subtitle}>{t('scoreRing.subtitle')}</Text>
       )}
     </View>
   );

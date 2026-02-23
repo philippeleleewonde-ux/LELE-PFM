@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { ProgressRing } from './ProgressRing';
 import { PF } from './shared';
 import { formatGrade } from '@/services/format-helpers';
@@ -11,6 +12,7 @@ interface ScoreHeroProps {
 }
 
 export function ScoreHero({ score, grade, compact = false }: ScoreHeroProps) {
+  const { t } = useTranslation('performance');
   const gradeInfo = formatGrade(grade);
   const ringSize = compact ? 90 : 160;
   const ringStroke = compact ? 8 : 12;
@@ -37,7 +39,7 @@ export function ScoreHero({ score, grade, compact = false }: ScoreHeroProps) {
         </View>
         <Text style={styles.gradeLabel}>{gradeInfo.label}</Text>
         {!compact && (
-          <Text style={styles.subtitle}>Votre score financier</Text>
+          <Text style={styles.subtitle}>{t('scoreHero.yourFinancialScore')}</Text>
         )}
       </View>
     </View>

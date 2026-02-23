@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { PF, PerfGlassCard } from './shared';
 import { useInvestmentStore } from '@/stores/investment-store';
 import { synthesizeWisdom, PillarScore, WisdomAction } from '@/domain/calculators/wisdom-synthesis-engine';
@@ -38,9 +39,11 @@ function scoreColor(score: number): string {
 
 // ─── Impact badge ───
 
-function ImpactBadge({ impact }: { impact: WisdomAction['impact'] }) {
+type TFunction = (key: string, options?: Record<string, unknown>) => string;
+
+function ImpactBadge({ impact, t }: { impact: WisdomAction['impact']; t: TFunction }) {
   const color = impact === 'high' ? PF.red : impact === 'medium' ? PF.orange : PF.green;
-  const label = impact === 'high' ? 'Urgent' : impact === 'medium' ? 'Moyen' : 'Faible';
+  const label = impact === 'high' ? t('wisdom.urgent') : impact === 'medium' ? t('wisdom.medium') : t('wisdom.low');
   return (
     <View style={[styles.impactBadge, { backgroundColor: color + '20', borderColor: color }]}>
       <Text style={[styles.impactText, { color }]}>{label}</Text>
@@ -88,7 +91,7 @@ function PillarRow({ pillar }: { pillar: PillarScore }) {
 
 // ─── Action Row ───
 
-function ActionRow({ action }: { action: WisdomAction }) {
+function ActionRow({ action, t }: { action: WisdomAction; t: TFunction }) {
   return (
     <View style={styles.actionRow}>
       <View style={styles.actionNumber}>
@@ -98,7 +101,7 @@ function ActionRow({ action }: { action: WisdomAction }) {
         <Text style={styles.actionText}>{action.action}</Text>
         <Text style={styles.actionCategory}>{action.category}</Text>
       </View>
-      <ImpactBadge impact={action.impact} />
+      <ImpactBadge impact={action.impact} t={t} />
     </View>
   );
 }
@@ -106,6 +109,7 @@ function ActionRow({ action }: { action: WisdomAction }) {
 // ─── Main Section ───
 
 export function SectionAC_WisdomSynthesis() {
+  const { t } = useTranslation('performance');
   const allocations = useInvestmentStore((s) => s.allocations);
   const investorProfile = useInvestmentStore((s) => s.investorProfile);
 
@@ -118,7 +122,7 @@ export function SectionAC_WisdomSynthesis() {
     return (
       <PerfGlassCard>
         <Text style={styles.emptyText}>
-          Configurez votre profil investisseur et vos allocations pour voir la synthese globale.
+          {t('wisdom.configureProfile')}
         </Text>
       </PerfGlassCard>
     );
@@ -140,7 +144,7 @@ export function SectionAC_WisdomSynthesis() {
 
       {/* Pillar Scores Card */}
       <PerfGlassCard style={styles.section}>
-        <Text style={styles.sectionTitle}>Scores par pilier</Text>
+        <Text style={styles.sectionTitle}>{t('wisdom.pillarScores')}</Text>
         {synthesis.pillars.map((p) => (
           <PillarRow key={p.pillar} pillar={p} />
         ))}
@@ -150,7 +154,7 @@ export function SectionAC_WisdomSynthesis() {
       <PerfGlassCard style={styles.section}>
         <View style={styles.sectionTitleRow}>
           <View style={[styles.bulletDot, { backgroundColor: PF.green }]} />
-          <Text style={styles.sectionTitle}>Forces</Text>
+          <Text style={styles.sectionTitle}>{t('wisdom.strengths')}</Text>
         </View>
         {synthesis.topStrengths.map((s, i) => (
           <View key={i} style={styles.bulletRow}>
@@ -164,7 +168,7 @@ export function SectionAC_WisdomSynthesis() {
       <PerfGlassCard style={styles.section}>
         <View style={styles.sectionTitleRow}>
           <View style={[styles.bulletDot, { backgroundColor: PF.orange }]} />
-          <Text style={styles.sectionTitle}>Risques</Text>
+          <Text style={styles.sectionTitle}>{t('wisdom.risks')}</Text>
         </View>
         {synthesis.topRisks.map((r, i) => (
           <View key={i} style={styles.bulletRow}>
@@ -176,9 +180,9 @@ export function SectionAC_WisdomSynthesis() {
 
       {/* Action Plan Card */}
       <PerfGlassCard style={styles.section}>
-        <Text style={styles.sectionTitle}>Plan d'action prioritaire</Text>
+        <Text style={styles.sectionTitle}>{t('wisdom.actionPlan')}</Text>
         {synthesis.actionPlan.map((a) => (
-          <ActionRow key={a.priority} action={a} />
+          <ActionRow key={a.priority} action={a} t={t} />
         ))}
       </PerfGlassCard>
 
@@ -186,7 +190,7 @@ export function SectionAC_WisdomSynthesis() {
       <PerfGlassCard style={styles.section}>
         <Text style={styles.verdictText}>{synthesis.verdict}</Text>
         <Text style={styles.footerText}>
-          Cette synthese agrege les resultats de 12 moteurs d'analyse independants. Elle evolue avec vos allocations et ne constitue pas un conseil en investissement.
+          {t('wisdom.disclaimer')}
         </Text>
       </PerfGlassCard>
     </View>

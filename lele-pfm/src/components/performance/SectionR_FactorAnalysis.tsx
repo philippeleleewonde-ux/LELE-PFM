@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { PF, PerfGlassCard } from './shared';
 import { useInvestmentStore } from '@/stores/investment-store';
 import { analyzeFactors, FACTOR_INFO, InvestmentFactor } from '@/domain/calculators/factor-scoring-engine';
@@ -14,6 +15,7 @@ function levelColor(level: string): string {
 }
 
 export function SectionR_FactorAnalysis() {
+  const { t } = useTranslation('performance');
   const allocations = useInvestmentStore((s) => s.allocations);
   const investorProfile = useInvestmentStore((s) => s.investorProfile);
 
@@ -26,7 +28,7 @@ export function SectionR_FactorAnalysis() {
     return (
       <PerfGlassCard>
         <Text style={styles.emptyText}>
-          Configurez votre profil investisseur pour voir l'analyse factorielle.
+          {t('factorAnalysis.configureProfile')}
         </Text>
       </PerfGlassCard>
     );
@@ -36,14 +38,14 @@ export function SectionR_FactorAnalysis() {
     <View style={styles.container}>
       {/* Factor bars */}
       <PerfGlassCard>
-        <Text style={styles.sectionTitle}>Exposition aux facteurs</Text>
+        <Text style={styles.sectionTitle}>{t('factorAnalysis.factorExposure')}</Text>
         {analysis.factors.map((f) => (
           <View key={f.factor} style={styles.factorRow}>
             <View style={styles.factorHeader}>
               <Text style={styles.factorEmoji}>{FACTOR_INFO[f.factor as InvestmentFactor].emoji}</Text>
               <Text style={styles.factorName}>{f.label}</Text>
               <Text style={[styles.factorLevel, { color: levelColor(f.level) }]}>
-                {f.level === 'high' ? 'Forte' : f.level === 'moderate' ? 'Mod\u00e9r\u00e9e' : 'Faible'}
+                {f.level === 'high' ? t('factorAnalysis.high') : f.level === 'moderate' ? t('factorAnalysis.moderate') : t('factorAnalysis.low')}
               </Text>
               <Text style={styles.factorScore}>{f.score}/10</Text>
             </View>
@@ -64,7 +66,7 @@ export function SectionR_FactorAnalysis() {
 
         {/* Diversification score */}
         <View style={styles.divRow}>
-          <Text style={styles.divLabel}>\u00c9quilibre factoriel</Text>
+          <Text style={styles.divLabel}>{t('factorAnalysis.factorBalance')}</Text>
           <Text
             style={[
               styles.divValue,

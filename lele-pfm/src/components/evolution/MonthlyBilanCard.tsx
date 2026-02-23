@@ -1,11 +1,13 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { CalendarDays, TrendingUp, TrendingDown, Minus } from 'lucide-react-native';
+import { useTranslation } from 'react-i18next';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { formatCurrency } from '@/services/format-helpers';
 import { useWeeklyEvolution } from '@/hooks/useWeeklyEvolution';
 
 export function MonthlyBilanCard() {
+  const { t } = useTranslation('app');
   const { monthly } = useWeeklyEvolution();
 
   if (monthly.monthWeeksCount === 0) return null;
@@ -33,9 +35,9 @@ export function MonthlyBilanCard() {
 
   // Trend config
   const trendConfig = {
-    up: { Icon: TrendingUp, color: '#4ADE80', text: 'En progression' },
-    down: { Icon: TrendingDown, color: '#F87171', text: 'En baisse' },
-    stable: { Icon: Minus, color: '#A1A1AA', text: 'Stable' },
+    up: { Icon: TrendingUp, color: '#4ADE80', text: t('evolution.trendProgressUp') },
+    down: { Icon: TrendingDown, color: '#F87171', text: t('evolution.trendProgressDown') },
+    stable: { Icon: Minus, color: '#A1A1AA', text: t('evolution.trendStable') },
   };
   const trend = trendConfig[monthTrend];
 
@@ -43,8 +45,8 @@ export function MonthlyBilanCard() {
   const deltaText =
     monthScoreDelta !== null && monthScoreDelta !== 0
       ? monthScoreDelta > 0
-        ? `Tu as gagne +${monthScoreDelta} points en 1 mois`
-        : `Tu as perdu ${monthScoreDelta} points en 1 mois`
+        ? t('evolution.gainedPoints', { delta: monthScoreDelta })
+        : t('evolution.lostPoints', { delta: monthScoreDelta })
       : null;
 
   const deltaColor = monthScoreDelta !== null && monthScoreDelta > 0 ? '#4ADE80' : '#F87171';
@@ -54,14 +56,14 @@ export function MonthlyBilanCard() {
       {/* ── Header ── */}
       <View style={styles.header}>
         <CalendarDays size={18} color="#FBBF24" />
-        <Text style={styles.headerTitle}>BILAN {monthLabel.toUpperCase()}</Text>
+        <Text style={styles.headerTitle}>{t('evolution.bilanHeader', { month: monthLabel.toUpperCase() })}</Text>
       </View>
 
       {/* ── Metric rows ── */}
       <View style={styles.metricsContainer}>
         {/* Score moyen */}
         <View style={styles.metricRow}>
-          <Text style={styles.metricLabel}>Score moyen</Text>
+          <Text style={styles.metricLabel}>{t('evolution.avgScore')}</Text>
           <View style={styles.metricValueRow}>
             <Text style={styles.metricValue}>
               {monthAvgScore !== null ? monthAvgScore : '--'}
@@ -74,7 +76,7 @@ export function MonthlyBilanCard() {
 
         {/* Epargne totale */}
         <View style={styles.metricRow}>
-          <Text style={styles.metricLabel}>Epargne totale</Text>
+          <Text style={styles.metricLabel}>{t('evolution.totalSavings')}</Text>
           <Text
             style={[
               styles.metricValue,
@@ -87,15 +89,15 @@ export function MonthlyBilanCard() {
 
         {/* Budget respecte */}
         <View style={styles.metricRow}>
-          <Text style={styles.metricLabel}>Budget respecte</Text>
+          <Text style={styles.metricLabel}>{t('evolution.budgetRespected')}</Text>
           <Text style={styles.metricValue}>
-            {budgetRespectWeeks}/{monthWeeksCount} semaines ({monthBudgetRespectRate}%)
+            {t('evolution.weeksCount', { count: budgetRespectWeeks, total: monthWeeksCount, percent: monthBudgetRespectRate })}
           </Text>
         </View>
 
         {/* Tendance */}
         <View style={styles.metricRow}>
-          <Text style={styles.metricLabel}>Tendance</Text>
+          <Text style={styles.metricLabel}>{t('evolution.trend')}</Text>
           <View style={styles.trendRow}>
             <trend.Icon size={14} color={trend.color} />
             <Text style={[styles.trendText, { color: trend.color }]}>

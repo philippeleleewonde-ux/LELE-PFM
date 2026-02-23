@@ -1,0 +1,262 @@
+{
+  "modules": {
+    "1": "Conciencia Financiera",
+    "2": "Presupuesto y Disciplina",
+    "3": "Primeros Pasos de Ahorro",
+    "4": "Ingresos y Diversificacion",
+    "5": "Dominio de Categorias",
+    "6": "Objetivos y Proyectos",
+    "7": "Ahorro Avanzado",
+    "8": "Rendimiento y Analisis",
+    "9": "Estrategia y Anticipacion",
+    "10": "Resiliencia Financiera",
+    "11": "Vision a Largo Plazo",
+    "12": "Excelencia Financiera"
+  },
+  "difficulty": {
+    "decouverte": "Descubrimiento",
+    "intermediaire": "Intermedio",
+    "avance": "Avanzado",
+    "expert": "Experto"
+  },
+  "S1": {
+    "savoir": "Quien no sabe a donde va su dinero, nunca sabra como conservarlo. Registrar tus gastos es el primer acto de libertad financiera.",
+    "faire": "Registrar tu primer gasto de la semana",
+    "maitriserDesc": "Al menos 1 transaccion registrada esta semana"
+  },
+  "S2": {
+    "savoir": "En promedio, subestimamos nuestros gastos en un 30%. El cerebro olvida las compras pequenas, la app no.",
+    "faire": "Registrar gastos en al menos 3 categorias diferentes",
+    "maitriserDesc": "3 categorias diferentes usadas esta semana"
+  },
+  "S3": {
+    "savoir": "Conocer tu presupuesto semanal es como conocer el indicador de gasolina de tu auto. Sin eso, manejas a ciegas.",
+    "faire": "Haber registrado gastos para ver la barra de progreso",
+    "maitriserDesc": "Gastos registrados esta semana (presupuesto activo)"
+  },
+  "S4": {
+    "savoir": "La foto de fin de semana: cuanto gane, gaste y ahorre. Es el balance el que crea la conciencia.",
+    "faire": "Tener un balance semanal generado (WeeklySummary)",
+    "maitriserDesc": "Un registro de rendimiento guardado esta semana"
+  },
+  "S5": {
+    "savoir": "El presupuesto no es una prision. Es un camino: rebasar las lineas es peligroso, mantenerse en los carriles es comodo.",
+    "faire": "Terminar la semana con una tasa de ejecucion bajo el 100%",
+    "maitriserDesc": "Gastos < presupuesto semanal"
+  },
+  "S6": {
+    "savoir": "Una compra impulsiva cuesta en promedio 3 veces mas de lo que piensas, porque es dinero que deja de trabajar para ti.",
+    "faire": "Usar el escudo anti-impulsivo al menos 1 vez",
+    "maitriserDesc": "Escudo anti-impulsivo usado esta semana"
+  },
+  "S7": {
+    "savoir": "La regla del 85%: los mejores administradores solo gastan el 85% de su presupuesto. El 15% restante es su margen de maniobra.",
+    "faire": "Terminar la semana bajo el 85% del presupuesto",
+    "maitriserDesc": "Tasa de ejecucion <= 85%"
+  },
+  "S8": {
+    "savoir": "La disciplina no es privacion. Es elegir lo que realmente importa en lugar de lo que tienta en el momento.",
+    "faire": "Registrar al menos 1 transaccion por dia (5 dias minimo)",
+    "maitriserDesc": "5 dias con transacciones esta semana"
+  },
+  "S9": {
+    "savoir": "Ahorrar no es guardar lo que sobra. Es apartar ANTES de gastar. Pagate a ti mismo primero.",
+    "faire": "Terminar la semana con ahorros positivos",
+    "maitriserDesc": "Ahorros > 0 esta semana"
+  },
+  "S10": {
+    "savoir": "Un fondo de emergencia cubre 3 meses de gastos. Sin el, cualquier imprevisto puede dejarte en una situacion critica.",
+    "faire": "Crear un objetivo de ahorro con el icono de emergencia",
+    "maitriserDesc": "Un objetivo 'emergencia' existe"
+  },
+  "S11": {
+    "savoir": "La constancia le gana a la intensidad. Ahorrar 5,000 FCFA cada semana vale mas que 50,000 una vez por trimestre.",
+    "faire": "Hacer una contribucion a un objetivo de ahorro",
+    "maitriserDesc": "Al menos 1 contribucion esta semana"
+  },
+  "S12": {
+    "savoir": "Balance T1: mira tu alcancia. Cada peso aqui es una prueba de que puedes cambiar tu futuro.",
+    "faire": "Tener un saldo positivo en la alcancia",
+    "maitriserDesc": "Ahorros acumulados (alcancia) > 0"
+  },
+  "S13": {
+    "savoir": "No puedes ahorrar lo que no ganas. Registrar tus ingresos es tan importante como registrar tus gastos.",
+    "faire": "Registrar un ingreso (salario u otro)",
+    "maitriserDesc": "Al menos 1 ingreso registrado esta semana"
+  },
+  "S14": {
+    "savoir": "Depender de una sola fuente de ingresos es caminar en la cuerda floja. La diversificacion es tu red de seguridad.",
+    "faire": "Registrar un ingreso fuera de salario (primas, freelance...)",
+    "maitriserDesc": "Un ingreso no salarial registrado esta semana"
+  },
+  "S15": {
+    "savoir": "La relacion ingresos/gastos es tu indicador vital. Por encima de 1, construyes. Por debajo, destruyes.",
+    "faire": "Tener un saldo neto positivo (ingresos > gastos) esta semana",
+    "maitriserDesc": "Ingresos semanales > gastos semanales"
+  },
+  "S16": {
+    "savoir": "Cada fuente de ingreso adicional reduce tu vulnerabilidad en un 25%. Dos fuentes valen mas que una.",
+    "faire": "Tener ingresos de al menos 2 fuentes diferentes este mes",
+    "maitriserDesc": "2 fuentes de ingresos diferentes este mes"
+  },
+  "S17": {
+    "savoir": "La categoria de alimentacion es frecuentemente el primer rubro de gasto. Vigilarla es vigilar del 30 al 40% de tu presupuesto.",
+    "faire": "Consultar el detalle de una categoria de gastos",
+    "maitriserDesc": "Detalle de categoria consultado"
+  },
+  "S18": {
+    "savoir": "Los gastos fijos (vivienda, telecomunicaciones) son los mas peligrosos: los olvidamos porque son automaticos.",
+    "faire": "Registrar al menos 2 gastos de tipo Fijo esta semana",
+    "maitriserDesc": "2 transacciones Fijo registradas"
+  },
+  "S19": {
+    "savoir": "La categoria donde mas gastas es donde tienes mayor margen de mejora.",
+    "faire": "Reducir los gastos de tu categoria principal respecto a la semana anterior",
+    "maitriserDesc": "Categoria principal en baja vs semana anterior"
+  },
+  "S20": {
+    "savoir": "Cero exceso en una categoria es una victoria. 4 categorias sin exceso = semana excelente.",
+    "faire": "Tener al menos 4 categorias bajo presupuesto esta semana",
+    "maitriserDesc": "4+ categorias bajo presupuesto"
+  },
+  "S21": {
+    "savoir": "Un objetivo sin monto ni fecha limite es solo un sueno. Ponle cifras y fechas para hacerlo realidad.",
+    "faire": "Crear un objetivo con un monto Y una fecha limite",
+    "maitriserDesc": "Un objetivo con fecha limite existe"
+  },
+  "S22": {
+    "savoir": "Las pequenas contribuciones regulares superan a los grandes aportes ocasionales. La regularidad crea el habito.",
+    "faire": "Hacer 2 contribuciones a tus objetivos esta semana",
+    "maitriserDesc": "2+ contribuciones esta semana"
+  },
+  "S23": {
+    "savoir": "Tener varios objetivos en paralelo obliga a priorizar, la competencia financiera mas valiosa.",
+    "faire": "Tener al menos 2 objetivos activos simultaneamente",
+    "maitriserDesc": "2+ objetivos activos"
+  },
+  "S24": {
+    "savoir": "Balance T2: compara tu puntaje financiero de hoy con el del inicio. La progresion es la verdadera victoria.",
+    "faire": "Tener un puntaje financiero en alza respecto al T1",
+    "maitriserDesc": "Puntaje actual > puntaje guardado previamente"
+  },
+  "S25": {
+    "savoir": "El EPR (Ahorro Potencial Realizable) es TU meta personalizada. No es arbitraria, se calcula sobre TUS ingresos y gastos.",
+    "faire": "Tener un objetivo EPR activo y gastos registrados",
+    "maitriserDesc": "Objetivo EPR > 0 y gastos > 0"
+  },
+  "S26": {
+    "savoir": "La distribucion 67/33: dos tercios de tus ahorros para el ahorro duro, un tercio para el placer. El equilibrio evita la frustracion.",
+    "faire": "Alcanzar un grado minimo B esta semana (nota >= 7/10)",
+    "maitriserDesc": "Grado B o superior"
+  },
+  "S27": {
+    "savoir": "El excedente mas alla del objetivo EPR es capital libre. Es el acelerador de tus proyectos.",
+    "faire": "Superar el objetivo EPR (ahorros > objetivo)",
+    "maitriserDesc": "Ahorros > objetivo EPR semanal"
+  },
+  "S28": {
+    "savoir": "4 semanas consecutivas de ahorros positivos = formacion de habito. Tu cerebro empieza a hacerlo automaticamente.",
+    "faire": "Tener 4 semanas consecutivas con ahorros > 0",
+    "maitriserDesc": "Las ultimas 4 semanas todas positivas"
+  },
+  "S29": {
+    "savoir": "El calendario de rendimiento es tu espejo financiero. Las semanas verdes son tus victorias, las rojas tus lecciones.",
+    "faire": "Consultar el calendario en la pestana Rendimiento",
+    "maitriserDesc": "Historial de rendimiento consultado (4+ semanas registradas)"
+  },
+  "S30": {
+    "savoir": "La tendencia importa mas que el resultado aislado. 3 semanas de alza valen mas que 1 semana perfecta.",
+    "faire": "Tener una tendencia alcista en el puntaje financiero",
+    "maitriserDesc": "Tendencia del puntaje = alza"
+  },
+  "S31": {
+    "savoir": "Objetivo vs Realizado: la seccion que muestra si tu plan va por buen camino. Una diferencia > 20% requiere un ajuste.",
+    "faire": "Tener un prorrateo de ejecucion entre 80% y 120%",
+    "maitriserDesc": "Progresion global entre 80-120%"
+  },
+  "S32": {
+    "savoir": "El grado A no es un lujo. Es alcanzable si gastas menos del 70% de tu presupuesto semanal.",
+    "faire": "Obtener un grado A o A+ esta semana",
+    "maitriserDesc": "Grado A o A+"
+  },
+  "S33": {
+    "savoir": "El fin de mes es la trampa clasica: los gastos se acumulan, el presupuesto se derrite. Anticipa gastando menos a inicio de mes.",
+    "faire": "Terminar la semana bajo el 80% del presupuesto",
+    "maitriserDesc": "Tasa de ejecucion < 80%"
+  },
+  "S34": {
+    "savoir": "Cada objetivo alcanzado demuestra que tienes la capacidad de alcanzar el siguiente. La confianza financiera se construye con pruebas.",
+    "faire": "Tener al menos 1 objetivo de ahorro completado",
+    "maitriserDesc": "1+ objetivo completado"
+  },
+  "S35": {
+    "savoir": "Un puntaje financiero superior a 70 te coloca en el 20% de los mejores administradores. Superior a 80, en el 10%.",
+    "faire": "Alcanzar un puntaje financiero global >= 70",
+    "maitriserDesc": "Puntaje financiero >= 70"
+  },
+  "S36": {
+    "savoir": "Balance T3: 9 meses de disciplina. Tu alcancia y tus objetivos cuentan tu transformacion.",
+    "faire": "Tener un acumulado de ahorros positivo significativo",
+    "maitriserDesc": "Alcancia neta > 0 con 20+ semanas de historial"
+  },
+  "S37": {
+    "savoir": "Todos tienen semanas malas. El maestro financiero limita los danos y rebota la semana siguiente.",
+    "faire": "Si hubo exceso la semana anterior: volver bajo presupuesto esta semana",
+    "maitriserDesc": "Rebote despues de exceso, o semana bajo presupuesto"
+  },
+  "S38": {
+    "savoir": "El fondo de emergencia no es un objetivo, es una obligacion. Debe representar 3 veces tus gastos mensuales.",
+    "faire": "Objetivo de emergencia a >= 50% de progreso",
+    "maitriserDesc": "Objetivo de emergencia >= 50% completado"
+  },
+  "S39": {
+    "savoir": "La regularidad de los ingresos se mide en 8 semanas. Si alcanzas el 80% de tus previsiones, tu modelo es solido.",
+    "faire": "Tener ingresos registrados regularmente",
+    "maitriserDesc": "Ingresos registrados en al menos 4 de las ultimas 8 semanas"
+  },
+  "S40": {
+    "savoir": "El estres financiero disminuye un 60% cuando tienes un plan Y lo sigues. Solo el plan no es suficiente.",
+    "faire": "Puntaje REG >= 80 Y puntaje PRE >= 70 (via puntaje financiero guardado)",
+    "maitriserDesc": "Regularidad fuerte + precision presupuestaria solida"
+  },
+  "S41": {
+    "savoir": "El Ano 2 del plan duplica el objetivo EPR. Si dominas el Ano 1, el Ano 2 es una aceleracion natural, no un choque.",
+    "faire": "Tener 10+ semanas con grado B o superior en el historial",
+    "maitriserDesc": "10+ semanas grado B/A/A+"
+  },
+  "S42": {
+    "savoir": "3 objetivos de ahorro activos = diversificacion del futuro. Emergencia + Placer + Proyecto = equilibrio perfecto.",
+    "faire": "Tener 3 objetivos activos de categorias diferentes",
+    "maitriserDesc": "3 objetivos activos, 3 iconos diferentes"
+  },
+  "S43": {
+    "savoir": "Tus 5 palancas de puntaje financiero son como los 5 dedos de la mano. El mas debil determina la fuerza de tu agarre.",
+    "faire": "Tener las 5 palancas del puntaje por encima de 50",
+    "maitriserDesc": "Todas las palancas >= 50"
+  },
+  "S44": {
+    "savoir": "El patrimonio no se construye en un dia, pero se construye cada dia. Tu regularidad de los ultimos 11 meses lo demuestra.",
+    "faire": "Puntaje de regularidad de ahorro (REG) >= 85",
+    "maitriserDesc": "Palanca REG >= 85"
+  },
+  "S45": {
+    "savoir": "Las ultimas 3 semanas del ano son las mas dificiles (fiestas, presiones sociales). Mantener el rumbo aqui es la prueba definitiva de dominio.",
+    "faire": "Mantener el presupuesto bajo el 90% a pesar del periodo",
+    "maitriserDesc": "Tasa de ejecucion <= 90%"
+  },
+  "S46": {
+    "savoir": "Cada contribucion a tus objetivos es un voto por la persona que quieres ser.",
+    "faire": "Contribuir a al menos 2 objetivos diferentes esta semana",
+    "maitriserDesc": "Contribuciones a 2+ objetivos diferentes"
+  },
+  "S47": {
+    "savoir": "Puntaje financiero >= 75 durante 48 semanas. Formas parte del 15% que termina lo que empieza.",
+    "faire": "Puntaje financiero global >= 75",
+    "maitriserDesc": "Puntaje >= 75"
+  },
+  "S48": {
+    "savoir": "Balance anual: cuenta tus objetivos alcanzados, tus ahorros acumulados, tu progresion de puntaje. Ya no eres la misma persona que en la S1.",
+    "faire": "Haber completado al menos 40 desafios de 48",
+    "maitriserDesc": "40+ desafios completados"
+  }
+}

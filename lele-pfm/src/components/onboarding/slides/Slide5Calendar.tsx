@@ -1,13 +1,8 @@
 import React, { useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, Animated } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useTranslation } from 'react-i18next';
 import { OB, FadeInView, OBGlassCard, neonGlow } from '../shared';
-
-const years = [
-  { label: 'An 1', pct: 30, amount: '432 000 F', color: OB.blueLight, delay: 300 },
-  { label: 'An 2', pct: 60, amount: '864 000 F', color: OB.accent, delay: 500 },
-  { label: 'An 3', pct: 100, amount: '1 440 000 F', color: OB.gold, delay: 700 },
-];
 
 function AnimatedBar({ pct, color, isActive, delay }: { pct: number; color: string; isActive: boolean; delay: number }) {
   const width = useRef(new Animated.Value(0)).current;
@@ -32,6 +27,14 @@ function AnimatedBar({ pct, color, isActive, delay }: { pct: number; color: stri
 }
 
 export default function Slide5Calendar({ isActive }: { isActive: boolean }) {
+  const { t } = useTranslation('onboarding');
+
+  const years = [
+    { label: t('slide5.year1'), pct: 30, amount: '432 000 F', color: OB.blueLight, delay: 300 },
+    { label: t('slide5.year2'), pct: 60, amount: '864 000 F', color: OB.accent, delay: 500 },
+    { label: t('slide5.year3'), pct: 100, amount: '1 440 000 F', color: OB.gold, delay: 700 },
+  ];
+
   return (
     <LinearGradient colors={[OB.darkBg, '#12131A']} style={styles.container}>
       {isActive && (
@@ -39,7 +42,7 @@ export default function Slide5Calendar({ isActive }: { isActive: boolean }) {
           {/* Pactole Card */}
           <FadeInView active={isActive} delay={100}>
           <OBGlassCard style={styles.card}>
-            <Text style={styles.cardTitle}>Ton pactole se construit</Text>
+            <Text style={styles.cardTitle}>{t('slide5.cardTitle')}</Text>
 
             {years.map((y, i) => (
               <FadeInView key={y.label} active={isActive} delay={200 + i * 100} duration={400} from="left" style={styles.yearRow}>
@@ -60,8 +63,8 @@ export default function Slide5Calendar({ isActive }: { isActive: boolean }) {
             <FadeInView active={isActive} delay={900} duration={400} from="top" style={styles.treasureBox}>
               <Text style={styles.treasureIcon}>{'\u{1F4B0}'}</Text>
               <View style={{ flex: 1 }}>
-                <Text style={styles.treasureTitle}>Ton cashback naturel</Text>
-                <Text style={styles.treasureSub}>se remplit année après année</Text>
+                <Text style={styles.treasureTitle}>{t('slide5.treasureTitle')}</Text>
+                <Text style={styles.treasureSub}>{t('slide5.treasureSub')}</Text>
               </View>
             </FadeInView>
           </OBGlassCard>
@@ -69,16 +72,16 @@ export default function Slide5Calendar({ isActive }: { isActive: boolean }) {
 
           {/* Text */}
           <FadeInView active={isActive} delay={400}>
-            <Text style={[styles.tagline, neonGlow(OB.accent)]}>Un plan. Trois ans. Ton cashback.</Text>
+            <Text style={[styles.tagline, neonGlow(OB.accent)]}>{t('slide5.tagline')}</Text>
           </FadeInView>
           <FadeInView active={isActive} delay={500}>
             <Text style={styles.heading}>
-              En 3 ans, tu crées{'\n'}ton pactole.
+              {t('slide5.heading')}
             </Text>
           </FadeInView>
           <FadeInView active={isActive} delay={600}>
             <Text style={styles.body}>
-              <Text style={{ color: '#fff', fontWeight: '700' }}>Chaque mois, ton cashback grossit.</Text> On te fixe des objectifs progressifs pour booster ton épargne sans forcer.
+              <Text style={{ color: '#fff', fontWeight: '700' }}>{t('slide5.bodyBold')}</Text>{t('slide5.bodyEnd')}
             </Text>
           </FadeInView>
         </>

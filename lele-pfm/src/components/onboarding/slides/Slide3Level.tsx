@@ -1,13 +1,8 @@
 import React, { useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, Animated } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useTranslation } from 'react-i18next';
 import { OB, FadeInView, OBGlassCard, neonGlow } from '../shared';
-
-const kpis = [
-  { label: 'Coûts invisibles', value: '840 000 F', color: OB.greenLight },
-  { label: 'Coût maximum', value: '210 000 F', color: OB.orangeLight },
-  { label: 'Cashback caché', value: '120 000 F', color: OB.blueLight },
-];
 
 function AnimatedRing({ isActive }: { isActive: boolean }) {
   const progress = useRef(new Animated.Value(0)).current;
@@ -32,6 +27,14 @@ function AnimatedRing({ isActive }: { isActive: boolean }) {
 }
 
 export default function Slide3Level({ isActive }: { isActive: boolean }) {
+  const { t } = useTranslation('onboarding');
+
+  const kpis = [
+    { label: t('slide3.kpi1'), value: '840 000 F', color: OB.greenLight },
+    { label: t('slide3.kpi2'), value: '210 000 F', color: OB.orangeLight },
+    { label: t('slide3.kpi3'), value: '120 000 F', color: OB.blueLight },
+  ];
+
   return (
     <LinearGradient colors={[OB.darkBg, '#12131A']} style={styles.container}>
       {isActive && (
@@ -41,7 +44,7 @@ export default function Slide3Level({ isActive }: { isActive: boolean }) {
           <OBGlassCard style={styles.card}>
             <View style={styles.scoreRow}>
               <View>
-                <Text style={styles.scoreLabel}>Ton bilan de sante financiere</Text>
+                <Text style={styles.scoreLabel}>{t('slide3.scoreLabel')}</Text>
                 <Text style={styles.scoreValue}>72 <Text style={styles.scoreSuffix}>/ 100</Text></Text>
               </View>
               <View style={styles.gradeBadge}>
@@ -66,16 +69,16 @@ export default function Slide3Level({ isActive }: { isActive: boolean }) {
 
           {/* Text */}
           <FadeInView active={isActive} delay={300}>
-            <Text style={[styles.tagline, neonGlow(OB.accent)]}>Ton bilan en un clin d'oeil</Text>
+            <Text style={[styles.tagline, neonGlow(OB.accent)]}>{t('slide3.tagline')}</Text>
           </FadeInView>
           <FadeInView active={isActive} delay={400}>
             <Text style={styles.heading}>
-              Un score. Un grade.{'\n'}La verite sur tes finances.
+              {t('slide3.heading')}
             </Text>
           </FadeInView>
           <FadeInView active={isActive} delay={500}>
             <Text style={styles.body}>
-              <Text style={{ color: '#fff', fontWeight: '700' }}>De E a A+</Text>, ton grade te dit ou tu en es. Pas pour te juger, mais pour savoir exactement par ou commencer.
+              <Text style={{ color: '#fff', fontWeight: '700' }}>{t('slide3.bodyBold')}</Text>{t('slide3.bodyEnd')}
             </Text>
           </FadeInView>
         </>

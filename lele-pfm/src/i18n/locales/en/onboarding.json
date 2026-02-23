@@ -1,0 +1,102 @@
+{
+  "buttons": {
+    "0": "Show me!",
+    "1": "What's next?",
+    "2": "Keep going!",
+    "3": "More!",
+    "4": "Almost there...",
+    "5": "Last one!",
+    "6": "Let's go!"
+  },
+  "skip": "Skip intro",
+  "slide1": {
+    "title": "You spend.",
+    "titleHighlight": "What if you earned while spending?",
+    "subtitle": "LELE PFM turns your spending into wealth.",
+    "headerBefore": "Today",
+    "headerAfter": "With LELE",
+    "comp1Before": "You spend and you lose",
+    "comp1After": "You spend and you earn",
+    "comp2Before": "You struggle at the end of the month",
+    "comp2After": "You build your nest egg",
+    "comp3Before": "You cut without knowing where",
+    "comp3After": "We show you where to act",
+    "comp4Before": "No method",
+    "comp4After": "A 3-year plan"
+  },
+  "slide2": {
+    "cardTitle": "We ask you a few questions",
+    "step1Label": "Your profile",
+    "step1Desc": "Age, situation, job",
+    "step2Label": "Your income",
+    "step2Desc": "Salary, business, benefits",
+    "step3Label": "Your spending",
+    "step3Desc": "By category",
+    "step4Label": "Your history",
+    "step4Desc": "3 to 5 years of data",
+    "resultTitle": "The engine analyzes everything",
+    "resultSub": "and detects your hidden savings",
+    "tagline": "We identify how you spend",
+    "heading": "A few questions.\nPowerful answers.",
+    "bodyBold": "You tell us how you live",
+    "bodyEnd": ", we calculate how you can live better. No judgment, just numbers."
+  },
+  "slide3": {
+    "scoreLabel": "Your financial health report",
+    "kpi1": "Hidden costs",
+    "kpi2": "Maximum cost",
+    "kpi3": "Hidden cashback",
+    "tagline": "Your report at a glance",
+    "heading": "A score. A grade.\nThe truth about your finances.",
+    "bodyBold": "From E to A+",
+    "bodyEnd": ", your grade tells you where you stand. Not to judge you, but to know exactly where to start."
+  },
+  "slide4": {
+    "cardTitle": "Cashback by category",
+    "cat1": "Outings & recreation",
+    "cat2": "Food",
+    "cat3": "Transport",
+    "cat4": "Housing",
+    "hintHigh": "Big cashback",
+    "hintMedium": "Medium cashback",
+    "hintLow": "Little cashback",
+    "tagline": "Every expense under the scanner",
+    "heading": "We tell you exactly\nwhere your cashback is.",
+    "bodyBold": "Every category hides a cashback.",
+    "bodyEnd": " We identify the ones hiding the most cashback, without touching essentials."
+  },
+  "slide5": {
+    "cardTitle": "Your nest egg is growing",
+    "year1": "Year 1",
+    "year2": "Year 2",
+    "year3": "Year 3",
+    "treasureTitle": "Your natural cashback",
+    "treasureSub": "grows year after year",
+    "tagline": "A plan. Three years. Your cashback.",
+    "heading": "In 3 years, you build\nyour nest egg.",
+    "bodyBold": "Every month, your cashback grows.",
+    "bodyEnd": " We set progressive goals to boost your savings without forcing it."
+  },
+  "slide6": {
+    "cardTitle": "Your natural cashback works for you",
+    "benefit1Title": "Your savings get a boost",
+    "benefit1Desc": "Your natural cashback strengthens your reserves",
+    "benefit2Title": "Your pleasures too",
+    "benefit2Desc": "A portion funds what you enjoy",
+    "benefit3Title": "Without touching essentials",
+    "benefit3Desc": "We never cut what matters most",
+    "tagline": "The best of both worlds",
+    "heading": "A cashback that boosts\nsavings AND pleasures.",
+    "bodyBold": "Your natural cashback boosts your savings AND your pleasures",
+    "bodyEnd": ", with no effort or sacrifice."
+  },
+  "slide7": {
+    "heading": "5 minutes.\nThen we take off.",
+    "step1": "5 minutes for your diagnosis",
+    "step2": "Your score and grade instantly",
+    "step3": "Your nest egg calculated over 3 years",
+    "step4": "Your concrete monthly goals",
+    "step5": "You take off toward financial freedom",
+    "bottomTagline": "Your financial future starts here."
+  }
+}

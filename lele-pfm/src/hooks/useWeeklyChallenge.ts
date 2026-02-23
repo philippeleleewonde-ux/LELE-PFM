@@ -10,7 +10,7 @@ import { useIncomeStore } from '@/stores/income-store';
 import { useSavingsGoalStore } from '@/stores/savings-goal-store';
 import { usePerformanceStore } from '@/stores/performance-store';
 import { useEngineStore } from '@/stores/engine-store';
-import { getCurrentWeek, getWeekNumber, getISOYear } from '@/utils/week-helpers';
+import { getCurrentWeek, getWeekDates, getWeekNumber, getISOYear } from '@/utils/week-helpers';
 
 export interface WeeklyChallengeResult {
   challenge: FinancialChallenge | null;
@@ -127,8 +127,10 @@ const CHECKERS: Record<string, (ctx: CondCtx) => boolean> = {
 
 // ─── Hook ───
 
-export function useWeeklyChallenge(): WeeklyChallengeResult {
-  const { week: calWeek, year: calYear } = getCurrentWeek();
+export function useWeeklyChallenge(selectedWeek?: number, selectedYear?: number): WeeklyChallengeResult {
+  const { week: realWeek, year: realYear } = getCurrentWeek();
+  const calWeek = selectedWeek ?? realWeek;
+  const calYear = selectedYear ?? realYear;
   const lastCalculatedAt = useEngineStore((s) => s.lastCalculatedAt);
   const engineOutput = useEngineStore((s) => s.engineOutput);
   const transactions = useTransactionStore((s) => s.transactions);
@@ -142,13 +144,15 @@ export function useWeeklyChallenge(): WeeklyChallengeResult {
   const getCompletedCount = useChallengeStore((s) => s.getCompletedCount);
   const getRolling8Score = useChallengeStore((s) => s.getRolling8Score);
 
-  // Determine plan week (1-48, cycling)
+  // Determine plan week (1-48, cycling) based on selected week
   const planWeek = useMemo(() => {
     if (!lastCalculatedAt) return 1;
-    const elapsed = Date.now() - new Date(lastCalculatedAt).getTime();
-    const weeksElapsed = Math.floor(elapsed / (7 * 24 * 60 * 60 * 1000));
+    const calcDate = new Date(lastCalculatedAt);
+    const { start: selectedWeekStart } = getWeekDates(calWeek, calYear);
+    const elapsed = selectedWeekStart.getTime() - calcDate.getTime();
+    const weeksElapsed = Math.max(0, Math.floor(elapsed / (7 * 24 * 60 * 60 * 1000)));
     return (weeksElapsed % 48) + 1;
-  }, [lastCalculatedAt, calWeek]);
+  }, [lastCalculatedAt, calWeek, calYear]);
 
   // Current challenge
   const challenge = useMemo(() => {

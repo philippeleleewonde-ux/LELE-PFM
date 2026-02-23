@@ -14,6 +14,7 @@ import {
   Lightbulb,
   TrendingUp,
 } from 'lucide-react-native';
+import { useTranslation } from 'react-i18next';
 import { formatCurrency } from '@/services/format-helpers';
 import { LeverScore } from '@/hooks/useFinancialScore';
 import { LeverEvolution } from '@/hooks/useWeeklyEvolution';
@@ -27,14 +28,14 @@ interface IndicatorStoryCardProps {
   streakValue?: number;
 }
 
-// ─── Advice map ───
+// ─── Advice keys ───
 
-const ADVICE: Record<string, string> = {
-  REG: 'Continue a epargner chaque semaine pour maintenir ta serie',
-  PRE: "Vise un taux d'execution entre 85% et 95% de ton budget",
-  SEC: "Chaque euro epargne te rapproche de ton objectif annuel",
-  EFF: 'Diversifie tes sources de revenus pour stabiliser ton score',
-  LIT: 'Complete tes defis hebdomadaires pour progresser',
+const ADVICE_KEYS: Record<string, string> = {
+  REG: 'evolution.adviceREG',
+  PRE: 'evolution.advicePRE',
+  SEC: 'evolution.adviceSEC',
+  EFF: 'evolution.adviceEFF',
+  LIT: 'evolution.adviceLIT',
 };
 
 // ─── Component ───
@@ -45,6 +46,7 @@ export function IndicatorStoryCard({
   bestRecord,
   streakValue,
 }: IndicatorStoryCardProps) {
+  const { t } = useTranslation('app');
   const { code, label, score, color, details } = lever;
 
   // ── Trend icon ──
@@ -113,20 +115,20 @@ export function IndicatorStoryCard({
           <View style={styles.trendRow}>
             <TrendingUp size={14} color="#4ADE80" />
             <Text style={[styles.trendText, { color: '#4ADE80' }]}>
-              En hausse depuis la derniere semaine
+              {t('evolution.trendUp')}
             </Text>
           </View>
         )}
         {evolution.trend === 'down' && (
           <View style={styles.trendRow}>
             <Text style={[styles.trendText, { color: '#FB923C' }]}>
-              En baisse {'\u2014'} reste concentre
+              {t('evolution.trendDown')}
             </Text>
           </View>
         )}
         {evolution.trend === 'stable' && (
           <View style={styles.trendRow}>
-            <Text style={[styles.trendText, { color: '#71717A' }]}>Stable</Text>
+            <Text style={[styles.trendText, { color: '#71717A' }]}>{t('evolution.trendStable')}</Text>
           </View>
         )}
       </View>
@@ -134,14 +136,14 @@ export function IndicatorStoryCard({
       {/* ═══ 5. Advice text ═══ */}
       <View style={styles.adviceRow}>
         <Lightbulb size={13} color="#71717A" />
-        <Text style={styles.adviceText}>{ADVICE[code]}</Text>
+        <Text style={styles.adviceText}>{t(ADVICE_KEYS[code])}</Text>
       </View>
 
       {/* ═══ 6. Record line ═══ */}
       {bestRecord && (
         <View style={styles.recordRow}>
           <Text style={styles.recordText}>
-            Record : {bestRecord.value} (Sem. {bestRecord.week})
+            {t('evolution.record', { value: bestRecord.value, week: bestRecord.week })}
           </Text>
         </View>
       )}
@@ -158,19 +160,20 @@ function BreakdownREG({
   details: LeverScore['details'];
   streakValue?: number;
 }) {
+  const { t } = useTranslation('app');
   const ewma = details.regEwmaFrequency ?? 0;
   const avgNote = details.regAvgNote ?? 0;
   const streak = details.regCurrentStreak ?? streakValue ?? 0;
   return (
     <>
-      <Text style={styles.breakdownSubLabel}>Frequence EWMA</Text>
+      <Text style={styles.breakdownSubLabel}>{t('evolution.ewmaFrequency')}</Text>
       <View style={styles.miniBarRow}>
         <View style={styles.miniBarTrack}>
           <View style={[styles.miniBarFill, { backgroundColor: '#4ADE80', width: `${Math.min(100, ewma)}%` }]} />
         </View>
         <Text style={styles.miniBarScore}>{ewma}</Text>
       </View>
-      <Text style={styles.breakdownSubLabel}>Intensite (note {avgNote}/10)</Text>
+      <Text style={styles.breakdownSubLabel}>{t('evolution.intensity', { avgNote })}</Text>
       <View style={styles.miniBarRow}>
         <View style={styles.miniBarTrack}>
           <View style={[styles.miniBarFill, { backgroundColor: '#60A5FA', width: `${Math.min(100, details.regSavingsIntensity ?? 0)}%` }]} />
@@ -179,15 +182,15 @@ function BreakdownREG({
       </View>
       {streak > 0 && (
         <Text style={[styles.breakdownLine, { color: '#4ADE80' }]}>
-          Serie en cours : {streak} semaines
+          {t('evolution.currentStreak', { streak })}
         </Text>
       )}
       <Text style={[styles.breakdownLine, { color: '#71717A' }]}>
-        {details.regWeeksWithSavings ?? 0}/{details.regTotalWeeks ?? 0} semaines avec epargne
+        {t('evolution.weeksWithSavings', { count: details.regWeeksWithSavings ?? 0, total: details.regTotalWeeks ?? 0 })}
       </Text>
       {details.regHasBeginnerBonus && (
         <View style={styles.bonusBadge}>
-          <Text style={styles.bonusBadgeText}>Bonus debutant +15</Text>
+          <Text style={styles.bonusBadgeText}>{t('evolution.beginnerBonus')}</Text>
         </View>
       )}
     </>
@@ -197,6 +200,7 @@ function BreakdownREG({
 // ─── Breakdown: PRE (audit-grade) ───
 
 function BreakdownPRE({ details }: { details: LeverScore['details'] }) {
+  const { t } = useTranslation('app');
   const hasDecomp = details.preScoreIncomp !== undefined
     || details.preScoreSemi !== undefined
     || details.preScoreDisc !== undefined;
@@ -212,7 +216,7 @@ function BreakdownPRE({ details }: { details: LeverScore['details'] }) {
       {hasDecomp ? (
         <>
           {/* Incompressible */}
-          <Text style={styles.breakdownSubLabel}>Incompressible (Alim, Logt, Sante)</Text>
+          <Text style={styles.breakdownSubLabel}>{t('evolution.incompressible')}</Text>
           <View style={styles.miniBarRow}>
             <View style={styles.miniBarTrack}>
               <View
@@ -228,12 +232,12 @@ function BreakdownPRE({ details }: { details: LeverScore['details'] }) {
             <Text style={styles.miniBarScore}>{details.preScoreIncomp ?? 0}</Text>
           </View>
           <Text style={[styles.breakdownLine, { fontSize: 11 }]}>
-            Execution : {incompPct}% ({formatCurrency(details.preTotalSpentIncomp8w ?? 0)} / {formatCurrency(details.preTotalBudgetIncomp8w ?? 0)})
+            {t('evolution.execution', { percent: incompPct, spent: formatCurrency(details.preTotalSpentIncomp8w ?? 0), budget: formatCurrency(details.preTotalBudgetIncomp8w ?? 0) })}
           </Text>
 
           {/* Semi-essentiel */}
           <Text style={[styles.breakdownSubLabel, { marginTop: 8 }]}>
-            Semi-essentiel (Transp, Telecom, Educ)
+            {t('evolution.semiEssential')}
           </Text>
           <View style={styles.miniBarRow}>
             <View style={styles.miniBarTrack}>
@@ -250,12 +254,12 @@ function BreakdownPRE({ details }: { details: LeverScore['details'] }) {
             <Text style={styles.miniBarScore}>{details.preScoreSemi ?? 0}</Text>
           </View>
           <Text style={[styles.breakdownLine, { fontSize: 11 }]}>
-            Execution : {semiPct}% ({formatCurrency(details.preTotalSpentSemi8w ?? 0)} / {formatCurrency(details.preTotalBudgetSemi8w ?? 0)})
+            {t('evolution.execution', { percent: semiPct, spent: formatCurrency(details.preTotalSpentSemi8w ?? 0), budget: formatCurrency(details.preTotalBudgetSemi8w ?? 0) })}
           </Text>
 
           {/* Discretionnaire */}
           <Text style={[styles.breakdownSubLabel, { marginTop: 8 }]}>
-            Discretionnaire (Vetements, Loisirs)
+            {t('evolution.discretionary')}
           </Text>
           <View style={styles.miniBarRow}>
             <View style={styles.miniBarTrack}>
@@ -272,12 +276,12 @@ function BreakdownPRE({ details }: { details: LeverScore['details'] }) {
             <Text style={styles.miniBarScore}>{details.preScoreDisc ?? 0}</Text>
           </View>
           <Text style={[styles.breakdownLine, { fontSize: 11 }]}>
-            Execution : {discPct}% ({formatCurrency(details.preTotalSpentDisc8w ?? 0)} / {formatCurrency(details.preTotalBudgetDisc8w ?? 0)})
+            {t('evolution.execution', { percent: discPct, spent: formatCurrency(details.preTotalSpentDisc8w ?? 0), budget: formatCurrency(details.preTotalBudgetDisc8w ?? 0) })}
           </Text>
 
           {/* Global */}
           <Text style={[styles.breakdownLine, { marginTop: 8 }]}>
-            Taux global : {details.preAvgExecution ?? 0}%
+            {t('evolution.globalRate', { rate: details.preAvgExecution ?? 0 })}
           </Text>
           {/* Volatilite */}
           {(() => {
@@ -287,7 +291,7 @@ function BreakdownPRE({ details }: { details: LeverScore['details'] }) {
             return (
               <View style={[styles.bonusBadge, { backgroundColor: 'rgba(248,113,113,0.15)', marginTop: 6 }]}>
                 <Text style={[styles.bonusBadgeText, { color: '#F87171' }]}>
-                  Volatilite {Math.round(worstCV * 100)}% — penalite x{worstP.toFixed(2)}
+                  {t('evolution.volatility', { cv: Math.round(worstCV * 100), penalty: worstP.toFixed(2) })}
                 </Text>
               </View>
             );
@@ -296,18 +300,18 @@ function BreakdownPRE({ details }: { details: LeverScore['details'] }) {
       ) : (
         <>
           <Text style={styles.breakdownLine}>
-            Taux d'execution moyen : {details.preAvgExecution ?? 0}%
+            {t('evolution.avgExecution', { rate: details.preAvgExecution ?? 0 })}
           </Text>
         </>
       )}
       {details.preHasBeginnerBonus && (
         <View style={styles.bonusBadge}>
-          <Text style={styles.bonusBadgeText}>Bonus debutant +15</Text>
+          <Text style={styles.bonusBadgeText}>{t('evolution.beginnerBonus')}</Text>
         </View>
       )}
       {!details.preHasBudget && (
         <Text style={[styles.breakdownLine, { color: '#F87171', marginTop: 4 }]}>
-          Aucun plan configure {'\u2014'} score a 0
+          {t('evolution.noPlanConfigured')}
         </Text>
       )}
     </>
@@ -317,6 +321,7 @@ function BreakdownPRE({ details }: { details: LeverScore['details'] }) {
 // ─── Breakdown: SEC ───
 
 function BreakdownSEC({ details }: { details: LeverScore['details'] }) {
+  const { t } = useTranslation('app');
   const ratio = details.secCoverageRatio ?? 0;
   const ratioPercent = Math.round(ratio * 100);
 
@@ -327,27 +332,27 @@ function BreakdownSEC({ details }: { details: LeverScore['details'] }) {
   if (ratio >= 1.0) {
     zoneBg = 'rgba(74,222,128,0.15)';
     zoneTextColor = '#4ADE80';
-    zoneLabel = 'Zone verte';
+    zoneLabel = t('evolution.zoneGreen');
   } else if (ratio >= 0.70) {
     zoneBg = 'rgba(253,186,116,0.15)';
     zoneTextColor = '#FDBA74';
-    zoneLabel = 'Zone jaune';
+    zoneLabel = t('evolution.zoneYellow');
   } else {
     zoneBg = 'rgba(248,113,113,0.15)';
     zoneTextColor = '#F87171';
-    zoneLabel = 'Zone rouge';
+    zoneLabel = t('evolution.zoneRed');
   }
 
   return (
     <>
       <Text style={styles.breakdownLine}>
-        Objectif prorata : {formatCurrency(details.secProratedTarget ?? 0)}
+        {t('evolution.proratedTarget', { amount: formatCurrency(details.secProratedTarget ?? 0) })}
       </Text>
       <Text style={styles.breakdownLine}>
-        Epargne cumulee : {formatCurrency(details.secCumulEconomies ?? 0)}
+        {t('evolution.cumulSavings', { amount: formatCurrency(details.secCumulEconomies ?? 0) })}
       </Text>
       <Text style={styles.breakdownLine}>
-        Ratio de couverture : {ratioPercent}%
+        {t('evolution.coverageRatio', { percent: ratioPercent })}
       </Text>
       <View style={[styles.zoneBadge, { backgroundColor: zoneBg }]}>
         <Text style={[styles.zoneBadgeText, { color: zoneTextColor }]}>
@@ -355,8 +360,7 @@ function BreakdownSEC({ details }: { details: LeverScore['details'] }) {
         </Text>
       </View>
       <Text style={[styles.breakdownLine, { color: '#71717A', marginTop: 6 }]}>
-        An{details.secPlanYear ?? 1} T{details.secQuarter ?? 1} {'\u2014'} Semaine{' '}
-        {details.secWeeksElapsed ?? 0}/48
+        {t('evolution.planYearQuarter', { year: details.secPlanYear ?? 1, quarter: details.secQuarter ?? 1, weeks: details.secWeeksElapsed ?? 0 })}
       </Text>
     </>
   );
@@ -365,13 +369,14 @@ function BreakdownSEC({ details }: { details: LeverScore['details'] }) {
 // ─── Breakdown: EFF ───
 
 function BreakdownEFF({ details }: { details: LeverScore['details'] }) {
+  const { t } = useTranslation('app');
   const fixePercent = Math.round((details.effRealizationFixe ?? 0) * 100);
   const variablePercent = Math.round((details.effRealizationVariable ?? 0) * 100);
 
   return (
     <>
       {/* Revenus Fixes */}
-      <Text style={styles.breakdownSubLabel}>Revenus Fixes</Text>
+      <Text style={styles.breakdownSubLabel}>{t('evolution.fixedRevenue')}</Text>
       <View style={styles.miniBarRow}>
         <View style={styles.miniBarTrack}>
           <View
@@ -389,7 +394,7 @@ function BreakdownEFF({ details }: { details: LeverScore['details'] }) {
 
       {/* Revenus Variables */}
       <Text style={[styles.breakdownSubLabel, { marginTop: 8 }]}>
-        Revenus Variables
+        {t('evolution.variableRevenue')}
       </Text>
       <View style={styles.miniBarRow}>
         <View style={styles.miniBarTrack}>
@@ -408,15 +413,13 @@ function BreakdownEFF({ details }: { details: LeverScore['details'] }) {
 
       {/* 8 weeks summary */}
       <Text style={[styles.breakdownLine, { marginTop: 8 }]}>
-        8 dernieres semaines : Recu{' '}
-        {formatCurrency(details.effTotalActual8w ?? 0)} / Attendu{' '}
-        {formatCurrency(details.effTotalExpected8w ?? 0)}
+        {t('evolution.last8weeks', { received: formatCurrency(details.effTotalActual8w ?? 0), expected: formatCurrency(details.effTotalExpected8w ?? 0) })}
       </Text>
 
       {/* Beginner bonus */}
       {details.effHasBeginnerBonus && (
         <View style={styles.bonusBadge}>
-          <Text style={styles.bonusBadgeText}>Bonus debutant +15</Text>
+          <Text style={styles.bonusBadgeText}>{t('evolution.beginnerBonus')}</Text>
         </View>
       )}
     </>
@@ -426,16 +429,17 @@ function BreakdownEFF({ details }: { details: LeverScore['details'] }) {
 // ─── Breakdown: LIT ───
 
 function BreakdownLIT({ details }: { details: LeverScore['details'] }) {
+  const { t } = useTranslation('app');
   return (
     <>
-      <Text style={styles.breakdownSubLabel}>Connaissances EKH (60%)</Text>
+      <Text style={styles.breakdownSubLabel}>{t('evolution.knowledgeEKH')}</Text>
       <View style={styles.miniBarRow}>
         <View style={styles.miniBarTrack}>
           <View style={[styles.miniBarFill, { backgroundColor: '#FBBF24', width: `${Math.min(100, details.litEkhNorm ?? 0)}%` }]} />
         </View>
         <Text style={styles.miniBarScore}>{details.litEkhNorm ?? 0}</Text>
       </View>
-      <Text style={[styles.breakdownSubLabel, { marginTop: 8 }]}>Engagement defis (25%)</Text>
+      <Text style={[styles.breakdownSubLabel, { marginTop: 8 }]}>{t('evolution.challengeEngagement')}</Text>
       <View style={styles.miniBarRow}>
         <View style={styles.miniBarTrack}>
           <View style={[styles.miniBarFill, { backgroundColor: '#FB923C', width: `${Math.min(100, details.litChallengeScore ?? 0)}%` }]} />
@@ -443,12 +447,12 @@ function BreakdownLIT({ details }: { details: LeverScore['details'] }) {
         <Text style={styles.miniBarScore}>{details.litChallengeScore ?? 0}</Text>
       </View>
       <Text style={[styles.breakdownLine, { marginTop: 8 }]}>
-        Curriculum : {details.litCompletedCount ?? 0}/{details.litTotalChallenges ?? 48} defis completes
+        {t('evolution.curriculum', { completed: details.litCompletedCount ?? 0, total: details.litTotalChallenges ?? 48 })}
       </Text>
       {details.litFloorActive && (
         <View style={[styles.bonusBadge, { backgroundColor: 'rgba(96,165,250,0.15)' }]}>
           <Text style={[styles.bonusBadgeText, { color: '#60A5FA' }]}>
-            Plancher expert : {details.litKnowledgeFloor ?? 0}/100
+            {t('evolution.expertFloor', { floor: details.litKnowledgeFloor ?? 0 })}
           </Text>
         </View>
       )}

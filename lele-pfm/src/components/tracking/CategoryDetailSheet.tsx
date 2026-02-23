@@ -1,6 +1,7 @@
 import React, { useRef, useEffect } from 'react';
 import { View, Text, Modal, Pressable, ScrollView, Animated, StyleSheet, useWindowDimensions } from 'react-native';
 import { X, Plus } from 'lucide-react-native';
+import { useTranslation } from 'react-i18next';
 import { CategoryTracking } from '@/hooks/useWeeklyTracking';
 import { DailyTransactionRow } from './DailyTransactionRow';
 import { formatCurrency } from '@/services/format-helpers';
@@ -14,6 +15,7 @@ interface CategoryDetailSheetProps {
 }
 
 export function CategoryDetailSheet({ visible, category, onClose, onAddTransaction }: CategoryDetailSheetProps) {
+  const { t } = useTranslation('tracking');
   const { width, height } = useWindowDimensions();
   const isSmall = width < 360;
   const translateY = useRef(new Animated.Value(height)).current;
@@ -75,7 +77,7 @@ export function CategoryDetailSheet({ visible, category, onClose, onAddTransacti
         {/* Transaction list */}
         <ScrollView style={[styles.list, { maxHeight: height * (isSmall ? 0.5 : 0.4) }]} showsVerticalScrollIndicator={false}>
           {sortedTxs.length === 0 ? (
-            <Text style={styles.empty}>Aucune dépense cette semaine</Text>
+            <Text style={styles.empty}>{t('categoryDetail.emptyExpenses')}</Text>
           ) : (
             sortedTxs.map((tx) => (
               <DailyTransactionRow
@@ -90,7 +92,7 @@ export function CategoryDetailSheet({ visible, category, onClose, onAddTransacti
         {/* Add button */}
         <Pressable onPress={onAddTransaction} style={styles.addBtn}>
           <Plus size={20} color="#0F1014" />
-          <Text style={styles.addBtnText}>Ajouter une dépense</Text>
+          <Text style={styles.addBtnText}>{t('categoryDetail.addExpense')}</Text>
         </Pressable>
       </Animated.View>
       </View>

@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, Image } from 'react-native';
 import { Bell } from 'lucide-react-native';
+import { useTranslation } from 'react-i18next';
 
 interface HomeHeaderProps {
     userName?: string;
@@ -10,16 +11,18 @@ interface HomeHeaderProps {
 }
 
 export function HomeHeader({
-    userName = 'Utilisateur',
+    userName,
     userImage = 'https://i.pravatar.cc/150?u=main',
     onNotificationPress,
     onProfilePress
 }: HomeHeaderProps) {
+    const { t } = useTranslation('app');
+    const displayName = userName || t('dashboard.user');
     return (
         <View className="flex-row justify-between items-center px-6 pt-16 pb-6">
             <View>
-                <Text className="text-white/60 text-sm">Bonjour,</Text>
-                <Text className="text-white text-xl font-bold">{userName}</Text>
+                <Text className="text-white/60 text-sm">{t('dashboard.greeting')}</Text>
+                <Text className="text-white text-xl font-bold">{displayName}</Text>
             </View>
             <View className="flex-row items-center gap-4">
                 <View className="relative">

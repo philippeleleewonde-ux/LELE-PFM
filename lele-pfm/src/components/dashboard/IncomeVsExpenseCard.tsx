@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, Pressable, StyleSheet } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { ArrowUpRight, ArrowDownLeft } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
 import { GlassCard } from '@/components/ui/GlassCard';
@@ -9,6 +10,7 @@ import { useTransactionStore } from '@/stores/transaction-store';
 import { getCurrentWeek } from '@/utils/week-helpers';
 
 export function IncomeVsExpenseCard() {
+  const { t } = useTranslation('tracking');
   const router = useRouter();
   const { week, year } = getCurrentWeek();
   const incomeTotal = useIncomeStore((s) => s.getWeekTotal(week, year));
@@ -26,7 +28,7 @@ export function IncomeVsExpenseCard() {
           <View style={styles.column}>
             <View style={styles.iconRow}>
               <ArrowDownLeft size={14} color="#4ADE80" />
-              <Text style={styles.columnLabel}>Rentrees</Text>
+              <Text style={styles.columnLabel}>{t('incomeVsExpense.income')}</Text>
             </View>
             <Text style={[styles.columnValue, { color: '#4ADE80' }]}>
               +{formatCurrency(incomeTotal)}
@@ -40,7 +42,7 @@ export function IncomeVsExpenseCard() {
           <View style={styles.column}>
             <View style={styles.iconRow}>
               <ArrowUpRight size={14} color="#FBBF24" />
-              <Text style={styles.columnLabel}>Depenses</Text>
+              <Text style={styles.columnLabel}>{t('incomeVsExpense.expenses')}</Text>
             </View>
             <Text style={[styles.columnValue, { color: '#FBBF24' }]}>
               -{formatCurrency(expenseTotal)}
@@ -52,7 +54,7 @@ export function IncomeVsExpenseCard() {
         <View style={styles.balanceRow}>
           <View style={styles.balanceDivider} />
           <View style={styles.balanceContent}>
-            <Text style={styles.balanceLabel}>Solde net</Text>
+            <Text style={styles.balanceLabel}>{t('incomeVsExpense.netBalance')}</Text>
             <Text style={[styles.balanceValue, { color: balance >= 0 ? '#4ADE80' : '#F87171' }]}>
               {balance >= 0 ? '+' : ''}{formatCurrency(balance)}
             </Text>

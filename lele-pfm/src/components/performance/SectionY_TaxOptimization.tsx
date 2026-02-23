@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, Pressable } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { PF, PerfGlassCard } from './shared';
 import { useInvestmentStore } from '@/stores/investment-store';
 import {
@@ -10,6 +11,7 @@ import {
 } from '@/domain/calculators/tax-optimization-engine';
 
 export function SectionY_TaxOptimization() {
+  const { t } = useTranslation('performance');
   const allocations = useInvestmentStore((s) => s.allocations);
   const investorProfile = useInvestmentStore((s) => s.investorProfile);
   const [selectedRegimeIndex, setSelectedRegimeIndex] = useState(0);
@@ -25,7 +27,7 @@ export function SectionY_TaxOptimization() {
     return (
       <PerfGlassCard>
         <Text style={styles.emptyText}>
-          Configurez votre profil investisseur dans les r{'\u00e9'}glages pour voir l'analyse fiscale.
+          {t('taxOptimization.configureProfile')}
         </Text>
       </PerfGlassCard>
     );
@@ -64,18 +66,17 @@ export function SectionY_TaxOptimization() {
         <>
           {/* Tax efficiency score */}
           <PerfGlassCard style={styles.section}>
-            <Text style={styles.sectionTitle}>Efficacit{'\u00e9'} fiscale</Text>
+            <Text style={styles.sectionTitle}>{t('taxOptimization.taxEfficiency')}</Text>
             <Text
               style={[
                 styles.scoreValue,
                 { color: getScoreColor(result.taxEfficiencyScore) },
               ]}
             >
-              {result.taxEfficiencyScore}% d'efficacit{'\u00e9'} fiscale
+              {t('taxOptimization.taxEfficiencyPercent', { score: result.taxEfficiencyScore })}
             </Text>
             <Text style={styles.scoreSub}>
-              Rendement brut {result.portfolioGrossReturn.toFixed(2)}% {'\u2192'} net{' '}
-              {result.portfolioNetReturn.toFixed(2)}% (perte fiscale: {result.portfolioTaxDrag.toFixed(2)}%)
+              {t('taxOptimization.grossToNet', { gross: result.portfolioGrossReturn.toFixed(2), net: result.portfolioNetReturn.toFixed(2), drag: result.portfolioTaxDrag.toFixed(2) })}
             </Text>
             <Text style={styles.verdict}>{result.verdict}</Text>
           </PerfGlassCard>
@@ -83,7 +84,7 @@ export function SectionY_TaxOptimization() {
           {/* Per-asset breakdown */}
           {result.assetProfiles.length > 0 && (
             <PerfGlassCard style={styles.section}>
-              <Text style={styles.sectionTitle}>D{'\u00e9'}tail par actif</Text>
+              <Text style={styles.sectionTitle}>{t('taxOptimization.perAssetDetail')}</Text>
               <View style={styles.assetList}>
                 {result.assetProfiles.map((p) => (
                   <AssetRow key={p.asset} profile={p} />
@@ -95,7 +96,7 @@ export function SectionY_TaxOptimization() {
           {/* Strategies */}
           {result.strategies.filter((s) => s.applicable).length > 0 && (
             <PerfGlassCard style={styles.section}>
-              <Text style={styles.sectionTitle}>Strat{'\u00e9'}gies d'optimisation</Text>
+              <Text style={styles.sectionTitle}>{t('taxOptimization.optimizationStrategies')}</Text>
               <View style={styles.stratList}>
                 {result.strategies
                   .filter((s) => s.applicable)
@@ -108,7 +109,7 @@ export function SectionY_TaxOptimization() {
 
           {/* Disclaimer */}
           <Text style={styles.disclaimer}>
-            Estimations indicatives, consultez un conseiller fiscal pour votre situation personnelle.
+            {t('taxOptimization.disclaimer')}
           </Text>
         </>
       )}
@@ -153,6 +154,7 @@ function AssetRow({ profile }: { profile: AssetTaxProfile }) {
 }
 
 function StrategyRow({ strategy }: { strategy: TaxStrategy }) {
+  const { t } = useTranslation('performance');
   const diffColor =
     strategy.difficulty === 'easy'
       ? PF.green
@@ -161,10 +163,10 @@ function StrategyRow({ strategy }: { strategy: TaxStrategy }) {
         : PF.red;
   const diffLabel =
     strategy.difficulty === 'easy'
-      ? 'Facile'
+      ? t('taxOptimization.easy')
       : strategy.difficulty === 'moderate'
-        ? 'Mod\u00e9r\u00e9'
-        : 'Avanc\u00e9';
+        ? t('taxOptimization.moderate')
+        : t('taxOptimization.advanced');
 
   return (
     <View style={styles.stratRow}>
@@ -178,7 +180,7 @@ function StrategyRow({ strategy }: { strategy: TaxStrategy }) {
       </View>
       <Text style={styles.stratDesc}>{strategy.description}</Text>
       <Text style={[styles.stratSaving, { color: PF.green }]}>
-        {'\u00c9'}conomie potentielle : ~{strategy.potentialSaving}%/an
+        {t('taxOptimization.potentialSaving', { saving: strategy.potentialSaving })}
       </Text>
     </View>
   );

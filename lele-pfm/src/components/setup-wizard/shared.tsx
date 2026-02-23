@@ -32,16 +32,10 @@ export const WZ = {
 
 export const WIZARD_STEP_COUNT = 8;
 
-// Step labels for the wizard
-export const WIZARD_STEP_LABELS = [
-  'Profil',
-  'Revenus & Dépenses',
-  'Historique',
-  'Risques',
-  'Auto-évaluation',
-  'Leviers',
-  'Investissement',
-  'Terminé !',
+/** i18n keys resolved via t(`wizard:stepLabels.${index}`) */
+export const WIZARD_STEP_LABEL_KEYS = [
+  'stepLabels.0', 'stepLabels.1', 'stepLabels.2', 'stepLabels.3',
+  'stepLabels.4', 'stepLabels.5', 'stepLabels.6', 'stepLabels.7',
 ];
 
 // ─── GlassCard ───

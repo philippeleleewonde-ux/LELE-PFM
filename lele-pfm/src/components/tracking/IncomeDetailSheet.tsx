@@ -1,6 +1,7 @@
 import React, { useRef, useEffect } from 'react';
 import { View, Text, Modal, Pressable, ScrollView, Animated, StyleSheet, useWindowDimensions } from 'react-native';
 import { X, Plus } from 'lucide-react-native';
+import { useTranslation } from 'react-i18next';
 import { IncomeSourceTracking } from '@/hooks/useWeeklyIncome';
 import { DailyIncomeRow } from './DailyIncomeRow';
 import { formatCurrency } from '@/services/format-helpers';
@@ -14,6 +15,7 @@ interface IncomeDetailSheetProps {
 }
 
 export function IncomeDetailSheet({ visible, source, onClose, onAddIncome }: IncomeDetailSheetProps) {
+  const { t } = useTranslation('tracking');
   const { width, height } = useWindowDimensions();
   const isSmall = width < 360;
   const translateY = useRef(new Animated.Value(height)).current;
@@ -55,7 +57,7 @@ export function IncomeDetailSheet({ visible, source, onClose, onAddIncome }: Inc
             <Text style={styles.title}>{source.label}</Text>
             <Text style={styles.subtitle}>
               {formatCurrency(source.weeklyActual)}
-              {source.weeklyExpected > 0 && ` / ${formatCurrency(source.weeklyExpected)} attendu`}
+              {source.weeklyExpected > 0 && ` / ${formatCurrency(source.weeklyExpected)} ${t('incomeDetail.expected')}`}
             </Text>
           </View>
           <Pressable onPress={onClose} style={styles.closeBtn}>
@@ -71,7 +73,7 @@ export function IncomeDetailSheet({ visible, source, onClose, onAddIncome }: Inc
 
         <ScrollView style={[styles.list, { maxHeight: height * (isSmall ? 0.5 : 0.4) }]} showsVerticalScrollIndicator={false}>
           {sortedTxs.length === 0 ? (
-            <Text style={styles.empty}>Aucune rentree cette semaine</Text>
+            <Text style={styles.empty}>{t('incomeDetail.emptyIncome')}</Text>
           ) : (
             sortedTxs.map((inc) => (
               <DailyIncomeRow
@@ -85,7 +87,7 @@ export function IncomeDetailSheet({ visible, source, onClose, onAddIncome }: Inc
 
         <Pressable onPress={onAddIncome} style={styles.addBtn}>
           <Plus size={20} color="#0F1014" />
-          <Text style={styles.addBtnText}>Ajouter une rentree</Text>
+          <Text style={styles.addBtnText}>{t('incomeDetail.addIncome')}</Text>
         </Pressable>
       </Animated.View>
       </View>

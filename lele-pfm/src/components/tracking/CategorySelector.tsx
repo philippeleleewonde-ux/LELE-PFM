@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Pressable, Text, StyleSheet } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import {
   ShoppingBasket,
   Shirt,
@@ -12,15 +13,16 @@ import {
 } from 'lucide-react-native';
 import { COICOPCode } from '@/types';
 
-const CATEGORIES: { code: COICOPCode; label: string; icon: typeof ShoppingBasket; color: string }[] = [
-  { code: '01', label: 'Alimentation', icon: ShoppingBasket, color: '#4ADE80' },
-  { code: '02', label: 'Vêtements', icon: Shirt, color: '#F472B6' },
-  { code: '03', label: 'Logement', icon: Home, color: '#60A5FA' },
-  { code: '04', label: 'Santé', icon: HeartPulse, color: '#F87171' },
-  { code: '05', label: 'Transports', icon: Car, color: '#FBBF24' },
-  { code: '06', label: 'Telecom', icon: Phone, color: '#A78BFA' },
-  { code: '07', label: 'Loisirs', icon: Film, color: '#FB923C' },
-  { code: '08', label: 'Éducation', icon: BookOpen, color: '#34D399' },
+/** labelKey resolves via t(`app:categories.${labelKey}`) */
+const CATEGORIES: { code: COICOPCode; labelKey: string; icon: typeof ShoppingBasket; color: string }[] = [
+  { code: '01', labelKey: 'food', icon: ShoppingBasket, color: '#4ADE80' },
+  { code: '02', labelKey: 'clothing', icon: Shirt, color: '#F472B6' },
+  { code: '03', labelKey: 'housing', icon: Home, color: '#60A5FA' },
+  { code: '04', labelKey: 'health', icon: HeartPulse, color: '#F87171' },
+  { code: '05', labelKey: 'transport', icon: Car, color: '#FBBF24' },
+  { code: '06', labelKey: 'telecom', icon: Phone, color: '#A78BFA' },
+  { code: '07', labelKey: 'leisure', icon: Film, color: '#FB923C' },
+  { code: '08', labelKey: 'education', icon: BookOpen, color: '#34D399' },
 ];
 
 interface CategorySelectorProps {
@@ -29,6 +31,7 @@ interface CategorySelectorProps {
 }
 
 export function CategorySelector({ selected, onSelect }: CategorySelectorProps) {
+  const { t } = useTranslation('app');
   return (
     <View style={styles.grid}>
       {CATEGORIES.map((cat) => {
@@ -52,7 +55,7 @@ export function CategorySelector({ selected, onSelect }: CategorySelectorProps) 
               ]}
               numberOfLines={1}
             >
-              {cat.label}
+              {t(`categories.${cat.labelKey}`)}
             </Text>
           </Pressable>
         );
@@ -62,6 +65,10 @@ export function CategorySelector({ selected, onSelect }: CategorySelectorProps) 
 }
 
 export { CATEGORIES as CATEGORY_CONFIGS };
+
+/** Use with t(`app:categories.${labelKey}`) to get translated label */
+export const CATEGORY_COLOR_MAP: Record<string, { labelKey: string; color: string }> =
+  Object.fromEntries(CATEGORIES.map(c => [c.code, { labelKey: c.labelKey, color: c.color }])) as Record<string, { labelKey: string; color: string }>;
 
 const styles = StyleSheet.create({
   grid: {

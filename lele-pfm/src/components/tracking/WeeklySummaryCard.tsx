@@ -1,5 +1,6 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import {
   Award, PiggyBank, Wallet, TrendingDown, TrendingUp,
   ArrowDownLeft, Target, Zap, Shield, Crosshair, AlertTriangle,
@@ -10,10 +11,11 @@ import { getGradeColor, getNoteColor, WeeklySavingsResult } from '@/domain/calcu
 import { usePerformanceStore } from '@/stores/performance-store';
 import { useInvestmentStore } from '@/stores/investment-store';
 import { useIncomeStore } from '@/stores/income-store';
+import { useSavingsGoalStore } from '@/stores/savings-goal-store';
 import { useViewMode } from '@/hooks/useViewMode';
 import { useFinancialScore } from '@/hooks/useFinancialScore';
 import { useWeeklyAllocation } from '@/hooks/useWeeklyAllocation';
-import { getWeekRangeLabel } from '@/utils/week-helpers';
+import { getCurrentWeek, getWeekRangeLabel } from '@/utils/week-helpers';
 import { GOAL_CATEGORIES, GoalIcon } from '@/constants/goal-categories';
 
 interface WeeklySummaryCardProps {
@@ -37,6 +39,7 @@ export function WeeklySummaryCard({
   planYear,
   currentQuarter,
 }: WeeklySummaryCardProps) {
+  const { t } = useTranslation('tracking');
   const saveWeeklyRecord = usePerformanceStore((s) => s.saveWeeklyRecord);
   const addInvestmentRecord = useInvestmentStore((s) => s.addInvestmentRecord);
   const weeklyIncomeActual = useIncomeStore((s) =>
@@ -91,6 +94,35 @@ export function WeeklySummaryCard({
     }
   }, [week, year, weeklyBudget, weeklyTarget, weeklySpent, savings, isInvestor]);
 
+  // ── Auto-allocation side-effect ──
+  const addAutoContributions = useSavingsGoalStore((s) => s.addAutoContributions);
+  const autoAllocatedRef = useRef<string>('');
+
+  useEffect(() => {
+    const { week: currentW, year: currentY } = getCurrentWeek();
+    const isRealWeek = week === currentW && year === currentY;
+    if (!isRealWeek) return;
+    if (savings.economies <= 0) return;
+
+    const pending = allocation.pendingAutoAllocations.filter(
+      (p) => !p.alreadyDone && p.allocatedAmount > 0
+    );
+    if (pending.length === 0) return;
+
+    // Guard: don't re-trigger for the same week
+    const weekTag = `${week}-${year}`;
+    if (autoAllocatedRef.current === weekTag) return;
+    autoAllocatedRef.current = weekTag;
+
+    addAutoContributions(
+      pending.map((p) => ({
+        goalId: p.goalId,
+        amount: p.allocatedAmount,
+        weekKey: p.weekKey,
+      }))
+    );
+  }, [week, year, savings.economies, allocation.pendingAutoAllocations, addAutoContributions]);
+
   if (weeklyBudget <= 0) return null;
 
   const hasGoals = allocation.goalAllocations.length > 0;
@@ -137,7 +169,7 @@ export function WeeklySummaryCard({
             <View style={styles.eprRow}>
               <View style={styles.eprItem}>
                 <Zap size={13} color="#4ADE80" />
-                <Text style={styles.eprLabel}>Economie</Text>
+                <Text style={styles.eprLabel}>{t('summary.savings')}</Text>
               </View>
               <Text style={[styles.eprValue, { color: '#4ADE80' }]}>
                 {formatCurrency(savings.economies)}
@@ -146,7 +178,7 @@ export function WeeklySummaryCard({
             <View style={styles.eprRow}>
               <View style={styles.eprItem}>
                 <Target size={13} color="#60A5FA" />
-                <Text style={styles.eprLabel}>Objectif EPR</Text>
+                <Text style={styles.eprLabel}>{t('summary.eprTarget')}</Text>
                 <View style={styles.calendarBadge}>
                   <Text style={styles.calendarBadgeText}>An{planYear} T{currentQuarter}</Text>
                 </View>
@@ -158,7 +190,7 @@ export function WeeklySummaryCard({
             <View style={styles.eprRow}>
               <View style={styles.eprItem}>
                 <Shield size={13} color={allocation.eprAtteint ? '#4ADE80' : '#FBBF24'} />
-                <Text style={styles.eprLabel}>EPR realise</Text>
+                <Text style={styles.eprLabel}>{t('summary.eprRealized')}</Text>
               </View>
               <Text style={[styles.eprValue, { color: allocation.eprAtteint ? '#4ADE80' : '#FBBF24' }]}>
                 {formatCurrency(allocation.eprProvision)}
@@ -171,14 +203,14 @@ export function WeeklySummaryCard({
 
           {/* ── Cascade d'Allocation ── */}
           <View style={styles.cascadeDivider} />
-          <Text style={styles.cascadeTitle}>CASCADE D'ALLOCATION</Text>
+          <Text style={styles.cascadeTitle}>{t('summary.allocationCascade')}</Text>
 
           {/* Impulse info banner */}
           {hasImpulse && (
             <View style={styles.impulseBanner}>
               <AlertTriangle size={12} color="#FBBF24" />
               <Text style={styles.impulseBannerText}>
-                Sans vos achats impulsifs ({formatCurrency(allocation.impulseTotal)}), vous auriez {formatCurrency(allocation.economiesIfNoImpulse)}
+                {t('summary.impulseMessage')} ({formatCurrency(allocation.impulseTotal)}), {t('summary.impulseExtra')} {formatCurrency(allocation.economiesIfNoImpulse)}
               </Text>
             </View>
           )}
@@ -209,7 +241,7 @@ export function WeeklySummaryCard({
           <View style={styles.distributionRow}>
             <View style={styles.stat}>
               <PiggyBank size={14} color="#4ADE80" />
-              <Text style={styles.statLabel}>Epargne</Text>
+              <Text style={styles.statLabel}>{t('summary.savingsPocket')}</Text>
               <Text style={[styles.statValue, { color: '#4ADE80' }]}>
                 {formatCurrency(allocation.totalEpargne)}
               </Text>
@@ -222,7 +254,7 @@ export function WeeklySummaryCard({
             {isInvestor && allocation.investissement > 0 && (
               <View style={styles.stat}>
                 <TrendingUp size={14} color="#FBBF24" />
-                <Text style={styles.statLabel}>Investir</Text>
+                <Text style={styles.statLabel}>{t('summary.investPocket')}</Text>
                 <Text style={[styles.statValue, { color: '#FBBF24' }]}>
                   {formatCurrency(allocation.investissement)}
                 </Text>
@@ -230,7 +262,7 @@ export function WeeklySummaryCard({
             )}
             <View style={styles.stat}>
               <Wallet size={14} color="#A78BFA" />
-              <Text style={styles.statLabel}>Liberte</Text>
+              <Text style={styles.statLabel}>{t('summary.freedomPocket')}</Text>
               <Text style={[styles.statValue, { color: hasImpulse ? '#71717A' : '#A78BFA' }]}>
                 {formatCurrency(allocation.discretionnaire)}
               </Text>
@@ -255,14 +287,14 @@ export function WeeklySummaryCard({
             <View style={styles.debtBanner}>
               <AlertTriangle size={12} color="#F87171" />
               <Text style={styles.debtText}>
-                Impulsifs non couverts : {formatCurrency(allocation.impulseDebt)}
+                {t('summary.impulseUncovered')} : {formatCurrency(allocation.impulseDebt)}
               </Text>
             </View>
           )}
 
           {/* Verification total */}
           <View style={styles.verifyRow}>
-            <Text style={styles.verifyLabel}>Total distribue</Text>
+            <Text style={styles.verifyLabel}>{t('summary.totalDistributed')}</Text>
             <Text style={styles.verifyValue}>
               = {formatCurrency(savings.economies)}
             </Text>
@@ -272,7 +304,7 @@ export function WeeklySummaryCard({
         <View style={styles.distributionRow}>
           <View style={styles.stat}>
             <TrendingDown size={14} color="#F87171" />
-            <Text style={styles.statLabel}>Depassement</Text>
+            <Text style={styles.statLabel}>{t('summary.overspend')}</Text>
             <Text style={[styles.statValue, { color: '#F87171' }]}>
               {formatCurrency(savings.depassement)}
             </Text>
@@ -287,13 +319,13 @@ export function WeeklySummaryCard({
           <View style={styles.incomeRow}>
             <View style={styles.stat}>
               <ArrowDownLeft size={14} color="#4ADE80" />
-              <Text style={styles.statLabel}>Rentrees</Text>
+              <Text style={styles.statLabel}>{t('summary.income')}</Text>
               <Text style={[styles.statValue, { color: '#4ADE80' }]}>
                 +{formatCurrency(weeklyIncomeActual)}
               </Text>
             </View>
             <View style={styles.stat}>
-              <Text style={styles.statLabel}>Balance</Text>
+              <Text style={styles.statLabel}>{t('summary.balance')}</Text>
               <Text style={[styles.statValue, { color: incomeBalance >= 0 ? '#4ADE80' : '#F87171' }]}>
                 {incomeBalance >= 0 ? '+' : ''}{formatCurrency(incomeBalance)}
               </Text>

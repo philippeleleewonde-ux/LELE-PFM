@@ -1,0 +1,262 @@
+{
+  "modules": {
+    "1": "Financial Awareness",
+    "2": "Budget & Discipline",
+    "3": "First Steps in Savings",
+    "4": "Income & Diversification",
+    "5": "Category Mastery",
+    "6": "Goals & Projects",
+    "7": "Advanced Savings",
+    "8": "Performance & Analysis",
+    "9": "Strategy & Anticipation",
+    "10": "Financial Resilience",
+    "11": "Long-Term Vision",
+    "12": "Financial Excellence"
+  },
+  "difficulty": {
+    "decouverte": "Discovery",
+    "intermediaire": "Intermediate",
+    "avance": "Advanced",
+    "expert": "Expert"
+  },
+  "S1": {
+    "savoir": "Those who don't know where their money goes will never learn to keep it. Tracking your expenses is the first act of financial freedom.",
+    "faire": "Record your first expense of the week",
+    "maitriserDesc": "At least 1 transaction recorded this week"
+  },
+  "S2": {
+    "savoir": "On average, people underestimate their spending by 30%. Your brain forgets small purchases -- the app does not.",
+    "faire": "Record expenses in at least 3 different categories",
+    "maitriserDesc": "3 different categories used this week"
+  },
+  "S3": {
+    "savoir": "Knowing your weekly budget is like knowing your car's fuel gauge. Without it, you're driving blind.",
+    "faire": "Record expenses to see the progress bar",
+    "maitriserDesc": "Expenses recorded this week (active budget)"
+  },
+  "S4": {
+    "savoir": "The end-of-week snapshot: how much you earned, spent, and saved. It's the review that builds awareness.",
+    "faire": "Have a weekly summary generated (WeeklySummary)",
+    "maitriserDesc": "A performance record saved this week"
+  },
+  "S5": {
+    "savoir": "A budget is not a prison. It's a road -- crossing the lines is dangerous, staying in your lane is comfortable.",
+    "faire": "Finish the week with a spending rate below 100%",
+    "maitriserDesc": "Spending < weekly budget"
+  },
+  "S6": {
+    "savoir": "An impulse purchase costs on average 3x more than you think, because it's money that is no longer working for you.",
+    "faire": "Use the anti-impulse shield at least once",
+    "maitriserDesc": "Anti-impulse shield used this week"
+  },
+  "S7": {
+    "savoir": "The 85% rule: the best money managers only spend 85% of their budget. The remaining 15% is their safety margin.",
+    "faire": "Finish the week under 85% of the budget",
+    "maitriserDesc": "Spending rate <= 85%"
+  },
+  "S8": {
+    "savoir": "Discipline is not deprivation. It's choosing what truly matters over what's tempting in the moment.",
+    "faire": "Record at least 1 transaction per day (5 days minimum)",
+    "maitriserDesc": "5 days with transactions this week"
+  },
+  "S9": {
+    "savoir": "Saving is not keeping what's left over. It's setting money aside BEFORE spending. Pay Yourself First.",
+    "faire": "Finish the week with positive savings",
+    "maitriserDesc": "Savings > 0 this week"
+  },
+  "S10": {
+    "savoir": "An emergency fund covers 3 months of expenses. Without one, the slightest unexpected event can bring you to your knees financially.",
+    "faire": "Create a savings goal with the emergency icon",
+    "maitriserDesc": "An 'emergency' goal exists"
+  },
+  "S11": {
+    "savoir": "Consistency beats intensity. Saving 5,000 FCFA every week is better than 50,000 once a quarter.",
+    "faire": "Make a contribution to a savings goal",
+    "maitriserDesc": "At least 1 contribution this week"
+  },
+  "S12": {
+    "savoir": "Q1 review: look at your piggy bank. Every franc in there is proof that you can change your future.",
+    "faire": "Have a positive balance in the piggy bank",
+    "maitriserDesc": "Cumulative savings (piggy bank) > 0"
+  },
+  "S13": {
+    "savoir": "You can't save what you don't earn. Tracking your income is just as important as tracking your expenses.",
+    "faire": "Record an income entry (salary or other)",
+    "maitriserDesc": "At least 1 income recorded this week"
+  },
+  "S14": {
+    "savoir": "Depending on a single income source is walking a tightrope. Diversification is your safety net.",
+    "faire": "Record a non-salary income (bonuses, freelance...)",
+    "maitriserDesc": "A non-salary income recorded this week"
+  },
+  "S15": {
+    "savoir": "The income-to-expense ratio is your vital sign. Above 1, you're building. Below, you're destroying.",
+    "faire": "Have a positive net balance (income > expenses) this week",
+    "maitriserDesc": "Weekly income > weekly expenses"
+  },
+  "S16": {
+    "savoir": "Each additional income source reduces your vulnerability by 25%. Two sources are better than one.",
+    "faire": "Have income from at least 2 different sources this month",
+    "maitriserDesc": "2 different income sources this month"
+  },
+  "S17": {
+    "savoir": "Food is often the top spending category. Monitoring it means watching 30 to 40% of your budget.",
+    "faire": "View the detail of an expense category",
+    "maitriserDesc": "Category detail viewed"
+  },
+  "S18": {
+    "savoir": "Fixed expenses (housing, telecom) are the most dangerous: we forget them because they are automatic.",
+    "faire": "Record at least 2 Fixed-type expenses this week",
+    "maitriserDesc": "2 Fixed transactions recorded"
+  },
+  "S19": {
+    "savoir": "The category where you spend the most is where you have the greatest room for improvement.",
+    "faire": "Reduce spending in your top category compared to the previous week",
+    "maitriserDesc": "Top category spending down vs previous week"
+  },
+  "S20": {
+    "savoir": "Zero overspend in a category is a victory. 4 categories under budget = excellent week.",
+    "faire": "Have at least 4 categories under budget this week",
+    "maitriserDesc": "4+ categories under budget"
+  },
+  "S21": {
+    "savoir": "A goal without an amount or deadline is just a dream. Put a number and a date on it to make it real.",
+    "faire": "Create a goal with an amount AND a deadline",
+    "maitriserDesc": "A goal with a deadline exists"
+  },
+  "S22": {
+    "savoir": "Small regular contributions beat large occasional deposits. Consistency builds the habit.",
+    "faire": "Make 2 contributions to your goals this week",
+    "maitriserDesc": "2+ contributions this week"
+  },
+  "S23": {
+    "savoir": "Having multiple goals in parallel forces prioritization -- the most valuable financial skill.",
+    "faire": "Have at least 2 active goals simultaneously",
+    "maitriserDesc": "2+ active goals"
+  },
+  "S24": {
+    "savoir": "Q2 review: compare your financial score today with the one from the start. Progress is the real victory.",
+    "faire": "Have a financial score that has improved since Q1",
+    "maitriserDesc": "Current score > previously saved score"
+  },
+  "S25": {
+    "savoir": "EPR (Achievable Potential Savings) is YOUR personalized target. It's not arbitrary -- it's calculated based on YOUR income and expenses.",
+    "faire": "Have an active EPR target and recorded expenses",
+    "maitriserDesc": "EPR target > 0 and expenses > 0"
+  },
+  "S26": {
+    "savoir": "The 67/33 split: two-thirds of your savings for hard savings, one-third for fun. Balance prevents frustration.",
+    "faire": "Reach a minimum grade of B this week (score >= 7/10)",
+    "maitriserDesc": "Grade B or higher"
+  },
+  "S27": {
+    "savoir": "The surplus beyond the EPR target is free capital. It's the accelerator for your projects.",
+    "faire": "Exceed the EPR target (savings > target)",
+    "maitriserDesc": "Savings > weekly EPR target"
+  },
+  "S28": {
+    "savoir": "4 consecutive weeks of positive savings = habit formation. Your brain starts doing it automatically.",
+    "faire": "Have 4 consecutive weeks with savings > 0",
+    "maitriserDesc": "Last 4 weeks all positive"
+  },
+  "S29": {
+    "savoir": "The performance calendar is your financial mirror. Green weeks are your victories, red weeks are your lessons.",
+    "faire": "View the calendar in the Performance tab",
+    "maitriserDesc": "Performance history viewed (4+ weeks recorded)"
+  },
+  "S30": {
+    "savoir": "The trend matters more than any single result. 3 weeks of improvement are worth more than 1 perfect week.",
+    "faire": "Have an upward trend on the financial score",
+    "maitriserDesc": "Score trend = upward"
+  },
+  "S31": {
+    "savoir": "Objective vs Actual: the section that shows if your plan is on track. A gap > 20% calls for an adjustment.",
+    "faire": "Have a prorated execution rate between 80% and 120%",
+    "maitriserDesc": "Overall progress between 80-120%"
+  },
+  "S32": {
+    "savoir": "Grade A is not a luxury. It's achievable if you spend less than 70% of your weekly budget.",
+    "faire": "Achieve a grade of A or A+ this week",
+    "maitriserDesc": "Grade A or A+"
+  },
+  "S33": {
+    "savoir": "The end of the month is the classic trap: expenses pile up, the budget melts. Anticipate by spending less at the start of the month.",
+    "faire": "Finish the week under 80% of the budget",
+    "maitriserDesc": "Spending rate < 80%"
+  },
+  "S34": {
+    "savoir": "Every goal achieved proves you have the ability to reach the next one. Financial confidence is built through proof.",
+    "faire": "Have at least 1 completed savings goal",
+    "maitriserDesc": "1+ goal completed"
+  },
+  "S35": {
+    "savoir": "A financial score above 70 puts you in the top 20% of money managers. Above 80, in the top 10%.",
+    "faire": "Reach a global financial score >= 70",
+    "maitriserDesc": "Financial score >= 70"
+  },
+  "S36": {
+    "savoir": "Q3 review: 9 months of discipline. Your piggy bank and your goals tell the story of your transformation.",
+    "faire": "Have a significantly positive cumulative savings balance",
+    "maitriserDesc": "Net piggy bank > 0 with 20+ weeks of history"
+  },
+  "S37": {
+    "savoir": "Everyone has bad weeks. A financial master limits the damage and bounces back the following week.",
+    "faire": "If you overspent last week: get back under budget this week",
+    "maitriserDesc": "Bounce back after overspend, or week under budget"
+  },
+  "S38": {
+    "savoir": "An emergency fund is not a goal -- it's an obligation. It should represent 3x your monthly expenses.",
+    "faire": "Emergency goal at >= 50% progress",
+    "maitriserDesc": "Emergency goal >= 50% complete"
+  },
+  "S39": {
+    "savoir": "Income consistency is measured over 8 weeks. If you reach 80% of your forecasts, your model is solid.",
+    "faire": "Have regularly recorded income",
+    "maitriserDesc": "Income recorded in at least 4 of the last 8 weeks"
+  },
+  "S40": {
+    "savoir": "Financial stress drops by 60% when you have a plan AND follow it. The plan alone is not enough.",
+    "faire": "REG score >= 80 AND PRE score >= 70 (via saved financial score)",
+    "maitriserDesc": "Strong consistency + solid budget accuracy"
+  },
+  "S41": {
+    "savoir": "Year 2 of the plan doubles the EPR target. If you master Year 1, Year 2 is a natural acceleration, not a shock.",
+    "faire": "Have 10+ weeks with grade B or higher in history",
+    "maitriserDesc": "10+ weeks grade B/A/A+"
+  },
+  "S42": {
+    "savoir": "3 active savings goals = future diversification. Emergency + Fun + Project = perfect balance.",
+    "faire": "Have 3 active goals of different categories",
+    "maitriserDesc": "3 active goals, 3 different icons"
+  },
+  "S43": {
+    "savoir": "Your 5 financial score levers are like the 5 fingers of your hand. The weakest one determines the strength of your grip.",
+    "faire": "Have all 5 score levers above 50",
+    "maitriserDesc": "All levers >= 50"
+  },
+  "S44": {
+    "savoir": "Wealth is not built in a day, but it is built every day. Your consistency over the last 11 months proves it.",
+    "faire": "Savings consistency score (REG) >= 85",
+    "maitriserDesc": "REG lever >= 85"
+  },
+  "S45": {
+    "savoir": "The last 3 weeks of the year are the hardest (holidays, social pressure). Staying on track here is the ultimate proof of mastery.",
+    "faire": "Keep the budget under 90% despite the period",
+    "maitriserDesc": "Spending rate <= 90%"
+  },
+  "S46": {
+    "savoir": "Every contribution to your goals is a vote for the person you want to become.",
+    "faire": "Contribute to at least 2 different goals this week",
+    "maitriserDesc": "Contributions to 2+ different goals"
+  },
+  "S47": {
+    "savoir": "Financial score >= 75 over 48 weeks. You are among the 15% who finish what they start.",
+    "faire": "Global financial score >= 75",
+    "maitriserDesc": "Score >= 75"
+  },
+  "S48": {
+    "savoir": "Annual review: count your achieved goals, your cumulative savings, your score progression. You are no longer the same person as in Week 1.",
+    "faire": "Have completed at least 40 out of 48 challenges",
+    "maitriserDesc": "40+ challenges completed"
+  }
+}

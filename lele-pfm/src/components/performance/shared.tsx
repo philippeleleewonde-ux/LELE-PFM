@@ -31,16 +31,16 @@ export const PF = {
   neonLime: '#4ADE80',
 } as const;
 
-// COICOP category labels and colors
+// COICOP category labels — i18n keys (use t(COICOP_LABELS[code]) to get translated label)
 export const COICOP_LABELS: Record<string, string> = {
-  '01': 'Alimentation',
-  '02': 'Logement',
-  '03': 'Transports',
-  '04': 'Loisirs',
-  '05': 'Habillement',
-  '06': 'Communications',
-  '07': 'Santé',
-  '08': 'Éducation',
+  '01': 'coicop.01',
+  '02': 'coicop.02',
+  '03': 'coicop.03',
+  '04': 'coicop.04',
+  '05': 'coicop.05',
+  '06': 'coicop.06',
+  '07': 'coicop.07',
+  '08': 'coicop.08',
 };
 
 export const COICOP_COLORS: Record<string, string> = {

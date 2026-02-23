@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react';
 import { View, Text, StyleSheet, Pressable } from 'react-native';
 import { TrendingUp, ArrowUpRight } from 'lucide-react-native';
+import { useTranslation } from 'react-i18next';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { useInvestmentStore } from '@/stores/investment-store';
 import { useEngineStore } from '@/stores/engine-store';
@@ -12,6 +13,7 @@ interface Props {
 }
 
 export function InvestmentSummaryCard({ onPress }: Props) {
+  const { t } = useTranslation('app');
   const allocations = useInvestmentStore((s) => s.allocations);
   const investorProfile = useInvestmentStore((s) => s.investorProfile);
   const engineOutput = useEngineStore((s) => s.engineOutput);
@@ -41,23 +43,23 @@ export function InvestmentSummaryCard({ onPress }: Props) {
           <View style={styles.iconBox}>
             <TrendingUp size={16} color="#FBBF24" />
           </View>
-          <Text style={styles.title}>Portefeuille investissement</Text>
+          <Text style={styles.title}>{t('dashboard.investmentPortfolio')}</Text>
           {onPress && <ArrowUpRight size={16} color="#A1A1AA" />}
         </View>
 
         <View style={styles.row}>
           <View style={styles.stat}>
-            <Text style={styles.statLabel}>Investi</Text>
+            <Text style={styles.statLabel}>{t('dashboard.invested')}</Text>
             <Text style={styles.statValue}>{formatCurrency(totalInvested)}</Text>
           </View>
           <View style={styles.stat}>
-            <Text style={styles.statLabel}>Rendement estimé</Text>
+            <Text style={styles.statLabel}>{t('dashboard.estimatedReturn')}</Text>
             <Text style={[styles.statValue, { color: '#4ADE80' }]}>
-              {estimatedReturn.toFixed(1)}%/an
+              {t('dashboard.returnPerYear', { rate: estimatedReturn.toFixed(1) })}
             </Text>
           </View>
           <View style={styles.stat}>
-            <Text style={styles.statLabel}>Objectif/mois</Text>
+            <Text style={styles.statLabel}>{t('dashboard.monthlyTarget')}</Text>
             <Text style={styles.statValue}>{formatCurrency(monthlyInvest)}</Text>
           </View>
         </View>

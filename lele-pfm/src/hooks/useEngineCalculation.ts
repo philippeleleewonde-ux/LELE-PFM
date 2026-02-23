@@ -3,6 +3,7 @@
  * Maps wizard data → engine input → runs PersonalFinanceEngine → stores output.
  */
 import { useState, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { PersonalFinanceEngine } from '@/domain/engine/personal-finance-engine';
 import { useEngineStore, IncomeTarget } from '@/stores/engine-store';
 import { mapWizardToEngineInput } from '@/services/wizard-to-engine.mapper';
@@ -17,6 +18,7 @@ interface UseEngineCalculationReturn {
 }
 
 export function useEngineCalculation(): UseEngineCalculationReturn {
+  const { t } = useTranslation('tracking');
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<EngineOutput | null>(null);
   const { isCalculating, setCalculating, setEngineOutput, setIncomeTargets } = useEngineStore();
@@ -51,12 +53,12 @@ export function useEngineCalculation(): UseEngineCalculationReturn {
 
       return output;
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Erreur de calcul inconnue';
+      const message = err instanceof Error ? err.message : t('engine.unknownCalcError');
       setError(message);
       setCalculating(false);
       return null;
     }
-  }, [setCalculating, setEngineOutput, setIncomeTargets]);
+  }, [t, setCalculating, setEngineOutput, setIncomeTargets]);
 
   return { isCalculating, error, result, calculate };
 }

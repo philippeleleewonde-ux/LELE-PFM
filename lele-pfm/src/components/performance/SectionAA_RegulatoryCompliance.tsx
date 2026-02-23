@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { PF, PerfGlassCard } from './shared';
 import { useInvestmentStore } from '@/stores/investment-store';
 import {
@@ -9,6 +10,7 @@ import {
 } from '@/domain/calculators/regulatory-engine';
 
 export function SectionAA_RegulatoryCompliance() {
+  const { t } = useTranslation('performance');
   const allocations = useInvestmentStore((s) => s.allocations);
   const investorProfile = useInvestmentStore((s) => s.investorProfile);
 
@@ -21,7 +23,7 @@ export function SectionAA_RegulatoryCompliance() {
     return (
       <PerfGlassCard>
         <Text style={styles.emptyText}>
-          Configurez votre profil investisseur dans les réglages pour voir l'analyse réglementaire.
+          {t('compliance.noProfile')}
         </Text>
       </PerfGlassCard>
     );
@@ -30,7 +32,7 @@ export function SectionAA_RegulatoryCompliance() {
   if (!analysis) {
     return (
       <PerfGlassCard>
-        <Text style={styles.emptyText}>Aucune allocation à analyser.</Text>
+        <Text style={styles.emptyText}>{t('compliance.noAllocations')}</Text>
       </PerfGlassCard>
     );
   }
@@ -57,9 +59,9 @@ export function SectionAA_RegulatoryCompliance() {
           <View style={styles.scoreInfo}>
             <Text style={[styles.gradeText, { color: scoreColor }]}>{analysis.globalGrade}</Text>
             <Text style={styles.scoreSummaryLine}>
-              {totalViolations} violation{totalViolations !== 1 ? 's' : ''}
+              {t('compliance.violationCount', { count: totalViolations })}
               {' \u00B7 '}
-              {totalWarnings} avertissement{totalWarnings !== 1 ? 's' : ''}
+              {t('compliance.warningCount', { count: totalWarnings })}
             </Text>
           </View>
         </View>
@@ -74,7 +76,7 @@ export function SectionAA_RegulatoryCompliance() {
       {/* Critical violations */}
       {analysis.criticalViolations.length > 0 && (
         <PerfGlassCard style={[styles.section, styles.criticalCard]}>
-          <Text style={styles.criticalTitle}>Violations critiques</Text>
+          <Text style={styles.criticalTitle}>{t('compliance.criticalViolations')}</Text>
           {analysis.criticalViolations.map((v) => (
             <View key={v.id} style={styles.criticalRow}>
               <Text style={styles.criticalIcon}>{'\u274C'}</Text>
@@ -91,7 +93,7 @@ export function SectionAA_RegulatoryCompliance() {
       {/* Top actions */}
       {analysis.topActions.length > 0 && (
         <PerfGlassCard style={styles.section}>
-          <Text style={styles.sectionTitle}>Actions recommandées</Text>
+          <Text style={styles.sectionTitle}>{t('compliance.recommendedActions')}</Text>
           {analysis.topActions.map((action, i) => (
             <View key={i} style={styles.actionRow}>
               <Text style={styles.actionNumber}>{i + 1}.</Text>
@@ -103,7 +105,7 @@ export function SectionAA_RegulatoryCompliance() {
 
       {/* Disclaimer */}
       <Text style={styles.disclaimer}>
-        Analyse indicative, consultez un professionnel pour la conformité réglementaire de vos investissements.
+        {t('compliance.disclaimer')}
       </Text>
     </View>
   );

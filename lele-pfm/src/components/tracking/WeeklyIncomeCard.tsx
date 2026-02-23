@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, useWindowDimensions } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { formatCurrency } from '@/services/format-helpers';
 import { ArrowDownLeft, TrendingUp, TrendingDown } from 'lucide-react-native';
@@ -17,6 +18,7 @@ export function WeeklyIncomeCard({
   progressPercent,
   isOnTrack,
 }: WeeklyIncomeCardProps) {
+  const { t } = useTranslation('tracking');
   const { width } = useWindowDimensions();
   const isSmall = width < 360;
 
@@ -32,13 +34,13 @@ export function WeeklyIncomeCard({
     <GlassCard variant="dark" style={styles.card}>
       <View style={styles.topRow}>
         <View>
-          <Text style={styles.label}>Recu</Text>
+          <Text style={styles.label}>{t('incomeCard.received')}</Text>
           <Text style={[styles.received, { color: '#4ADE80' }, isSmall && { fontSize: 20 }]}>
             +{formatCurrency(totalActual)}
           </Text>
         </View>
         <View style={styles.rightCol}>
-          <Text style={styles.label}>Attendu</Text>
+          <Text style={styles.label}>{t('incomeCard.expected')}</Text>
           <Text style={[styles.expectedValue, isSmall && { fontSize: 15 }]}>
             {formatCurrency(totalExpected)}
           </Text>
@@ -55,7 +57,7 @@ export function WeeklyIncomeCard({
             <View style={styles.statusRow}>
               <ArrowDownLeft size={14} color="#4ADE80" />
               <Text style={styles.statusText}>
-                {progressPercent}% recu
+                {t('incomeCard.percentReceived', { percent: progressPercent })}
               </Text>
             </View>
 
@@ -66,7 +68,7 @@ export function WeeklyIncomeCard({
                 <TrendingDown size={14} color="#F87171" />
               )}
               <Text style={[styles.projectionText, { color: isOnTrack ? '#4ADE80' : '#F87171' }]}>
-                {isOnTrack ? 'En bonne voie' : 'En retard'}
+                {isOnTrack ? t('incomeCard.onTrack') : t('incomeCard.behind')}
               </Text>
             </View>
           </View>

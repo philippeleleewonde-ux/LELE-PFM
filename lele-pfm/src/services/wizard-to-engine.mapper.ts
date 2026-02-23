@@ -67,24 +67,77 @@ const LEVER_TYPE_MAP: Record<string, string> = {
  *
  * Fallback: '07' (Loisirs) if no match found.
  */
-function mapLabelToCOICOP(label: string): COICOPCode {
+export function mapLabelToCOICOP(label: string, lang?: string): COICOPCode {
   const norm = label.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-  // 01 - Alimentation (FOOD)
-  if (/aliment|nourrit|courses|epicer|restaurant|cantine|repas|manger|bouffe|vivr/.test(norm)) return '01';
-  // 02 - Vêtements et chaussures (CLOTHING)
-  if (/vetement|habit|chaussur|textile|mode|linge|fringue/.test(norm)) return '02';
-  // 03 - Logement, eau, électricité, gaz (HOUSING)
-  if (/loyer|logement|habitation|electricite|eau|gaz|chauffag|charges|syndic|immobil|amenag/.test(norm)) return '03';
-  // 04 - Santé (HEALTH)
-  if (/sante|medecin|pharmac|mutuelle|hopital|dentist|optique|medicament|doctor|soins/.test(norm)) return '04';
-  // 05 - Transports (TRANSPORT)
-  if (/transport|essence|carburant|voiture|auto|moto|bus|metro|train|taxi|peage|parking|deplac/.test(norm)) return '05';
-  // 06 - Communications
-  if (/communic|telephone|mobile|internet|forfait|fibre|telecom/.test(norm)) return '06';
-  // 07 - Loisirs et culture (RECREATION)
-  if (/loisir|sortie|cinema|sport|voyage|vacanc|jeu|divertiss|abonnement|netflix|spotify/.test(norm)) return '07';
-  // 08 - Éducation (EDUCATION)
-  if (/education|scolar|ecole|universi|formation|cours|etude|livre|fourniture/.test(norm)) return '08';
+
+  // FR keywords (default)
+  const FR_PATTERNS: Array<[RegExp, COICOPCode]> = [
+    [/aliment|nourrit|courses|epicer|restaurant|cantine|repas|manger|bouffe|vivr|supermarche|marche|boulanger|boucher|poisson|legume|fruit/, '01'],
+    [/vetement|habit|chaussur|textile|mode|linge|fringue/, '02'],
+    [/loyer|logement|habitation|electricite|eau|gaz|chauffag|charges|syndic|immobil|amenag/, '03'],
+    [/sante|medecin|pharmac|mutuelle|hopital|dentist|optique|medicament|doctor|soins/, '04'],
+    [/transport|essence|carburant|voiture|auto|moto|bus|metro|train|taxi|peage|parking|deplac|uber|bolt/, '05'],
+    [/communic|telephone|mobile|internet|forfait|fibre|telecom/, '06'],
+    [/loisir|sortie|cinema|sport|voyage|vacanc|jeu|divertiss|abonnement|netflix|spotify/, '07'],
+    [/education|scolar|ecole|universi|formation|cours|etude|livre|fourniture/, '08'],
+  ];
+
+  // EN keywords
+  const EN_PATTERNS: Array<[RegExp, COICOPCode]> = [
+    [/food|grocer|supermarket|restaurant|meal|eat|lunch|dinner|breakfast|bakery|butcher|fish|vegetable|fruit|snack/, '01'],
+    [/cloth|shoe|garment|textile|fashion|apparel|dress|shirt|pants/, '02'],
+    [/rent|housing|electricity|water|gas|heating|mortgage|home|apartment|utility|maintenance/, '03'],
+    [/health|doctor|pharmacy|hospital|dentist|medical|medicine|insurance|clinic/, '04'],
+    [/transport|fuel|gasoline|car|bike|bus|subway|train|taxi|parking|uber|bolt|ride|commute|toll/, '05'],
+    [/phone|mobile|internet|telecom|subscription|data|wifi|fiber/, '06'],
+    [/leisure|entertainment|cinema|movie|sport|travel|vacation|game|hobby|netflix|spotify|gym/, '07'],
+    [/education|school|university|tuition|course|study|book|supplies|training/, '08'],
+  ];
+
+  // ES keywords
+  const ES_PATTERNS: Array<[RegExp, COICOPCode]> = [
+    [/aliment|comida|supermercado|restaurante|comestible|cena|almuerzo|desayuno|panaderia|carniceria|fruta|verdura|mercado/, '01'],
+    [/ropa|calzado|zapato|textil|moda|vestido|camisa|pantalon/, '02'],
+    [/alquiler|vivienda|electricidad|agua|gas|calefaccion|hipoteca|hogar|mantenimiento/, '03'],
+    [/salud|medico|farmacia|hospital|dentista|medicina|seguro|clinica/, '04'],
+    [/transporte|combustible|gasolina|coche|moto|autobus|metro|tren|taxi|peaje|estacion|uber|bolt/, '05'],
+    [/telefono|movil|internet|telecom|datos|fibra/, '06'],
+    [/ocio|entretenimiento|cine|deporte|viaje|vacacion|juego|netflix|spotify|gimnasio/, '07'],
+    [/educacion|escuela|universidad|curso|estudio|libro|material|formacion/, '08'],
+  ];
+
+  // PT keywords
+  const PT_PATTERNS: Array<[RegExp, COICOPCode]> = [
+    [/aliment|comida|supermercado|restaurante|refeicao|almoco|jantar|cafe|padaria|acougue|fruta|legume|mercado|feira/, '01'],
+    [/roupa|calcado|sapato|textil|moda|vestido|camisa|calca/, '02'],
+    [/aluguel|moradia|eletricidade|agua|gas|aquecimento|hipoteca|casa|manutencao|condominio/, '03'],
+    [/saude|medico|farmacia|hospital|dentista|medicina|seguro|clinica/, '04'],
+    [/transporte|combustivel|gasolina|carro|moto|onibus|metro|trem|taxi|pedagio|uber|bolt/, '05'],
+    [/telefone|celular|internet|telecom|dados|fibra/, '06'],
+    [/lazer|entretenimento|cinema|esporte|viagem|ferias|jogo|netflix|spotify|academia/, '07'],
+    [/educacao|escola|universidade|curso|estudo|livro|material|formacao/, '08'],
+  ];
+
+  const patternSets: Record<string, Array<[RegExp, COICOPCode]>> = {
+    fr: FR_PATTERNS,
+    en: EN_PATTERNS,
+    es: ES_PATTERNS,
+    pt: PT_PATTERNS,
+  };
+
+  // Try current language first, then FR as fallback
+  const primaryPatterns = patternSets[lang ?? 'fr'] ?? FR_PATTERNS;
+  for (const [regex, code] of primaryPatterns) {
+    if (regex.test(norm)) return code;
+  }
+
+  // If not FR, also try FR patterns as fallback
+  if (lang && lang !== 'fr') {
+    for (const [regex, code] of FR_PATTERNS) {
+      if (regex.test(norm)) return code;
+    }
+  }
+
   return '07'; // fallback Loisirs
 }
 

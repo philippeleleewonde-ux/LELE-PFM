@@ -1,0 +1,102 @@
+{
+  "buttons": {
+    "0": "Muestrame!",
+    "1": "Y despues?",
+    "2": "Continua!",
+    "3": "Mas!",
+    "4": "Casi...",
+    "5": "La ultima!",
+    "6": "Vamos alla!"
+  },
+  "skip": "Saltar la intro",
+  "slide1": {
+    "title": "Tu gastas.",
+    "titleHighlight": "Y si ganaras al gastar?",
+    "subtitle": "LELE PFM transforma tus gastos en riqueza.",
+    "headerBefore": "Hoy",
+    "headerAfter": "Con LELE",
+    "comp1Before": "Gastas y pierdes",
+    "comp1After": "Gastas y ganas",
+    "comp2Before": "Sufres los fines de mes",
+    "comp2After": "Construyes tu tesoro",
+    "comp3Before": "Recortas sin saber",
+    "comp3After": "Te mostramos donde actuar",
+    "comp4Before": "Cero metodo",
+    "comp4After": "Un plan a 3 anos"
+  },
+  "slide2": {
+    "cardTitle": "Te hacemos algunas preguntas",
+    "step1Label": "Tu perfil",
+    "step1Desc": "Edad, situacion, profesion",
+    "step2Label": "Tus ingresos",
+    "step2Desc": "Salario, negocio, ayudas",
+    "step3Label": "Tus gastos",
+    "step3Desc": "Por categoria",
+    "step4Label": "Tu historial",
+    "step4Desc": "3 a 5 anos de datos",
+    "resultTitle": "El motor analiza todo",
+    "resultSub": "y detecta tus ahorros ocultos",
+    "tagline": "Identificamos como gastas",
+    "heading": "Unas preguntas.\nRespuestas poderosas.",
+    "bodyBold": "Tu nos dices como vives",
+    "bodyEnd": ", nosotros calculamos como puedes vivir mejor. Sin juicios, solo numeros."
+  },
+  "slide3": {
+    "scoreLabel": "Tu diagnostico de salud financiera",
+    "kpi1": "Costos invisibles",
+    "kpi2": "Costo maximo",
+    "kpi3": "Cashback oculto",
+    "tagline": "Tu diagnostico en un vistazo",
+    "heading": "Un puntaje. Un grado.\nLa verdad sobre tus finanzas.",
+    "bodyBold": "De E a A+",
+    "bodyEnd": ", tu grado te dice donde estas. No para juzgarte, sino para saber exactamente por donde empezar."
+  },
+  "slide4": {
+    "cardTitle": "Cashback por categoria",
+    "cat1": "Salidas y ocio",
+    "cat2": "Alimentacion",
+    "cat3": "Transporte",
+    "cat4": "Vivienda",
+    "hintHigh": "Gran cashback",
+    "hintMedium": "Cashback medio",
+    "hintLow": "Poco cashback",
+    "tagline": "Cada gasto analizado al detalle",
+    "heading": "Te decimos exactamente\ndonde esta tu cashback.",
+    "bodyBold": "Cada categoria esconde un cashback.",
+    "bodyEnd": " Identificamos las que esconden mas cashback, sin tocar lo esencial."
+  },
+  "slide5": {
+    "cardTitle": "Tu tesoro se construye",
+    "year1": "Ano 1",
+    "year2": "Ano 2",
+    "year3": "Ano 3",
+    "treasureTitle": "Tu cashback natural",
+    "treasureSub": "se llena ano tras ano",
+    "tagline": "Un plan. Tres anos. Tu cashback.",
+    "heading": "En 3 anos, creas\ntu tesoro.",
+    "bodyBold": "Cada mes, tu cashback crece.",
+    "bodyEnd": " Te fijamos objetivos progresivos para impulsar tu ahorro sin forzar."
+  },
+  "slide6": {
+    "cardTitle": "Tu cashback natural trabaja para ti",
+    "benefit1Title": "Tu ahorro se potencia",
+    "benefit1Desc": "Tu cashback natural refuerza tus reservas",
+    "benefit2Title": "Tus gustos tambien",
+    "benefit2Desc": "Una parte financia lo que te gusta",
+    "benefit3Title": "Sin tocar lo vital",
+    "benefit3Desc": "Nunca recortamos lo esencial",
+    "tagline": "Lo mejor de ambos mundos",
+    "heading": "Un cashback que potencia\nahorro Y gustos.",
+    "bodyBold": "Tu cashback natural potencia tu ahorro Y tus gustos",
+    "bodyEnd": ", sin esfuerzo ni sacrificio."
+  },
+  "slide7": {
+    "heading": "5 minutos.\nDespues, despegamos.",
+    "step1": "5 minutos para tu diagnostico",
+    "step2": "Tu puntaje y tu grado al instante",
+    "step3": "Tu tesoro calculado a 3 anos",
+    "step4": "Tus objetivos concretos por mes",
+    "step5": "Despegas hacia tu libertad financiera",
+    "bottomTagline": "Tu futuro financiero empieza aqui."
+  }
+}

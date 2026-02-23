@@ -1,11 +1,12 @@
 import React, { useState, useCallback, useMemo, useRef, useEffect } from 'react';
 import { View, Text, Pressable, Animated, StyleSheet } from 'react-native';
 import { ChevronLeft, ChevronRight, Calendar, Eye } from 'lucide-react-native';
+import { useTranslation } from 'react-i18next';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { formatCurrency } from '@/services/format-helpers';
 import { getCurrentWeek } from '@/utils/week-helpers';
 import { usePerformanceCalendar, WeekCalendarEntry, MonthCalendarEntry } from '@/hooks/usePerformanceCalendar';
-import { getGradeColor, getNoteColor, MONTH_NAMES_FR } from '@/domain/calculators/weekly-savings-engine';
+import { getGradeColor, getNoteColor, getMonthName } from '@/domain/calculators/weekly-savings-engine';
 import { WeekCard } from './WeekCard';
 import { WeekReportSheet, PeriodReportSheet } from './PeriodReportSheet';
 
@@ -44,6 +45,7 @@ interface PerformanceCalendarProps {
 }
 
 export function PerformanceCalendar({ initialYear }: PerformanceCalendarProps) {
+  const { t } = useTranslation('tracking');
   const { week: currentWeek, year: currentYear } = getCurrentWeek();
   const [selectedYear, setSelectedYear] = useState(initialYear ?? currentYear);
   const currentMonth = new Date().getMonth() + 1; // 1-based
@@ -98,7 +100,7 @@ export function PerformanceCalendar({ initialYear }: PerformanceCalendarProps) {
       <View style={styles.emptyContainer}>
         <Calendar size={40} color="#52525B" />
         <Text style={styles.emptyText}>
-          Completez le wizard pour voir votre calendrier de performance.
+          {t('reporting.completeWizard')}
         </Text>
       </View>
     );
@@ -125,19 +127,19 @@ export function PerformanceCalendar({ initialYear }: PerformanceCalendarProps) {
           <GlassCard variant="dark" style={styles.yearSummary}>
             <View style={styles.yearSummaryRow}>
               <View style={styles.yearStatBlock}>
-                <Text style={styles.yearStatLabel}>Note moyenne</Text>
+                <Text style={styles.yearStatLabel}>{t('reporting.averageNote')}</Text>
                 <Text style={[styles.yearStatValue, { color: getNoteColor(calendarData.yearSummary.noteMoyenne) }]}>
                   {calendarData.yearSummary.noteMoyenne}/10
                 </Text>
               </View>
               <View style={styles.yearStatBlock}>
-                <Text style={styles.yearStatLabel}>Grade</Text>
+                <Text style={styles.yearStatLabel}>{t('reporting.grade')}</Text>
                 <Text style={[styles.yearStatValue, { color: getGradeColor(calendarData.yearSummary.gradeMoyen) }]}>
                   {calendarData.yearSummary.gradeMoyen}
                 </Text>
               </View>
               <View style={styles.yearStatBlock}>
-                <Text style={styles.yearStatLabel}>Economies</Text>
+                <Text style={styles.yearStatLabel}>{t('reporting.savings')}</Text>
                 <Text style={[styles.yearStatValue, { color: '#4ADE80' }]}>
                   {formatCurrency(calendarData.yearSummary.totalEconomies)}
                 </Text>
@@ -153,7 +155,7 @@ export function PerformanceCalendar({ initialYear }: PerformanceCalendarProps) {
           <Pressable onPress={goToPrevMonth} style={styles.monthNavBtn}>
             <ChevronLeft size={18} color="#A1A1AA" />
           </Pressable>
-          <Text style={styles.monthNavLabel}>{MONTH_NAMES_FR[selectedMonth - 1]}</Text>
+          <Text style={styles.monthNavLabel}>{getMonthName(selectedMonth - 1)}</Text>
           <Pressable onPress={goToNextMonth} style={styles.monthNavBtn}>
             <ChevronRight size={18} color="#A1A1AA" />
           </Pressable>
@@ -167,7 +169,7 @@ export function PerformanceCalendar({ initialYear }: PerformanceCalendarProps) {
       >
         <Eye size={14} color="#FBBF24" />
         <Text style={styles.toggleYearText}>
-          {showAllMonths ? 'Voir par mois' : "Voir toute l'annee"}
+          {showAllMonths ? t('reporting.viewByMonth') : t('reporting.viewFullYear')}
         </Text>
       </Pressable>
 
@@ -181,7 +183,7 @@ export function PerformanceCalendar({ initialYear }: PerformanceCalendarProps) {
             {currentMonthData.summary.noteMoyenne}/10
           </Text>
           <Text style={styles.monthBandEco}>+{formatCurrency(currentMonthData.summary.totalEconomies)}</Text>
-          <Text style={styles.monthBandWeeks}>{currentMonthData.summary.nbSemaines} sem.</Text>
+          <Text style={styles.monthBandWeeks}>{currentMonthData.summary.nbSemaines} {t('reporting.weeksShort')}</Text>
         </Pressable>
       )}
 
@@ -218,7 +220,7 @@ export function PerformanceCalendar({ initialYear }: PerformanceCalendarProps) {
                 ))
               ) : (
                 <View style={styles.noDataBanner}>
-                  <Text style={styles.noDataText}>Aucune donnee ce mois</Text>
+                  <Text style={styles.noDataText}>{t('reporting.noDataThisMonth')}</Text>
                 </View>
               )}
             </View>
@@ -245,8 +247,8 @@ export function PerformanceCalendar({ initialYear }: PerformanceCalendarProps) {
       {/* Year Report Sheet */}
       <PeriodReportSheet
         visible={showYearReport}
-        title={`Bilan ${selectedYear}`}
-        subtitle="Rapport annuel"
+        title={t('reporting.yearReportTitle', { year: selectedYear })}
+        subtitle={t('reporting.yearReport')}
         summary={calendarData.yearSummary.nbSemaines > 0 ? calendarData.yearSummary : null}
         onClose={() => setShowYearReport(false)}
       />

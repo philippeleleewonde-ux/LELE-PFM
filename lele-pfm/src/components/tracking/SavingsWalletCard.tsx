@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, Pressable, StyleSheet, useWindowDimensions } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { PiggyBank, Wallet, ChevronRight, Banknote } from 'lucide-react-native';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { formatCurrency } from '@/services/format-helpers';
@@ -7,6 +8,7 @@ import { useSavingsWallet } from '@/hooks/useSavingsWallet';
 import { SavingsDetailSheet } from './SavingsDetailSheet';
 
 export function SavingsWalletCard() {
+  const { t } = useTranslation('tracking');
   const wallet = useSavingsWallet();
   const [showDetail, setShowDetail] = useState(false);
   const { width } = useWindowDimensions();
@@ -23,7 +25,7 @@ export function SavingsWalletCard() {
           {/* Header */}
           <View style={styles.header}>
             <PiggyBank size={20} color="#FBBF24" />
-            <Text style={styles.headerTitle}>MA TIRELIRE</Text>
+            <Text style={styles.headerTitle}>{t('wallet.title')}</Text>
             <ChevronRight size={16} color="#52525B" />
           </View>
 
@@ -32,14 +34,14 @@ export function SavingsWalletCard() {
             {isPositive ? '+' : ''}{formatCurrency(wallet.allTimeNet)}
           </Text>
           <Text style={styles.bigSubtitle}>
-            {isPositive ? 'economises au total' : 'en depassement net'}
+            {isPositive ? t('wallet.totalSaved') : t('wallet.netOverspend')}
           </Text>
 
           {/* Non depense (real unspent money) */}
           {wallet.allTimeNonDepense > 0 && (
             <View style={[styles.nonDepenseRow, isSmall && { paddingHorizontal: 10 }]}>
               <Banknote size={14} color="#60A5FA" />
-              <Text style={styles.nonDepenseLabel}>Argent non depense</Text>
+              <Text style={styles.nonDepenseLabel}>{t('wallet.unsavedMoney')}</Text>
               <Text style={styles.nonDepenseValue}>
                 {formatCurrency(wallet.allTimeNonDepense)}
               </Text>
@@ -51,7 +53,7 @@ export function SavingsWalletCard() {
             <View style={styles.distRow}>
               <View style={styles.distBlock}>
                 <PiggyBank size={14} color="#4ADE80" />
-                <Text style={styles.distLabel}>EPARGNE</Text>
+                <Text style={styles.distLabel}>{t('wallet.savingsLabel')}</Text>
                 <Text style={[styles.distValue, { color: '#4ADE80' }]}>
                   {formatCurrency(wallet.allTimeEpargne)}
                 </Text>
@@ -59,7 +61,7 @@ export function SavingsWalletCard() {
               </View>
               <View style={styles.distBlock}>
                 <Wallet size={14} color="#A78BFA" />
-                <Text style={styles.distLabel}>PLAISIR</Text>
+                <Text style={styles.distLabel}>{t('wallet.funLabel')}</Text>
                 <Text style={[styles.distValue, { color: '#A78BFA' }]}>
                   {formatCurrency(wallet.allTimeDiscretionnaire)}
                 </Text>
@@ -71,10 +73,10 @@ export function SavingsWalletCard() {
           {/* Detail rows */}
           <View style={styles.detailSection}>
             <View style={styles.detailDivider} />
-            <DetailRow label="Cette semaine" value={wallet.currentWeekEconomies} isSmall={isSmall} />
-            <DetailRow label="Ce mois" value={wallet.currentMonthEconomies} isSmall={isSmall} />
-            <DetailRow label="Cette annee" value={wallet.currentYearEconomies} isSmall={isSmall} />
-            <DetailRow label="Depuis le debut" value={wallet.allTimeNet} highlight isSmall={isSmall} />
+            <DetailRow label={t('wallet.thisWeek')} value={wallet.currentWeekEconomies} isSmall={isSmall} />
+            <DetailRow label={t('wallet.thisMonth')} value={wallet.currentMonthEconomies} isSmall={isSmall} />
+            <DetailRow label={t('wallet.thisYear')} value={wallet.currentYearEconomies} isSmall={isSmall} />
+            <DetailRow label={t('wallet.sinceBeginning')} value={wallet.allTimeNet} highlight isSmall={isSmall} />
           </View>
         </GlassCard>
       </Pressable>

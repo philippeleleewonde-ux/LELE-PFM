@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { Target } from 'lucide-react-native';
+import { useTranslation } from 'react-i18next';
 import { useSavingsGoals } from '@/hooks/useSavingsGoals';
 import { SavingsGoalCard } from './SavingsGoalCard';
 import type { SavingsGoal } from '@/stores/savings-goal-store';
@@ -11,6 +12,7 @@ interface SavingsGoalsSectionProps {
 }
 
 export function SavingsGoalsSection({ onGoalPress, onContribute }: SavingsGoalsSectionProps) {
+  const { t } = useTranslation('tracking');
   const { activeGoals, completedGoals } = useSavingsGoals();
 
   const allGoals = [...activeGoals, ...completedGoals];
@@ -20,15 +22,15 @@ export function SavingsGoalsSection({ onGoalPress, onContribute }: SavingsGoalsS
       {/* Section header */}
       <View style={styles.headerRow}>
         <Target size={14} color="#22D3EE" />
-        <Text style={styles.sectionTitle}>MES OBJECTIFS</Text>
+        <Text style={styles.sectionTitle}>{t('goals.myGoals')}</Text>
       </View>
 
       {allGoals.length === 0 ? (
         <View style={styles.emptyContainer}>
           <Target size={32} color="#52525B" />
-          <Text style={styles.emptyTitle}>Aucun objectif</Text>
+          <Text style={styles.emptyTitle}>{t('goals.noGoals')}</Text>
           <Text style={styles.emptyText}>
-            Definissez votre premier objectif via le bouton +
+            {t('goals.noGoalsHint')}
           </Text>
         </View>
       ) : (

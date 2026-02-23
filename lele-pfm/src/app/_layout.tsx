@@ -25,6 +25,8 @@ export default function RootLayout() {
   const logout = useAuthStore((s) => s.logout);
   const isOnboarded = useAppStore((s) => s.isOnboarded);
   const isSetupComplete = useAppStore((s) => s.isSetupComplete);
+  const isLanguageSet = useAppStore((s) => s.isLanguageSet);
+  const language = useAppStore((s) => s.language);
 
   const [isReady, setIsReady] = useState(false);
 
@@ -34,8 +36,8 @@ export default function RootLayout() {
   const devBypassAuth = isSetupComplete && !isAuthenticated;
 
   useEffect(() => {
-    i18n.changeLanguage('fr');
-  }, []);
+    i18n.changeLanguage(language);
+  }, [language]);
 
   // DEV: auto-set user if setup complete but not authenticated
   useEffect(() => {
@@ -104,6 +106,7 @@ export default function RootLayout() {
   const inAuthGroup = segments[0] === '(auth)';
   const inOnboarding = segments[0] === 'onboarding';
   const inSetupWizard = segments[0] === 'setup-wizard';
+  const inLanguageSelect = segments[0] === 'language-select';
 
   const isWeb = Platform.OS === 'web';
 
@@ -117,8 +120,13 @@ export default function RootLayout() {
       {/* Responsive mobile shell: constrain to 430px on web, full width on native */}
       <View style={responsiveStyles.outerShell}>
         <View style={responsiveStyles.appFrame}>
+          {/* Language select redirect: show language picker before everything */}
+          {!isLanguageSet && !inLanguageSelect && (
+            <Redirect href="/language-select" />
+          )}
+
           {/* Onboarding redirect: show onboarding if not completed yet */}
-          {!isOnboarded && !inOnboarding && (
+          {isLanguageSet && !isOnboarded && !inOnboarding && !inLanguageSelect && (
             <Redirect href="/onboarding" />
           )}
 
@@ -144,6 +152,7 @@ export default function RootLayout() {
               },
             }}
           >
+            <Stack.Screen name="language-select" />
             <Stack.Screen name="onboarding" />
             <Stack.Screen name="(auth)" />
             <Stack.Screen name="setup-wizard" />

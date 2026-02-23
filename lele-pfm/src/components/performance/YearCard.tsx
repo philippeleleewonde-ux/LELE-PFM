@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { ProgressRing } from './ProgressRing';
 import { PerfGlassCard, PF } from './shared';
 import { formatCurrency } from '@/services/format-helpers';
@@ -10,6 +11,7 @@ interface YearCardProps {
 }
 
 export function YearCard({ plan }: YearCardProps) {
+  const { t } = useTranslation('performance');
   const ringColor = plan.year === 1 ? PF.cyan : plan.year === 2 ? PF.blue : PF.green;
 
   return (
@@ -28,7 +30,7 @@ export function YearCard({ plan }: YearCardProps) {
           <Text style={[styles.ringPercent, { color: ringColor }]}>{plan.recoveryPercent}%</Text>
         </ProgressRing>
         <View style={styles.eprInfo}>
-          <Text style={styles.eprLabel}>Ton cashback cette année</Text>
+          <Text style={styles.eprLabel}>{t('yearCard.cashback')}</Text>
           <Text style={[styles.eprValue, { color: ringColor }]}>{formatCurrency(plan.epr)}</Text>
         </View>
       </View>
@@ -36,12 +38,12 @@ export function YearCard({ plan }: YearCardProps) {
       {/* Boost split */}
       <View style={styles.splitRow}>
         <View style={styles.splitItem}>
-          <Text style={styles.splitLabel}>Booste ton épargne</Text>
+          <Text style={styles.splitLabel}>{t('yearCard.boostSavings')}</Text>
           <Text style={styles.splitValue}>{formatCurrency(plan.epargne)}</Text>
         </View>
         <View style={styles.splitDivider} />
         <View style={styles.splitItem}>
-          <Text style={styles.splitLabel}>Booste tes plaisirs</Text>
+          <Text style={styles.splitLabel}>{t('yearCard.boostFun')}</Text>
           <Text style={styles.splitValue}>{formatCurrency(plan.discretionnaire)}</Text>
         </View>
       </View>
@@ -49,11 +51,11 @@ export function YearCard({ plan }: YearCardProps) {
       {/* Targets */}
       <View style={styles.targetRow}>
         <View style={styles.targetItem}>
-          <Text style={styles.targetLabel}>Mensuel</Text>
+          <Text style={styles.targetLabel}>{t('yearCard.monthly')}</Text>
           <Text style={styles.targetValue}>{formatCurrency(plan.monthlyTarget)}</Text>
         </View>
         <View style={styles.targetItem}>
-          <Text style={styles.targetLabel}>Hebdo</Text>
+          <Text style={styles.targetLabel}>{t('yearCard.weekly')}</Text>
           <Text style={styles.targetValue}>{formatCurrency(plan.weeklyTarget)}</Text>
         </View>
       </View>

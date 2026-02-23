@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, ScrollView, StyleSheet, Pressable, useWindowDimensions } from 'react-native';
 import { TrendingUp, Shield, Zap, Clock, Calendar, Hourglass } from 'lucide-react-native';
+import { useTranslation } from 'react-i18next';
 import { WZ, GlassCard, FadeInView, PrimaryButton } from '../shared';
 import { useInvestmentStore } from '@/stores/investment-store';
 import { useWizardStore } from '@/stores/wizard-store';
@@ -47,6 +48,7 @@ function ChoiceCard({ icon, label, description, selected, color, onPress, compac
 }
 
 export default function Step7InvestorProfile({ isActive }: Props) {
+  const { t } = useTranslation('wizard');
   const setInvestorProfile = useInvestmentStore((s) => s.setInvestorProfile);
   const setAllocations = useInvestmentStore((s) => s.setAllocations);
   const existingProfile = useInvestmentStore((s) => s.investorProfile);
@@ -100,13 +102,13 @@ export default function Step7InvestorProfile({ isActive }: Props) {
     >
       <FadeInView active={isActive} delay={100}>
         <Text style={[styles.sectionTitle, isSmall && { fontSize: 13, marginTop: 12 }]}>
-          Tolérance au risque
+          {t('step7.riskTolerance')}
         </Text>
         <View style={styles.choices}>
           <ChoiceCard
             icon={<Shield size={iconSize} color="#4ADE80" />}
-            label="Prudent"
-            description="Capital garanti, rendement modéré"
+            label={t('step7.conservative')}
+            description={t('step7.conservativeDesc')}
             selected={risk === 'conservative'}
             color="#4ADE80"
             onPress={() => setRisk('conservative')}
@@ -114,8 +116,8 @@ export default function Step7InvestorProfile({ isActive }: Props) {
           />
           <ChoiceCard
             icon={<TrendingUp size={iconSize} color="#60A5FA" />}
-            label="Équilibré"
-            description="Mix sécurité et performance"
+            label={t('step7.moderate')}
+            description={t('step7.moderateDesc')}
             selected={risk === 'moderate'}
             color="#60A5FA"
             onPress={() => setRisk('moderate')}
@@ -123,8 +125,8 @@ export default function Step7InvestorProfile({ isActive }: Props) {
           />
           <ChoiceCard
             icon={<Zap size={iconSize} color="#FBBF24" />}
-            label="Dynamique"
-            description="Rendement élevé, volatilité acceptée"
+            label={t('step7.aggressive')}
+            description={t('step7.aggressiveDesc')}
             selected={risk === 'aggressive'}
             color="#FBBF24"
             onPress={() => setRisk('aggressive')}
@@ -135,13 +137,13 @@ export default function Step7InvestorProfile({ isActive }: Props) {
 
       <FadeInView active={isActive} delay={250}>
         <Text style={[styles.sectionTitle, isSmall && { fontSize: 13 }]}>
-          Horizon d'investissement
+          {t('step7.investmentHorizon')}
         </Text>
         <View style={styles.choices}>
           <ChoiceCard
             icon={<Clock size={iconSize} color="#FB923C" />}
-            label="Court terme"
-            description="Moins de 2 ans"
+            label={t('step7.shortTerm')}
+            description={t('step7.shortTermDesc')}
             selected={horizon === 'short'}
             color="#FB923C"
             onPress={() => setHorizon('short')}
@@ -149,8 +151,8 @@ export default function Step7InvestorProfile({ isActive }: Props) {
           />
           <ChoiceCard
             icon={<Calendar size={iconSize} color="#A78BFA" />}
-            label="Moyen terme"
-            description="2 à 5 ans"
+            label={t('step7.mediumTerm')}
+            description={t('step7.mediumTermDesc')}
             selected={horizon === 'medium'}
             color="#A78BFA"
             onPress={() => setHorizon('medium')}
@@ -158,8 +160,8 @@ export default function Step7InvestorProfile({ isActive }: Props) {
           />
           <ChoiceCard
             icon={<Hourglass size={iconSize} color="#22D3EE" />}
-            label="Long terme"
-            description="Plus de 5 ans"
+            label={t('step7.longTerm')}
+            description={t('step7.longTermDesc')}
             selected={horizon === 'long'}
             color="#22D3EE"
             onPress={() => setHorizon('long')}
@@ -169,12 +171,12 @@ export default function Step7InvestorProfile({ isActive }: Props) {
       </FadeInView>
 
       <FadeInView active={isActive} delay={400}>
-        <Text style={[styles.sectionTitle, isSmall && { fontSize: 13 }]}>Finance islamique</Text>
+        <Text style={[styles.sectionTitle, isSmall && { fontSize: 13 }]}>{t('step7.islamicFinance')}</Text>
         <View style={styles.choices}>
           <ChoiceCard
             icon={<Text style={{ fontSize: isSmall ? 14 : 18 }}>{'\u2713'}</Text>}
-            label="Obligatoire"
-            description="Uniquement des produits conformes"
+            label={t('step7.shariaRequired')}
+            description={t('step7.shariaRequiredDesc')}
             selected={sharia === 'required'}
             color="#4ADE80"
             onPress={() => setSharia('required')}
@@ -182,8 +184,8 @@ export default function Step7InvestorProfile({ isActive }: Props) {
           />
           <ChoiceCard
             icon={<Text style={{ fontSize: isSmall ? 14 : 18 }}>{'\u2248'}</Text>}
-            label="Préféré"
-            description="Privilégier si possible"
+            label={t('step7.shariaPreferred')}
+            description={t('step7.shariaPreferredDesc')}
             selected={sharia === 'preferred'}
             color="#60A5FA"
             onPress={() => setSharia('preferred')}
@@ -191,8 +193,8 @@ export default function Step7InvestorProfile({ isActive }: Props) {
           />
           <ChoiceCard
             icon={<Text style={{ fontSize: isSmall ? 14 : 18 }}>{'\u00D7'}</Text>}
-            label="Indifférent"
-            description="Tous les produits"
+            label={t('step7.shariaNotRequired')}
+            description={t('step7.shariaNotRequiredDesc')}
             selected={sharia === 'not_required'}
             color="#A1A1AA"
             onPress={() => setSharia('not_required')}
@@ -203,7 +205,7 @@ export default function Step7InvestorProfile({ isActive }: Props) {
 
       <FadeInView active={isActive} delay={550}>
         <Text style={[styles.sectionTitle, isSmall && { fontSize: 13 }]}>
-          Part investissement ({investRatio}%)
+          {t('step7.investmentShare', { ratio: investRatio })}
         </Text>
         <GlassCard style={styles.ratioCard}>
           <View style={[styles.ratioRow, isMedium && { gap: 6 }]}>
@@ -230,16 +232,16 @@ export default function Step7InvestorProfile({ isActive }: Props) {
             ))}
           </View>
           <Text style={[styles.ratioHint, isSmall && { fontSize: 10 }]}>
-            Épargne {67 - investRatio}% · Investissement {investRatio}% · Plaisir 33%
+            {t('step7.ratioHint', { savings: 67 - investRatio, invest: investRatio })}
           </Text>
         </GlassCard>
       </FadeInView>
 
       <FadeInView active={isActive} delay={700}>
         <View style={[styles.buttons, isSmall && { marginTop: 16 }]}>
-          <PrimaryButton label="Valider mon profil" onPress={handleSave} />
+          <PrimaryButton label={t('step7.validateProfile')} onPress={handleSave} />
           <Pressable onPress={handleSkip} style={styles.skipButton}>
-            <Text style={styles.skipText}>Passer cette étape</Text>
+            <Text style={styles.skipText}>{t('step7.skipStep')}</Text>
           </Pressable>
         </View>
       </FadeInView>

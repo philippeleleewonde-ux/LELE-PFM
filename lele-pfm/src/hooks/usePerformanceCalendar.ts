@@ -8,7 +8,7 @@ import {
   getWeeksInMonth,
   WeeklySavingsResult,
   PeriodSavingsResult,
-  MONTH_NAMES_FR,
+  getMonthName,
 } from '@/domain/calculators/weekly-savings-engine';
 import { Grade } from '@/types';
 
@@ -158,7 +158,7 @@ export function usePerformanceCalendar(year: number) {
       months.push({
         month: m,
         year,
-        label: MONTH_NAMES_FR[m - 1],
+        label: getMonthName(m - 1),
         weeks: monthWeeks,
         summary,
       });

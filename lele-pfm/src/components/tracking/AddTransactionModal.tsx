@@ -10,6 +10,8 @@ import {
   StyleSheet,
   useWindowDimensions,
 } from 'react-native';
+import { useTranslation } from 'react-i18next';
+import i18n from '@/i18n';
 import { X, CreditCard, Banknote, ArrowRightLeft, Receipt, CalendarDays } from 'lucide-react-native';
 import { COICOPCode, PaymentMethod, TransactionType } from '@/types';
 import { useTransactionStore } from '@/stores/transaction-store';
@@ -29,12 +31,19 @@ const TYPE_BY_CATEGORY: Record<COICOPCode, TransactionType> = {
   '08': 'Fixe',
 };
 
-const PAYMENT_METHODS: { key: PaymentMethod; label: string; icon: typeof CreditCard }[] = [
-  { key: 'CarteBancaire', label: 'Carte', icon: CreditCard },
-  { key: 'Espèces', label: 'Espèces', icon: Banknote },
-  { key: 'Virement', label: 'Virement', icon: ArrowRightLeft },
-  { key: 'Prélèvement', label: 'Prélèv.', icon: Receipt },
+const PAYMENT_METHODS: { key: PaymentMethod; labelKey: string; icon: typeof CreditCard }[] = [
+  { key: 'CarteBancaire', labelKey: 'addExpense.paymentMethods.card', icon: CreditCard },
+  { key: 'Espèces', labelKey: 'addExpense.paymentMethods.cash', icon: Banknote },
+  { key: 'Virement', labelKey: 'addExpense.paymentMethods.transfer', icon: ArrowRightLeft },
+  { key: 'Prélèvement', labelKey: 'addExpense.paymentMethods.debit', icon: Receipt },
 ];
+
+const DATE_LOCALE_MAP: Record<string, string> = {
+  fr: 'fr-FR',
+  en: 'en-US',
+  es: 'es-ES',
+  pt: 'pt-PT',
+};
 
 interface AddTransactionModalProps {
   visible: boolean;
@@ -43,6 +52,7 @@ interface AddTransactionModalProps {
 }
 
 export function AddTransactionModal({ visible, onClose, defaultCategory }: AddTransactionModalProps) {
+  const { t } = useTranslation('tracking');
   const { width, height } = useWindowDimensions();
   const isSmall = width < 360;
   const addTransaction = useTransactionStore((s) => s.addTransaction);
@@ -161,7 +171,7 @@ export function AddTransactionModal({ visible, onClose, defaultCategory }: AddTr
 
         {/* Header */}
         <View style={styles.header}>
-          <Text style={styles.title}>Nouvelle dépense</Text>
+          <Text style={styles.title}>{t('addExpense.title')}</Text>
           <Pressable onPress={onClose} style={styles.closeBtn}>
             <X size={20} color="#A1A1AA" />
           </Pressable>
@@ -169,33 +179,33 @@ export function AddTransactionModal({ visible, onClose, defaultCategory }: AddTr
 
         <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={[styles.scrollContent, { paddingHorizontal: isSmall ? 14 : 20 }]}>
           {/* Category selector */}
-          <Text style={styles.sectionLabel}>Catégorie</Text>
+          <Text style={styles.sectionLabel}>{t('addExpense.category')}</Text>
           <CategorySelector selected={category} onSelect={setCategory} />
 
           {/* Amount */}
-          <Text style={[styles.sectionLabel, { marginTop: 20 }]}>Montant</Text>
+          <Text style={[styles.sectionLabel, { marginTop: 20 }]}>{t('addExpense.amount')}</Text>
           <AmountInput value={amount} onChange={setAmount} />
 
           {/* Label */}
-          <Text style={[styles.sectionLabel, { marginTop: 20 }]}>Description</Text>
+          <Text style={[styles.sectionLabel, { marginTop: 20 }]}>{t('addExpense.description')}</Text>
           <TextInput
             style={styles.textInput}
             value={label}
             onChangeText={setLabel}
-            placeholder="Ex: Supermarché, Taxi, Pharmacie..."
+            placeholder={t('addExpense.placeholder')}
             placeholderTextColor="#52525B"
             returnKeyType="done"
           />
 
           {/* Date picker */}
-          <Text style={[styles.sectionLabel, { marginTop: 20 }]}>Date</Text>
+          <Text style={[styles.sectionLabel, { marginTop: 20 }]}>{t('addExpense.date')}</Text>
           <View style={styles.dateRow}>
             <Pressable
               onPress={() => setSelectedDate('today')}
               style={[styles.dateBtn, selectedDate === 'today' && styles.dateBtnActive]}
             >
               <Text style={[styles.dateBtnText, selectedDate === 'today' && styles.dateBtnTextActive]}>
-                Aujourd'hui
+                {t('addExpense.today')}
               </Text>
             </Pressable>
             <Pressable
@@ -203,7 +213,7 @@ export function AddTransactionModal({ visible, onClose, defaultCategory }: AddTr
               style={[styles.dateBtn, selectedDate === 'yesterday' && styles.dateBtnActive]}
             >
               <Text style={[styles.dateBtnText, selectedDate === 'yesterday' && styles.dateBtnTextActive]}>
-                Hier
+                {t('addExpense.yesterday')}
               </Text>
             </Pressable>
             <Pressable
@@ -212,7 +222,7 @@ export function AddTransactionModal({ visible, onClose, defaultCategory }: AddTr
             >
               <CalendarDays size={16} color={selectedDate === 'custom' ? '#FBBF24' : '#A1A1AA'} />
               <Text style={[styles.dateBtnText, { fontSize: 12 }, selectedDate === 'custom' && styles.dateBtnTextActive]}>
-                Autre
+                {t('addExpense.other')}
               </Text>
             </Pressable>
           </View>
@@ -225,24 +235,24 @@ export function AddTransactionModal({ visible, onClose, defaultCategory }: AddTr
                 ]}
                 value={customDateText}
                 onChangeText={handleCustomDateInput}
-                placeholder="JJ/MM/AAAA"
+                placeholder={t('addExpense.datePlaceholder')}
                 placeholderTextColor="#52525B"
                 keyboardType="number-pad"
                 maxLength={10}
               />
               {customDate && (
                 <Text style={styles.customDateConfirm}>
-                  {customDate.toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric' })}
+                  {customDate.toLocaleDateString(DATE_LOCALE_MAP[i18n.language] || 'fr-FR', { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric' })}
                 </Text>
               )}
               {!customDate && customDateText.length === 10 && (
-                <Text style={styles.customDateError}>Date invalide</Text>
+                <Text style={styles.customDateError}>{t('addExpense.invalidDate')}</Text>
               )}
             </View>
           )}
 
           {/* Payment method */}
-          <Text style={[styles.sectionLabel, { marginTop: 20 }]}>Moyen de paiement</Text>
+          <Text style={[styles.sectionLabel, { marginTop: 20 }]}>{t('addExpense.paymentMethod')}</Text>
           <View style={styles.paymentRow}>
             {PAYMENT_METHODS.map((pm) => {
               const isActive = paymentMethod === pm.key;
@@ -255,7 +265,7 @@ export function AddTransactionModal({ visible, onClose, defaultCategory }: AddTr
                 >
                   <Icon size={18} color={isActive ? '#FBBF24' : '#A1A1AA'} />
                   <Text style={[styles.paymentLabel, isActive && styles.paymentLabelActive]}>
-                    {pm.label}
+                    {t(pm.labelKey)}
                   </Text>
                 </Pressable>
               );
@@ -270,7 +280,7 @@ export function AddTransactionModal({ visible, onClose, defaultCategory }: AddTr
           style={[styles.submitBtn, !isValid && styles.submitBtnDisabled]}
         >
           <Text style={[styles.submitText, !isValid && styles.submitTextDisabled]}>
-            Ajouter
+            {t('addExpense.submit')}
           </Text>
         </Pressable>
       </Animated.View>

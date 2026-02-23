@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, useWindowDimensions } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { formatCurrency } from '@/services/format-helpers';
 import { TrendingUp, TrendingDown, PiggyBank } from 'lucide-react-native';
@@ -27,6 +28,7 @@ export function WeeklyProgressCard({
   planYear,
   currentQuarter,
 }: WeeklyProgressCardProps) {
+  const { t } = useTranslation('tracking');
   const { width } = useWindowDimensions();
   const isSmall = width < 360;
 
@@ -46,13 +48,13 @@ export function WeeklyProgressCard({
     <GlassCard variant="dark" style={styles.card}>
       <View style={styles.topRow}>
         <View>
-          <Text style={styles.label}>Depense</Text>
+          <Text style={styles.label}>{t('progress.spent')}</Text>
           <Text style={[styles.spent, { color: barColor }, isSmall && { fontSize: 20 }]}>
             {formatCurrency(weeklySpent)}
           </Text>
         </View>
         <View style={styles.rightCol}>
-          <Text style={styles.label}>Plafond</Text>
+          <Text style={styles.label}>{t('progress.budget')}</Text>
           <Text style={[styles.budgetValue, isSmall && { fontSize: 15 }]}>{formatCurrency(weeklyBudget)}</Text>
         </View>
       </View>
@@ -64,7 +66,7 @@ export function WeeklyProgressCard({
 
       <View style={styles.bottomRow}>
         <View style={styles.remainingRow}>
-          <Text style={styles.remainingLabel}>Restant : </Text>
+          <Text style={styles.remainingLabel}>{t('progress.remaining')} </Text>
           <Text style={[styles.remainingValue, { color: weeklyRemaining > 0 ? '#4ADE80' : '#F87171' }]}>
             {formatCurrency(weeklyRemaining)}
           </Text>
@@ -77,7 +79,7 @@ export function WeeklyProgressCard({
             <TrendingUp size={14} color="#F87171" />
           )}
           <Text style={[styles.projectionText, { color: isOnTrack ? '#4ADE80' : '#F87171' }]}>
-            {formatCurrency(projectedWeekTotal)} projete
+            {formatCurrency(projectedWeekTotal)} {t('progress.projected')}
           </Text>
         </View>
       </View>
@@ -90,13 +92,13 @@ export function WeeklyProgressCard({
             <PiggyBank size={16} color="#FBBF24" />
             <View style={styles.savingsColumns}>
               <View style={styles.savingsCol}>
-                <Text style={styles.savingsColLabel}>Economise</Text>
+                <Text style={styles.savingsColLabel}>{t('progress.saved')}</Text>
                 <Text style={[styles.savingsColValue, { color: savingsOnTrack ? '#4ADE80' : '#FBBF24' }]}>
                   {formatCurrency(actualSavings)}
                 </Text>
               </View>
               <View style={[styles.savingsCol, styles.savingsColRight]}>
-                <Text style={styles.savingsColLabel}>Objectif EPR (An{planYear} T{currentQuarter})</Text>
+                <Text style={styles.savingsColLabel}>{t('progress.eprTarget')} (An{planYear} T{currentQuarter})</Text>
                 <Text style={styles.savingsTargetValue}>{formatCurrency(weeklyTarget)}</Text>
               </View>
             </View>
@@ -117,8 +119,8 @@ export function WeeklyProgressCard({
           {actualSavings > 0 && (
             <Text style={[styles.eprStatusText, { color: savingsOnTrack ? '#4ADE80' : '#A1A1AA' }]}>
               {savingsOnTrack
-                ? `EPR atteint${actualSavings > weeklyTarget ? ` (+${formatCurrency(actualSavings - weeklyTarget)} bonus)` : ''}`
-                : `EPR : ${Math.round((actualSavings / weeklyTarget) * 100)}%`
+                ? `${t('progress.eprReached')}${actualSavings > weeklyTarget ? ` (+${formatCurrency(actualSavings - weeklyTarget)} ${t('progress.bonus')})` : ''}`
+                : `${t('progress.eprLabel')} ${Math.round((actualSavings / weeklyTarget) * 100)}%`
               }
             </Text>
           )}

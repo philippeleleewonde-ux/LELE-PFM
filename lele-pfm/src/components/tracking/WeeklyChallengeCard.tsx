@@ -1,11 +1,17 @@
 import React from 'react';
 import { View, Text, Pressable, StyleSheet, useWindowDimensions } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { BookOpen, Zap, CheckCircle, ChevronRight, Trophy } from 'lucide-react-native';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { useWeeklyChallenge } from '@/hooks/useWeeklyChallenge';
 import { DIFFICULTY_COLORS, DIFFICULTY_LABELS } from '@/constants/financial-challenges';
 
-export function WeeklyChallengeCard() {
+interface WeeklyChallengeCardProps {
+  week?: number;
+  year?: number;
+}
+
+export function WeeklyChallengeCard({ week, year }: WeeklyChallengeCardProps = {}) {
   const {
     challenge,
     planWeek,
@@ -17,7 +23,8 @@ export function WeeklyChallengeCard() {
     completedCount,
     onReadSavoir,
     onManualFaire,
-  } = useWeeklyChallenge();
+  } = useWeeklyChallenge(week, year);
+  const { t } = useTranslation('tracking');
   const { width } = useWindowDimensions();
   const isSmall = width < 360;
 
@@ -32,7 +39,7 @@ export function WeeklyChallengeCard() {
       <View style={styles.header}>
         <View style={styles.headerLeft}>
           <Trophy size={16} color="#22D3EE" />
-          <Text style={styles.headerTitle}>DEFI DE LA SEMAINE</Text>
+          <Text style={styles.headerTitle}>{t('challenge.title')}</Text>
         </View>
         <View style={styles.headerRight}>
           <View style={[styles.weekBadge, { backgroundColor: `${diffColor}20`, borderColor: `${diffColor}40` }]}>
@@ -53,11 +60,11 @@ export function WeeklyChallengeCard() {
 
       {/* Progress steps */}
       <View style={styles.stepsRow}>
-        <StepDot label="Savoir" done={savoirRead} active={!savoirRead} color="#22D3EE" />
+        <StepDot label={t('challenge.knowledge')} done={savoirRead} active={!savoirRead} color="#22D3EE" />
         <View style={[styles.stepLine, (savoirRead) && styles.stepLineDone]} />
-        <StepDot label="Faire" done={conditionMet} active={savoirRead && !conditionMet} color="#FBBF24" />
+        <StepDot label={t('challenge.action')} done={conditionMet} active={savoirRead && !conditionMet} color="#FBBF24" />
         <View style={[styles.stepLine, (conditionMet) && styles.stepLineDone]} />
-        <StepDot label="Valide" done={isFullyComplete} active={conditionMet && !isFullyComplete} color="#4ADE80" />
+        <StepDot label={t('challenge.validated')} done={isFullyComplete} active={conditionMet && !isFullyComplete} color="#4ADE80" />
       </View>
 
       {/* Savoir section */}
@@ -68,7 +75,7 @@ export function WeeklyChallengeCard() {
             {challenge.savoir}
           </Text>
           <Pressable onPress={onReadSavoir} style={styles.savoirBtn}>
-            <Text style={styles.savoirBtnText}>J'ai compris</Text>
+            <Text style={styles.savoirBtnText}>{t('challenge.understood')}</Text>
             <ChevronRight size={14} color="#0F1014" />
           </Pressable>
         </View>
@@ -86,7 +93,7 @@ export function WeeklyChallengeCard() {
         <View style={styles.faireBox}>
           <Zap size={16} color="#FBBF24" />
           <View style={styles.faireContent}>
-            <Text style={styles.faireLabel}>ACTION</Text>
+            <Text style={styles.faireLabel}>{t('challenge.actionLabel')}</Text>
             <Text style={[styles.faireText, isSmall && { fontSize: 13 }]}>
               {challenge.faire}
             </Text>
@@ -97,11 +104,11 @@ export function WeeklyChallengeCard() {
             </View>
           ) : isManual ? (
             <Pressable onPress={onManualFaire} style={styles.faireDoneBtn}>
-              <Text style={styles.faireDoneBtnText}>C'est fait</Text>
+              <Text style={styles.faireDoneBtnText}>{t('challenge.done')}</Text>
             </Pressable>
           ) : (
             <View style={styles.fairePending}>
-              <Text style={styles.fairePendingText}>En cours</Text>
+              <Text style={styles.fairePendingText}>{t('challenge.inProgress')}</Text>
             </View>
           )}
         </View>
@@ -110,12 +117,12 @@ export function WeeklyChallengeCard() {
       {/* Maitriser status */}
       {savoirRead && (
         <View style={styles.maitriserRow}>
-          <Text style={styles.maitriserLabel}>Verification</Text>
+          <Text style={styles.maitriserLabel}>{t('challenge.verifying')}</Text>
           <Text style={[
             styles.maitriserStatus,
             { color: conditionMet ? '#4ADE80' : '#52525B' },
           ]}>
-            {conditionMet ? 'Valide !' : challenge.maitriserDesc}
+            {conditionMet ? t('challenge.validatedBang') : challenge.maitriserDesc}
           </Text>
         </View>
       )}
@@ -131,7 +138,7 @@ export function WeeklyChallengeCard() {
       {/* Completed count */}
       {completedCount > 0 && (
         <Text style={styles.completedText}>
-          {completedCount}/48 defis completes
+          {completedCount}/48 {t('challenge.challengesCompleted')}
         </Text>
       )}
 
@@ -139,7 +146,7 @@ export function WeeklyChallengeCard() {
       {isFullyComplete && (
         <View style={styles.celebrateBanner}>
           <Trophy size={14} color="#FBBF24" />
-          <Text style={styles.celebrateText}>Defi complete !</Text>
+          <Text style={styles.celebrateText}>{t('challenge.challengeComplete')}</Text>
         </View>
       )}
     </GlassCard>

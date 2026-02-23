@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, Pressable, Modal, ScrollView, StyleSheet } from 'react-native';
 import { X, TrendingUp, TrendingDown, Award, PiggyBank, Wallet } from 'lucide-react-native';
+import { useTranslation } from 'react-i18next';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { formatCurrency } from '@/services/format-helpers';
 import {
@@ -22,6 +23,7 @@ interface WeekReportProps {
 }
 
 export function WeekReportSheet({ visible, entry, onClose }: WeekReportProps) {
+  const { t } = useTranslation('tracking');
   if (!entry) return null;
   const { week, year, budget, target, spent, savings } = entry;
 
@@ -50,20 +52,20 @@ export function WeekReportSheet({ visible, entry, onClose }: WeekReportProps) {
                 {savings.note}/10
               </Text>
               <Text style={styles.gradeLabel}>
-                {savings.budgetRespecte ? 'Budget respecté' : 'Budget dépassé'}
+                {savings.budgetRespecte ? t('reporting.budgetRespected') : t('reporting.budgetExceeded')}
               </Text>
             </View>
 
             {/* Budget vs Réalisé */}
             <GlassCard variant="dark" style={styles.cardSpacing}>
-              <Text style={styles.sectionLabel}>Budget vs Réalisé</Text>
-              <StatRow icon={Wallet} label="Budget semaine" value={formatCurrency(budget)} color="#60A5FA" />
-              <StatRow icon={TrendingDown} label="Dépensé" value={formatCurrency(spent)} color={savings.budgetRespecte ? '#4ADE80' : '#F87171'} />
-              <StatRow icon={TrendingUp} label="Objectif épargne" value={formatCurrency(target)} color="#A78BFA" />
+              <Text style={styles.sectionLabel}>{t('reporting.budgetVsActual')}</Text>
+              <StatRow icon={Wallet} label={t('reporting.weeklyBudget')} value={formatCurrency(budget)} color="#60A5FA" />
+              <StatRow icon={TrendingDown} label={t('reporting.spent')} value={formatCurrency(spent)} color={savings.budgetRespecte ? '#4ADE80' : '#F87171'} />
+              <StatRow icon={TrendingUp} label={t('reporting.savingsTarget')} value={formatCurrency(target)} color="#A78BFA" />
               <View style={styles.divider} />
               <StatRow
                 icon={savings.economiesCappees > 0 ? PiggyBank : TrendingDown}
-                label={savings.economiesCappees > 0 ? 'Économies validées' : 'Dépassement'}
+                label={savings.economiesCappees > 0 ? t('reporting.validatedSavings') : t('reporting.overspend')}
                 value={formatCurrency(savings.economiesCappees > 0 ? savings.economiesCappees : savings.depassement)}
                 color={savings.economiesCappees > 0 ? '#4ADE80' : '#F87171'}
                 bold
@@ -73,15 +75,15 @@ export function WeekReportSheet({ visible, entry, onClose }: WeekReportProps) {
             {/* Distribution */}
             {savings.economiesCappees > 0 && (
               <GlassCard variant="dark" style={styles.cardSpacing}>
-                <Text style={styles.sectionLabel}>Répartition de vos économies</Text>
-                <StatRow icon={PiggyBank} label="Épargne (67%)" value={formatCurrency(savings.epargne)} color="#4ADE80" />
-                <StatRow icon={Wallet} label="Plaisir (33%)" value={formatCurrency(savings.discretionnaire)} color="#A78BFA" />
+                <Text style={styles.sectionLabel}>{t('reporting.savingsDistribution')}</Text>
+                <StatRow icon={PiggyBank} label={t('reporting.savingsPocket67')} value={formatCurrency(savings.epargne)} color="#4ADE80" />
+                <StatRow icon={Wallet} label={t('reporting.funPocket33')} value={formatCurrency(savings.discretionnaire)} color="#A78BFA" />
               </GlassCard>
             )}
 
             {/* Execution Rate */}
             <GlassCard variant="dark" style={styles.cardSpacing}>
-              <Text style={styles.sectionLabel}>Taux d'exécution</Text>
+              <Text style={styles.sectionLabel}>{t('reporting.executionRate')}</Text>
               <View style={styles.barContainer}>
                 <View style={styles.barBg}>
                   <View
@@ -102,10 +104,10 @@ export function WeekReportSheet({ visible, entry, onClose }: WeekReportProps) {
               </View>
               <Text style={styles.hint}>
                 {savings.tauxExecution <= 80
-                  ? 'Excellent ! Vous dépensez bien en dessous de votre budget.'
+                  ? t('reporting.executionExcellent')
                   : savings.tauxExecution <= 100
-                    ? 'Bien ! Vous êtes dans les limites de votre budget.'
-                    : `Attention, vous avez dépassé votre budget de ${savings.tauxExecution - 100}%.`}
+                    ? t('reporting.executionGood')
+                    : t('reporting.executionOver', { percent: savings.tauxExecution - 100 })}
               </Text>
             </GlassCard>
           </ScrollView>
@@ -126,6 +128,7 @@ interface PeriodReportProps {
 }
 
 export function PeriodReportSheet({ visible, title, subtitle, summary, onClose }: PeriodReportProps) {
+  const { t } = useTranslation('tracking');
   const wallet = useSavingsWallet();
 
   if (!summary) return null;
@@ -155,19 +158,19 @@ export function PeriodReportSheet({ visible, title, subtitle, summary, onClose }
                 {summary.noteMoyenne}/10
               </Text>
               <Text style={styles.gradeLabel}>
-                {summary.nbSemaines} semaine{summary.nbSemaines > 1 ? 's' : ''} analysée{summary.nbSemaines > 1 ? 's' : ''}
+                {t('reporting.weeksAnalyzed', { count: summary.nbSemaines })}
               </Text>
             </View>
 
             {/* Summary Stats */}
             <GlassCard variant="dark" style={styles.cardSpacing}>
-              <Text style={styles.sectionLabel}>Bilan de la période</Text>
-              <StatRow icon={PiggyBank} label="Total économies" value={formatCurrency(summary.totalEconomies)} color="#4ADE80" />
-              <StatRow icon={TrendingDown} label="Total dépassements" value={formatCurrency(summary.totalDepassement)} color="#F87171" />
+              <Text style={styles.sectionLabel}>{t('reporting.periodSummary')}</Text>
+              <StatRow icon={PiggyBank} label={t('reporting.totalSavings')} value={formatCurrency(summary.totalEconomies)} color="#4ADE80" />
+              <StatRow icon={TrendingDown} label={t('reporting.totalOverspend')} value={formatCurrency(summary.totalDepassement)} color="#F87171" />
               <View style={styles.divider} />
               <StatRow
                 icon={Award}
-                label="Économies nettes"
+                label={t('reporting.netSavings')}
                 value={formatCurrency(summary.economiesNettes)}
                 color={summary.economiesNettes >= 0 ? '#4ADE80' : '#F87171'}
                 bold
@@ -177,27 +180,27 @@ export function PeriodReportSheet({ visible, title, subtitle, summary, onClose }
             {/* Distribution */}
             {summary.totalEconomies > 0 && (
               <GlassCard variant="dark" style={styles.cardSpacing}>
-                <Text style={styles.sectionLabel}>Répartition des économies</Text>
-                <StatRow icon={PiggyBank} label="Épargne (67%)" value={formatCurrency(summary.totalEpargne)} color="#4ADE80" />
-                <StatRow icon={Wallet} label="Plaisir (33%)" value={formatCurrency(summary.totalDiscretionnaire)} color="#A78BFA" />
+                <Text style={styles.sectionLabel}>{t('reporting.savingsDistributionPeriod')}</Text>
+                <StatRow icon={PiggyBank} label={t('reporting.savingsPocket67')} value={formatCurrency(summary.totalEpargne)} color="#4ADE80" />
+                <StatRow icon={Wallet} label={t('reporting.funPocket33')} value={formatCurrency(summary.totalDiscretionnaire)} color="#A78BFA" />
               </GlassCard>
             )}
 
             {/* Budget Respect */}
             <GlassCard variant="dark" style={styles.cardSpacing}>
-              <Text style={styles.sectionLabel}>Respect du budget</Text>
+              <Text style={styles.sectionLabel}>{t('reporting.budgetRespect')}</Text>
               <View style={styles.budgetRow}>
                 <View style={styles.budgetStat}>
                   <Text style={[styles.budgetNum, { color: '#4ADE80' }]}>{summary.semainesDansBudget}</Text>
-                  <Text style={styles.budgetLabel}>dans le budget</Text>
+                  <Text style={styles.budgetLabel}>{t('reporting.inBudget')}</Text>
                 </View>
                 <View style={styles.budgetStat}>
                   <Text style={[styles.budgetNum, { color: '#F87171' }]}>{summary.nbSemaines - summary.semainesDansBudget}</Text>
-                  <Text style={styles.budgetLabel}>en dépassement</Text>
+                  <Text style={styles.budgetLabel}>{t('reporting.overBudget')}</Text>
                 </View>
                 <View style={styles.budgetStat}>
                   <Text style={[styles.budgetNum, { color: '#FBBF24' }]}>{summary.tauxRespectBudget}%</Text>
-                  <Text style={styles.budgetLabel}>taux de respect</Text>
+                  <Text style={styles.budgetLabel}>{t('reporting.respectRate')}</Text>
                 </View>
               </View>
             </GlassCard>
@@ -205,23 +208,23 @@ export function PeriodReportSheet({ visible, title, subtitle, summary, onClose }
             {/* Cumul (all-time) */}
             {wallet.nbSemainesTotal > 0 && (
               <GlassCard variant="dark" style={styles.cardSpacing}>
-                <Text style={styles.sectionLabel}>Cumul depuis le début</Text>
+                <Text style={styles.sectionLabel}>{t('reporting.cumulSinceStart')}</Text>
                 <StatRow
                   icon={PiggyBank}
-                  label="Total économies"
+                  label={t('reporting.totalSavings')}
                   value={formatCurrency(wallet.allTimeEconomies)}
                   color="#4ADE80"
                 />
                 <StatRow
                   icon={TrendingDown}
-                  label="Total dépassements"
+                  label={t('reporting.totalOverspend')}
                   value={formatCurrency(wallet.allTimeDepassement)}
                   color="#F87171"
                 />
                 <View style={styles.divider} />
                 <StatRow
                   icon={Award}
-                  label="Économies nettes cumulées"
+                  label={t('reporting.cumulNetSavings')}
                   value={formatCurrency(wallet.allTimeNet)}
                   color={wallet.allTimeNet >= 0 ? '#4ADE80' : '#F87171'}
                   bold
@@ -229,13 +232,13 @@ export function PeriodReportSheet({ visible, title, subtitle, summary, onClose }
                 <View style={styles.divider} />
                 <StatRow
                   icon={PiggyBank}
-                  label="Épargne cumulée (67%)"
+                  label={t('reporting.cumulSavings67')}
                   value={formatCurrency(wallet.allTimeEpargne)}
                   color="#4ADE80"
                 />
                 <StatRow
                   icon={Wallet}
-                  label="Plaisir cumulé (33%)"
+                  label={t('reporting.cumulFun33')}
                   value={formatCurrency(wallet.allTimeDiscretionnaire)}
                   color="#A78BFA"
                 />

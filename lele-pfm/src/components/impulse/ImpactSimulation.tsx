@@ -1,6 +1,7 @@
 import React, { useState, useCallback, useMemo } from 'react';
 import { View, Text, Pressable, TextInput, StyleSheet } from 'react-native';
 import { ChevronLeft, ChevronRight, Check, AlertTriangle, Minus, Plus } from 'lucide-react-native';
+import { useTranslation } from 'react-i18next';
 import { useEngineStore } from '@/stores/engine-store';
 import { useTransactionStore } from '@/stores/transaction-store';
 import { useImpulseStore } from '@/stores/impulse-store';
@@ -27,6 +28,7 @@ interface ImpactSimulationProps {
 }
 
 export function ImpactSimulation({ label, amount, analysis, onBack, onClose }: ImpactSimulationProps) {
+  const { t } = useTranslation('app');
   const currency = useEngineStore((s) => s.currency) || 'FCFA';
   const addTransaction = useTransactionStore((s) => s.addTransaction);
   const setCurrentWeek = useTransactionStore((s) => s.setCurrentWeek);
@@ -103,7 +105,7 @@ export function ImpactSimulation({ label, amount, analysis, onBack, onClose }: I
 
     addTransaction({
       profile_id: 'local',
-      type: 'Imprévue' as TransactionType,
+      type: t('impulse.transactionType') as TransactionType,
       category: purchaseCategory,
       label,
       amount,
@@ -112,7 +114,7 @@ export function ImpactSimulation({ label, amount, analysis, onBack, onClose }: I
       week_number: txWeek,
       year: txYear,
       is_reconciled: false,
-      notes: `Anti-impulsif: compense sur ${weeks} semaines`,
+      notes: t('impulse.transactionNote', { weeks }),
     });
 
     const compensations = Object.entries(reductions)
@@ -149,9 +151,9 @@ export function ImpactSimulation({ label, amount, analysis, onBack, onClose }: I
           {label} — {formatAmount(amount)} {currency}
         </Text>
 
-        <Text style={styles.heading}>Impact sur ton budget :</Text>
+        <Text style={styles.heading}>{t('impulse.impactHeading')}</Text>
         <Text style={styles.subHeading}>
-          "Cet achat equivaut a..."
+          {t('impulse.impactSubheading')}
         </Text>
 
         {analysis.impactByCategory.map((cat) => {
@@ -164,28 +166,28 @@ export function ImpactSimulation({ label, amount, analysis, onBack, onClose }: I
             <View key={cat.code} style={styles.impactRow}>
               <View style={styles.impactIconLabel}>
                 <Icon size={16} color={cat.color} />
-                <Text style={styles.impactLabel} numberOfLines={1}>{cat.label}</Text>
+                <Text style={styles.impactLabel} numberOfLines={1}>{t(`categories.${cat.labelKey}`)}</Text>
               </View>
               <View style={styles.impactBarContainer}>
                 <View style={[styles.impactBar, { width: `${barWidth}%`, backgroundColor: cat.color }]} />
               </View>
-              <Text style={styles.impactWeeks}>{cat.weeksEquivalent} sem</Text>
+              <Text style={styles.impactWeeks}>{cat.weeksEquivalent} {t('impulse.weekUnit')}</Text>
             </View>
           );
         })}
 
         <View style={styles.totalRow}>
-          <Text style={styles.totalLabel}>Budget global :</Text>
-          <Text style={styles.totalValue}>{analysis.totalWeeksOfBudget} semaines</Text>
+          <Text style={styles.totalLabel}>{t('impulse.globalBudget')}</Text>
+          <Text style={styles.totalValue}>{analysis.totalWeeksOfBudget} {t('impulse.weeksUnit')}</Text>
         </View>
 
         <View style={styles.actions}>
           <Pressable onPress={onBack} style={styles.backBtn}>
             <ChevronLeft size={16} color="#A1A1AA" />
-            <Text style={styles.backText}>Retour</Text>
+            <Text style={styles.backText}>{t('impulse.back')}</Text>
           </Pressable>
           <Pressable onPress={() => setSubStep('compensation')} style={styles.primaryBtn}>
-            <Text style={styles.primaryBtnText}>Compenser</Text>
+            <Text style={styles.primaryBtnText}>{t('impulse.compensate')}</Text>
             <ChevronRight size={16} color="#0F1014" />
           </Pressable>
         </View>
@@ -197,10 +199,10 @@ export function ImpactSimulation({ label, amount, analysis, onBack, onClose }: I
   if (subStep === 'compensation') {
     return (
       <View style={styles.container}>
-        <Text style={styles.heading}>Compenser {formatAmount(amount)} {currency}</Text>
+        <Text style={styles.heading}>{t('impulse.compensate')} {formatAmount(amount)} {currency}</Text>
 
         {/* Duration selector */}
-        <Text style={styles.sectionLabel}>Sur combien de semaines ?</Text>
+        <Text style={styles.sectionLabel}>{t('impulse.howManyWeeks')}</Text>
         <View style={styles.durationRow}>
           {DURATION_PRESETS.map((w) => (
             <Pressable
@@ -217,7 +219,7 @@ export function ImpactSimulation({ label, amount, analysis, onBack, onClose }: I
             style={[styles.durationInput, customWeeksText ? styles.durationInputActive : null]}
             value={customWeeksText}
             onChangeText={handleCustomWeeks}
-            placeholder="Autre"
+            placeholder={t('impulse.other')}
             placeholderTextColor="#52525B"
             keyboardType="numeric"
             maxLength={2}
@@ -226,12 +228,12 @@ export function ImpactSimulation({ label, amount, analysis, onBack, onClose }: I
 
         {/* Weekly amount info */}
         <View style={styles.weeklyInfoBox}>
-          <Text style={styles.weeklyInfoLabel}>Reduction hebdo :</Text>
+          <Text style={styles.weeklyInfoLabel}>{t('impulse.weeklyReduction')}</Text>
           <Text style={styles.weeklyInfoValue}>{formatAmount(weeklyCompensation)} {currency}/sem</Text>
         </View>
 
         <Text style={[styles.sectionLabel, { marginTop: 12 }]}>
-          Repartis les % par categorie :
+          {t('impulse.distributePercent')}
         </Text>
 
         {/* Category percentage distribution */}
@@ -247,7 +249,7 @@ export function ImpactSimulation({ label, amount, analysis, onBack, onClose }: I
               <View style={styles.compLeft}>
                 <Icon size={16} color={cat.color} />
                 <View style={styles.compInfo}>
-                  <Text style={styles.compLabel} numberOfLines={1}>{cat.label}</Text>
+                  <Text style={styles.compLabel} numberOfLines={1}>{t(`categories.${cat.labelKey}`)}</Text>
                   <Text style={styles.compBudget}>
                     {formatAmount(cat.weeklyBudget)}/sem
                   </Text>
@@ -306,15 +308,15 @@ export function ImpactSimulation({ label, amount, analysis, onBack, onClose }: I
           </View>
           <Text style={[styles.compProgressText, isDistributionComplete && { color: '#4ADE80' }]}>
             {isDistributionComplete
-              ? `Reparti : 100% — ${formatAmount(weeklyCompensation)} ${currency}/sem`
-              : `${totalPercent}% reparti — reste ${100 - totalPercent}%`}
+              ? t('impulse.distributionComplete', { amount: formatAmount(weeklyCompensation), currency })
+              : t('impulse.distributionRemaining', { percent: totalPercent, remaining: 100 - totalPercent })}
           </Text>
         </View>
 
         <View style={styles.actions}>
           <Pressable onPress={() => setSubStep('simulation')} style={styles.backBtn}>
             <ChevronLeft size={16} color="#A1A1AA" />
-            <Text style={styles.backText}>Retour</Text>
+            <Text style={styles.backText}>{t('impulse.back')}</Text>
           </Pressable>
           <Pressable
             onPress={() => setSubStep('confirmation')}
@@ -322,7 +324,7 @@ export function ImpactSimulation({ label, amount, analysis, onBack, onClose }: I
             style={[styles.primaryBtn, !isDistributionComplete && styles.primaryBtnDisabled]}
           >
             <Text style={[styles.primaryBtnText, !isDistributionComplete && styles.primaryBtnTextDisabled]}>
-              Confirmer
+              {t('impulse.confirm')}
             </Text>
             <ChevronRight size={16} color={isDistributionComplete ? '#0F1014' : '#52525B'} />
           </Pressable>
@@ -339,35 +341,35 @@ export function ImpactSimulation({ label, amount, analysis, onBack, onClose }: I
       <View style={styles.confirmIcon}>
         <Check size={24} color="#4ADE80" />
       </View>
-      <Text style={styles.confirmTitle}>Resume de ta decision</Text>
+      <Text style={styles.confirmTitle}>{t('impulse.decisionSummary')}</Text>
 
       <View style={styles.confirmSection}>
-        <Text style={styles.confirmLabel}>Achat</Text>
+        <Text style={styles.confirmLabel}>{t('impulse.purchase')}</Text>
         <Text style={styles.confirmValue}>{label}</Text>
       </View>
 
       <View style={styles.confirmSection}>
-        <Text style={styles.confirmLabel}>Montant</Text>
+        <Text style={styles.confirmLabel}>{t('impulse.amount')}</Text>
         <Text style={styles.confirmValue}>{formatAmount(amount)} {currency}</Text>
       </View>
 
-      <Text style={[styles.sectionLabel, { marginTop: 16 }]}>Imputer sur :</Text>
+      <Text style={[styles.sectionLabel, { marginTop: 16 }]}>{t('impulse.chargeOn')}</Text>
       <CategorySelector selected={purchaseCategory} onSelect={setPurchaseCategory} />
 
       <View style={[styles.confirmSection, { marginTop: 16 }]}>
-        <Text style={styles.confirmLabel}>Compensations ({weeks} semaines)</Text>
+        <Text style={styles.confirmLabel}>{t('impulse.compensations', { weeks })}</Text>
         {activeReductions.map(([code, weeklyAmount]) => {
           const cat = analysis.impactByCategory.find((c) => c.code === code);
           const pct = percents[code] ?? 0;
           return (
             <Text key={code} style={styles.confirmCompLine}>
-              {'\u2022'} {cat?.label ?? code} : {pct}% = -{formatAmount(weeklyAmount)}/sem
+              {'\u2022'} {cat ? t(`categories.${cat.labelKey}`) : code} : {pct}% = -{formatAmount(weeklyAmount)}/sem
             </Text>
           );
         })}
         <View style={styles.confirmTotalLine}>
           <Text style={styles.confirmTotalText}>
-            Total : -{formatAmount(weeklyCompensation)} {currency}/sem x {weeks} sem = {formatAmount(amount)} {currency}
+            {t('impulse.totalLine', { weekly: formatAmount(weeklyCompensation), currency, weeks, total: formatAmount(amount) })}
           </Text>
         </View>
       </View>
@@ -375,14 +377,14 @@ export function ImpactSimulation({ label, amount, analysis, onBack, onClose }: I
       <View style={styles.warningBox}>
         <AlertTriangle size={16} color="#FBBF24" />
         <Text style={styles.warningText}>
-          Tes budgets hebdo seront reduits pendant {weeks} semaines.
+          {t('impulse.warningBudgets', { weeks })}
         </Text>
       </View>
 
       <View style={styles.actions}>
         <Pressable onPress={() => setSubStep('compensation')} style={styles.backBtn}>
           <ChevronLeft size={16} color="#A1A1AA" />
-          <Text style={styles.backText}>Modifier</Text>
+          <Text style={styles.backText}>{t('impulse.modify')}</Text>
         </Pressable>
         <Pressable
           onPress={handleConfirm}
@@ -390,7 +392,7 @@ export function ImpactSimulation({ label, amount, analysis, onBack, onClose }: I
           style={[styles.confirmBtn, !purchaseCategory && styles.primaryBtnDisabled]}
         >
           <Text style={[styles.confirmBtnText, !purchaseCategory && styles.primaryBtnTextDisabled]}>
-            Valider l'achat
+            {t('impulse.validatePurchase')}
           </Text>
         </Pressable>
       </View>

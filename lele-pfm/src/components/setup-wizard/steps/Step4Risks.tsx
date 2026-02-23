@@ -1,6 +1,7 @@
 import React, { useCallback } from 'react';
 import { View, Text, ScrollView, StyleSheet } from 'react-native';
 import Slider from '@react-native-community/slider';
+import { useTranslation } from 'react-i18next';
 import { WZ, GlassCard, FadeInView, neonGlow } from '../shared';
 import { useWizardStore } from '@/stores/wizard-store';
 
@@ -10,26 +11,25 @@ interface Props {
 
 interface RiskDomain {
   key: string;
-  label: string;
-  description: string;
 }
 
 const RISK_DOMAINS: RiskDomain[] = [
-  { key: 'emploi', label: 'Emploi', description: 'Stabilité professionnelle' },
-  { key: 'logement', label: 'Logement', description: 'Situation immobilière' },
-  { key: 'sante', label: 'Santé', description: 'Couverture et frais médicaux' },
-  { key: 'endettement', label: 'Endettement', description: 'Niveau d\'endettement' },
-  { key: 'epargne', label: 'Épargne', description: 'Capacité d\'épargne' },
-  { key: 'juridique', label: 'Juridique', description: 'Exposition juridique' },
+  { key: 'emploi' },
+  { key: 'logement' },
+  { key: 'sante' },
+  { key: 'endettement' },
+  { key: 'epargne' },
+  { key: 'juridique' },
 ];
 
-function getRiskLabel(value: number): { text: string; color: string } {
-  if (value <= 33) return { text: 'Stable', color: WZ.green };
-  if (value <= 66) return { text: 'Modéré', color: WZ.orange };
-  return { text: 'À surveiller', color: WZ.red };
+function getRiskLabel(value: number, t: any): { text: string; color: string } {
+  if (value <= 33) return { text: t('step4.riskLevels.stable'), color: WZ.green };
+  if (value <= 66) return { text: t('step4.riskLevels.moderate'), color: WZ.orange };
+  return { text: t('step4.riskLevels.watch'), color: WZ.red };
 }
 
 export default function Step4Risks({ isActive }: Props) {
+  const { t } = useTranslation('wizard');
   const { formData, updateFormData } = useWizardStore();
   const risks = formData.risks;
 
@@ -46,15 +46,15 @@ export default function Step4Risks({ isActive }: Props) {
       showsVerticalScrollIndicator={false}
     >
       <FadeInView active={isActive} delay={0}>
-        <Text style={styles.title}>Évaluation des risques</Text>
+        <Text style={styles.title}>{t('step4.title')}</Text>
         <Text style={styles.subtitle}>
-          Évaluez votre niveau d'exposition pour chaque domaine
+          {t('step4.subtitle')}
         </Text>
       </FadeInView>
 
       {RISK_DOMAINS.map((domain, index) => {
         const value = risks[domain.key] ?? 0;
-        const riskInfo = getRiskLabel(value);
+        const riskInfo = getRiskLabel(value, t);
 
         return (
           <FadeInView key={domain.key} active={isActive} delay={100 + index * 80}>
@@ -62,8 +62,8 @@ export default function Step4Risks({ isActive }: Props) {
               <View style={styles.cardHeader}>
                 <Text style={styles.shieldIcon}>🛡️</Text>
                 <View style={styles.cardTitleWrap}>
-                  <Text style={styles.domainName}>{domain.label}</Text>
-                  <Text style={styles.domainDesc}>{domain.description}</Text>
+                  <Text style={styles.domainName}>{t('step4.domains.' + domain.key)}</Text>
+                  <Text style={styles.domainDesc}>{t('step4.domains.' + domain.key + 'Desc')}</Text>
                 </View>
                 <View style={[styles.badge, { backgroundColor: riskInfo.color + '22' }]}>
                   <Text style={[styles.badgeText, { color: riskInfo.color, ...neonGlow(riskInfo.color) }]}>

@@ -1,6 +1,7 @@
 import React, { useState, useCallback, useRef } from 'react';
 import { View, ScrollView, Text, Pressable, Animated, StyleSheet } from 'react-native';
-import { Plus, X, ArrowUpRight, ArrowDownLeft, Wand2, Shield, Target } from 'lucide-react-native';
+import { useTranslation } from 'react-i18next';
+import { Plus, X, ArrowUpRight, ArrowDownLeft, Wand2, Shield, Target, Mic } from 'lucide-react-native';
 import { useEngineStore } from '@/stores/engine-store';
 import { useTransactionStore } from '@/stores/transaction-store';
 import { useWeeklyTracking, CategoryTracking } from '@/hooks/useWeeklyTracking';
@@ -31,8 +32,10 @@ import { CreateGoalModal } from '@/components/tracking/CreateGoalModal';
 import { ContributeGoalModal } from '@/components/tracking/ContributeGoalModal';
 import { GoalDetailSheet } from '@/components/tracking/GoalDetailSheet';
 import { WeeklyChallengeCard } from '@/components/tracking/WeeklyChallengeCard';
+import { VoiceExpenseModal } from '@/components/tracking/VoiceExpenseModal';
 
 export default function TransactionsScreen() {
+  const { t } = useTranslation('app');
   const engineOutput = useEngineStore((s) => s.engineOutput);
   const currency = useEngineStore((s) => s.currency);
   const addTransaction = useTransactionStore((s) => s.addTransaction);
@@ -55,6 +58,9 @@ export default function TransactionsScreen() {
 
   // Impulse check modal
   const [showImpulseCheck, setShowImpulseCheck] = useState(false);
+
+  // Voice expense modal
+  const [showVoiceModal, setShowVoiceModal] = useState(false);
 
   // Goal modals
   const [showCreateGoal, setShowCreateGoal] = useState(false);
@@ -133,6 +139,11 @@ export default function TransactionsScreen() {
     if (fabExpanded) toggleFab();
   }, [fabExpanded, toggleFab]);
 
+  const handleOpenVoiceExpense = useCallback(() => {
+    setShowVoiceModal(true);
+    if (fabExpanded) toggleFab();
+  }, [fabExpanded, toggleFab]);
+
   const handleOpenCreateGoal = useCallback(() => {
     setShowCreateGoal(true);
     if (fabExpanded) toggleFab();
@@ -175,9 +186,9 @@ export default function TransactionsScreen() {
       <View style={styles.container}>
         <View style={styles.ctaContainer}>
           <GlassCard variant="neon" style={styles.ctaCard}>
-            <Text style={styles.ctaTitle}>Portefeuille</Text>
+            <Text style={styles.ctaTitle}>{t('transactions.title')}</Text>
             <Text style={styles.ctaText}>
-              Completez le wizard d'abord pour definir vos objectifs hebdomadaires.
+              {t('transactions.completeWizard')}
             </Text>
           </GlassCard>
         </View>
@@ -201,6 +212,10 @@ export default function TransactionsScreen() {
   const goalTranslateY = fabAnim.interpolate({
     inputRange: [0, 1],
     outputRange: [0, -250],
+  });
+  const voiceTranslateY = fabAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0, -310],
   });
   const miniFabOpacity = fabAnim.interpolate({
     inputRange: [0, 0.5, 1],
@@ -236,7 +251,7 @@ export default function TransactionsScreen() {
         />
 
         {/* Weekly Challenge */}
-        <WeeklyChallengeCard />
+        <WeeklyChallengeCard week={currentWeek} year={currentYear} />
 
         {/* Weekly Progress Card — expenses */}
         <WeeklyProgressCard
@@ -278,7 +293,7 @@ export default function TransactionsScreen() {
         {isInvestor && <InvestmentWalletCard />}
 
         {/* Expenses Section */}
-        <Text style={styles.sectionTitle}>Depenses</Text>
+        <Text style={styles.sectionTitle}>{t('transactions.expensesTab')}</Text>
 
         <GlassCard variant="dark" style={styles.categoriesCard}>
           {sortedCategories.map((cat, idx) => (
@@ -293,7 +308,7 @@ export default function TransactionsScreen() {
         </GlassCard>
 
         {/* Income Section */}
-        <Text style={[styles.sectionTitle, { marginTop: 20 }]}>Rentrees</Text>
+        <Text style={[styles.sectionTitle, { marginTop: 20 }]}>{t('transactions.incomeTab')}</Text>
 
         <WeeklyIncomeCard
           totalActual={incomeData.totalActualWeekly}
@@ -320,10 +335,27 @@ export default function TransactionsScreen() {
       {/* Demo FAB */}
       <Pressable onPress={handleGenerateDemo} style={styles.fabDemo}>
         <Wand2 size={20} color="#D9A11B" />
-        <Text style={styles.fabDemoText}>Demo</Text>
+        <Text style={styles.fabDemoText}>{t('transactions.fabDemo')}</Text>
       </Pressable>
 
       {/* Expandable FAB — mini buttons */}
+      {/* Voice mini FAB (orange, mic) */}
+      <Animated.View
+        style={[
+          styles.miniFab,
+          {
+            transform: [{ translateY: voiceTranslateY }, { scale: miniFabScale }],
+            opacity: miniFabOpacity,
+          },
+        ]}
+        pointerEvents={fabExpanded ? 'auto' : 'none'}
+      >
+        <Pressable onPress={handleOpenVoiceExpense} style={[styles.miniFabBtn, { backgroundColor: '#F97316' }]}>
+          <Mic size={20} color="#FFFFFF" />
+        </Pressable>
+        <Text style={[styles.miniFabLabel, { color: '#F97316' }]}>{t('transactions.fabVoice')}</Text>
+      </Animated.View>
+
       {/* Goal mini FAB (cyan, target) */}
       <Animated.View
         style={[
@@ -338,7 +370,7 @@ export default function TransactionsScreen() {
         <Pressable onPress={handleOpenCreateGoal} style={[styles.miniFabBtn, { backgroundColor: '#22D3EE' }]}>
           <Target size={20} color="#0F1014" />
         </Pressable>
-        <Text style={[styles.miniFabLabel, { color: '#22D3EE' }]}>Objectif</Text>
+        <Text style={[styles.miniFabLabel, { color: '#22D3EE' }]}>{t('transactions.fabGoal')}</Text>
       </Animated.View>
 
       {/* Impulse check mini FAB (violet, shield) */}
@@ -355,7 +387,7 @@ export default function TransactionsScreen() {
         <Pressable onPress={handleOpenImpulseCheck} style={[styles.miniFabBtn, { backgroundColor: '#A78BFA' }]}>
           <Shield size={20} color="#0F1014" />
         </Pressable>
-        <Text style={[styles.miniFabLabel, { color: '#A78BFA' }]}>Anti-impulsif</Text>
+        <Text style={[styles.miniFabLabel, { color: '#A78BFA' }]}>{t('transactions.fabImpulse')}</Text>
       </Animated.View>
 
       {/* Income mini FAB (green, arrow down-left) */}
@@ -372,7 +404,7 @@ export default function TransactionsScreen() {
         <Pressable onPress={handleOpenAddIncome} style={[styles.miniFabBtn, { backgroundColor: '#4ADE80' }]}>
           <ArrowDownLeft size={20} color="#0F1014" />
         </Pressable>
-        <Text style={[styles.miniFabLabel, { color: '#4ADE80' }]}>Rentree</Text>
+        <Text style={[styles.miniFabLabel, { color: '#4ADE80' }]}>{t('transactions.fabIncome')}</Text>
       </Animated.View>
 
       {/* Expense mini FAB (gold, arrow up-right) */}
@@ -389,7 +421,7 @@ export default function TransactionsScreen() {
         <Pressable onPress={handleOpenAddExpense} style={[styles.miniFabBtn, { backgroundColor: '#FBBF24' }]}>
           <ArrowUpRight size={20} color="#0F1014" />
         </Pressable>
-        <Text style={[styles.miniFabLabel, { color: '#FBBF24' }]}>Depense</Text>
+        <Text style={[styles.miniFabLabel, { color: '#FBBF24' }]}>{t('transactions.fabExpense')}</Text>
       </Animated.View>
 
       {/* Main FAB */}
@@ -452,6 +484,12 @@ export default function TransactionsScreen() {
         goalId={detailGoalId}
         onClose={() => setDetailGoalId(null)}
         onContribute={handleContributeFromDetail}
+      />
+
+      {/* Voice Expense Modal */}
+      <VoiceExpenseModal
+        visible={showVoiceModal}
+        onClose={() => setShowVoiceModal(false)}
       />
     </View>
   );

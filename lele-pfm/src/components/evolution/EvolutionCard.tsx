@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, Animated } from 'react-native';
 import { TrendingUp, ArrowUpRight, ArrowDownRight, Minus } from 'lucide-react-native';
+import { useTranslation } from 'react-i18next';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { formatCurrency } from '@/services/format-helpers';
 import { useWeeklyEvolution } from '@/hooks/useWeeklyEvolution';
@@ -8,6 +9,7 @@ import { useWeeklyEvolution } from '@/hooks/useWeeklyEvolution';
 // ---------- Component ----------
 
 export function EvolutionCard() {
+  const { t } = useTranslation('app');
   const evolution = useWeeklyEvolution();
 
   // Derived values from hook data
@@ -65,14 +67,14 @@ export function EvolutionCard() {
           <View style={styles.emptyState}>
             <Minus size={16} color="#52525B" />
             <Text style={styles.emptyText}>
-              Premiere semaine {'\u2014'} pas encore de comparaison
+              {t('evolution.firstWeek')}
             </Text>
           </View>
         ) : (
           <>
             {/* ── Score row ── */}
             <View style={styles.row}>
-              <Text style={styles.rowLabel}>Score</Text>
+              <Text style={styles.rowLabel}>{t('evolution.score')}</Text>
               <View style={styles.rowRight}>
                 <Text style={styles.previousValue}>
                   {evolution.previousScore}
@@ -91,7 +93,7 @@ export function EvolutionCard() {
 
             {/* ── Note row ── */}
             <View style={styles.row}>
-              <Text style={styles.rowLabel}>Note</Text>
+              <Text style={styles.rowLabel}>{t('evolution.note')}</Text>
               <View style={styles.rowRight}>
                 <Text style={styles.previousValue}>
                   {evolution.previousNote}/10
@@ -110,7 +112,7 @@ export function EvolutionCard() {
 
             {/* ── Epargne row ── */}
             <View style={styles.row}>
-              <Text style={styles.rowLabel}>Epargne</Text>
+              <Text style={styles.rowLabel}>{t('evolution.savings')}</Text>
               <View style={styles.rowRight}>
                 <Text style={[styles.currentValue, { color: '#E4E4E7' }]}>
                   {formatCurrency(evolution.currentEcon)}
@@ -134,8 +136,7 @@ export function EvolutionCard() {
                   style={[styles.leverText, { color: evolution.bestImprovedLever.color }]}
                   numberOfLines={1}
                 >
-                  Meilleure progression : {evolution.bestImprovedLever.label} (+
-                  {evolution.bestImprovedLever.delta})
+                  {t('evolution.bestProgression', { label: evolution.bestImprovedLever.label, delta: evolution.bestImprovedLever.delta })}
                 </Text>
               </View>
             )}
@@ -148,8 +149,7 @@ export function EvolutionCard() {
                   style={[styles.leverText, { color: '#F87171' }]}
                   numberOfLines={1}
                 >
-                  A surveiller : {evolution.worstLever.label} (
-                  {evolution.worstLever.delta})
+                  {t('evolution.toWatch', { label: evolution.worstLever.label, delta: evolution.worstLever.delta })}
                 </Text>
               </View>
             )}

@@ -1,14 +1,8 @@
 import React, { useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, Animated } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useTranslation } from 'react-i18next';
 import { OB, FadeInView, OBGlassCard, neonGlow } from '../shared';
-
-const categories = [
-  { label: 'Sorties & loisirs', potentiel: 80, color: OB.orangeLight, delay: 300 },
-  { label: 'Alimentation', potentiel: 45, color: OB.greenLight, delay: 500 },
-  { label: 'Transport', potentiel: 35, color: OB.blueLight, delay: 700 },
-  { label: 'Logement', potentiel: 5, color: OB.textMuted, delay: 900 },
-];
 
 function AnimatedBar({ potentiel, color, isActive, delay }: { potentiel: number; color: string; isActive: boolean; delay: number }) {
   const width = useRef(new Animated.Value(0)).current;
@@ -31,6 +25,15 @@ function AnimatedBar({ potentiel, color, isActive, delay }: { potentiel: number;
 }
 
 export default function Slide4Waterfall({ isActive }: { isActive: boolean }) {
+  const { t } = useTranslation('onboarding');
+
+  const categories = [
+    { label: t('slide4.cat1'), potentiel: 80, color: OB.orangeLight, delay: 300 },
+    { label: t('slide4.cat2'), potentiel: 45, color: OB.greenLight, delay: 500 },
+    { label: t('slide4.cat3'), potentiel: 35, color: OB.blueLight, delay: 700 },
+    { label: t('slide4.cat4'), potentiel: 5, color: OB.textMuted, delay: 900 },
+  ];
+
   return (
     <LinearGradient colors={[OB.darkBg, '#12131A']} style={styles.container}>
       {isActive && (
@@ -38,7 +41,7 @@ export default function Slide4Waterfall({ isActive }: { isActive: boolean }) {
           {/* Categories Card */}
           <FadeInView active={isActive} delay={100}>
           <OBGlassCard style={styles.card}>
-            <Text style={styles.cardTitle}>Cashback par catégorie</Text>
+            <Text style={styles.cardTitle}>{t('slide4.cardTitle')}</Text>
 
             {categories.map((cat, i) => (
               <FadeInView key={cat.label} active={isActive} delay={200 + i * 100} duration={400} from="left" style={styles.catRow}>
@@ -48,7 +51,7 @@ export default function Slide4Waterfall({ isActive }: { isActive: boolean }) {
                 </View>
                 <AnimatedBar potentiel={cat.potentiel} color={cat.color} isActive={isActive} delay={cat.delay} />
                 <Text style={styles.catHint}>
-                  {cat.potentiel >= 60 ? 'Gros cashback' : cat.potentiel >= 30 ? 'Cashback moyen' : 'Peu de cashback'}
+                  {cat.potentiel >= 60 ? t('slide4.hintHigh') : cat.potentiel >= 30 ? t('slide4.hintMedium') : t('slide4.hintLow')}
                 </Text>
               </FadeInView>
             ))}
@@ -57,16 +60,16 @@ export default function Slide4Waterfall({ isActive }: { isActive: boolean }) {
 
           {/* Text */}
           <FadeInView active={isActive} delay={400}>
-            <Text style={[styles.tagline, neonGlow(OB.accent)]}>Chaque dépense passée au scanner</Text>
+            <Text style={[styles.tagline, neonGlow(OB.accent)]}>{t('slide4.tagline')}</Text>
           </FadeInView>
           <FadeInView active={isActive} delay={500}>
             <Text style={styles.heading}>
-              On te dit exactement{'\n'}où est ton cashback.
+              {t('slide4.heading')}
             </Text>
           </FadeInView>
           <FadeInView active={isActive} delay={600}>
             <Text style={styles.body}>
-              <Text style={{ color: '#fff', fontWeight: '700' }}>Chaque catégorie cache un cashback.</Text> On identifie celles qui cachent le plus de cashback, sans toucher à l'essentiel.
+              <Text style={{ color: '#fff', fontWeight: '700' }}>{t('slide4.bodyBold')}</Text>{t('slide4.bodyEnd')}
             </Text>
           </FadeInView>
         </>

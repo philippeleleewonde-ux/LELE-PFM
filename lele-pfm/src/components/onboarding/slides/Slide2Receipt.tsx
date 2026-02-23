@@ -1,16 +1,19 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useTranslation } from 'react-i18next';
 import { OB, FadeInView, ZoomInView, OBGlassCard, neonGlow } from '../shared';
 
-const steps = [
-  { num: '1', label: 'Ton profil', desc: 'Age, situation, metier', icon: '👤', color: OB.blueLight },
-  { num: '2', label: 'Tes revenus', desc: 'Salaire, business, aides', icon: '💰', color: OB.greenLight },
-  { num: '3', label: 'Tes depenses', desc: 'Par categorie', icon: '🛒', color: OB.orangeLight },
-  { num: '4', label: 'Ton historique', desc: '3 a 5 ans de donnees', icon: '📊', color: OB.accent },
-];
-
 export default function Slide2Receipt({ isActive }: { isActive: boolean }) {
+  const { t } = useTranslation('onboarding');
+
+  const steps = [
+    { num: '1', label: t('slide2.step1Label'), desc: t('slide2.step1Desc'), icon: '👤', color: OB.blueLight },
+    { num: '2', label: t('slide2.step2Label'), desc: t('slide2.step2Desc'), icon: '💰', color: OB.greenLight },
+    { num: '3', label: t('slide2.step3Label'), desc: t('slide2.step3Desc'), icon: '🛒', color: OB.orangeLight },
+    { num: '4', label: t('slide2.step4Label'), desc: t('slide2.step4Desc'), icon: '📊', color: OB.accent },
+  ];
+
   return (
     <LinearGradient colors={[OB.darkBg, '#12131A']} style={styles.container}>
       {isActive && (
@@ -18,7 +21,7 @@ export default function Slide2Receipt({ isActive }: { isActive: boolean }) {
           {/* Steps Card */}
           <FadeInView active={isActive} delay={100}>
           <OBGlassCard style={styles.card}>
-            <Text style={styles.cardTitle}>On te pose quelques questions</Text>
+            <Text style={styles.cardTitle}>{t('slide2.cardTitle')}</Text>
 
             {steps.map((s, i) => (
               <FadeInView key={s.num} active={isActive} delay={200 + i * 120} duration={400} from="left" style={[styles.stepRow, i < steps.length - 1 && styles.stepRowBorder]}>
@@ -37,8 +40,8 @@ export default function Slide2Receipt({ isActive }: { isActive: boolean }) {
             <ZoomInView active={isActive} delay={800} style={styles.resultBox}>
               <Text style={styles.resultIcon}>{'\u{1F9E0}'}</Text>
               <View style={{ flex: 1 }}>
-                <Text style={styles.resultTitle}>Le moteur analyse tout</Text>
-                <Text style={styles.resultSub}>et detecte tes economies cachees</Text>
+                <Text style={styles.resultTitle}>{t('slide2.resultTitle')}</Text>
+                <Text style={styles.resultSub}>{t('slide2.resultSub')}</Text>
               </View>
             </ZoomInView>
           </OBGlassCard>
@@ -46,16 +49,16 @@ export default function Slide2Receipt({ isActive }: { isActive: boolean }) {
 
           {/* Text */}
           <FadeInView active={isActive} delay={400}>
-            <Text style={[styles.tagline, neonGlow(OB.accent)]}>On identifie comment tu depenses</Text>
+            <Text style={[styles.tagline, neonGlow(OB.accent)]}>{t('slide2.tagline')}</Text>
           </FadeInView>
           <FadeInView active={isActive} delay={500}>
             <Text style={styles.heading}>
-              Quelques questions.{'\n'}Des reponses puissantes.
+              {t('slide2.heading')}
             </Text>
           </FadeInView>
           <FadeInView active={isActive} delay={600}>
             <Text style={styles.body}>
-              <Text style={{ color: '#fff', fontWeight: '700' }}>Tu nous dis comment tu vis</Text>, on calcule comment tu peux vivre mieux. Pas de jugement, juste des chiffres.
+              <Text style={{ color: '#fff', fontWeight: '700' }}>{t('slide2.bodyBold')}</Text>{t('slide2.bodyEnd')}
             </Text>
           </FadeInView>
         </>

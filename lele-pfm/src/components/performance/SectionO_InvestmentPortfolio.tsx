@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react';
 import { View, Text, StyleSheet, useWindowDimensions } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { PF, PerfGlassCard } from './shared';
 import { useInvestmentStore } from '@/stores/investment-store';
 import { useEngineStore } from '@/stores/engine-store';
@@ -34,11 +35,13 @@ export function SectionO_InvestmentPortfolio() {
     return { p36, comparison };
   }, [monthlyInvestCalc, annualReturn]);
 
+  const { t } = useTranslation('performance');
+
   if (!investorProfile || !engineOutput) {
     return (
       <PerfGlassCard>
         <Text style={styles.emptyText}>
-          Configurez votre profil investisseur dans les réglages pour voir cette section.
+          {t('investmentPortfolio.configureProfile')}
         </Text>
       </PerfGlassCard>
     );
@@ -46,28 +49,27 @@ export function SectionO_InvestmentPortfolio() {
 
   const last = projection?.p36[35];
   const ratioPercent = investorProfile.investmentRatio;
+  const monthlyFormatted = formatCurrency(Math.round(monthlyInvestCalc));
 
   return (
     <View style={styles.container}>
       {/* Educational intro banner */}
       <PerfGlassCard style={[styles.section, styles.introBanner]}>
-        <Text style={styles.introTitle}>Comment lire cette section ?</Text>
+        <Text style={styles.introTitle}>{t('investmentPortfolio.howToRead')}</Text>
         <Text style={styles.introText}>
-          En analysant vos revenus et depenses, l'application estime que vous pourriez investir{' '}
-          <Text style={styles.introHighlight}>{formatCurrency(Math.round(monthlyInvestCalc))}/mois</Text>.
-          {'\n'}Les chiffres ci-dessous simulent ce qui se passerait si vous le faisiez pendant 3 ans.
+          {t('investmentPortfolio.introText', { monthly: monthlyFormatted })}
         </Text>
         <View style={styles.introDetailRow}>
           <Text style={styles.introDetail}>
-            {ratioPercent}% de votre epargne dedie a l'investissement
+            {t('investmentPortfolio.introDetail', { ratio: ratioPercent })}
           </Text>
         </View>
       </PerfGlassCard>
 
       {/* Current allocation */}
       <PerfGlassCard style={styles.section}>
-        <Text style={styles.sectionTitle}>Ou est place votre argent ?</Text>
-        <Text style={styles.sectionHint}>Les produits dans lesquels vous investissez et leur rendement annuel.</Text>
+        <Text style={styles.sectionTitle}>{t('investmentPortfolio.whereIsYourMoney')}</Text>
+        <Text style={styles.sectionHint}>{t('investmentPortfolio.productsHint')}</Text>
         {allocations.length > 0 ? (
           <View style={styles.allocList}>
             {allocations.map((a) => (
@@ -79,52 +81,51 @@ export function SectionO_InvestmentPortfolio() {
               </View>
             ))}
             <View style={styles.allocSummary}>
-              <Text style={styles.summaryLabel}>Gain moyen attendu</Text>
+              <Text style={styles.summaryLabel}>{t('investmentPortfolio.averageReturn')}</Text>
               <Text style={[styles.summaryValue, { color: PF.green }]}>
                 {annualReturn.toFixed(1)}%/an
               </Text>
             </View>
           </View>
         ) : (
-          <Text style={styles.emptyText}>Aucune allocation calculee</Text>
+          <Text style={styles.emptyText}>{t('investmentPortfolio.noAllocation')}</Text>
         )}
       </PerfGlassCard>
 
       {/* 36-month projection */}
       {last && (
         <PerfGlassCard style={styles.section}>
-          <Text style={styles.sectionTitle}>Projection sur 3 ans</Text>
+          <Text style={styles.sectionTitle}>{t('investmentPortfolio.projection3y')}</Text>
           <Text style={styles.sectionHint}>
-            Simulation : si vous investissez {formatCurrency(Math.round(monthlyInvestCalc))}/mois
-            pendant 36 mois a {annualReturn.toFixed(1)}%/an.
+            {t('investmentPortfolio.projectionHint', { monthly: monthlyFormatted, annualReturn: annualReturn.toFixed(1) })}
           </Text>
           <View style={styles.projGrid}>
             <View style={styles.projItem}>
-              <Text style={styles.projLabel}>Votre argent place</Text>
+              <Text style={styles.projLabel}>{t('investmentPortfolio.yourMoneyInvested')}</Text>
               <Text style={styles.projValue}>{formatCurrency(last.invested)}</Text>
               <Text style={styles.projHint}>
-                {formatCurrency(Math.round(monthlyInvestCalc))}/mois x 36 mois
+                {t('investmentPortfolio.investedHint', { monthly: monthlyFormatted })}
               </Text>
             </View>
             <View style={styles.projItem}>
-              <Text style={styles.projLabel}>Gains generes</Text>
+              <Text style={styles.projLabel}>{t('investmentPortfolio.gainsGenerated')}</Text>
               <Text style={[styles.projValue, { color: PF.green }]}>+{formatCurrency(last.returns)}</Text>
               <Text style={styles.projHint}>
-                Ce que votre placement vous rapporte en plus
+                {t('investmentPortfolio.gainsHint')}
               </Text>
             </View>
             <View style={styles.projItem}>
-              <Text style={styles.projLabel}>Total dans 3 ans</Text>
+              <Text style={styles.projLabel}>{t('investmentPortfolio.totalIn3y')}</Text>
               <Text style={[styles.projValue, { color: PF.accent }]}>{formatCurrency(last.total)}</Text>
               <Text style={styles.projHint}>
-                Votre argent + les gains cumules
+                {t('investmentPortfolio.totalHint')}
               </Text>
             </View>
             <View style={styles.projItem}>
-              <Text style={styles.projLabel}>Valeur reelle</Text>
+              <Text style={styles.projLabel}>{t('investmentPortfolio.realValue')}</Text>
               <Text style={styles.projValue}>{formatCurrency(last.inflationAdjusted)}</Text>
               <Text style={styles.projHint}>
-                Pouvoir d'achat reel (les prix augmentent de ~3%/an)
+                {t('investmentPortfolio.realValueHint')}
               </Text>
             </View>
           </View>
@@ -134,22 +135,22 @@ export function SectionO_InvestmentPortfolio() {
       {/* Comparison */}
       {projection?.comparison && (
         <PerfGlassCard style={styles.section}>
-          <Text style={styles.sectionTitle}>Investir vs. laisser dormir son argent</Text>
+          <Text style={styles.sectionTitle}>{t('investmentPortfolio.investVsSleep')}</Text>
           <Text style={styles.sectionHint}>
-            Comparaison : que se passe-t-il si vous placez la meme somme sur un livret epargne classique ?
+            {t('investmentPortfolio.comparisonHint')}
           </Text>
           <View style={styles.compRow}>
             <View style={styles.compItem}>
-              <Text style={styles.compLabel}>Epargne classique</Text>
+              <Text style={styles.compLabel}>{t('investmentPortfolio.classicSavings')}</Text>
               <Text style={styles.compValue}>{formatCurrency(projection.comparison.savings36m)}</Text>
-              <Text style={styles.compHint}>Livret a ~3%/an</Text>
+              <Text style={styles.compHint}>{t('investmentPortfolio.classicSavingsHint')}</Text>
             </View>
             <View style={styles.compItem}>
-              <Text style={styles.compLabel}>Investissement</Text>
+              <Text style={styles.compLabel}>{t('investmentPortfolio.investmentLabel')}</Text>
               <Text style={[styles.compValue, { color: PF.green }]}>
                 {formatCurrency(projection.comparison.investment36m)}
               </Text>
-              <Text style={styles.compHint}>Votre portefeuille</Text>
+              <Text style={styles.compHint}>{t('investmentPortfolio.investmentHint')}</Text>
             </View>
           </View>
           <Text style={[styles.compDelta, { color: projection.comparison.delta > 0 ? PF.green : PF.red }]}>
@@ -158,15 +159,15 @@ export function SectionO_InvestmentPortfolio() {
           </Text>
           <Text style={styles.compExplain}>
             {projection.comparison.delta > 0
-              ? 'En investissant, vous gagnez plus qu\'en laissant votre argent sur un simple livret.'
-              : 'Avec ce portefeuille, un livret classique serait plus avantageux.'}
+              ? t('investmentPortfolio.investBetter')
+              : t('investmentPortfolio.livretBetter')}
           </Text>
         </PerfGlassCard>
       )}
 
       {/* Disclaimer */}
       <Text style={styles.disclaimer}>
-        Simulation indicative basee sur vos donnees. Les rendements passes ne garantissent pas les rendements futurs. Consultez un conseiller avant d'investir.
+        {t('investmentPortfolio.disclaimer')}
       </Text>
     </View>
   );

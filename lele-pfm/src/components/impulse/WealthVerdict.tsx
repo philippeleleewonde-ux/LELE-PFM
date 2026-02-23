@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, Pressable, StyleSheet } from 'react-native';
 import { ChevronLeft, Clock } from 'lucide-react-native';
+import { useTranslation } from 'react-i18next';
 import { useEngineStore } from '@/stores/engine-store';
 import { ImpulseAnalysis } from '@/hooks/useImpulseCheck';
 
@@ -24,6 +25,7 @@ function RuleCard({ multiplier, canAfford, needed, total, savings, currency }: {
   savings: number;
   currency: string;
 }) {
+  const { t } = useTranslation('app');
   const target = total;
   const progress = target > 0 ? Math.min(100, Math.round((savings / target) * 100)) : 0;
 
@@ -32,16 +34,18 @@ function RuleCard({ multiplier, canAfford, needed, total, savings, currency }: {
       <View style={styles.ruleHeader}>
         <Text style={styles.ruleEmoji}>{canAfford ? '\u2705' : '\u274C'}</Text>
         <Text style={[styles.ruleTitle, canAfford ? styles.ruleTextGreen : styles.ruleTextRed]}>
-          Regle des {multiplier}x : {canAfford ? 'Tu peux !' : 'Pas encore'}
+          {canAfford
+            ? t('impulse.ruleCanAfford', { multiplier })
+            : t('impulse.ruleCannotAfford', { multiplier })}
         </Text>
       </View>
 
       <Text style={styles.ruleLine}>
-        Il te faut : {formatAmount(target)} {currency}
+        {t('impulse.youNeed', { amount: formatAmount(target), currency })}
       </Text>
       {!canAfford && (
         <Text style={styles.ruleLine}>
-          Il te manque : {formatAmount(needed)} {currency}
+          {t('impulse.youMissing', { amount: formatAmount(needed), currency })}
         </Text>
       )}
 
@@ -63,6 +67,7 @@ function RuleCard({ multiplier, canAfford, needed, total, savings, currency }: {
 }
 
 export function WealthVerdict({ label, amount, analysis, onBack, onClose }: WealthVerdictProps) {
+  const { t } = useTranslation('app');
   const currency = useEngineStore((s) => s.currency) || 'FCFA';
 
   const overallVerdict = analysis.canAfford10x
@@ -79,7 +84,7 @@ export function WealthVerdict({ label, amount, analysis, onBack, onClose }: Weal
 
       {/* Savings info */}
       <View style={styles.savingsRow}>
-        <Text style={styles.savingsLabel}>Ta tirelire :</Text>
+        <Text style={styles.savingsLabel}>{t('impulse.piggyBank')}</Text>
         <Text style={styles.savingsAmount}>
           {formatAmount(analysis.totalSavings)} {currency}
         </Text>
@@ -99,10 +104,10 @@ export function WealthVerdict({ label, amount, analysis, onBack, onClose }: Weal
         </Text>
         <Text style={styles.verdictText}>
           {overallVerdict === 'success'
-            ? 'Tu peux te le permettre !'
+            ? t('impulse.verdictSuccess')
             : overallVerdict === 'warning'
-            ? 'Tu peux, mais reste vigilant'
-            : 'Tu ne peux pas encore'}
+            ? t('impulse.verdictWarning')
+            : t('impulse.verdictFail')}
         </Text>
       </View>
 
@@ -131,7 +136,7 @@ export function WealthVerdict({ label, amount, analysis, onBack, onClose }: Weal
         <View style={styles.timeRow}>
           <Clock size={16} color="#A78BFA" />
           <Text style={styles.timeText}>
-            A ton rythme ({formatAmount(analysis.avgWeeklySavings)}/sem), tu atteindras 5x dans ~{analysis.weeksToReach5x} sem
+            {t('impulse.timeToReach5x', { savings: formatAmount(analysis.avgWeeklySavings), weeks: analysis.weeksToReach5x })}
           </Text>
         </View>
       )}
@@ -140,7 +145,7 @@ export function WealthVerdict({ label, amount, analysis, onBack, onClose }: Weal
         <View style={styles.timeRow}>
           <Clock size={16} color="#A78BFA" />
           <Text style={styles.timeText}>
-            A ton rythme ({formatAmount(analysis.avgWeeklySavings)}/sem), tu atteindras 10x dans ~{analysis.weeksToReach10x} sem
+            {t('impulse.timeToReach10x', { savings: formatAmount(analysis.avgWeeklySavings), weeks: analysis.weeksToReach10x })}
           </Text>
         </View>
       )}
@@ -150,8 +155,8 @@ export function WealthVerdict({ label, amount, analysis, onBack, onClose }: Weal
         <Text style={styles.adviceEmoji}>{'\uD83D\uDCA1'}</Text>
         <Text style={styles.adviceText}>
           {overallVerdict === 'success'
-            ? 'Tu es dans une excellente position. Cet achat ne mettra pas en danger tes finances.'
-            : 'Epargne d\'abord, achete quand tu peux te le permettre 5 fois minimum.'}
+            ? t('impulse.adviceSuccess')
+            : t('impulse.adviceFail')}
         </Text>
       </View>
 
@@ -159,10 +164,10 @@ export function WealthVerdict({ label, amount, analysis, onBack, onClose }: Weal
       <View style={styles.actions}>
         <Pressable onPress={onBack} style={styles.backBtn}>
           <ChevronLeft size={16} color="#A1A1AA" />
-          <Text style={styles.backText}>Retour</Text>
+          <Text style={styles.backText}>{t('impulse.back')}</Text>
         </Pressable>
         <Pressable onPress={onClose} style={styles.closeBtn}>
-          <Text style={styles.closeBtnText}>Fermer</Text>
+          <Text style={styles.closeBtnText}>{t('impulse.close')}</Text>
         </Pressable>
       </View>
     </View>

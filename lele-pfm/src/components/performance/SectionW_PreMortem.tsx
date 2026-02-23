@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { PF, PerfGlassCard } from './shared';
 import { useInvestmentStore } from '@/stores/investment-store';
 import {
@@ -36,35 +37,18 @@ function impactColor(impact: FailureMode['impact']): string {
   }
 }
 
-function impactLabel(impact: FailureMode['impact']): string {
-  switch (impact) {
-    case 'low':
-      return 'Faible';
-    case 'medium':
-      return 'Moyen';
-    case 'high':
-      return 'Élevé';
-    case 'critical':
-      return 'Critique';
-  }
+function impactLabel(impact: FailureMode['impact'], t: (key: string) => string): string {
+  return t(`premortem.impact.${impact}`);
 }
 
-function riskLabel(level: PreMortemAnalysis['overallRiskLevel']): string {
-  switch (level) {
-    case 'low':
-      return 'Faible';
-    case 'moderate':
-      return 'Modéré';
-    case 'elevated':
-      return 'Élevé';
-    case 'high':
-      return 'Très élevé';
-  }
+function riskLabel(level: PreMortemAnalysis['overallRiskLevel'], t: (key: string) => string): string {
+  return t(`premortem.risk.${level}`);
 }
 
 // ─── Component ───
 
 export function SectionW_PreMortem() {
+  const { t } = useTranslation('performance');
   const allocations = useInvestmentStore((s) => s.allocations);
   const investorProfile = useInvestmentStore((s) => s.investorProfile);
 
@@ -77,8 +61,7 @@ export function SectionW_PreMortem() {
     return (
       <PerfGlassCard>
         <Text style={styles.emptyText}>
-          Configurez votre profil investisseur dans les réglages pour voir
-          l'analyse pré-mortem.
+          {t('premortem.noProfile')}
         </Text>
       </PerfGlassCard>
     );
@@ -88,8 +71,7 @@ export function SectionW_PreMortem() {
     return (
       <PerfGlassCard>
         <Text style={styles.emptyText}>
-          Aucun scénario de défaillance identifié pour votre portefeuille
-          actuel.
+          {t('premortem.noFailures')}
         </Text>
       </PerfGlassCard>
     );
@@ -101,10 +83,10 @@ export function SectionW_PreMortem() {
     <View style={styles.container}>
       {/* Header */}
       <PerfGlassCard style={styles.section}>
-        <Text style={styles.sectionTitle}>Analyse Pré-Mortem</Text>
-        <Text style={styles.subtitle}>Et si votre plan échouait ?</Text>
+        <Text style={styles.sectionTitle}>{t('premortem.title')}</Text>
+        <Text style={styles.subtitle}>{t('premortem.subtitle')}</Text>
         <Text style={styles.subtitleMuted}>
-          Anticipez les risques avant qu'ils ne se réalisent.
+          {t('premortem.description')}
         </Text>
 
         {/* Survival probability */}
@@ -113,13 +95,13 @@ export function SectionW_PreMortem() {
             <Text style={[styles.survivalNumber, { color: survColor }]}>
               {analysis.survivalProbability}%
             </Text>
-            <Text style={styles.survivalLabel}>Probabilité de survie</Text>
+            <Text style={styles.survivalLabel}>{t('premortem.survivalLabel')}</Text>
           </View>
           <View
             style={[styles.riskBadge, { backgroundColor: survColor + '20' }]}
           >
             <Text style={[styles.riskBadgeText, { color: survColor }]}>
-              Risque {riskLabel(analysis.overallRiskLevel)}
+              {t('premortem.riskPrefix')} {riskLabel(analysis.overallRiskLevel, t)}
             </Text>
           </View>
         </View>
@@ -127,7 +109,7 @@ export function SectionW_PreMortem() {
 
       {/* Top 3 threats */}
       <PerfGlassCard style={styles.section}>
-        <Text style={styles.sectionTitle}>Menaces principales</Text>
+        <Text style={styles.sectionTitle}>{t('premortem.mainThreats')}</Text>
         <View style={styles.threatList}>
           {analysis.topThreats.map((threat) => {
             const badgeColor = impactColor(threat.impact);
@@ -144,7 +126,7 @@ export function SectionW_PreMortem() {
                     <Text
                       style={[styles.impactBadgeText, { color: badgeColor }]}
                     >
-                      {impactLabel(threat.impact)}
+                      {impactLabel(threat.impact, t)}
                     </Text>
                   </View>
                   <Text style={styles.threatTitle} numberOfLines={1}>
@@ -159,14 +141,14 @@ export function SectionW_PreMortem() {
                 <Text style={styles.threatDesc}>{threat.description}</Text>
 
                 {/* Trigger conditions */}
-                <Text style={styles.triggerLabel}>Déclencheurs</Text>
+                <Text style={styles.triggerLabel}>{t('premortem.triggers')}</Text>
                 <Text style={styles.triggerText}>
                   {threat.triggerConditions}
                 </Text>
 
                 {/* Mitigation card */}
                 <View style={styles.mitigationCard}>
-                  <Text style={styles.mitigationLabel}>Parade</Text>
+                  <Text style={styles.mitigationLabel}>{t('premortem.mitigation')}</Text>
                   <Text style={styles.mitigationText}>
                     {threat.mitigation}
                   </Text>
@@ -180,7 +162,7 @@ export function SectionW_PreMortem() {
       {/* Action plan */}
       {analysis.actionPlan.length > 0 && (
         <PerfGlassCard style={styles.section}>
-          <Text style={styles.sectionTitle}>Plan d'action</Text>
+          <Text style={styles.sectionTitle}>{t('premortem.actionPlan')}</Text>
           <View style={styles.actionList}>
             {analysis.actionPlan.map((action, idx) => (
               <View key={idx} style={styles.actionRow}>
@@ -200,8 +182,7 @@ export function SectionW_PreMortem() {
           {analysis.summary}
         </Text>
         <Text style={styles.footerMuted}>
-          Cette analyse est indicative et basée sur des probabilités
-          historiques. Elle ne constitue pas un conseil en investissement.
+          {t('premortem.disclaimer')}
         </Text>
       </PerfGlassCard>
     </View>

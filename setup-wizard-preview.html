@@ -1,0 +1,1044 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LELE PFM — Setup Wizard Preview</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', -apple-system, sans-serif;
+    background: #0F172A;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    color: #F8FAFC;
+    overflow: hidden;
+  }
+
+  .phone-frame {
+    width: 390px;
+    height: 844px;
+    background: #0F172A;
+    border-radius: 44px;
+    border: 3px solid #334155;
+    overflow: hidden;
+    position: relative;
+    box-shadow: 0 0 80px rgba(59, 130, 246, 0.15);
+  }
+
+  .notch {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 160px;
+    height: 34px;
+    background: #0F172A;
+    border-radius: 0 0 20px 20px;
+    z-index: 100;
+  }
+
+  /* ===== PROGRESS BAR ===== */
+  .progress-area {
+    position: absolute;
+    top: 44px;
+    left: 0; right: 0;
+    padding: 12px 28px 0;
+    z-index: 90;
+  }
+
+  .progress-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+
+  .progress-step-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: #94A3B8;
+  }
+
+  .progress-time {
+    font-size: 11px;
+    color: #64748B;
+  }
+
+  .progress-bar-bg {
+    height: 6px;
+    background: #1E293B;
+    border-radius: 3px;
+    overflow: hidden;
+  }
+
+  .progress-bar-fill {
+    height: 100%;
+    border-radius: 3px;
+    background: linear-gradient(90deg, #3B82F6, #8B5CF6);
+    transition: width 0.5s ease;
+  }
+
+  /* ===== SLIDES ===== */
+  .slides-container {
+    width: 100%;
+    height: 100%;
+    position: relative;
+  }
+
+  .slide {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    display: flex;
+    flex-direction: column;
+    padding: 90px 28px 110px;
+    opacity: 0;
+    transform: translateX(80px);
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    pointer-events: none;
+    overflow-y: auto;
+  }
+
+  .slide.active {
+    opacity: 1;
+    transform: translateX(0);
+    pointer-events: all;
+  }
+
+  .slide.exit-left {
+    opacity: 0;
+    transform: translateX(-80px);
+  }
+
+  /* ===== STEP HEADER ===== */
+  .step-emoji {
+    font-size: 42px;
+    margin-bottom: 12px;
+  }
+
+  .step-title {
+    font-size: 24px;
+    font-weight: 800;
+    line-height: 1.2;
+    margin-bottom: 6px;
+  }
+
+  .step-subtitle {
+    font-size: 14px;
+    color: #94A3B8;
+    line-height: 1.5;
+    margin-bottom: 24px;
+  }
+
+  .step-subtitle strong {
+    color: #F8FAFC;
+  }
+
+  /* ===== PROFILE TYPE GRID ===== */
+  .profile-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+
+  .profile-card {
+    background: #1E293B;
+    border: 2px solid #334155;
+    border-radius: 14px;
+    padding: 14px 8px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .profile-card:hover {
+    border-color: #475569;
+    background: #253348;
+  }
+
+  .profile-card.selected {
+    border-color: #3B82F6;
+    background: rgba(59, 130, 246, 0.1);
+    box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.3);
+  }
+
+  .profile-card .pc-emoji { font-size: 28px; margin-bottom: 6px; }
+  .profile-card .pc-label { font-size: 11px; font-weight: 600; color: #CBD5E1; line-height: 1.2; }
+
+  .profile-card.selected .pc-label { color: #60A5FA; }
+
+  /* ===== SITUATION CARDS ===== */
+  .situation-row {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+  }
+
+  .situation-chip {
+    flex: 1;
+    min-width: calc(50% - 4px);
+    background: #1E293B;
+    border: 2px solid #334155;
+    border-radius: 12px;
+    padding: 14px 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .situation-chip:hover { border-color: #475569; }
+
+  .situation-chip.selected {
+    border-color: #3B82F6;
+    background: rgba(59, 130, 246, 0.08);
+  }
+
+  .sit-icon { font-size: 22px; }
+  .sit-text { font-size: 13px; font-weight: 600; color: #CBD5E1; }
+  .situation-chip.selected .sit-text { color: #60A5FA; }
+
+  /* ===== FORM FIELD ===== */
+  .field-group {
+    margin-bottom: 18px;
+  }
+
+  .field-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #94A3B8;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .field-input {
+    width: 100%;
+    padding: 14px 16px;
+    background: #1E293B;
+    border: 2px solid #334155;
+    border-radius: 12px;
+    color: #F8FAFC;
+    font-size: 16px;
+    font-family: inherit;
+    font-weight: 600;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .field-input:focus {
+    border-color: #3B82F6;
+  }
+
+  .field-input::placeholder {
+    color: #475569;
+    font-weight: 400;
+  }
+
+  .field-hint {
+    font-size: 11px;
+    color: #64748B;
+    margin-top: 6px;
+  }
+
+  /* ===== STEPPER ===== */
+  .stepper {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    background: #1E293B;
+    border: 2px solid #334155;
+    border-radius: 14px;
+    padding: 12px 16px;
+  }
+
+  .stepper-btn {
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    border: 2px solid #475569;
+    background: transparent;
+    color: #94A3B8;
+    font-size: 20px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    font-family: inherit;
+  }
+
+  .stepper-btn:hover {
+    border-color: #3B82F6;
+    color: #60A5FA;
+  }
+
+  .stepper-value {
+    flex: 1;
+    text-align: center;
+    font-size: 28px;
+    font-weight: 800;
+  }
+
+  .stepper-label {
+    font-size: 12px;
+    color: #64748B;
+    text-align: center;
+  }
+
+  /* ===== REVENUE INPUT ===== */
+  .revenue-input-container {
+    position: relative;
+    margin-bottom: 12px;
+  }
+
+  .revenue-currency {
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 18px;
+    font-weight: 700;
+    color: #64748B;
+  }
+
+  .revenue-input {
+    width: 100%;
+    padding: 18px 50px 18px 20px;
+    background: #1E293B;
+    border: 2px solid #334155;
+    border-radius: 16px;
+    color: #4ADE80;
+    font-size: 28px;
+    font-family: inherit;
+    font-weight: 800;
+    outline: none;
+    transition: border-color 0.2s;
+    text-align: left;
+  }
+
+  .revenue-input:focus { border-color: #22C55E; }
+  .revenue-input::placeholder { color: #334155; font-weight: 400; font-size: 20px; }
+
+  .source-chips {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 12px;
+  }
+
+  .source-chip {
+    padding: 8px 14px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: 1.5px solid #334155;
+    background: #1E293B;
+    color: #94A3B8;
+  }
+
+  .source-chip.selected {
+    border-color: #22C55E;
+    background: rgba(34, 197, 94, 0.1);
+    color: #4ADE80;
+  }
+
+  /* ===== WATERFALL SLIDERS ===== */
+  .wf-slider-group {
+    margin-bottom: 14px;
+  }
+
+  .wf-slider-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
+  }
+
+  .wf-slider-label {
+    font-size: 13px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .wf-slider-value {
+    font-size: 15px;
+    font-weight: 800;
+  }
+
+  .wf-slider {
+    width: 100%;
+    height: 8px;
+    border-radius: 4px;
+    -webkit-appearance: none;
+    appearance: none;
+    outline: none;
+    cursor: pointer;
+  }
+
+  .wf-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    cursor: pointer;
+    border: 3px solid;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  }
+
+  .slider-p1 { background: linear-gradient(90deg, #3B82F6, #1E293B); }
+  .slider-p1::-webkit-slider-thumb { background: #3B82F6; border-color: #60A5FA; }
+  .slider-p2 { background: linear-gradient(90deg, #F97316, #1E293B); }
+  .slider-p2::-webkit-slider-thumb { background: #F97316; border-color: #FB923C; }
+  .slider-p3 { background: linear-gradient(90deg, #22C55E, #1E293B); }
+  .slider-p3::-webkit-slider-thumb { background: #22C55E; border-color: #4ADE80; }
+  .slider-p4 { background: linear-gradient(90deg, #EC4899, #1E293B); }
+  .slider-p4::-webkit-slider-thumb { background: #EC4899; border-color: #F472B6; }
+
+  .wf-total {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    margin-top: 16px;
+    padding: 10px;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 700;
+  }
+
+  .wf-total.valid {
+    background: rgba(34, 197, 94, 0.1);
+    color: #4ADE80;
+  }
+
+  .wf-total.invalid {
+    background: rgba(239, 68, 68, 0.1);
+    color: #F87171;
+  }
+
+  .wf-default-btn {
+    display: block;
+    margin: 8px auto 0;
+    padding: 6px 14px;
+    border: 1px solid #475569;
+    border-radius: 8px;
+    background: transparent;
+    color: #64748B;
+    font-size: 11px;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.2s;
+  }
+
+  .wf-default-btn:hover { border-color: #94A3B8; color: #94A3B8; }
+
+  /* ===== READY SCREEN ===== */
+  .ready-center {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+  }
+
+  .ready-badge {
+    width: 100px; height: 100px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, rgba(34,197,94,0.2), rgba(34,197,94,0.05));
+    border: 3px solid rgba(34,197,94,0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 48px;
+    margin-bottom: 24px;
+    animation: pop-in 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  }
+
+  @keyframes pop-in {
+    0% { transform: scale(0); }
+    100% { transform: scale(1); }
+  }
+
+  .ready-summary {
+    background: #1E293B;
+    border-radius: 16px;
+    padding: 18px;
+    width: 100%;
+    margin-top: 24px;
+    border: 1px solid #334155;
+  }
+
+  .summary-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    font-size: 13px;
+    border-bottom: 1px solid rgba(51,65,85,0.5);
+  }
+
+  .summary-row:last-child { border: none; }
+
+  .summary-label { color: #94A3B8; }
+  .summary-value { font-weight: 700; color: #F8FAFC; }
+
+  .confetti {
+    position: absolute;
+    font-size: 20px;
+    animation: confetti-fall 2s ease-out forwards;
+    pointer-events: none;
+  }
+
+  @keyframes confetti-fall {
+    0% { transform: translateY(-20px) rotate(0deg); opacity: 1; }
+    100% { transform: translateY(300px) rotate(360deg); opacity: 0; }
+  }
+
+  /* ===== NAVIGATION ===== */
+  .nav-area {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 16px 28px 36px;
+    z-index: 50;
+    background: linear-gradient(transparent, #0F172A 30%);
+  }
+
+  .nav-buttons {
+    display: flex;
+    gap: 12px;
+  }
+
+  .btn-back {
+    padding: 16px 20px;
+    border: 1px solid #475569;
+    border-radius: 14px;
+    background: transparent;
+    color: #94A3B8;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.2s;
+  }
+
+  .btn-back:hover { background: rgba(51,65,85,0.5); }
+
+  .btn-continue {
+    flex: 1;
+    padding: 16px;
+    border: none;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #3B82F6, #8B5CF6);
+    color: white;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.2s;
+    box-shadow: 0 4px 16px rgba(59, 130, 246, 0.3);
+  }
+
+  .btn-continue:hover { transform: translateY(-1px); }
+
+  .btn-continue.disabled {
+    background: #334155;
+    color: #64748B;
+    box-shadow: none;
+    cursor: not-allowed;
+  }
+
+  .btn-dashboard {
+    width: 100%;
+    padding: 18px;
+    border: none;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #22C55E, #16A34A);
+    color: white;
+    font-size: 17px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+    box-shadow: 0 4px 16px rgba(34, 197, 94, 0.3);
+    transition: all 0.2s;
+  }
+
+  .btn-dashboard:hover { transform: translateY(-1px); }
+
+  /* ===== RESPONSIVE ===== */
+  @media (max-width: 420px) {
+    .phone-frame { width: 100vw; height: 100vh; border-radius: 0; border: none; }
+  }
+
+  .preview-label {
+    position: fixed;
+    top: 16px;
+    left: 16px;
+    font-family: 'Inter', sans-serif;
+    font-size: 11px;
+    color: #64748B;
+    background: #1E293B;
+    padding: 6px 12px;
+    border-radius: 8px;
+    border: 1px solid #334155;
+    z-index: 1000;
+  }
+
+  @media (max-width: 420px) { .preview-label { display: none; } }
+
+  /* Toggle switch */
+  .toggle-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 16px;
+    background: #1E293B;
+    border-radius: 12px;
+    border: 1px solid #334155;
+    margin-bottom: 10px;
+  }
+
+  .toggle-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 14px;
+    font-weight: 500;
+  }
+
+  .toggle-info .ti-icon { font-size: 20px; }
+
+  .tip-box {
+    background: rgba(59, 130, 246, 0.08);
+    border: 1px solid rgba(59, 130, 246, 0.2);
+    border-radius: 12px;
+    padding: 12px 14px;
+    font-size: 12px;
+    color: #94A3B8;
+    line-height: 1.5;
+    margin-top: 16px;
+    display: flex;
+    gap: 8px;
+  }
+
+  .tip-box .tip-icon { font-size: 16px; flex-shrink: 0; }
+  .tip-box strong { color: #60A5FA; }
+</style>
+</head>
+<body>
+
+<div class="preview-label">LELE PFM — Setup Wizard (après onboarding)</div>
+
+<div class="phone-frame">
+  <div class="notch"></div>
+
+  <!-- Progress bar -->
+  <div class="progress-area">
+    <div class="progress-header">
+      <div class="progress-step-label" id="progressLabel">Etape 1/4</div>
+      <div class="progress-time" id="progressTime">~2 min</div>
+    </div>
+    <div class="progress-bar-bg">
+      <div class="progress-bar-fill" id="progressFill" style="width: 25%;"></div>
+    </div>
+  </div>
+
+  <div class="slides-container" id="slidesContainer">
+
+    <!-- ===== STEP 1: QUI ES-TU ? ===== -->
+    <div class="slide active" data-index="0">
+      <div class="step-emoji">👋</div>
+      <div class="step-title">Dis-nous qui tu es !</div>
+      <div class="step-subtitle">
+        Pas besoin de tout détailler. <strong>Juste l'essentiel</strong> pour qu'on adapte l'app à ta vie.
+      </div>
+
+      <div style="font-size:12px;font-weight:600;color:#64748B;margin-bottom:10px;text-transform:uppercase;letter-spacing:1px;">
+        Ta situation pro
+      </div>
+      <div class="profile-grid" id="profileGrid">
+        <div class="profile-card" onclick="selectProfile(this, 'Salarié')">
+          <div class="pc-emoji">💼</div>
+          <div class="pc-label">Salarié</div>
+        </div>
+        <div class="profile-card" onclick="selectProfile(this, 'Freelance')">
+          <div class="pc-emoji">🎯</div>
+          <div class="pc-label">Freelance</div>
+        </div>
+        <div class="profile-card" onclick="selectProfile(this, 'Entrepreneur')">
+          <div class="pc-emoji">🚀</div>
+          <div class="pc-label">Entrepreneur</div>
+        </div>
+        <div class="profile-card" onclick="selectProfile(this, 'Fonctionnaire')">
+          <div class="pc-emoji">🏛️</div>
+          <div class="pc-label">Fonction&shy;naire</div>
+        </div>
+        <div class="profile-card" onclick="selectProfile(this, 'Étudiant')">
+          <div class="pc-emoji">🎓</div>
+          <div class="pc-label">Étudiant</div>
+        </div>
+        <div class="profile-card" onclick="selectProfile(this, 'Retraité')">
+          <div class="pc-emoji">🌴</div>
+          <div class="pc-label">Retraité</div>
+        </div>
+        <div class="profile-card" onclick="selectProfile(this, 'Intérimaire')">
+          <div class="pc-emoji">⏱️</div>
+          <div class="pc-label">Intérimaire</div>
+        </div>
+        <div class="profile-card" onclick="selectProfile(this, 'Artisan')">
+          <div class="pc-emoji">🔧</div>
+          <div class="pc-label">Artisan</div>
+        </div>
+        <div class="profile-card" onclick="selectProfile(this, 'Autre')">
+          <div class="pc-emoji">✨</div>
+          <div class="pc-label">Autre</div>
+        </div>
+      </div>
+
+      <div class="tip-box">
+        <span class="tip-icon">💡</span>
+        <span>On te pose cette question pour <strong>adapter les conseils</strong> à ta réalité. Un freelance et un salarié n'ont pas les mêmes défis !</span>
+      </div>
+    </div>
+
+    <!-- ===== STEP 2: TA VIE ===== -->
+    <div class="slide" data-index="1">
+      <div class="step-emoji">🏠</div>
+      <div class="step-title">Et dans la vie ?</div>
+      <div class="step-subtitle">
+        Pour que nos calculs collent à <strong>ta vraie vie</strong>, pas à une moyenne nationale.
+      </div>
+
+      <div style="font-size:12px;font-weight:600;color:#64748B;margin-bottom:10px;text-transform:uppercase;letter-spacing:1px;">
+        Situation familiale
+      </div>
+      <div class="situation-row">
+        <div class="situation-chip" onclick="selectSituation(this)">
+          <span class="sit-icon">🙋</span>
+          <span class="sit-text">Célibataire</span>
+        </div>
+        <div class="situation-chip" onclick="selectSituation(this)">
+          <span class="sit-icon">💑</span>
+          <span class="sit-text">En couple</span>
+        </div>
+        <div class="situation-chip" onclick="selectSituation(this)">
+          <span class="sit-icon">👨‍👩‍👧</span>
+          <span class="sit-text">Famille</span>
+        </div>
+        <div class="situation-chip" onclick="selectSituation(this)">
+          <span class="sit-icon">🏠</span>
+          <span class="sit-text">Colocation</span>
+        </div>
+      </div>
+
+      <div style="font-size:12px;font-weight:600;color:#64748B;margin-bottom:10px;text-transform:uppercase;letter-spacing:1px;">
+        Personnes à ta charge
+      </div>
+      <div class="field-group">
+        <div class="stepper">
+          <button class="stepper-btn" onclick="updateStepper(-1)">−</button>
+          <div>
+            <div class="stepper-value" id="stepperValue">0</div>
+            <div class="stepper-label">personne(s)</div>
+          </div>
+          <button class="stepper-btn" onclick="updateStepper(1)">+</button>
+        </div>
+      </div>
+
+      <div class="field-group">
+        <div class="field-label">🎂 Ton âge</div>
+        <input type="number" class="field-input" placeholder="Ex: 32" min="16" max="99" style="width:120px;">
+      </div>
+
+      <div class="tip-box">
+        <span class="tip-icon">🤫</span>
+        <span>Tout reste <strong>100% privé</strong>. Tes données ne quittent jamais ton téléphone. Promis.</span>
+      </div>
+    </div>
+
+    <!-- ===== STEP 3: REVENUS ===== -->
+    <div class="slide" data-index="2">
+      <div class="step-emoji">💰</div>
+      <div class="step-title">Combien tu gagnes ?</div>
+      <div class="step-subtitle">
+        Pas de jugement. Que tu gagnes 800€ ou 8000€, <strong>on t'aide pareil</strong>.
+      </div>
+
+      <div style="font-size:12px;font-weight:600;color:#64748B;margin-bottom:10px;text-transform:uppercase;letter-spacing:1px;">
+        Revenu mensuel net
+      </div>
+      <div class="revenue-input-container">
+        <input type="text" class="revenue-input" placeholder="2 400" id="revenueInput" oninput="updateRevenue()">
+        <span class="revenue-currency">€</span>
+      </div>
+
+      <div style="font-size:12px;font-weight:600;color:#64748B;margin:18px 0 10px;text-transform:uppercase;letter-spacing:1px;">
+        D'où ça vient ? <span style="font-weight:400;text-transform:none;">(choix multiples)</span>
+      </div>
+      <div class="source-chips">
+        <div class="source-chip" onclick="toggleSource(this)">💼 Salaire</div>
+        <div class="source-chip" onclick="toggleSource(this)">🎯 Freelance</div>
+        <div class="source-chip" onclick="toggleSource(this)">🏠 Loyers</div>
+        <div class="source-chip" onclick="toggleSource(this)">📈 Investissements</div>
+        <div class="source-chip" onclick="toggleSource(this)">🎁 Aides / Allocations</div>
+        <div class="source-chip" onclick="toggleSource(this)">💡 Autre</div>
+      </div>
+
+      <div class="tip-box" style="margin-top:20px;">
+        <span class="tip-icon">🎯</span>
+        <span>Un montant approximatif suffit ! Tu pourras <strong>affiner plus tard</strong> dans les paramètres.</span>
+      </div>
+    </div>
+
+    <!-- ===== STEP 4: PRIORITÉS ===== -->
+    <div class="slide" data-index="3">
+      <div class="step-emoji">🎯</div>
+      <div class="step-title">Tes priorités d'épargne</div>
+      <div class="step-subtitle">
+        Quand tu économises, <strong>où doit aller l'argent en premier ?</strong> Ajuste les curseurs à ta sauce.
+      </div>
+
+      <div class="wf-slider-group">
+        <div class="wf-slider-header">
+          <div class="wf-slider-label" style="color:#60A5FA;">🛡️ Mon coussin de sécurité</div>
+          <div class="wf-slider-value" style="color:#60A5FA;" id="val-p1">30%</div>
+        </div>
+        <input type="range" class="wf-slider slider-p1" min="0" max="100" value="30" oninput="updateWaterfall()">
+      </div>
+
+      <div class="wf-slider-group">
+        <div class="wf-slider-header">
+          <div class="wf-slider-label" style="color:#FB923C;">💳 Rembourser mes dettes</div>
+          <div class="wf-slider-value" style="color:#FB923C;" id="val-p2">35%</div>
+        </div>
+        <input type="range" class="wf-slider slider-p2" min="0" max="100" value="35" oninput="updateWaterfall()">
+      </div>
+
+      <div class="wf-slider-group">
+        <div class="wf-slider-header">
+          <div class="wf-slider-label" style="color:#4ADE80;">📈 Préparer mon futur</div>
+          <div class="wf-slider-value" style="color:#4ADE80;" id="val-p3">20%</div>
+        </div>
+        <input type="range" class="wf-slider slider-p3" min="0" max="100" value="20" oninput="updateWaterfall()">
+      </div>
+
+      <div class="wf-slider-group">
+        <div class="wf-slider-header">
+          <div class="wf-slider-label" style="color:#F472B6;">🎉 Me faire plaisir</div>
+          <div class="wf-slider-value" style="color:#F472B6;" id="val-p4">15%</div>
+        </div>
+        <input type="range" class="wf-slider slider-p4" min="0" max="100" value="15" oninput="updateWaterfall()">
+      </div>
+
+      <div class="wf-total valid" id="wfTotal">✓ Total : 100% — Parfait !</div>
+      <button class="wf-default-btn" onclick="resetWaterfall()">Remettre les valeurs par défaut</button>
+
+      <div class="tip-box" style="margin-top:12px;">
+        <span class="tip-icon">💡</span>
+        <span>Pas de dettes ? Mets ce curseur à 0% et <strong>répartis le reste</strong> comme tu veux !</span>
+      </div>
+    </div>
+
+    <!-- ===== STEP 5: READY ! ===== -->
+    <div class="slide" data-index="4">
+      <div class="ready-center">
+        <div class="ready-badge" id="readyBadge">🎉</div>
+        <div class="step-title" style="font-size:26px;">Tout est prêt !</div>
+        <div class="step-subtitle" style="margin-bottom:0;">
+          Ton espace financier est configuré.<br>
+          <strong>Bienvenue chez toi.</strong>
+        </div>
+
+        <div class="ready-summary" id="readySummary">
+          <div class="summary-row">
+            <span class="summary-label">Profil</span>
+            <span class="summary-value" id="sum-profile">Salarié 💼</span>
+          </div>
+          <div class="summary-row">
+            <span class="summary-label">Situation</span>
+            <span class="summary-value" id="sum-situation">Célibataire</span>
+          </div>
+          <div class="summary-row">
+            <span class="summary-label">Revenu mensuel</span>
+            <span class="summary-value" id="sum-revenue" style="color:#4ADE80;">2 400€</span>
+          </div>
+          <div class="summary-row">
+            <span class="summary-label">Priorité n°1</span>
+            <span class="summary-value" id="sum-priority" style="color:#60A5FA;">🛡️ Coussin 30%</span>
+          </div>
+          <div class="summary-row">
+            <span class="summary-label">Première semaine</span>
+            <span class="summary-value" style="color:#A78BFA;">Sem. 07 — maintenant !</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Navigation -->
+  <div class="nav-area" id="navArea">
+    <div class="nav-buttons" id="navButtons">
+      <button class="btn-continue" onclick="next()">C'est parti ! →</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const TOTAL_STEPS = 5;
+  let current = 0;
+  let stepperVal = 0;
+  let selectedProfile = '';
+
+  function updateProgress() {
+    const pct = ((current + 1) / TOTAL_STEPS) * 100;
+    document.getElementById('progressFill').style.width = pct + '%';
+    document.getElementById('progressLabel').textContent = current < 4 ? `Étape ${current + 1}/4` : 'Terminé !';
+    const times = ['~2 min', '~1 min 30', '~1 min', '~30 sec', ''];
+    document.getElementById('progressTime').textContent = times[current];
+  }
+
+  function updateNav() {
+    const nav = document.getElementById('navButtons');
+    if (current === 0) {
+      nav.innerHTML = `<button class="btn-continue" onclick="next()">C'est parti ! →</button>`;
+    } else if (current === TOTAL_STEPS - 1) {
+      nav.innerHTML = `<button class="btn-dashboard" onclick="goToDashboard()">Voir mon tableau de bord 🏠</button>`;
+    } else {
+      nav.innerHTML = `
+        <button class="btn-back" onclick="prev()">←</button>
+        <button class="btn-continue" onclick="next()">Continuer →</button>
+      `;
+    }
+  }
+
+  function goTo(index) {
+    const slides = document.querySelectorAll('.slide');
+    slides.forEach((s, i) => {
+      s.classList.remove('active', 'exit-left');
+      if (i < index) s.classList.add('exit-left');
+    });
+    slides[index].classList.add('active');
+    current = index;
+    updateProgress();
+    updateNav();
+
+    if (index === TOTAL_STEPS - 1) {
+      setTimeout(spawnConfetti, 300);
+    }
+  }
+
+  function next() {
+    if (current < TOTAL_STEPS - 1) goTo(current + 1);
+  }
+
+  function prev() {
+    if (current > 0) goTo(current - 1);
+  }
+
+  function selectProfile(el, name) {
+    document.querySelectorAll('.profile-card').forEach(c => c.classList.remove('selected'));
+    el.classList.add('selected');
+    selectedProfile = name;
+  }
+
+  function selectSituation(el) {
+    document.querySelectorAll('.situation-chip').forEach(c => c.classList.remove('selected'));
+    el.classList.add('selected');
+  }
+
+  function updateStepper(delta) {
+    stepperVal = Math.max(0, Math.min(10, stepperVal + delta));
+    document.getElementById('stepperValue').textContent = stepperVal;
+    const label = document.querySelector('.stepper-label');
+    label.textContent = stepperVal <= 1 ? 'personne' : 'personnes';
+  }
+
+  function toggleSource(el) {
+    el.classList.toggle('selected');
+  }
+
+  function updateRevenue() {
+    // Just visual feedback
+  }
+
+  function updateWaterfall() {
+    const sliders = document.querySelectorAll('.wf-slider');
+    const vals = Array.from(sliders).map(s => parseInt(s.value));
+    document.getElementById('val-p1').textContent = vals[0] + '%';
+    document.getElementById('val-p2').textContent = vals[1] + '%';
+    document.getElementById('val-p3').textContent = vals[2] + '%';
+    document.getElementById('val-p4').textContent = vals[3] + '%';
+
+    const total = vals.reduce((a, b) => a + b, 0);
+    const totalEl = document.getElementById('wfTotal');
+    if (Math.abs(total - 100) < 2) {
+      totalEl.className = 'wf-total valid';
+      totalEl.textContent = '✓ Total : ' + total + '% — Parfait !';
+    } else {
+      totalEl.className = 'wf-total invalid';
+      totalEl.textContent = '⚠ Total : ' + total + '% — Il faut arriver à 100%';
+    }
+
+    // Update slider gradients
+    sliders.forEach(s => {
+      const pct = s.value;
+      const color = getComputedStyle(s).getPropertyValue('background').includes('#3B82F6') ? '#3B82F6' : '#3B82F6';
+    });
+  }
+
+  function resetWaterfall() {
+    const defaults = [30, 35, 20, 15];
+    document.querySelectorAll('.wf-slider').forEach((s, i) => {
+      s.value = defaults[i];
+    });
+    updateWaterfall();
+  }
+
+  function spawnConfetti() {
+    const emojis = ['🎉', '✨', '🌟', '💰', '🎊', '🏆', '💎', '🔥'];
+    const container = document.querySelector('.slides-container');
+    for (let i = 0; i < 12; i++) {
+      const el = document.createElement('div');
+      el.className = 'confetti';
+      el.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+      el.style.left = (10 + Math.random() * 80) + '%';
+      el.style.top = '10%';
+      el.style.animationDelay = (Math.random() * 0.8) + 's';
+      el.style.animationDuration = (1.5 + Math.random() * 1) + 's';
+      container.appendChild(el);
+      setTimeout(() => el.remove(), 3000);
+    }
+  }
+
+  function goToDashboard() {
+    alert('🏠 Direction le Dashboard !\n\n(En production : router.replace("/(tabs)/"))');
+  }
+
+  // Keyboard
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight') next();
+    if (e.key === 'ArrowLeft') prev();
+  });
+
+  // Init
+  updateProgress();
+  updateNav();
+</script>
+</body>
+</html>

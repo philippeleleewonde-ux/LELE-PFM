@@ -25,6 +25,7 @@ import {
   Info,
   Shuffle,
   Trash2,
+  RotateCcw,
   Briefcase,
   Edit3,
 } from 'lucide-react-native';
@@ -87,7 +88,7 @@ function SettingsRow({ icon, label, value, onPress, rightElement, colors, isLast
 export default function SettingsScreen() {
   const theme = useTheme();
   const colors = theme.colors;
-  const { t } = useTranslation();
+  const { t } = useTranslation(['common', 'app']);
   const user = useAuthStore((s) => s.user);
   const biometricEnabled = useAppStore((s) => s.biometricEnabled);
   const setBiometricEnabled = useAppStore((s) => s.setBiometricEnabled);
@@ -101,6 +102,8 @@ export default function SettingsScreen() {
   const investorProfile = useInvestmentStore((s) => s.investorProfile);
   const clearInvestorProfile = useInvestmentStore((s) => s.clearInvestorProfile);
   const updateFormData = useWizardStore((s) => s.updateFormData);
+  const resetWizard = useWizardStore((s) => s.resetWizard);
+  const setSetupComplete = useAppStore((s) => s.setSetupComplete);
   const { calculate } = useEngineCalculation();
   const clearTransactions = useTransactionStore((s) => s.clearTransactions);
   const clearRecords = usePerformanceStore((s) => s.clearRecords);
@@ -137,16 +140,16 @@ export default function SettingsScreen() {
 
       // 4. Success
       if (Platform.OS === 'web') {
-        window.alert('Demo complete generee avec 10 semaines de donnees realistes.');
+        window.alert(t('app:settings.demoSuccess'));
       } else {
-        Alert.alert('Fait', 'Demo complete generee avec 10 semaines de donnees realistes.');
+        Alert.alert(t('app:settings.done'), t('app:settings.demoSuccess'));
       }
     } catch (err) {
-      const msg = err instanceof Error ? err.message : 'Erreur inconnue';
+      const msg = err instanceof Error ? err.message : t('app:settings.unknownError');
       if (Platform.OS === 'web') {
-        window.alert('Erreur: ' + msg);
+        window.alert(t('app:settings.error') + ': ' + msg);
       } else {
-        Alert.alert('Erreur', msg);
+        Alert.alert(t('app:settings.error'), msg);
       }
     } finally {
       setIsGenerating(false);
@@ -163,23 +166,56 @@ export default function SettingsScreen() {
       clearRecords();
       clearInvestmentRecords();
       if (Platform.OS === 'web') {
-        window.alert('Toutes les données de tracking ont été supprimées.');
+        window.alert(t('app:settings.trackingDeletedSuccess'));
       } else {
-        Alert.alert('Fait', 'Toutes les données de tracking ont été supprimées.');
+        Alert.alert(t('app:settings.done'), t('app:settings.trackingDeletedSuccess'));
       }
     };
 
     if (Platform.OS === 'web') {
-      if (window.confirm('Supprimer le tracking ?\nToutes les dépenses, rentrées, achats impulsifs, objectifs d\'épargne, défis et performances seront supprimés.')) {
+      if (window.confirm(t('app:settings.deleteTrackingConfirmTitle') + '\n' + t('app:settings.deleteTrackingConfirmMessage'))) {
         doDelete();
       }
     } else {
       Alert.alert(
-        'Supprimer le tracking',
-        'Toutes les dépenses, rentrées, achats impulsifs, objectifs d\'épargne, défis et performances seront supprimés. Cette action est irréversible.',
+        t('app:settings.deleteTrackingConfirmTitle'),
+        t('app:settings.deleteTrackingConfirmMessage'),
         [
-          { text: 'Annuler', style: 'cancel' },
-          { text: 'Supprimer', style: 'destructive', onPress: doDelete },
+          { text: t('app:settings.cancel'), style: 'cancel' },
+          { text: t('app:settings.delete'), style: 'destructive', onPress: doDelete },
+        ]
+      );
+    }
+  };
+
+  const handleRestartWizard = () => {
+    const doRestart = () => {
+      // Clear all stores
+      clearTransactions();
+      clearIncomes();
+      clearPurchases();
+      clearGoals();
+      clearChallenges();
+      clearRecords();
+      clearInvestmentRecords();
+      // Clear engine + wizard
+      useEngineStore.getState().clearEngineOutput();
+      resetWizard();
+      // Reset setup flag → triggers redirect to /setup-wizard in _layout.tsx
+      setSetupComplete(false);
+    };
+
+    if (Platform.OS === 'web') {
+      if (window.confirm(t('app:settings.restartWebMessage'))) {
+        doRestart();
+      }
+    } else {
+      Alert.alert(
+        t('app:settings.restartTitle'),
+        t('app:settings.restartMessage'),
+        [
+          { text: t('app:settings.cancel'), style: 'cancel' },
+          { text: t('app:settings.restart'), style: 'destructive', onPress: doRestart },
         ]
       );
     }
@@ -313,7 +349,7 @@ export default function SettingsScreen() {
       {/* View Mode Section */}
       <View style={styles.section}>
         <Text style={[styles.sectionTitle, { color: colors.textSecondary, paddingHorizontal: theme.spacing.lg }]}>
-          Mode de vue
+          {t('app:settings.viewMode')}
         </Text>
         <View style={{ marginHorizontal: 16 }}>
           <ViewModeSelector />
@@ -324,40 +360,32 @@ export default function SettingsScreen() {
       {isInvestor && (
         <View style={styles.section}>
           <Text style={[styles.sectionTitle, { color: colors.textSecondary, paddingHorizontal: theme.spacing.lg }]}>
-            Profil investisseur
+            {t('app:settings.investorProfile')}
           </Text>
           <View style={[styles.sectionCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
             {investorProfile ? (
               <>
                 <SettingsRow
                   icon={<Briefcase size={20} color="#FBBF24" />}
-                  label="Risque"
-                  value={
-                    investorProfile.riskTolerance === 'conservative' ? 'Prudent'
-                    : investorProfile.riskTolerance === 'moderate' ? 'Équilibré'
-                    : 'Dynamique'
-                  }
+                  label={t('app:settings.risk')}
+                  value={t(`app:settings.riskLevels.${investorProfile.riskTolerance}`)}
                   colors={colors}
                 />
                 <SettingsRow
                   icon={<Briefcase size={20} color="#A78BFA" />}
-                  label="Horizon"
-                  value={
-                    investorProfile.horizon === 'short' ? 'Court terme'
-                    : investorProfile.horizon === 'medium' ? 'Moyen terme'
-                    : 'Long terme'
-                  }
+                  label={t('app:settings.horizon')}
+                  value={t(`app:settings.horizonLevels.${investorProfile.horizon}`)}
                   colors={colors}
                 />
                 <SettingsRow
                   icon={<Briefcase size={20} color="#4ADE80" />}
-                  label="Part investissement"
+                  label={t('app:settings.investmentShare')}
                   value={`${investorProfile.investmentRatio}%`}
                   colors={colors}
                 />
                 <SettingsRow
                   icon={<Edit3 size={20} color={colors.primary[600]} />}
-                  label="Modifier mon profil"
+                  label={t('app:settings.editProfile')}
                   onPress={() => setShowInvestorSheet(true)}
                   colors={colors}
                   isLast
@@ -366,7 +394,7 @@ export default function SettingsScreen() {
             ) : (
               <SettingsRow
                 icon={<Briefcase size={20} color="#FBBF24" />}
-                label="Configurer mon profil"
+                label={t('app:settings.configureProfile')}
                 onPress={() => setShowInvestorSheet(true)}
                 colors={colors}
                 isLast
@@ -395,7 +423,7 @@ export default function SettingsScreen() {
       {/* Dev Section */}
       <View style={styles.section}>
         <Text style={[styles.sectionTitle, { color: colors.textSecondary, paddingHorizontal: theme.spacing.lg }]}>
-          Developpement
+          {t('app:settings.development')}
         </Text>
         <View style={[styles.sectionCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
           <TouchableOpacity
@@ -411,28 +439,43 @@ export default function SettingsScreen() {
                 <Shuffle size={20} color={colors.primary[600]} />
               )}
               <Text style={[styles.settingsRowLabel, { color: colors.text }]}>
-                {isGenerating ? 'Generation en cours...' : 'Donnees de demo'}
+                {isGenerating ? t('app:settings.generating') : t('app:settings.demoData')}
               </Text>
             </View>
             {!isGenerating && (
               <Text style={[styles.settingsRowValue, { color: colors.textTertiary }]}>
-                Regenerer
+                {t('app:settings.regenerate')}
               </Text>
             )}
           </TouchableOpacity>
           <TouchableOpacity
-            style={[styles.demoRow]}
+            style={[styles.demoRow, { borderBottomWidth: 1, borderBottomColor: colors.border }]}
             onPress={handleClearTracking}
             activeOpacity={0.7}
           >
             <View style={styles.settingsRowLeft}>
               <Trash2 size={20} color={colors.danger[600]} />
               <Text style={[styles.settingsRowLabel, { color: colors.danger[600] }]}>
-                Supprimer le tracking
+                {t('app:settings.deleteTracking')}
               </Text>
             </View>
             <Text style={[styles.settingsRowValue, { color: colors.textTertiary }]}>
-              Tout le suivi
+              {t('app:settings.allTracking')}
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.demoRow]}
+            onPress={handleRestartWizard}
+            activeOpacity={0.7}
+          >
+            <View style={styles.settingsRowLeft}>
+              <RotateCcw size={20} color={colors.danger[600]} />
+              <Text style={[styles.settingsRowLabel, { color: colors.danger[600] }]}>
+                {t('app:settings.restartWizard')}
+              </Text>
+            </View>
+            <Text style={[styles.settingsRowValue, { color: colors.textTertiary }]}>
+              {t('app:settings.clearAll')}
             </Text>
           </TouchableOpacity>
         </View>

@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   View,
   Text,
@@ -14,16 +15,14 @@ import { WZ, GlassCard, TipBox, FadeInView, neonGlow } from '../shared';
 
 interface EngagementOption {
   key: string;
-  label: string;
-  description: string;
   icon: string;
 }
 
 const ENGAGEMENT_LEVELS: EngagementOption[] = [
-  { key: 'beginner', label: 'Débutant', description: 'Je commence à peine', icon: '🌱' },
-  { key: 'curious', label: 'Curieux', description: "Je m'intéresse au sujet", icon: '🔍' },
-  { key: 'active', label: 'Actif', description: 'Je gère déjà mes finances', icon: '📊' },
-  { key: 'expert', label: 'Expert', description: 'Je maîtrise mes finances', icon: '🏆' },
+  { key: 'beginner', icon: '🌱' },
+  { key: 'curious', icon: '🔍' },
+  { key: 'active', icon: '📊' },
+  { key: 'expert', icon: '🏆' },
 ];
 
 // ─── Step3History Component ───
@@ -33,6 +32,7 @@ interface Step3HistoryProps {
 }
 
 export default function Step3History({ isActive }: Step3HistoryProps) {
+  const { t } = useTranslation('wizard');
   const { formData, updateFormData } = useWizardStore();
 
   // ─── Auto-fill from Step 2 income/expenses ───
@@ -161,9 +161,9 @@ export default function Step3History({ isActive }: Step3HistoryProps) {
     >
       {/* ─── Financial History Section ─── */}
       <FadeInView active={isActive} delay={0}>
-        <Text style={styles.sectionTitle}>Historique financier</Text>
+        <Text style={styles.sectionTitle}>{t('step3.title')}</Text>
         <Text style={styles.sectionSubtitle}>
-          Renseignez vos revenus et dépenses des 5 dernières années
+          {t('step3.subtitle')}
         </Text>
       </FadeInView>
 
@@ -172,8 +172,7 @@ export default function Step3History({ isActive }: Step3HistoryProps) {
           <View style={styles.autoFillBanner}>
             <Text style={styles.autoFillIcon}>📋</Text>
             <Text style={styles.autoFillText}>
-              Pré-rempli à partir de vos revenus et charges.{'\n'}
-              Corrigez avec vos données réelles si vous le souhaitez.
+              {t('step3.autoFillBanner')}
             </Text>
           </View>
         </FadeInView>
@@ -183,9 +182,9 @@ export default function Step3History({ isActive }: Step3HistoryProps) {
         <GlassCard style={styles.historyCard}>
           {/* Header row */}
           <View style={styles.headerRow}>
-            <Text style={[styles.headerLabel, styles.yearHeader]}>Année</Text>
-            <Text style={[styles.headerLabel, styles.fieldHeader]}>Revenus</Text>
-            <Text style={[styles.headerLabel, styles.fieldHeader]}>Dépenses</Text>
+            <Text style={[styles.headerLabel, styles.yearHeader]}>{t('step3.yearHeader')}</Text>
+            <Text style={[styles.headerLabel, styles.fieldHeader]}>{t('step3.incomeHeader')}</Text>
+            <Text style={[styles.headerLabel, styles.fieldHeader]}>{t('step3.expensesHeader')}</Text>
           </View>
 
           {/* Year rows */}
@@ -223,10 +222,10 @@ export default function Step3History({ isActive }: Step3HistoryProps) {
       {trendAnalysis && (
         <FadeInView active={isActive} delay={250}>
           <GlassCard style={styles.trendCard}>
-            <Text style={styles.trendTitle}>Analyse de tendance</Text>
+            <Text style={styles.trendTitle}>{t('step3.trendTitle')}</Text>
             <View style={styles.trendGrid}>
               <View style={styles.trendItem}>
-                <Text style={styles.trendLabel}>Croissance revenus</Text>
+                <Text style={styles.trendLabel}>{t('step3.revenueGrowth')}</Text>
                 <Text style={[
                   styles.trendValue,
                   { color: trendAnalysis.avgRevGrowth >= 0 ? WZ.green : '#EF4444' },
@@ -235,7 +234,7 @@ export default function Step3History({ isActive }: Step3HistoryProps) {
                 </Text>
               </View>
               <View style={styles.trendItem}>
-                <Text style={styles.trendLabel}>Croissance dépenses</Text>
+                <Text style={styles.trendLabel}>{t('step3.expenseGrowth')}</Text>
                 <Text style={[
                   styles.trendValue,
                   { color: trendAnalysis.avgExpGrowth <= 0 ? WZ.green : WZ.orange },
@@ -244,7 +243,7 @@ export default function Step3History({ isActive }: Step3HistoryProps) {
                 </Text>
               </View>
               <View style={styles.trendItemFull}>
-                <Text style={styles.trendLabel}>Ratio dépenses / revenus</Text>
+                <Text style={styles.trendLabel}>{t('step3.expenseToIncomeRatio')}</Text>
                 <View style={styles.trendRatioRow}>
                   <Text style={[
                     styles.trendRatioValue,
@@ -279,10 +278,10 @@ export default function Step3History({ isActive }: Step3HistoryProps) {
                       },
                     ]}>
                       {trendAnalysis.coherenceRatio < 85
-                        ? 'Sain'
+                        ? t('step3.healthy')
                         : trendAnalysis.coherenceRatio <= 100
-                          ? 'Attention'
-                          : 'Critique'}
+                          ? t('step3.caution')
+                          : t('step3.critical')}
                     </Text>
                   </View>
                 </View>
@@ -294,7 +293,7 @@ export default function Step3History({ isActive }: Step3HistoryProps) {
 
       <FadeInView active={isActive} delay={300}>
         <TipBox
-          text="5 ans d'historique permettent de calculer votre tendance financière, votre volatilité et votre capacité d'épargne (norme Bâle III)."
+          text={t('step3.tip')}
           style={styles.tipBox}
         />
       </FadeInView>
@@ -302,10 +301,10 @@ export default function Step3History({ isActive }: Step3HistoryProps) {
       {/* ─── Engagement Level Section ─── */}
       <FadeInView active={isActive} delay={400}>
         <Text style={[styles.sectionTitle, styles.engagementTitle]}>
-          Niveau d'engagement
+          {t('step3.engagementTitle')}
         </Text>
         <Text style={styles.sectionSubtitle}>
-          Comment évaluez-vous votre gestion financière ?
+          {t('step3.engagementSubtitle')}
         </Text>
       </FadeInView>
 
@@ -330,7 +329,7 @@ export default function Step3History({ isActive }: Step3HistoryProps) {
                     isSelected && styles.engagementLabelSelected,
                   ]}
                 >
-                  {level.label}
+                  {t('step3.engagementLevels.' + level.key)}
                 </Text>
                 <Text
                   style={[
@@ -338,7 +337,7 @@ export default function Step3History({ isActive }: Step3HistoryProps) {
                     isSelected && styles.engagementDescSelected,
                   ]}
                 >
-                  {level.description}
+                  {t('step3.engagementLevels.' + level.key + 'Desc')}
                 </Text>
               </Pressable>
             );

@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { PF, PerfGlassCard } from './shared';
 import { useInvestmentStore } from '@/stores/investment-store';
 import { analyzePortfolioKelly, PositionSizeResult } from '@/domain/calculators/kelly-criterion';
@@ -12,15 +13,16 @@ function getStatusColor(status: PositionSizeResult['status']): string {
   }
 }
 
-function getStatusLabel(status: PositionSizeResult['status']): string {
+function getStatusLabelKey(status: PositionSizeResult['status']): string {
   switch (status) {
-    case 'optimal': return '\u2713 Optimal';
-    case 'overweight': return '\u2191 Surpondere';
-    case 'underweight': return '\u2193 Sous-pondere';
+    case 'optimal': return 'kelly.optimal';
+    case 'overweight': return 'kelly.overweight';
+    case 'underweight': return 'kelly.underweight';
   }
 }
 
 export function SectionQ_KellyCriterion() {
+  const { t } = useTranslation('performance');
   const allocations = useInvestmentStore((s) => s.allocations);
   const investorProfile = useInvestmentStore((s) => s.investorProfile);
 
@@ -33,7 +35,7 @@ export function SectionQ_KellyCriterion() {
     return (
       <PerfGlassCard>
         <Text style={styles.emptyText}>
-          Configurez votre profil investisseur et vos allocations pour voir le dimensionnement Kelly.
+          {t('kelly.configureProfile')}
         </Text>
       </PerfGlassCard>
     );
@@ -46,7 +48,7 @@ export function SectionQ_KellyCriterion() {
     <View style={styles.container}>
       {/* Position sizing table */}
       <PerfGlassCard style={styles.section}>
-        <Text style={styles.sectionTitle}>Dimensionnement par position</Text>
+        <Text style={styles.sectionTitle}>{t('kelly.positionSizing')}</Text>
         <View style={styles.positionList}>
           {positions.map((pos) => {
             const statusColor = getStatusColor(pos.status);
@@ -60,7 +62,7 @@ export function SectionQ_KellyCriterion() {
                   <Text style={styles.positionName} numberOfLines={1}>{pos.assetName}</Text>
                   <View style={[styles.statusBadge, { backgroundColor: statusColor + '20' }]}>
                     <Text style={[styles.statusText, { color: statusColor }]}>
-                      {getStatusLabel(pos.status)}
+                      {t(getStatusLabelKey(pos.status))}
                     </Text>
                   </View>
                 </View>
@@ -83,13 +85,13 @@ export function SectionQ_KellyCriterion() {
                 {/* Comparison bars */}
                 <View style={styles.barContainer}>
                   <View style={styles.barRow}>
-                    <Text style={styles.barLabel}>Actuel</Text>
+                    <Text style={styles.barLabel}>{t('kelly.current')}</Text>
                     <View style={styles.barTrack}>
                       <View style={[styles.barFill, { width: `${currentBarWidth}%`, backgroundColor: PF.textMuted }]} />
                     </View>
                   </View>
                   <View style={styles.barRow}>
-                    <Text style={styles.barLabel}>Kelly</Text>
+                    <Text style={styles.barLabel}>{t('kelly.kellyLabel')}</Text>
                     <View style={styles.barTrack}>
                       <View style={[styles.barFill, { width: `${kellyBarWidth}%`, backgroundColor: statusColor }]} />
                     </View>
@@ -102,11 +104,11 @@ export function SectionQ_KellyCriterion() {
           {/* Summary */}
           <View style={styles.summaryRow}>
             <View style={styles.summaryItem}>
-              <Text style={styles.summaryLabel}>Kelly max/position</Text>
+              <Text style={styles.summaryLabel}>{t('kelly.kellyMaxPosition')}</Text>
               <Text style={[styles.summaryValue, { color: PF.accent }]}>{maxKelly}%</Text>
             </View>
             <View style={styles.summaryItem}>
-              <Text style={styles.summaryLabel}>Positions optimales</Text>
+              <Text style={styles.summaryLabel}>{t('kelly.optimalPositions')}</Text>
               <Text style={[styles.summaryValue, { color: PF.green }]}>
                 {optimalCount}/{positions.length}
               </Text>
@@ -118,9 +120,7 @@ export function SectionQ_KellyCriterion() {
       {/* Explanation card */}
       <PerfGlassCard style={styles.section}>
         <Text style={styles.infoText}>
-          Le critere de Kelly calcule la taille optimale de chaque position
-          pour maximiser la croissance a long terme sans risque de ruine.
-          Le demi-Kelly est recommande pour plus de securite.
+          {t('kelly.kellyExplanation')}
         </Text>
       </PerfGlassCard>
     </View>

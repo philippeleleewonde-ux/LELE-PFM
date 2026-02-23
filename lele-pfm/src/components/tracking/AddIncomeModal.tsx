@@ -10,6 +10,8 @@ import {
   StyleSheet,
   useWindowDimensions,
 } from 'react-native';
+import { useTranslation } from 'react-i18next';
+import i18n from '@/i18n';
 import { X, CalendarDays } from 'lucide-react-native';
 import { IncomeCode } from '@/constants/income-categories';
 import { useIncomeStore } from '@/stores/income-store';
@@ -24,7 +26,15 @@ interface AddIncomeModalProps {
   defaultSource?: IncomeCode;
 }
 
+const DATE_LOCALE_MAP: Record<string, string> = {
+  fr: 'fr-FR',
+  en: 'en-US',
+  es: 'es-ES',
+  pt: 'pt-PT',
+};
+
 export function AddIncomeModal({ visible, onClose, defaultSource }: AddIncomeModalProps) {
+  const { t } = useTranslation('tracking');
   const { width, height } = useWindowDimensions();
   const isSmall = width < 360;
   const addIncome = useIncomeStore((s) => s.addIncome);
@@ -132,37 +142,37 @@ export function AddIncomeModal({ visible, onClose, defaultSource }: AddIncomeMod
         <View style={styles.handleBar} />
 
         <View style={styles.header}>
-          <Text style={styles.title}>Nouvelle rentree</Text>
+          <Text style={styles.title}>{t('addIncome.title')}</Text>
           <Pressable onPress={onClose} style={styles.closeBtn}>
             <X size={20} color="#A1A1AA" />
           </Pressable>
         </View>
 
         <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={[styles.scrollContent, { paddingHorizontal: isSmall ? 14 : 20 }]}>
-          <Text style={styles.sectionLabel}>Source</Text>
+          <Text style={styles.sectionLabel}>{t('addIncome.source')}</Text>
           <IncomeCategorySelector selected={source} onSelect={setSource} />
 
-          <Text style={[styles.sectionLabel, { marginTop: 20 }]}>Montant</Text>
+          <Text style={[styles.sectionLabel, { marginTop: 20 }]}>{t('addIncome.amount')}</Text>
           <AmountInput value={amount} onChange={setAmount} />
 
-          <Text style={[styles.sectionLabel, { marginTop: 20 }]}>Description</Text>
+          <Text style={[styles.sectionLabel, { marginTop: 20 }]}>{t('addIncome.description')}</Text>
           <TextInput
             style={styles.textInput}
             value={label}
             onChangeText={setLabel}
-            placeholder="Ex: Salaire Fevrier, Prime annuelle..."
+            placeholder={t('addIncome.placeholder')}
             placeholderTextColor="#52525B"
             returnKeyType="done"
           />
 
-          <Text style={[styles.sectionLabel, { marginTop: 20 }]}>Date</Text>
+          <Text style={[styles.sectionLabel, { marginTop: 20 }]}>{t('addIncome.date')}</Text>
           <View style={styles.dateRow}>
             <Pressable
               onPress={() => setSelectedDate('today')}
               style={[styles.dateBtn, selectedDate === 'today' && styles.dateBtnActive]}
             >
               <Text style={[styles.dateBtnText, selectedDate === 'today' && styles.dateBtnTextActive]}>
-                Aujourd'hui
+                {t('addIncome.today')}
               </Text>
             </Pressable>
             <Pressable
@@ -170,7 +180,7 @@ export function AddIncomeModal({ visible, onClose, defaultSource }: AddIncomeMod
               style={[styles.dateBtn, selectedDate === 'yesterday' && styles.dateBtnActive]}
             >
               <Text style={[styles.dateBtnText, selectedDate === 'yesterday' && styles.dateBtnTextActive]}>
-                Hier
+                {t('addIncome.yesterday')}
               </Text>
             </Pressable>
             <Pressable
@@ -179,7 +189,7 @@ export function AddIncomeModal({ visible, onClose, defaultSource }: AddIncomeMod
             >
               <CalendarDays size={16} color={selectedDate === 'custom' ? '#4ADE80' : '#A1A1AA'} />
               <Text style={[styles.dateBtnText, { fontSize: 12 }, selectedDate === 'custom' && styles.dateBtnTextActive]}>
-                Autre
+                {t('addIncome.other')}
               </Text>
             </Pressable>
           </View>
@@ -192,18 +202,18 @@ export function AddIncomeModal({ visible, onClose, defaultSource }: AddIncomeMod
                 ]}
                 value={customDateText}
                 onChangeText={handleCustomDateInput}
-                placeholder="JJ/MM/AAAA"
+                placeholder={t('addIncome.datePlaceholder')}
                 placeholderTextColor="#52525B"
                 keyboardType="number-pad"
                 maxLength={10}
               />
               {customDate && (
                 <Text style={styles.customDateConfirm}>
-                  {customDate.toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric' })}
+                  {customDate.toLocaleDateString(DATE_LOCALE_MAP[i18n.language] || 'fr-FR', { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric' })}
                 </Text>
               )}
               {!customDate && customDateText.length === 10 && (
-                <Text style={styles.customDateError}>Date invalide</Text>
+                <Text style={styles.customDateError}>{t('addIncome.invalidDate')}</Text>
               )}
             </View>
           )}
@@ -215,7 +225,7 @@ export function AddIncomeModal({ visible, onClose, defaultSource }: AddIncomeMod
           style={[styles.submitBtn, !isValid && styles.submitBtnDisabled]}
         >
           <Text style={[styles.submitText, !isValid && styles.submitTextDisabled]}>
-            Ajouter
+            {t('addIncome.submit')}
           </Text>
         </Pressable>
       </Animated.View>

@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { PF, PerfGlassCard } from './shared';
 import { useInvestmentStore } from '@/stores/investment-store';
 import { useEngineStore } from '@/stores/engine-store';
@@ -43,6 +44,7 @@ function PercentileRow({
 // ─── Main Component ───
 
 export function SectionS_MonteCarlo() {
+  const { t } = useTranslation('performance');
   const engineOutput = useEngineStore((s) => s.engineOutput);
   const investorProfile = useInvestmentStore((s) => s.investorProfile);
   const allocations = useInvestmentStore((s) => s.allocations);
@@ -61,7 +63,7 @@ export function SectionS_MonteCarlo() {
     return (
       <PerfGlassCard>
         <Text style={styles.emptyText}>
-          Configurez votre profil investisseur dans les reglages pour voir cette section.
+          {t('monteCarlo.configureProfile')}
         </Text>
       </PerfGlassCard>
     );
@@ -71,7 +73,7 @@ export function SectionS_MonteCarlo() {
     return (
       <PerfGlassCard>
         <Text style={styles.emptyText}>
-          Aucune allocation disponible pour la simulation.
+          {t('monteCarlo.noAllocation')}
         </Text>
       </PerfGlassCard>
     );
@@ -84,35 +86,35 @@ export function SectionS_MonteCarlo() {
     <View style={styles.container}>
       {/* Distribution grid */}
       <PerfGlassCard>
-        <Text style={styles.sectionTitle}>Distribution sur 36 mois (1000 scenarios)</Text>
+        <Text style={styles.sectionTitle}>{t('monteCarlo.distribution')}</Text>
 
         <View style={styles.distGrid}>
           <PercentileRow
-            label="Meilleur cas (95%)"
+            label={t('monteCarlo.bestCase')}
             value={result.finalValues.best}
             color={PF.green}
             maxValue={maxVal}
           />
           <PercentileRow
-            label="Favorable (75%)"
+            label={t('monteCarlo.favorable')}
             value={result.finalValues.aboveAvg}
             color={PF.greenLight}
             maxValue={maxVal}
           />
           <PercentileRow
-            label="Median (50%)"
+            label={t('monteCarlo.median')}
             value={result.finalValues.median}
             color={PF.accent}
             maxValue={maxVal}
           />
           <PercentileRow
-            label="Defavorable (25%)"
+            label={t('monteCarlo.unfavorable')}
             value={result.finalValues.belowAvg}
             color={PF.orange}
             maxValue={maxVal}
           />
           <PercentileRow
-            label="Pire cas (5%)"
+            label={t('monteCarlo.worstCase')}
             value={result.finalValues.worst}
             color={PF.red}
             maxValue={maxVal}
@@ -121,18 +123,18 @@ export function SectionS_MonteCarlo() {
 
         {/* Capital invested reference */}
         <View style={styles.refRow}>
-          <Text style={styles.refLabel}>Capital investi</Text>
+          <Text style={styles.refLabel}>{t('monteCarlo.investedCapital')}</Text>
           <Text style={styles.refValue}>{formatCurrency(result.investedCapital)}</Text>
         </View>
       </PerfGlassCard>
 
       {/* Risk metrics */}
       <PerfGlassCard>
-        <Text style={styles.sectionTitle}>Metriques de risque</Text>
+        <Text style={styles.sectionTitle}>{t('monteCarlo.riskMetrics')}</Text>
 
         {/* Probability of loss */}
         <View style={styles.metricRow}>
-          <Text style={styles.metricLabel}>Probabilite de perte</Text>
+          <Text style={styles.metricLabel}>{t('monteCarlo.lossProb')}</Text>
           <Text style={[styles.metricValue, { color: probColor }]}>
             {result.probabilityOfLoss.toFixed(1)}%
           </Text>
@@ -153,7 +155,7 @@ export function SectionS_MonteCarlo() {
 
         {/* Expected value */}
         <View style={styles.metricRow}>
-          <Text style={styles.metricLabel}>Esperance de gain</Text>
+          <Text style={styles.metricLabel}>{t('monteCarlo.expectedGain')}</Text>
           <Text style={[styles.metricValue, { color: PF.green }]}>
             {formatCurrency(result.expectedValue)}
           </Text>
@@ -161,7 +163,7 @@ export function SectionS_MonteCarlo() {
 
         {/* Confidence interval */}
         <View style={styles.metricRow}>
-          <Text style={styles.metricLabel}>Intervalle de confiance 90%</Text>
+          <Text style={styles.metricLabel}>{t('monteCarlo.confidenceInterval')}</Text>
           <Text style={styles.metricValue}>
             {formatCurrency(result.confidenceInterval.lower)} —{' '}
             {formatCurrency(result.confidenceInterval.upper)}
@@ -172,8 +174,7 @@ export function SectionS_MonteCarlo() {
       {/* Disclaimer */}
       <PerfGlassCard>
         <Text style={styles.infoText}>
-          Base sur 1000 simulations stochastiques utilisant la volatilite historique de vos actifs.
-          Les resultats passes ne garantissent pas les performances futures.
+          {t('monteCarlo.disclaimer')}
         </Text>
       </PerfGlassCard>
     </View>

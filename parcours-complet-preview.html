@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LELE PFM — Parcours Complet (6 Pages Input)</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:'Inter',-apple-system,sans-serif;background:#0F172A;display:flex;justify-content:center;align-items:center;min-height:100vh;color:#F8FAFC;overflow:hidden;}
+  .phone{width:390px;height:844px;background:#0F172A;border-radius:44px;border:3px solid #334155;overflow:hidden;position:relative;box-shadow:0 0 80px rgba(59,130,246,0.15);}
+  .notch{position:absolute;top:0;left:50%;transform:translateX(-50%);width:160px;height:34px;background:#0F172A;border-radius:0 0 20px 20px;z-index:100;}
+
+  /* Progress */
+  .prog{position:absolute;top:44px;left:0;right:0;padding:12px 28px 0;z-index:90;}
+  .prog-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
+  .prog-label{font-size:12px;font-weight:600;color:#94A3B8;}
+  .prog-time{font-size:11px;color:#64748B;}
+  .prog-bar{height:5px;background:#1E293B;border-radius:3px;overflow:hidden;}
+  .prog-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,#3B82F6,#8B5CF6);transition:width 0.5s;}
+
+  /* Phase tabs */
+  .phase-tabs{position:absolute;top:74px;left:0;right:0;display:flex;padding:0 20px;gap:4px;z-index:89;}
+  .phase-tab{flex:1;text-align:center;padding:6px 2px;font-size:9px;font-weight:700;border-radius:6px;text-transform:uppercase;letter-spacing:0.5px;transition:all 0.3s;}
+  .phase-tab.done{background:rgba(34,197,94,0.15);color:#4ADE80;}
+  .phase-tab.active{background:rgba(59,130,246,0.2);color:#60A5FA;border:1px solid rgba(59,130,246,0.3);}
+  .phase-tab.locked{background:rgba(51,65,85,0.3);color:#475569;}
+
+  /* Slides */
+  .slides{width:100%;height:100%;position:relative;}
+  .s{position:absolute;top:0;left:0;width:100%;height:100%;display:flex;flex-direction:column;padding:100px 24px 108px;opacity:0;transform:translateX(60px);transition:all 0.45s cubic-bezier(0.4,0,0.2,1);pointer-events:none;overflow-y:auto;}
+  .s.on{opacity:1;transform:translateX(0);pointer-events:all;}
+  .s.off{opacity:0;transform:translateX(-60px);}
+
+  /* Typography */
+  .emoji{font-size:38px;margin-bottom:10px;}
+  .title{font-size:22px;font-weight:800;line-height:1.2;margin-bottom:4px;}
+  .sub{font-size:13px;color:#94A3B8;line-height:1.5;margin-bottom:20px;}
+  .sub b{color:#F8FAFC;}
+  .label{font-size:11px;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;}
+
+  /* Grid profiles */
+  .pgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px;}
+  .pcard{background:#1E293B;border:2px solid #334155;border-radius:12px;padding:10px 6px;text-align:center;cursor:pointer;transition:all 0.2s;}
+  .pcard:hover{border-color:#475569;}
+  .pcard.sel{border-color:#3B82F6;background:rgba(59,130,246,0.08);}
+  .pcard .pe{font-size:24px;margin-bottom:4px;}
+  .pcard .pl{font-size:10px;font-weight:600;color:#CBD5E1;line-height:1.2;}
+  .pcard.sel .pl{color:#60A5FA;}
+
+  /* Chips row */
+  .chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;}
+  .chip{padding:10px 12px;border-radius:10px;font-size:12px;font-weight:600;cursor:pointer;border:1.5px solid #334155;background:#1E293B;color:#94A3B8;transition:all 0.2s;display:flex;align-items:center;gap:6px;}
+  .chip.sel{border-color:#3B82F6;background:rgba(59,130,246,0.08);color:#60A5FA;}
+  .chip.green.sel{border-color:#22C55E;background:rgba(34,197,94,0.08);color:#4ADE80;}
+
+  /* Inputs */
+  .inp{width:100%;padding:12px 14px;background:#1E293B;border:1.5px solid #334155;border-radius:10px;color:#F8FAFC;font-size:15px;font-family:inherit;font-weight:600;outline:none;transition:border 0.2s;}
+  .inp:focus{border-color:#3B82F6;}
+  .inp::placeholder{color:#475569;font-weight:400;}
+  .inp-sm{width:100px;}
+
+  /* Row fields */
+  .frow{display:flex;gap:10px;align-items:center;margin-bottom:12px;}
+  .frow .inp{flex:1;}
+
+  /* Revenue rows */
+  .rev-row{display:flex;align-items:center;gap:8px;padding:10px 12px;background:#1E293B;border-radius:10px;border:1px solid #334155;margin-bottom:8px;}
+  .rev-row .rev-icon{font-size:20px;width:28px;}
+  .rev-row .rev-name{flex:1;font-size:13px;font-weight:500;}
+  .rev-row .rev-input{width:90px;padding:8px 10px;background:#0F172A;border:1px solid #475569;border-radius:8px;color:#4ADE80;font-size:15px;font-weight:700;font-family:inherit;outline:none;text-align:right;}
+  .rev-row .rev-input::placeholder{color:#334155;font-weight:400;}
+  .rev-row .rev-cur{font-size:13px;color:#64748B;font-weight:600;}
+
+  /* Expense COICOP cards */
+  .exp-card{display:flex;align-items:center;gap:10px;padding:10px 12px;background:#1E293B;border-radius:10px;border:1px solid #334155;margin-bottom:6px;}
+  .exp-icon{font-size:20px;width:28px;}
+  .exp-name{flex:1;font-size:12px;font-weight:600;color:#CBD5E1;}
+  .exp-input{width:80px;padding:7px 10px;background:#0F172A;border:1px solid #475569;border-radius:8px;color:#FB923C;font-size:14px;font-weight:700;font-family:inherit;outline:none;text-align:right;}
+  .exp-input::placeholder{color:#334155;font-weight:400;}
+  .exp-pct{font-size:11px;color:#64748B;width:36px;text-align:right;}
+
+  /* Stepper */
+  .stepper{display:flex;align-items:center;gap:14px;background:#1E293B;border:1.5px solid #334155;border-radius:10px;padding:8px 14px;margin-bottom:12px;}
+  .sbtn{width:34px;height:34px;border-radius:50%;border:1.5px solid #475569;background:transparent;color:#94A3B8;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:inherit;transition:all 0.2s;}
+  .sbtn:hover{border-color:#3B82F6;color:#60A5FA;}
+  .sval{flex:1;text-align:center;font-size:24px;font-weight:800;}
+  .slbl{font-size:11px;color:#64748B;text-align:center;}
+
+  /* Slider waterfall */
+  .wf{margin-bottom:12px;}
+  .wf-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;}
+  .wf-lbl{font-size:12px;font-weight:600;display:flex;align-items:center;gap:5px;}
+  .wf-val{font-size:14px;font-weight:800;}
+  .wf-range{width:100%;height:6px;border-radius:3px;-webkit-appearance:none;appearance:none;outline:none;cursor:pointer;}
+  .wf-range::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;cursor:pointer;border:3px solid;box-shadow:0 2px 6px rgba(0,0,0,0.3);}
+  .sr1{background:linear-gradient(90deg,#3B82F6 30%,#1E293B 30%);} .sr1::-webkit-slider-thumb{background:#3B82F6;border-color:#93C5FD;}
+  .sr2{background:linear-gradient(90deg,#F97316 35%,#1E293B 35%);} .sr2::-webkit-slider-thumb{background:#F97316;border-color:#FDBA74;}
+  .sr3{background:linear-gradient(90deg,#22C55E 20%,#1E293B 20%);} .sr3::-webkit-slider-thumb{background:#22C55E;border-color:#86EFAC;}
+  .sr4{background:linear-gradient(90deg,#EC4899 15%,#1E293B 15%);} .sr4::-webkit-slider-thumb{background:#EC4899;border-color:#F9A8D4;}
+  .wf-total{display:flex;justify-content:center;align-items:center;gap:6px;padding:8px;border-radius:10px;font-size:13px;font-weight:700;margin-top:8px;}
+  .wf-total.ok{background:rgba(34,197,94,0.1);color:#4ADE80;}
+  .wf-total.ko{background:rgba(239,68,68,0.1);color:#F87171;}
+
+  /* Risk domain */
+  .risk-item{margin-bottom:14px;}
+  .risk-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;}
+  .risk-lbl{font-size:12px;font-weight:600;display:flex;align-items:center;gap:5px;}
+  .risk-val{font-size:13px;font-weight:700;padding:2px 8px;border-radius:6px;}
+  .risk-bar-bg{height:8px;background:#1E293B;border-radius:4px;overflow:hidden;}
+  .risk-bar{height:100%;border-radius:4px;transition:width 0.3s;}
+  .risk-desc{font-size:10px;color:#64748B;margin-top:3px;}
+
+  /* Qualitative stars */
+  .qual-item{padding:12px;background:#1E293B;border-radius:10px;border:1px solid #334155;margin-bottom:8px;}
+  .qual-q{font-size:12px;font-weight:600;color:#CBD5E1;margin-bottom:8px;line-height:1.4;}
+  .qual-stars{display:flex;gap:6px;}
+  .star{width:36px;height:36px;border-radius:8px;background:#0F172A;border:1.5px solid #334155;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;transition:all 0.2s;}
+  .star.lit{background:rgba(255,215,0,0.1);border-color:rgba(255,215,0,0.4);color:#FFD700;}
+  .star:hover{border-color:#FFD700;}
+
+  /* Lever cards */
+  .lever{padding:12px;background:#1E293B;border-radius:10px;border:1px solid #334155;margin-bottom:8px;cursor:pointer;transition:all 0.2s;}
+  .lever:hover{border-color:#475569;}
+  .lever.sel{border-color:#8B5CF6;background:rgba(139,92,246,0.06);}
+  .lever-top{display:flex;align-items:center;gap:8px;margin-bottom:6px;}
+  .lever-icon{font-size:22px;}
+  .lever-name{font-size:13px;font-weight:700;flex:1;}
+  .lever-dim{font-size:9px;font-weight:600;padding:2px 8px;border-radius:4px;background:rgba(139,92,246,0.15);color:#A78BFA;}
+  .lever-desc{font-size:11px;color:#64748B;line-height:1.4;}
+  .lever-slider{width:100%;margin-top:8px;height:5px;border-radius:3px;-webkit-appearance:none;appearance:none;background:linear-gradient(90deg,#8B5CF6 50%,#1E293B 50%);outline:none;cursor:pointer;}
+  .lever-slider::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:#8B5CF6;border:2px solid #C4B5FD;cursor:pointer;}
+
+  /* Tip box */
+  .tip{background:rgba(59,130,246,0.06);border:1px solid rgba(59,130,246,0.15);border-radius:10px;padding:10px 12px;font-size:11px;color:#94A3B8;line-height:1.5;margin-top:12px;display:flex;gap:6px;}
+  .tip b{color:#60A5FA;}
+  .tip .ti{font-size:14px;flex-shrink:0;}
+
+  /* Mission card (dashboard) */
+  .mission{padding:14px;background:#1E293B;border-radius:14px;border:1.5px solid #334155;margin-bottom:10px;cursor:pointer;transition:all 0.2s;position:relative;overflow:hidden;}
+  .mission:hover{border-color:#475569;transform:translateY(-1px);}
+  .mission.done{border-color:rgba(34,197,94,0.3);opacity:0.7;}
+  .mission-top{display:flex;align-items:center;gap:10px;margin-bottom:6px;}
+  .mission-num{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;}
+  .mission-title{font-size:14px;font-weight:700;flex:1;}
+  .mission-time{font-size:10px;color:#64748B;background:#0F172A;padding:3px 8px;border-radius:6px;}
+  .mission-desc{font-size:12px;color:#94A3B8;line-height:1.4;margin-bottom:8px;}
+  .mission-unlock{font-size:10px;font-weight:600;color:#A78BFA;display:flex;align-items:center;gap:4px;}
+  .mission-badge{position:absolute;top:8px;right:8px;font-size:16px;}
+
+  /* Ready screen */
+  .ready-center{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;}
+  .ready-badge{width:90px;height:90px;border-radius:50%;background:linear-gradient(135deg,rgba(34,197,94,0.2),rgba(34,197,94,0.05));border:3px solid rgba(34,197,94,0.4);display:flex;align-items:center;justify-content:center;font-size:42px;margin-bottom:20px;animation:pop .5s cubic-bezier(.34,1.56,.64,1) forwards;}
+  @keyframes pop{0%{transform:scale(0);}100%{transform:scale(1);}}
+  .sum-card{background:#1E293B;border-radius:14px;padding:14px;width:100%;margin-top:16px;border:1px solid #334155;}
+  .sum-row{display:flex;justify-content:space-between;padding:6px 0;font-size:12px;border-bottom:1px solid rgba(51,65,85,0.4);}
+  .sum-row:last-child{border:none;}
+  .sum-l{color:#94A3B8;}.sum-v{font-weight:700;}
+
+  /* Nav */
+  .nav{position:absolute;bottom:0;left:0;right:0;padding:12px 24px 32px;z-index:50;background:linear-gradient(transparent,#0F172A 20%);}
+  .nav-btns{display:flex;gap:10px;}
+  .btn-back{padding:14px 18px;border:1px solid #475569;border-radius:12px;background:transparent;color:#94A3B8;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;}
+  .btn-next{flex:1;padding:14px;border:none;border-radius:12px;background:linear-gradient(135deg,#3B82F6,#8B5CF6);color:#fff;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;box-shadow:0 4px 14px rgba(59,130,246,0.3);}
+  .btn-next:hover{transform:translateY(-1px);}
+  .btn-green{background:linear-gradient(135deg,#22C55E,#16A34A) !important;box-shadow:0 4px 14px rgba(34,197,94,0.3) !important;}
+  .btn-purple{background:linear-gradient(135deg,#8B5CF6,#7C3AED) !important;box-shadow:0 4px 14px rgba(139,92,246,0.3) !important;}
+
+  /* Responsive */
+  @media(max-width:420px){.phone{width:100vw;height:100vh;border-radius:0;border:none;}}
+  .preview{position:fixed;top:12px;left:12px;font-family:'Inter';font-size:10px;color:#64748B;background:#1E293B;padding:5px 10px;border-radius:6px;border:1px solid #334155;z-index:1000;}
+  @media(max-width:420px){.preview{display:none;}}
+
+  /* Confetti */
+  .confetti{position:absolute;font-size:18px;animation:cfall 2s ease-out forwards;pointer-events:none;}
+  @keyframes cfall{0%{transform:translateY(-20px) rotate(0);opacity:1;}100%{transform:translateY(250px) rotate(360deg);opacity:0;}}
+
+  /* Section divider */
+  .divider{height:1px;background:#334155;margin:14px 0;}
+  .section-label{font-size:10px;font-weight:700;color:#475569;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:10px;display:flex;align-items:center;gap:6px;}
+</style>
+</head>
+<body>
+<div class="preview">LELE PFM — Parcours Complet · 6 Pages Input</div>
+<div class="phone">
+  <div class="notch"></div>
+  <div class="prog">
+    <div class="prog-top"><div class="prog-label" id="pLbl">Étape 1/6</div><div class="prog-time" id="pTime">~4 min</div></div>
+    <div class="prog-bar"><div class="prog-fill" id="pFill" style="width:16.6%"></div></div>
+  </div>
+  <div class="phase-tabs" id="phaseTabs">
+    <div class="phase-tab active" data-i="0">1·Profil</div>
+    <div class="phase-tab locked" data-i="1">2·Revenus</div>
+    <div class="phase-tab locked" data-i="2">3·Passé</div>
+    <div class="phase-tab locked" data-i="3">4·Risques</div>
+    <div class="phase-tab locked" data-i="4">5·Auto-éval</div>
+    <div class="phase-tab locked" data-i="5">6·Leviers</div>
+  </div>
+
+  <div class="slides" id="slides">
+
+    <!-- ===== PAGE 1: PROFIL FINANCIER ===== -->
+    <div class="s on" data-i="0">
+      <div class="emoji">👋</div>
+      <div class="title">Salut ! Faisons connaissance</div>
+      <div class="sub">3 petites questions pour qu'on <b>s'adapte à ta vie</b>. Pas à celle du voisin.</div>
+
+      <div class="section-label">🎯 Ta situation pro</div>
+      <div class="pgrid" id="pgrid">
+        <div class="pcard" onclick="selP(this)"><div class="pe">💼</div><div class="pl">Salarié</div></div>
+        <div class="pcard" onclick="selP(this)"><div class="pe">🎯</div><div class="pl">Freelance</div></div>
+        <div class="pcard" onclick="selP(this)"><div class="pe">🚀</div><div class="pl">Entrepreneur</div></div>
+        <div class="pcard" onclick="selP(this)"><div class="pe">🏛️</div><div class="pl">Fonctionnaire</div></div>
+        <div class="pcard" onclick="selP(this)"><div class="pe">🎓</div><div class="pl">Étudiant</div></div>
+        <div class="pcard" onclick="selP(this)"><div class="pe">🌴</div><div class="pl">Retraité</div></div>
+        <div class="pcard" onclick="selP(this)"><div class="pe">⏱️</div><div class="pl">Intérimaire</div></div>
+        <div class="pcard" onclick="selP(this)"><div class="pe">🔧</div><div class="pl">Artisan</div></div>
+        <div class="pcard" onclick="selP(this)"><div class="pe">✨</div><div class="pl">Autre</div></div>
+      </div>
+
+      <div class="section-label">🏠 Ta vie perso</div>
+      <div class="chips">
+        <div class="chip" onclick="selC(this,'fam')">🙋 Seul(e)</div>
+        <div class="chip" onclick="selC(this,'fam')">💑 En couple</div>
+        <div class="chip" onclick="selC(this,'fam')">👨‍👩‍👧 Famille</div>
+      </div>
+      <div class="frow">
+        <div style="flex:1">
+          <div class="label">🎂 Âge</div>
+          <input type="number" class="inp inp-sm" placeholder="32" min="16" max="99">
+        </div>
+        <div style="flex:1">
+          <div class="label">👶 Personnes à charge</div>
+          <div class="stepper"><button class="sbtn" onclick="stp(-1)">−</button><div><div class="sval" id="stpV">0</div></div><button class="sbtn" onclick="stp(1)">+</button></div>
+        </div>
+      </div>
+
+      <div class="section-label">🌍 Ton coin du monde</div>
+      <div class="frow">
+        <div style="flex:1"><div class="label">Pays</div><input class="inp" value="France" placeholder="France"></div>
+        <div style="width:90px"><div class="label">Devise</div><input class="inp" value="EUR" placeholder="EUR"></div>
+      </div>
+      <div class="label">📆 Tu vois loin ?</div>
+      <div class="chips">
+        <div class="chip" onclick="selC(this,'hz')">1 an</div>
+        <div class="chip sel" onclick="selC(this,'hz')">3 ans</div>
+        <div class="chip" onclick="selC(this,'hz')">5 ans</div>
+        <div class="chip" onclick="selC(this,'hz')">10+ ans</div>
+      </div>
+
+      <div class="tip"><span class="ti">🤫</span><span>Tout reste <b>sur ton téléphone</b>. Rien ne sort. On est pas une banque, on est ton coach perso.</span></div>
+    </div>
+
+    <!-- ===== PAGE 2: REVENUS & DÉPENSES ===== -->
+    <div class="s" data-i="1">
+      <div class="emoji">💰</div>
+      <div class="title">D'où vient ton argent ?</div>
+      <div class="sub">Pas de jugement. Que tu gagnes 800€ ou 8000€, <b>on t'aide pareil</b>.</div>
+
+      <div class="section-label">📥 Tes revenus mensuels</div>
+      <div class="rev-row"><span class="rev-icon">💼</span><span class="rev-name">Salaire net</span><input class="rev-input" placeholder="2 400"><span class="rev-cur">€</span></div>
+      <div class="rev-row"><span class="rev-icon">🎯</span><span class="rev-name">Freelance / Side</span><input class="rev-input" placeholder="0"><span class="rev-cur">€</span></div>
+      <div class="rev-row"><span class="rev-icon">🏠</span><span class="rev-name">Loyers perçus</span><input class="rev-input" placeholder="0"><span class="rev-cur">€</span></div>
+      <div class="rev-row"><span class="rev-icon">🎁</span><span class="rev-name">Aides / Alloc.</span><input class="rev-input" placeholder="0"><span class="rev-cur">€</span></div>
+      <div style="text-align:center;margin:6px 0;font-size:11px;color:#64748B;cursor:pointer;" onclick="this.style.display='none'">+ Ajouter une source</div>
+
+      <div class="divider"></div>
+
+      <div class="section-label">📤 ...et où il file ? <span style="font-weight:400;text-transform:none;color:#475569;">(estimation mensuelle)</span></div>
+      <div class="exp-card"><span class="exp-icon">🏠</span><span class="exp-name">Logement</span><input class="exp-input" placeholder="850" oninput="calcPct()"><span class="exp-pct" data-p>—</span></div>
+      <div class="exp-card"><span class="exp-icon">🚗</span><span class="exp-name">Transport</span><input class="exp-input" placeholder="200" oninput="calcPct()"><span class="exp-pct" data-p>—</span></div>
+      <div class="exp-card"><span class="exp-icon">🍔</span><span class="exp-name">Alimentation</span><input class="exp-input" placeholder="350" oninput="calcPct()"><span class="exp-pct" data-p>—</span></div>
+      <div class="exp-card"><span class="exp-icon">🏥</span><span class="exp-name">Santé</span><input class="exp-input" placeholder="80" oninput="calcPct()"><span class="exp-pct" data-p>—</span></div>
+      <div class="exp-card"><span class="exp-icon">🎭</span><span class="exp-name">Loisirs</span><input class="exp-input" placeholder="150" oninput="calcPct()"><span class="exp-pct" data-p>—</span></div>
+      <div class="exp-card"><span class="exp-icon">📚</span><span class="exp-name">Éducation</span><input class="exp-input" placeholder="0" oninput="calcPct()"><span class="exp-pct" data-p>—</span></div>
+      <div class="exp-card"><span class="exp-icon">🛡️</span><span class="exp-name">Assurances</span><input class="exp-input" placeholder="120" oninput="calcPct()"><span class="exp-pct" data-p>—</span></div>
+      <div class="exp-card"><span class="exp-icon">📦</span><span class="exp-name">Autres</span><input class="exp-input" placeholder="100" oninput="calcPct()"><span class="exp-pct" data-p>—</span></div>
+
+      <div class="tip"><span class="ti">🎯</span><span>Des montants approximatifs suffisent ! Tu pourras <b>affiner au fil des semaines</b>.</span></div>
+    </div>
+
+    <!-- ===== PAGE 3: HISTORIQUE FINANCIER ===== -->
+    <div class="s" data-i="2">
+      <div class="emoji">📊</div>
+      <div class="title">Dis-nous d'où tu viens...</div>
+      <div class="sub">Tes dernières années en un coup d'oeil. <b>On calcule ta trajectoire</b> pour mieux te guider.</div>
+
+      <div class="section-label">📈 Revenus annuels des 3 dernières années</div>
+      <div class="rev-row"><span class="rev-icon">📅</span><span class="rev-name">2025</span><input class="rev-input" placeholder="28 800"><span class="rev-cur">€</span></div>
+      <div class="rev-row"><span class="rev-icon">📅</span><span class="rev-name">2024</span><input class="rev-input" placeholder="27 000"><span class="rev-cur">€</span></div>
+      <div class="rev-row"><span class="rev-icon">📅</span><span class="rev-name">2023</span><input class="rev-input" placeholder="25 200"><span class="rev-cur">€</span></div>
+
+      <div class="divider"></div>
+
+      <div class="section-label">📉 Dépenses annuelles des 3 dernières années</div>
+      <div class="rev-row"><span class="rev-icon">📅</span><span class="rev-name">2025</span><input class="rev-input" placeholder="24 600" style="color:#FB923C"><span class="rev-cur">€</span></div>
+      <div class="rev-row"><span class="rev-icon">📅</span><span class="rev-name">2024</span><input class="rev-input" placeholder="23 800" style="color:#FB923C"><span class="rev-cur">€</span></div>
+      <div class="rev-row"><span class="rev-icon">📅</span><span class="rev-name">2023</span><input class="rev-input" placeholder="22 500" style="color:#FB923C"><span class="rev-cur">€</span></div>
+
+      <div class="divider"></div>
+
+      <div class="section-label">⏱️ Temps consacré à tes finances</div>
+      <div class="chips">
+        <div class="chip" onclick="selC(this,'time')">😅 Jamais</div>
+        <div class="chip" onclick="selC(this,'time')">🤔 Parfois</div>
+        <div class="chip sel" onclick="selC(this,'time')">📋 Régulier</div>
+        <div class="chip" onclick="selC(this,'time')">🧠 Expert</div>
+      </div>
+
+      <div class="tip"><span class="ti">💡</span><span>Avec ces données, on calcule ta <b>croissance, ta volatilité et tes tendances</b>. C'est la base de ton score !</span></div>
+    </div>
+
+    <!-- ===== PAGE 4: DONNÉES DE RISQUE ===== -->
+    <div class="s" data-i="3">
+      <div class="emoji">🛡️</div>
+      <div class="title">Ton bouclier anti-galère</div>
+      <div class="sub">6 questions. 2 minutes. Et tu sais exactement <b>où tu es blindé</b> et <b>où ça craint</b>.</div>
+
+      <div class="risk-item">
+        <div class="risk-head"><div class="risk-lbl">💼 Stabilité de l'emploi</div><div class="risk-val" id="rv1" style="background:rgba(34,197,94,0.15);color:#4ADE80;">Stable</div></div>
+        <input type="range" class="wf-range sr3" min="0" max="100" value="75" style="width:100%;height:6px;" oninput="updRisk(1,this.value)">
+        <div class="risk-desc">CDI = tranquille. CDD/Intérim = on adapte les calculs.</div>
+      </div>
+      <div class="risk-item">
+        <div class="risk-head"><div class="risk-lbl">💳 Poids des dettes</div><div class="risk-val" id="rv2" style="background:rgba(249,115,22,0.15);color:#FB923C;">Modéré</div></div>
+        <input type="range" class="wf-range sr2" min="0" max="100" value="45" style="width:100%;height:6px;" oninput="updRisk(2,this.value)">
+        <div class="risk-desc">Ratio dette/revenu. Moins c'est haut, mieux tu dors.</div>
+      </div>
+      <div class="risk-item">
+        <div class="risk-head"><div class="risk-lbl">📈 Exposition aux marchés</div><div class="risk-val" id="rv3" style="background:rgba(59,130,246,0.15);color:#60A5FA;">Faible</div></div>
+        <input type="range" class="wf-range sr1" min="0" max="100" value="20" style="width:100%;height:6px;" oninput="updRisk(3,this.value)">
+        <div class="risk-desc">Actions, crypto, immobilier locatif ? On mesure le risque.</div>
+      </div>
+      <div class="risk-item">
+        <div class="risk-head"><div class="risk-lbl">💧 Liquidité dispo</div><div class="risk-val" id="rv4" style="background:rgba(249,115,22,0.15);color:#FB923C;">Moyen</div></div>
+        <input type="range" class="wf-range sr2" min="0" max="100" value="50" style="width:100%;height:6px;" oninput="updRisk(4,this.value)">
+        <div class="risk-desc">Combien tu peux débloquer vite en cas de coup dur ?</div>
+      </div>
+      <div class="risk-item">
+        <div class="risk-head"><div class="risk-lbl">🏥 Couverture santé/imprévu</div><div class="risk-val" id="rv5" style="background:rgba(34,197,94,0.15);color:#4ADE80;">Bon</div></div>
+        <input type="range" class="wf-range sr3" min="0" max="100" value="65" style="width:100%;height:6px;" oninput="updRisk(5,this.value)">
+        <div class="risk-desc">Mutuelle, assurance, fonds d'urgence. T'es couvert ?</div>
+      </div>
+      <div class="risk-item">
+        <div class="risk-head"><div class="risk-lbl">👴 Préparation retraite</div><div class="risk-val" id="rv6" style="background:rgba(239,68,68,0.15);color:#F87171;">À voir</div></div>
+        <input type="range" class="wf-range sr4" min="0" max="100" value="25" style="width:100%;height:6px;" oninput="updRisk(6,this.value)">
+        <div class="risk-desc">Ton futur toi te remerciera. Ou pas.</div>
+      </div>
+
+      <div class="tip"><span class="ti">🎯</span><span>Ces réponses alimentent ton <b>Profil de Risque</b> sur le Dashboard — et tes alertes personnalisées.</span></div>
+    </div>
+
+    <!-- ===== PAGE 5: AUTO-ÉVALUATION ===== -->
+    <div class="s" data-i="4">
+      <div class="emoji">🪞</div>
+      <div class="title">Miroir, miroir...</div>
+      <div class="sub">Comment <b>tu te vois</b> vs comment tu es vraiment ? On compare — sans juger !</div>
+
+      <div class="qual-item">
+        <div class="qual-q">💼 Comment tu évalues la stabilité de tes revenus ?</div>
+        <div class="qual-stars" onclick="selStar(event,this)">
+          <div class="star" data-v="1">1</div><div class="star" data-v="2">2</div><div class="star" data-v="3">3</div><div class="star lit" data-v="4">⭐</div><div class="star" data-v="5">5</div>
+        </div>
+      </div>
+      <div class="qual-item">
+        <div class="qual-q">💰 Tu arrives à mettre de côté régulièrement ?</div>
+        <div class="qual-stars" onclick="selStar(event,this)">
+          <div class="star" data-v="1">1</div><div class="star" data-v="2">2</div><div class="star lit" data-v="3">⭐</div><div class="star" data-v="4">4</div><div class="star" data-v="5">5</div>
+        </div>
+      </div>
+      <div class="qual-item">
+        <div class="qual-q">📊 Tu maîtrises ton budget au quotidien ?</div>
+        <div class="qual-stars" onclick="selStar(event,this)">
+          <div class="star" data-v="1">1</div><div class="star" data-v="2">2</div><div class="star lit" data-v="3">⭐</div><div class="star" data-v="4">4</div><div class="star" data-v="5">5</div>
+        </div>
+      </div>
+      <div class="qual-item">
+        <div class="qual-q">🛡️ En cas de coup dur, tu tiens combien de temps ?</div>
+        <div class="qual-stars" onclick="selStar(event,this)">
+          <div class="star" data-v="1">1</div><div class="star lit" data-v="2">⭐</div><div class="star" data-v="3">3</div><div class="star" data-v="4">4</div><div class="star" data-v="5">5</div>
+        </div>
+      </div>
+      <div class="qual-item">
+        <div class="qual-q">📈 Tu diversifies tes placements / épargne ?</div>
+        <div class="qual-stars" onclick="selStar(event,this)">
+          <div class="star" data-v="1">1</div><div class="star lit" data-v="2">⭐</div><div class="star" data-v="3">3</div><div class="star" data-v="4">4</div><div class="star" data-v="5">5</div>
+        </div>
+      </div>
+
+      <div class="tip"><span class="ti">🪞</span><span>On va comparer <b>ta perception</b> avec tes <b>vrais chiffres</b>. Souvent, c'est là que la magie opère !</span></div>
+    </div>
+
+    <!-- ===== PAGE 6: LEVIERS D'AMÉLIORATION ===== -->
+    <div class="s" data-i="5">
+      <div class="emoji">🚀</div>
+      <div class="title">Tes 6 super-pouvoirs</div>
+      <div class="sub">Active tes leviers. <b>Chacun booste une dimension</b> de ta santé financière.</div>
+
+      <div class="lever sel" onclick="selLev(this)">
+        <div class="lever-top"><span class="lever-icon">🔒</span><span class="lever-name">Sécurisation</span><span class="lever-dim">→ ÉPARGNER</span></div>
+        <div class="lever-desc">Fonds d'urgence, assurances, couverture. Ton filet de sécurité.</div>
+        <input type="range" class="lever-slider" min="0" max="100" value="60">
+      </div>
+      <div class="lever" onclick="selLev(this)">
+        <div class="lever-top"><span class="lever-icon">📋</span><span class="lever-name">Organisation budgétaire</span><span class="lever-dim">→ DÉPENSER</span></div>
+        <div class="lever-desc">Suivi des dépenses, budget, planification. Ta discipline.</div>
+        <input type="range" class="lever-slider" min="0" max="100" value="45">
+      </div>
+      <div class="lever" onclick="selLev(this)">
+        <div class="lever-top"><span class="lever-icon">📚</span><span class="lever-name">Culture financière</span><span class="lever-dim">→ COMPÉTENCE</span></div>
+        <div class="lever-desc">Tes connaissances en finance perso. Ça s'apprend !</div>
+        <input type="range" class="lever-slider" min="0" max="100" value="35">
+      </div>
+      <div class="lever" onclick="selLev(this)">
+        <div class="lever-top"><span class="lever-icon">🐷</span><span class="lever-name">Discipline d'épargne</span><span class="lever-dim">→ ÉPARGNER</span></div>
+        <div class="lever-desc">Régularité, automatisation. Petit à petit, l'oiseau fait son nid.</div>
+        <input type="range" class="lever-slider" min="0" max="100" value="50">
+      </div>
+      <div class="lever" onclick="selLev(this)">
+        <div class="lever-top"><span class="lever-icon">📈</span><span class="lever-name">Formation investissement</span><span class="lever-dim">→ COMPÉTENCE</span></div>
+        <div class="lever-desc">Savoir placer, diversifier. Faire travailler ton argent.</div>
+        <input type="range" class="lever-slider" min="0" max="100" value="25">
+      </div>
+      <div class="lever" onclick="selLev(this)">
+        <div class="lever-top"><span class="lever-icon">🗺️</span><span class="lever-name">Stratégie patrimoniale</span><span class="lever-dim">→ PLANIFIER</span></div>
+        <div class="lever-desc">Vision long terme. Retraite, héritage, projets de vie.</div>
+        <input type="range" class="lever-slider" min="0" max="100" value="30">
+      </div>
+
+      <div class="tip"><span class="ti">💎</span><span>Ces leviers nourrissent tes <b>5 dimensions de santé financière</b> : Dépenser, Épargner, Compétence, Planifier, Protéger.</span></div>
+    </div>
+
+    <!-- ===== ÉCRAN FINAL: TOUT EST PRÊT ===== -->
+    <div class="s" data-i="6">
+      <div class="ready-center">
+        <div class="ready-badge" id="rBadge">🏆</div>
+        <div class="title" style="font-size:24px;">Wow, profil complet !</div>
+        <div class="sub" style="margin-bottom:0;">Tu fais partie des <b>5% d'utilisateurs</b> qui vont jusqu'au bout.<br>Ton Dashboard est <b>100% débloqué</b>.</div>
+        <div class="sum-card">
+          <div class="sum-row"><span class="sum-l">Profil</span><span class="sum-v">💼 Salarié</span></div>
+          <div class="sum-row"><span class="sum-l">Revenu mensuel</span><span class="sum-v" style="color:#4ADE80;">2 400€</span></div>
+          <div class="sum-row"><span class="sum-l">Dépenses estimées</span><span class="sum-v" style="color:#FB923C;">1 850€</span></div>
+          <div class="sum-row"><span class="sum-l">Profil de risque</span><span class="sum-v" style="color:#60A5FA;">🛡️ Modéré</span></div>
+          <div class="sum-row"><span class="sum-l">Score perçu</span><span class="sum-v" style="color:#FFD700;">⭐ 2.8/5</span></div>
+          <div class="sum-row"><span class="sum-l">Levier n°1</span><span class="sum-v" style="color:#A78BFA;">🔒 Sécurisation</span></div>
+          <div class="sum-row"><span class="sum-l">Première semaine</span><span class="sum-v" style="color:#EC4899;">Sem. 07 — c'est maintenant !</span></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="nav" id="navArea">
+    <div class="nav-btns" id="navBtns">
+      <button class="btn-next" onclick="nxt()">C'est parti ! →</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const T=7; let cur=0, stpVal=0;
+const labels=['Étape 1/6 — Profil','Étape 2/6 — Revenus','Étape 3/6 — Historique','Étape 4/6 — Risques','Étape 5/6 — Auto-éval','Étape 6/6 — Leviers','Terminé !'];
+const times=['~4 min','~3 min','~2 min','~2 min','~1 min','~1 min',''];
+const btnTexts=['Mes revenus →','Où va mon argent →','Mon passé financier →','Mon bouclier →','Mon auto-éval →','Mes super-pouvoirs →','Voir mon Dashboard 🏠'];
+
+function updProg(){
+  document.getElementById('pFill').style.width=((cur+1)/T*100)+'%';
+  document.getElementById('pLbl').textContent=labels[cur];
+  document.getElementById('pTime').textContent=times[cur];
+  document.querySelectorAll('.phase-tab').forEach((t,i)=>{
+    t.className='phase-tab'+(i<cur?' done':i===cur?' active':' locked');
+    if(i===cur) t.scrollIntoView({behavior:'smooth',inline:'center'});
+  });
+}
+
+function updNav(){
+  const n=document.getElementById('navBtns');
+  if(cur===T-1){
+    n.innerHTML='<button class="btn-next btn-green" onclick="goDash()">Voir mon Dashboard 🏠</button>';
+  } else if(cur===0){
+    n.innerHTML=`<button class="btn-next" onclick="nxt()">${btnTexts[cur]}</button>`;
+  } else {
+    const cls = cur===5?'btn-purple':cur===T-2?'btn-green':'';
+    n.innerHTML=`<button class="btn-back" onclick="prv()">←</button><button class="btn-next ${cls}" onclick="nxt()">${btnTexts[cur]}</button>`;
+  }
+}
+
+function goTo(i){
+  document.querySelectorAll('.s').forEach((s,j)=>{
+    s.classList.remove('on','off');
+    if(j<i)s.classList.add('off');
+  });
+  document.querySelectorAll('.s')[i].classList.add('on');
+  cur=i; updProg(); updNav();
+  if(i===T-1)setTimeout(confetti,200);
+}
+function nxt(){if(cur<T-1)goTo(cur+1);}
+function prv(){if(cur>0)goTo(cur-1);}
+
+function selP(el){document.querySelectorAll('.pcard').forEach(c=>c.classList.remove('sel'));el.classList.add('sel');}
+function selC(el,grp){
+  el.parentElement.querySelectorAll('.chip').forEach(c=>c.classList.remove('sel'));
+  el.classList.add('sel');
+}
+function stp(d){stpVal=Math.max(0,Math.min(10,stpVal+d));document.getElementById('stpV').textContent=stpVal;}
+
+function calcPct(){
+  const inps=document.querySelectorAll('.exp-input');
+  const pcts=document.querySelectorAll('[data-p]');
+  let total=0;
+  inps.forEach(i=>{total+=parseInt(i.value||0);});
+  inps.forEach((i,idx)=>{
+    const v=parseInt(i.value||0);
+    pcts[idx].textContent=total>0?Math.round(v/total*100)+'%':'—';
+  });
+}
+
+function updRisk(n,v){
+  const el=document.getElementById('rv'+n);
+  const vi=parseInt(v);
+  if(vi>=70){el.textContent='Stable';el.style.background='rgba(34,197,94,0.15)';el.style.color='#4ADE80';}
+  else if(vi>=40){el.textContent='Modéré';el.style.background='rgba(249,115,22,0.15)';el.style.color='#FB923C';}
+  else{el.textContent='À voir';el.style.background='rgba(239,68,68,0.15)';el.style.color='#F87171';}
+}
+
+function selStar(e,container){
+  const star=e.target.closest('.star');
+  if(!star)return;
+  const v=parseInt(star.dataset.v);
+  container.querySelectorAll('.star').forEach((s,i)=>{
+    if(i<v){s.classList.add('lit');s.textContent='⭐';}
+    else{s.classList.remove('lit');s.textContent=i+1;}
+  });
+}
+
+function selLev(el){document.querySelectorAll('.lever').forEach(l=>l.classList.remove('sel'));el.classList.add('sel');}
+
+function confetti(){
+  const emojis=['🎉','✨','🌟','💰','🎊','🏆','💎','🔥','⭐','🚀'];
+  const c=document.querySelector('.slides');
+  for(let i=0;i<14;i++){
+    const el=document.createElement('div');
+    el.className='confetti';
+    el.textContent=emojis[Math.floor(Math.random()*emojis.length)];
+    el.style.left=(5+Math.random()*90)+'%';
+    el.style.top='8%';
+    el.style.animationDelay=(Math.random()*0.6)+'s';
+    el.style.animationDuration=(1.2+Math.random()*1)+'s';
+    c.appendChild(el);
+    setTimeout(()=>el.remove(),3000);
+  }
+}
+
+function goDash(){alert('🏠 Direction le Dashboard 100% débloqué !\n\nToutes les 6 pages sont remplies.\nTous les KPI sont actifs.\n\n(En production : router.replace("/(tabs)/"))');}
+
+document.addEventListener('keydown',e=>{if(e.key==='ArrowRight')nxt();if(e.key==='ArrowLeft')prv();});
+updProg();updNav();
+</script>
+</body>
+</html>

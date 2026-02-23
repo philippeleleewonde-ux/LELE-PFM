@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { IndicatorCard } from './IndicatorCard';
 import { PF, FadeInView } from './shared';
 import { formatCurrency } from '@/services/format-helpers';
@@ -12,10 +13,12 @@ interface Props {
 }
 
 export function SectionIndicators({ year, indicators, eprTotal }: Props) {
+  const { t } = useTranslation('performance');
+
   if (indicators.length === 0) {
     return (
       <View style={styles.empty}>
-        <Text style={styles.emptyText}>Aucun indicateur calculé</Text>
+        <Text style={styles.emptyText}>{t('indicators.noIndicator')}</Text>
       </View>
     );
   }
@@ -27,17 +30,17 @@ export function SectionIndicators({ year, indicators, eprTotal }: Props) {
       {/* Summary header */}
       <View style={styles.summaryRow}>
         <View style={styles.summaryItem}>
-          <Text style={styles.summaryLabel}>Récupération</Text>
+          <Text style={styles.summaryLabel}>{t('indicators.recovery')}</Text>
           <Text style={styles.summaryValue}>{recoveryPercent}%</Text>
         </View>
         <View style={styles.summaryItem}>
-          <Text style={styles.summaryLabel}>Potentiel An {year}</Text>
+          <Text style={styles.summaryLabel}>{t('indicators.potentialYear', { year })}</Text>
           <Text style={[styles.summaryValue, { color: PF.accent }]}>
             {formatCurrency(eprTotal)}
           </Text>
         </View>
         <View style={styles.summaryItem}>
-          <Text style={styles.summaryLabel}>Indicateurs</Text>
+          <Text style={styles.summaryLabel}>{t('indicators.indicatorsCount')}</Text>
           <Text style={styles.summaryValue}>{indicators.length}</Text>
         </View>
       </View>

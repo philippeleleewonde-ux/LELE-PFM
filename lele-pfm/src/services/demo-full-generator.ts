@@ -284,30 +284,38 @@ function populateSavingsGoals(
     targetMultiplier: number;
     contributionWeeks: number[];  // indices into weeks array
     contributionRatio: number;    // % of surplus to contribute
+    allocation: { mode: 'manual' | 'fixed' | 'deadline' | 'percent'; fixedAmount?: number; percentAmount?: number };
+    contributionSource: 'manual' | 'auto';
   }> = [
     {
       name: "Fonds d'urgence",
       icon: 'urgence',
       color: '#34D399',
       targetMultiplier: 4,
-      contributionWeeks: [2, 4, 5, 6, 7, 8, 9], // starts contributing from S-7
+      contributionWeeks: [2, 4, 5, 6, 7, 8, 9],
       contributionRatio: 0.20,
+      allocation: { mode: 'percent', percentAmount: 20 },
+      contributionSource: 'auto',
     },
     {
       name: 'Voyage vacances',
       icon: 'voyage',
       color: '#60A5FA',
       targetMultiplier: 8,
-      contributionWeeks: [4, 6, 7, 9], // fewer contributions
+      contributionWeeks: [4, 6, 7, 9],
       contributionRatio: 0.12,
+      allocation: { mode: 'deadline' },
+      contributionSource: 'auto',
     },
     {
       name: 'Nouveau telephone',
       icon: 'tech',
       color: '#22D3EE',
       targetMultiplier: 2,
-      contributionWeeks: [5, 7, 8], // late start
+      contributionWeeks: [5, 7, 8],
       contributionRatio: 0.10,
+      allocation: { mode: 'fixed', fixedAmount: roundTo(weeklyBudget * 0.10, roundStep) },
+      contributionSource: 'auto',
     },
   ];
 
@@ -323,6 +331,7 @@ function populateSavingsGoals(
       deadline: deadlineStr,
       icon: def.icon,
       color: def.color,
+      allocation: def.allocation,
     });
 
     // Get the freshly created goal (first in array since addGoal prepends)
@@ -342,8 +351,10 @@ function populateSavingsGoals(
       );
       if (amount <= 0) continue;
 
-      const weekLabel = `Semaine ${weeks[weekIdx].week}`;
-      goalStore.addContribution(goal.id, amount, weekLabel);
+      const weekLabel = def.contributionSource === 'auto'
+        ? `Auto S${weeks[weekIdx].week}-${weeks[weekIdx].year}`
+        : `Semaine ${weeks[weekIdx].week}`;
+      goalStore.addContribution(goal.id, amount, weekLabel, def.contributionSource);
     }
   }
 }

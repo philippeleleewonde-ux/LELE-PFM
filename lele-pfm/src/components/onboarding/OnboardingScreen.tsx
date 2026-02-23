@@ -1,6 +1,7 @@
 import React, { useState, useRef, useCallback } from 'react';
 import { View, Text, StyleSheet, Pressable, ScrollView, NativeScrollEvent, NativeSyntheticEvent, LayoutChangeEvent } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useTranslation } from 'react-i18next';
 import { OB, SLIDE_COUNT, AmbientSpotlights } from './shared';
 import Slide1Home from './slides/Slide1Home';
 import Slide2Receipt from './slides/Slide2Receipt';
@@ -12,13 +13,12 @@ import Slide7Final from './slides/Slide7Final';
 
 const SLIDES = [Slide1Home, Slide2Receipt, Slide3Level, Slide4Waterfall, Slide5Calendar, Slide6Cube, Slide7Final];
 
-const buttonLabels = ['Montre-moi !', 'Et ensuite ?', 'Continue !', 'Encore !', 'Presque...', 'Derniere !', 'Je me lance !'];
-
 interface Props {
   onComplete: () => void;
 }
 
 export default function OnboardingScreen({ onComplete }: Props) {
+  const { t } = useTranslation('onboarding');
   const [current, setCurrent] = useState(0);
   const [containerWidth, setContainerWidth] = useState(0);
   const scrollRef = useRef<ScrollView>(null);
@@ -94,14 +94,14 @@ export default function OnboardingScreen({ onComplete }: Props) {
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 0 }}
           >
-            <Text style={styles.buttonText}>{buttonLabels[current]}</Text>
+            <Text style={styles.buttonText}>{t(`buttons.${current}`)}</Text>
           </LinearGradient>
         </Pressable>
 
         {/* Skip */}
         {!isLast && (
           <Pressable onPress={onComplete} hitSlop={12}>
-            <Text style={styles.skipText}>Passer l'intro</Text>
+            <Text style={styles.skipText}>{t('skip')}</Text>
           </Pressable>
         )}
       </View>

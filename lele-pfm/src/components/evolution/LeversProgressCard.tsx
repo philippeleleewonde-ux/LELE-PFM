@@ -6,6 +6,7 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { Target, ChevronUp, ChevronDown, Minus } from 'lucide-react-native';
+import { useTranslation } from 'react-i18next';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { useWeeklyEvolution, LeverEvolution } from '@/hooks/useWeeklyEvolution';
 
@@ -90,6 +91,7 @@ function formatDelta(delta: number | null): string {
 // ─── Component ───
 
 export function LeversProgressCard() {
+  const { t } = useTranslation('app');
   const { leversEvolution, currentScore, scoreDelta, hasData } = useWeeklyEvolution();
 
   if (!hasData) {
@@ -101,7 +103,7 @@ export function LeversProgressCard() {
       {/* Header */}
       <View style={styles.header}>
         <Target size={18} color="#FBBF24" />
-        <Text style={styles.headerLabel}>TES LEVIERS</Text>
+        <Text style={styles.headerLabel}>{t('evolution.leversHeader')}</Text>
       </View>
 
       {/* Lever rows */}
@@ -114,7 +116,7 @@ export function LeversProgressCard() {
       {/* Bottom summary */}
       <View style={styles.bottomSection}>
         <Text style={styles.bottomText}>
-          Score global : {Math.round(currentScore)}/100
+          {t('evolution.globalScore', { score: Math.round(currentScore) })}
           {scoreDelta !== null && (
             ` (${scoreTrendSymbol(scoreDelta)} ${formatDelta(scoreDelta)})`
           )}

@@ -1,9 +1,17 @@
 import React, { useState, useCallback } from 'react';
 import { View, Text, Pressable, Modal, ScrollView, StyleSheet, useWindowDimensions } from 'react-native';
-import { X, Trash2, Edit3, Check } from 'lucide-react-native';
+import { X, Trash2, Edit3, Check, Zap } from 'lucide-react-native';
+import { useTranslation } from 'react-i18next';
 import { GOAL_CATEGORIES } from '@/constants/goal-categories';
 import { useSavingsGoalStore, SavingsGoal } from '@/stores/savings-goal-store';
 import { formatCurrency } from '@/services/format-helpers';
+
+const DATE_LOCALES: Record<string, string> = {
+  fr: 'fr-FR',
+  en: 'en-US',
+  es: 'es-ES',
+  pt: 'pt-BR',
+};
 
 interface GoalDetailSheetProps {
   visible: boolean;
@@ -13,8 +21,10 @@ interface GoalDetailSheetProps {
 }
 
 export function GoalDetailSheet({ visible, goalId, onClose, onContribute }: GoalDetailSheetProps) {
+  const { t, i18n } = useTranslation('tracking');
   const { width, height } = useWindowDimensions();
   const isSmall = width < 360;
+  const dateLocale = DATE_LOCALES[i18n.language] ?? 'fr-FR';
   const goals = useSavingsGoalStore((s) => s.goals);
   const deleteGoal = useSavingsGoalStore((s) => s.deleteGoal);
   const deleteContribution = useSavingsGoalStore((s) => s.deleteContribution);
@@ -60,10 +70,10 @@ export function GoalDetailSheet({ visible, goalId, onClose, onContribute }: Goal
   let deadlineInfo: string | null = null;
   if (goal.deadline) {
     const dl = new Date(goal.deadline);
-    deadlineInfo = dl.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
+    deadlineInfo = dl.toLocaleDateString(dateLocale, { day: 'numeric', month: 'long', year: 'numeric' });
     if (!goal.isCompleted) {
       const daysLeft = Math.ceil((dl.getTime() - Date.now()) / (1000 * 60 * 60 * 24));
-      deadlineInfo += daysLeft > 0 ? ` (${daysLeft}j restants)` : ' (depassee)';
+      deadlineInfo += daysLeft > 0 ? ` (${t('goals.daysRemaining', { days: daysLeft })})` : ` (${t('goals.overdue')})`;
     }
   }
 
@@ -86,7 +96,7 @@ export function GoalDetailSheet({ visible, goalId, onClose, onContribute }: Goal
           {goal.isCompleted && (
             <View style={styles.completedBanner}>
               <Check size={16} color="#FBBF24" />
-              <Text style={styles.completedBannerText}>Objectif atteint !</Text>
+              <Text style={styles.completedBannerText}>{t('goals.goalReached')}</Text>
             </View>
           )}
 
@@ -103,41 +113,68 @@ export function GoalDetailSheet({ visible, goalId, onClose, onContribute }: Goal
               <Text style={[styles.progressPercent, { color: progressColor }]}>{progressPercent}%</Text>
             </View>
             {!goal.isCompleted && (
-              <Text style={styles.remainingText}>Reste {formatCurrency(remaining)}</Text>
+              <Text style={styles.remainingText}>{t('goals.remaining', { amount: formatCurrency(remaining) })}</Text>
             )}
           </View>
 
           {/* Deadline */}
           {deadlineInfo && (
             <View style={styles.deadlineRow}>
-              <Text style={styles.deadlineLabel}>Echeance</Text>
+              <Text style={styles.deadlineLabel}>{t('goals.deadline')}</Text>
               <Text style={styles.deadlineValue}>{deadlineInfo}</Text>
             </View>
           )}
 
+          {/* Allocation info */}
+          {goal.allocation && goal.allocation.mode !== 'manual' && (
+            <View style={styles.allocationRow}>
+              <Zap size={14} color="#A78BFA" />
+              <View style={styles.allocationInfo}>
+                <Text style={styles.allocationLabel}>{t('goals.autoAllocationLabel')}</Text>
+                <Text style={styles.allocationDesc}>
+                  {goal.allocation.mode === 'fixed' && t('goals.fixedPerWeek', { amount: formatCurrency(goal.allocation.fixedAmount ?? 0) })}
+                  {goal.allocation.mode === 'deadline' && t('goals.autoCalcDeadline')}
+                  {goal.allocation.mode === 'percent' && t('goals.percentSurplusWeekly', { percent: goal.allocation.percentAmount ?? 0 })}
+                </Text>
+              </View>
+            </View>
+          )}
+
           {/* Contributions history */}
-          <Text style={styles.historyTitle}>Historique des contributions</Text>
+          <Text style={styles.historyTitle}>{t('goals.contributionHistory')}</Text>
           <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.listContent}>
             {goal.contributions.length === 0 ? (
-              <Text style={styles.emptyText}>Aucune contribution pour l'instant.</Text>
+              <Text style={styles.emptyText}>{t('goals.noContributions')}</Text>
             ) : (
-              goal.contributions.map((c) => (
-                <View key={c.id} style={styles.contribRow}>
-                  <View style={styles.contribLeft}>
-                    <Text style={styles.contribAmount}>+{formatCurrency(c.amount)}</Text>
-                    <Text style={styles.contribLabel}>{c.label}</Text>
-                    <Text style={styles.contribDate}>
-                      {new Date(c.date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' })}
-                    </Text>
+              goal.contributions.map((c) => {
+                const isAuto = c.source === 'auto';
+                return (
+                  <View key={c.id} style={styles.contribRow}>
+                    <View style={styles.contribLeft}>
+                      <View style={styles.contribAmountRow}>
+                        <Text style={styles.contribAmount}>+{formatCurrency(c.amount)}</Text>
+                        {isAuto && (
+                          <View style={styles.autoBadge}>
+                            <Text style={styles.autoBadgeText}>AUTO</Text>
+                          </View>
+                        )}
+                      </View>
+                      <Text style={styles.contribLabel}>{c.label}</Text>
+                      <Text style={styles.contribDate}>
+                        {new Date(c.date).toLocaleDateString(dateLocale, { day: 'numeric', month: 'short', year: 'numeric' })}
+                      </Text>
+                    </View>
+                    {!isAuto && (
+                      <Pressable
+                        onPress={() => handleDeleteContribution(c.id)}
+                        style={styles.contribDeleteBtn}
+                      >
+                        <Trash2 size={14} color="#F87171" />
+                      </Pressable>
+                    )}
                   </View>
-                  <Pressable
-                    onPress={() => handleDeleteContribution(c.id)}
-                    style={styles.contribDeleteBtn}
-                  >
-                    <Trash2 size={14} color="#F87171" />
-                  </Pressable>
-                </View>
-              ))
+                );
+              })
             )}
           </ScrollView>
 
@@ -145,13 +182,13 @@ export function GoalDetailSheet({ visible, goalId, onClose, onContribute }: Goal
           <View style={styles.actions}>
             {!goal.isCompleted && (
               <Pressable onPress={onContribute} style={styles.contributeBtn}>
-                <Text style={styles.contributeBtnText}>Contribuer</Text>
+                <Text style={styles.contributeBtnText}>{t('goals.contribute')}</Text>
               </Pressable>
             )}
             <Pressable onPress={handleDelete} style={styles.deleteBtn}>
               <Trash2 size={16} color="#F87171" />
               <Text style={styles.deleteBtnText}>
-                {confirmDelete ? 'Confirmer la suppression' : 'Supprimer'}
+                {confirmDelete ? t('goals.confirmDeletion') : t('goals.deleteGoal')}
               </Text>
             </Pressable>
           </View>
@@ -280,6 +317,49 @@ const styles = StyleSheet.create({
     color: '#A1A1AA',
     fontSize: 12,
     fontWeight: '700',
+  },
+  allocationRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    backgroundColor: 'rgba(167,139,250,0.06)',
+    borderRadius: 10,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    marginBottom: 14,
+    borderWidth: 1,
+    borderColor: 'rgba(167,139,250,0.15)',
+  },
+  allocationInfo: {
+    flex: 1,
+  },
+  allocationLabel: {
+    color: '#A78BFA',
+    fontSize: 12,
+    fontWeight: '700',
+  },
+  allocationDesc: {
+    color: '#A1A1AA',
+    fontSize: 11,
+    fontWeight: '500',
+    marginTop: 2,
+  },
+  contribAmountRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  autoBadge: {
+    backgroundColor: 'rgba(167,139,250,0.15)',
+    borderRadius: 4,
+    paddingHorizontal: 5,
+    paddingVertical: 1,
+  },
+  autoBadgeText: {
+    color: '#A78BFA',
+    fontSize: 9,
+    fontWeight: '800',
+    letterSpacing: 0.5,
   },
   historyTitle: {
     color: '#A1A1AA',

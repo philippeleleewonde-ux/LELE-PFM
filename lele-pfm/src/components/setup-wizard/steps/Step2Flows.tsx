@@ -1,4 +1,5 @@
 import React, { useCallback, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   View,
   Text,
@@ -13,21 +14,21 @@ import { WZ, GlassCard, TipBox, FadeInView, neonGlow } from '../shared';
 // ─── Income sources with financial metadata ───
 // Parallèle HCM : comme les business lines avec type, fréquence, probabilité, croissance
 const INCOME_SOURCES = [
-  { key: 'salaire', label: 'Salaire net', icon: '💼', type: 'Fixe' as const, defaultFrequency: 'monthly' as const, defaultProbability: 98, defaultGrowth: 2.5 },
-  { key: 'primes', label: 'Primes / Bonus', icon: '🎯', type: 'Variable' as const, defaultFrequency: 'annual' as const, defaultProbability: 70, defaultGrowth: 0 },
-  { key: 'locatifs', label: 'Revenus locatifs', icon: '🏠', type: 'Fixe' as const, defaultFrequency: 'monthly' as const, defaultProbability: 90, defaultGrowth: 1.7 },
-  { key: 'aides', label: 'Aides / Allocations', icon: '🤝', type: 'Fixe' as const, defaultFrequency: 'monthly' as const, defaultProbability: 85, defaultGrowth: 1.0 },
-  { key: 'freelance', label: 'Freelance / Missions', icon: '💻', type: 'Variable' as const, defaultFrequency: 'monthly' as const, defaultProbability: 65, defaultGrowth: 0 },
-  { key: 'dividendes', label: 'Dividendes / Intérêts', icon: '📈', type: 'Variable' as const, defaultFrequency: 'annual' as const, defaultProbability: 80, defaultGrowth: 3.0 },
-  { key: 'pension', label: 'Pension', icon: '⚖️', type: 'Fixe' as const, defaultFrequency: 'monthly' as const, defaultProbability: 95, defaultGrowth: 1.0 },
-  { key: 'autres_revenus', label: 'Autres revenus', icon: '📦', type: 'Variable' as const, defaultFrequency: 'monthly' as const, defaultProbability: 50, defaultGrowth: 0 },
+  { key: 'salaire', labelKey: 'incomeSource.salaire', icon: '💼', type: 'Fixe' as const, defaultFrequency: 'monthly' as const, defaultProbability: 98, defaultGrowth: 2.5 },
+  { key: 'primes', labelKey: 'incomeSource.primes', icon: '🎯', type: 'Variable' as const, defaultFrequency: 'annual' as const, defaultProbability: 70, defaultGrowth: 0 },
+  { key: 'locatifs', labelKey: 'incomeSource.locatifs', icon: '🏠', type: 'Fixe' as const, defaultFrequency: 'monthly' as const, defaultProbability: 90, defaultGrowth: 1.7 },
+  { key: 'aides', labelKey: 'incomeSource.aides', icon: '🤝', type: 'Fixe' as const, defaultFrequency: 'monthly' as const, defaultProbability: 85, defaultGrowth: 1.0 },
+  { key: 'freelance', labelKey: 'incomeSource.freelance', icon: '💻', type: 'Variable' as const, defaultFrequency: 'monthly' as const, defaultProbability: 65, defaultGrowth: 0 },
+  { key: 'dividendes', labelKey: 'incomeSource.dividendes', icon: '📈', type: 'Variable' as const, defaultFrequency: 'annual' as const, defaultProbability: 80, defaultGrowth: 3.0 },
+  { key: 'pension', labelKey: 'incomeSource.pension', icon: '⚖️', type: 'Fixe' as const, defaultFrequency: 'monthly' as const, defaultProbability: 95, defaultGrowth: 1.0 },
+  { key: 'autres_revenus', labelKey: 'incomeSource.autres_revenus', icon: '📦', type: 'Variable' as const, defaultFrequency: 'monthly' as const, defaultProbability: 50, defaultGrowth: 0 },
 ] as const;
 
 // ─── Certainty levels (chips) ───
 const CERTAINTY_LEVELS = [
-  { key: 'garanti', label: 'Garanti', probability: 95, color: WZ.green },
-  { key: 'probable', label: 'Probable', probability: 70, color: WZ.orange },
-  { key: 'incertain', label: 'Incertain', probability: 40, color: '#EF4444' },
+  { key: 'garanti', labelKey: 'certainty.garanti', probability: 95, color: WZ.green },
+  { key: 'probable', labelKey: 'certainty.probable', probability: 70, color: WZ.orange },
+  { key: 'incertain', labelKey: 'certainty.incertain', probability: 40, color: '#EF4444' },
 ] as const;
 
 function getCertaintyKey(probability: number): string {
@@ -38,14 +39,14 @@ function getCertaintyKey(probability: number): string {
 
 // ─── 8 catégories COICOP recalibrées avec defaults ───
 const EXPENSE_CATEGORIES = [
-  { key: 'logement',     label: 'Logement',              icon: '🏡', coicop: '04', defaultType: 'Fixe' as const,     defaultNature: 'Essentielle' as const,      defaultElasticity: 10 },
-  { key: 'alimentation', label: 'Alimentation',           icon: '🛒', coicop: '01', defaultType: 'Variable' as const, defaultNature: 'Essentielle' as const,      defaultElasticity: 25 },
-  { key: 'transport',    label: 'Transport',              icon: '🚗', coicop: '07', defaultType: 'Variable' as const, defaultNature: 'Essentielle' as const,      defaultElasticity: 35 },
-  { key: 'sante',        label: 'Santé',                  icon: '🏥', coicop: '06', defaultType: 'Variable' as const, defaultNature: 'Essentielle' as const,      defaultElasticity: 15 },
-  { key: 'telecom',      label: 'Télécom & Abonnements',  icon: '📱', coicop: '08', defaultType: 'Fixe' as const,     defaultNature: 'Discrétionnaire' as const,  defaultElasticity: 45 },
-  { key: 'education',    label: 'Éducation',              icon: '📚', coicop: '10', defaultType: 'Fixe' as const,     defaultNature: 'Essentielle' as const,      defaultElasticity: 10 },
-  { key: 'loisirs',      label: 'Loisirs & Sorties',      icon: '🎭', coicop: '09', defaultType: 'Variable' as const, defaultNature: 'Discrétionnaire' as const,  defaultElasticity: 65 },
-  { key: 'habillement',  label: 'Habillement & Divers',   icon: '👔', coicop: '03', defaultType: 'Variable' as const, defaultNature: 'Discrétionnaire' as const,  defaultElasticity: 70 },
+  { key: 'logement',     labelKey: 'expenseCategory.logement',     icon: '🏡', coicop: '04', defaultType: 'Fixe' as const,     defaultNature: 'Essentielle' as const,      defaultElasticity: 10 },
+  { key: 'alimentation', labelKey: 'expenseCategory.alimentation', icon: '🛒', coicop: '01', defaultType: 'Variable' as const, defaultNature: 'Essentielle' as const,      defaultElasticity: 25 },
+  { key: 'transport',    labelKey: 'expenseCategory.transport',    icon: '🚗', coicop: '07', defaultType: 'Variable' as const, defaultNature: 'Essentielle' as const,      defaultElasticity: 35 },
+  { key: 'sante',        labelKey: 'expenseCategory.sante',        icon: '🏥', coicop: '06', defaultType: 'Variable' as const, defaultNature: 'Essentielle' as const,      defaultElasticity: 15 },
+  { key: 'telecom',      labelKey: 'expenseCategory.telecom',      icon: '📱', coicop: '08', defaultType: 'Fixe' as const,     defaultNature: 'Discrétionnaire' as const,  defaultElasticity: 45 },
+  { key: 'education',    labelKey: 'expenseCategory.education',    icon: '📚', coicop: '10', defaultType: 'Fixe' as const,     defaultNature: 'Essentielle' as const,      defaultElasticity: 10 },
+  { key: 'loisirs',      labelKey: 'expenseCategory.loisirs',      icon: '🎭', coicop: '09', defaultType: 'Variable' as const, defaultNature: 'Discrétionnaire' as const,  defaultElasticity: 65 },
+  { key: 'habillement',  labelKey: 'expenseCategory.habillement',  icon: '👔', coicop: '03', defaultType: 'Variable' as const, defaultNature: 'Discrétionnaire' as const,  defaultElasticity: 70 },
 ] as const;
 
 interface Step2FlowsProps {
@@ -53,6 +54,7 @@ interface Step2FlowsProps {
 }
 
 export default function Step2Flows({ isActive }: Step2FlowsProps) {
+  const { t } = useTranslation('wizard');
   const { formData, updateFormData } = useWizardStore();
   const { incomes, expenses } = formData;
   const currency = formData.currency || 'FCFA';
@@ -206,8 +208,8 @@ export default function Step2Flows({ isActive }: Step2FlowsProps) {
               <Text style={styles.sectionIcon}>💰</Text>
             </View>
             <View style={styles.sectionTitleGroup}>
-              <Text style={[styles.sectionTitle, { color: WZ.green, ...neonGlow(WZ.green) }]}>REVENUS</Text>
-              <Text style={styles.sectionSubtitle}>Sources de revenus avec certitude et progression</Text>
+              <Text style={[styles.sectionTitle, { color: WZ.green, ...neonGlow(WZ.green) }]}>{t('step2.incomeTitle')}</Text>
+              <Text style={styles.sectionSubtitle}>{t('step2.incomeSubtitle')}</Text>
             </View>
           </View>
 
@@ -223,10 +225,10 @@ export default function Step2Flows({ isActive }: Step2FlowsProps) {
                   <View style={styles.fieldLabelContainer}>
                     <Text style={styles.fieldIcon}>{source.icon}</Text>
                     <View style={styles.fieldLabelGroup}>
-                      <Text style={styles.fieldLabel}>{source.label}</Text>
+                      <Text style={styles.fieldLabel}>{t('step2.incomeSources.' + source.key)}</Text>
                       <View style={[styles.typeBadge, { backgroundColor: source.type === 'Fixe' ? 'rgba(34,197,94,0.15)' : 'rgba(249,115,22,0.15)' }]}>
                         <Text style={[styles.typeBadgeText, { color: source.type === 'Fixe' ? WZ.green : WZ.orange }]}>
-                          {source.type}
+                          {t('step2.types.' + source.type)}
                         </Text>
                       </View>
                     </View>
@@ -250,7 +252,7 @@ export default function Step2Flows({ isActive }: Step2FlowsProps) {
                   <View style={styles.detailRow}>
                     {/* Frequency toggle */}
                     <View style={styles.detailGroup}>
-                      <Text style={styles.detailLabel}>Fréquence</Text>
+                      <Text style={styles.detailLabel}>{t('step2.frequency')}</Text>
                       <View style={styles.toggleRow}>
                         {(['monthly', 'annual'] as const).map((freq) => {
                           const isSelected = entry.frequency === freq;
@@ -261,7 +263,7 @@ export default function Step2Flows({ isActive }: Step2FlowsProps) {
                               style={[styles.toggleChip, isSelected && styles.toggleChipSelected]}
                             >
                               <Text style={[styles.toggleText, isSelected && styles.toggleTextSelected]}>
-                                {freq === 'monthly' ? 'Mensuel' : 'Annuel'}
+                                {freq === 'monthly' ? t('step2.monthly') : t('step2.annual')}
                               </Text>
                             </Pressable>
                           );
@@ -271,7 +273,7 @@ export default function Step2Flows({ isActive }: Step2FlowsProps) {
 
                     {/* Certainty chips */}
                     <View style={styles.detailGroup}>
-                      <Text style={styles.detailLabel}>Certitude</Text>
+                      <Text style={styles.detailLabel}>{t('step2.certainty')}</Text>
                       <View style={styles.toggleRow}>
                         {CERTAINTY_LEVELS.map((level) => {
                           const isSelected = certaintyKey === level.key;
@@ -290,7 +292,7 @@ export default function Step2Flows({ isActive }: Step2FlowsProps) {
                                   isSelected && { color: level.color, fontWeight: '700' },
                                 ]}
                               >
-                                {level.label}
+                                {t('step2.certaintyLevels.' + level.key)}
                               </Text>
                             </Pressable>
                           );
@@ -300,7 +302,7 @@ export default function Step2Flows({ isActive }: Step2FlowsProps) {
 
                     {/* Growth rate */}
                     <View style={styles.detailGroup}>
-                      <Text style={styles.detailLabel}>Progression</Text>
+                      <Text style={styles.detailLabel}>{t('step2.growth')}</Text>
                       <View style={styles.growthRow}>
                         <Text style={styles.growthPlus}>+</Text>
                         <TextInput
@@ -313,7 +315,7 @@ export default function Step2Flows({ isActive }: Step2FlowsProps) {
                           keyboardType="numeric"
                           returnKeyType="done"
                         />
-                        <Text style={styles.growthSuffix}>%/an</Text>
+                        <Text style={styles.growthSuffix}>{t('step2.perYear')}</Text>
                       </View>
                     </View>
                   </View>
@@ -325,21 +327,21 @@ export default function Step2Flows({ isActive }: Step2FlowsProps) {
           {/* Subtotals: Fixe + Variable */}
           <View style={[styles.subtotalRow, { borderTopColor: 'rgba(34,197,94,0.2)' }]}>
             <View style={styles.subtotalGroup}>
-              <Text style={[styles.subtotalLabel, { color: WZ.green }]}>Fixes</Text>
+              <Text style={[styles.subtotalLabel, { color: WZ.green }]}>{t('step2.fixed')}</Text>
               <Text style={[styles.subtotalValue, { color: WZ.greenLight, ...neonGlow(WZ.greenLight) }]}>
                 {formatCurrency(totalFixed)}
               </Text>
             </View>
             <View style={styles.subtotalDivider} />
             <View style={styles.subtotalGroup}>
-              <Text style={[styles.subtotalLabel, { color: WZ.orange }]}>Variables</Text>
+              <Text style={[styles.subtotalLabel, { color: WZ.orange }]}>{t('step2.variable')}</Text>
               <Text style={[styles.subtotalValue, { color: WZ.orangeLight, ...neonGlow(WZ.orangeLight) }]}>
                 {formatCurrency(totalVariable)}
               </Text>
             </View>
             <View style={styles.subtotalDivider} />
             <View style={styles.subtotalGroup}>
-              <Text style={[styles.subtotalLabel, { color: WZ.textSecondary }]}>Total /mois</Text>
+              <Text style={[styles.subtotalLabel, { color: WZ.textSecondary }]}>{t('step2.totalPerMonth')}</Text>
               <Text style={[styles.subtotalValue, { color: WZ.textPrimary }]}>
                 {formatCurrency(totalIncomes)}
               </Text>
@@ -356,8 +358,8 @@ export default function Step2Flows({ isActive }: Step2FlowsProps) {
               <Text style={styles.sectionIcon}>🧾</Text>
             </View>
             <View style={styles.sectionTitleGroup}>
-              <Text style={[styles.sectionTitle, { color: WZ.orange, ...neonGlow(WZ.orange) }]}>DÉPENSES</Text>
-              <Text style={styles.sectionSubtitle}>Catégories COICOP avec type, nature et compression</Text>
+              <Text style={[styles.sectionTitle, { color: WZ.orange, ...neonGlow(WZ.orange) }]}>{t('step2.expenseTitle')}</Text>
+              <Text style={styles.sectionSubtitle}>{t('step2.expenseSubtitle')}</Text>
             </View>
           </View>
 
@@ -375,16 +377,16 @@ export default function Step2Flows({ isActive }: Step2FlowsProps) {
                   <View style={styles.fieldLabelContainer}>
                     <Text style={styles.fieldIcon}>{category.icon}</Text>
                     <View style={styles.fieldLabelGroup}>
-                      <Text style={styles.fieldLabel}>{category.label}</Text>
+                      <Text style={styles.fieldLabel}>{t('step2.expenseCategories.' + category.key)}</Text>
                       <View style={styles.badgeRow}>
                         <View style={[styles.typeBadge, { backgroundColor: entry.type === 'Fixe' ? 'rgba(34,197,94,0.15)' : 'rgba(249,115,22,0.15)' }]}>
                           <Text style={[styles.typeBadgeText, { color: entry.type === 'Fixe' ? WZ.green : WZ.orange }]}>
-                            {entry.type}
+                            {t('step2.types.' + entry.type)}
                           </Text>
                         </View>
                         <View style={[styles.typeBadge, { backgroundColor: entry.nature === 'Essentielle' ? 'rgba(59,130,246,0.15)' : 'rgba(168,85,247,0.15)' }]}>
                           <Text style={[styles.typeBadgeText, { color: entry.nature === 'Essentielle' ? '#3B82F6' : '#A855F7' }]}>
-                            {entry.nature === 'Essentielle' ? 'Essent.' : 'Discrétion.'}
+                            {entry.nature === 'Essentielle' ? t('step2.essentialShort') : t('step2.discretionaryShort')}
                           </Text>
                         </View>
                         {hasAmount && (
@@ -412,7 +414,7 @@ export default function Step2Flows({ isActive }: Step2FlowsProps) {
                   <View style={[styles.detailRow, { borderLeftColor: 'rgba(249,115,22,0.15)' }]}>
                     {/* Frequency toggle */}
                     <View style={styles.detailGroup}>
-                      <Text style={styles.detailLabel}>Fréquence</Text>
+                      <Text style={styles.detailLabel}>{t('step2.frequency')}</Text>
                       <View style={styles.toggleRow}>
                         {(['monthly', 'annual'] as const).map((freq) => {
                           const isSelected = entry.frequency === freq;
@@ -423,7 +425,7 @@ export default function Step2Flows({ isActive }: Step2FlowsProps) {
                               style={[styles.toggleChip, isSelected && styles.toggleChipSelected]}
                             >
                               <Text style={[styles.toggleText, isSelected && styles.toggleTextSelected]}>
-                                {freq === 'monthly' ? 'Mensuel' : 'Annuel'}
+                                {freq === 'monthly' ? t('step2.monthly') : t('step2.annual')}
                               </Text>
                             </Pressable>
                           );
@@ -433,7 +435,7 @@ export default function Step2Flows({ isActive }: Step2FlowsProps) {
 
                     {/* Elasticity display */}
                     <View style={styles.detailGroup}>
-                      <Text style={styles.detailLabel}>Potentiel de compression</Text>
+                      <Text style={styles.detailLabel}>{t('step2.compressionPotential')}</Text>
                       <View style={styles.elasticityRow}>
                         <View style={styles.elasticityBarBg}>
                           <View style={[styles.elasticityBarFill, { width: `${entry.elasticity}%` }]} />
@@ -463,21 +465,21 @@ export default function Step2Flows({ isActive }: Step2FlowsProps) {
           {/* Subtotals: Essentielles | Discrétionnaires | Total */}
           <View style={[styles.subtotalRow, { borderTopColor: 'rgba(249,115,22,0.2)' }]}>
             <View style={styles.subtotalGroup}>
-              <Text style={[styles.subtotalLabel, { color: '#3B82F6' }]}>Essentielles</Text>
+              <Text style={[styles.subtotalLabel, { color: '#3B82F6' }]}>{t('step2.essential')}</Text>
               <Text style={[styles.subtotalValue, { color: '#60A5FA' }]}>
                 {formatCurrency(totalEssentielles)}
               </Text>
             </View>
             <View style={styles.subtotalDivider} />
             <View style={styles.subtotalGroup}>
-              <Text style={[styles.subtotalLabel, { color: '#A855F7' }]}>Discrétion.</Text>
+              <Text style={[styles.subtotalLabel, { color: '#A855F7' }]}>{t('step2.discretionary')}</Text>
               <Text style={[styles.subtotalValue, { color: '#C084FC' }]}>
                 {formatCurrency(totalDiscretionnaires)}
               </Text>
             </View>
             <View style={styles.subtotalDivider} />
             <View style={styles.subtotalGroup}>
-              <Text style={[styles.subtotalLabel, { color: WZ.orange }]}>Total /mois</Text>
+              <Text style={[styles.subtotalLabel, { color: WZ.orange }]}>{t('step2.totalPerMonth')}</Text>
               <Text style={[styles.subtotalValue, { color: WZ.orangeLight, ...neonGlow(WZ.orangeLight) }]}>
                 {formatCurrency(totalExpenses)}
               </Text>
@@ -491,7 +493,7 @@ export default function Step2Flows({ isActive }: Step2FlowsProps) {
         <GlassCard style={styles.summaryCard}>
           <View style={styles.summaryRow}>
             <View style={styles.summaryItem}>
-              <Text style={styles.summaryLabel}>Rev. Fixes</Text>
+              <Text style={styles.summaryLabel}>{t('step2.fixedIncome')}</Text>
               <Text style={[styles.summaryAmount, { color: WZ.greenLight }]}>
                 {formatCurrency(totalFixed)}
               </Text>
@@ -500,7 +502,7 @@ export default function Step2Flows({ isActive }: Step2FlowsProps) {
             <View style={styles.summaryDivider} />
 
             <View style={styles.summaryItem}>
-              <Text style={styles.summaryLabel}>Rev. Variables</Text>
+              <Text style={styles.summaryLabel}>{t('step2.variableIncome')}</Text>
               <Text style={[styles.summaryAmount, { color: WZ.orange }]}>
                 {formatCurrency(totalVariable)}
               </Text>
@@ -509,7 +511,7 @@ export default function Step2Flows({ isActive }: Step2FlowsProps) {
             <View style={styles.summaryDivider} />
 
             <View style={styles.summaryItem}>
-              <Text style={styles.summaryLabel}>Dépenses</Text>
+              <Text style={styles.summaryLabel}>{t('step2.expenses')}</Text>
               <Text style={[styles.summaryAmount, { color: WZ.orangeLight }]}>
                 {formatCurrency(totalExpenses)}
               </Text>
@@ -519,7 +521,7 @@ export default function Step2Flows({ isActive }: Step2FlowsProps) {
 
             <View style={styles.summaryItem}>
               <Text style={styles.summaryLabel}>
-                {isDeficit ? 'Déficit' : 'Reste'}
+                {isDeficit ? t('step2.deficit') : t('step2.remaining')}
               </Text>
               <Text
                 style={[
@@ -538,7 +540,7 @@ export default function Step2Flows({ isActive }: Step2FlowsProps) {
       {/* ─── Tip ─── */}
       <FadeInView active={isActive} delay={650}>
         <TipBox
-          text="Les revenus annuels (primes, dividendes) sont automatiquement convertis en équivalent mensuel. Ajustez la certitude et la progression pour un calcul plus précis."
+          text={t('step2.tip')}
           style={styles.tipBox}
         />
       </FadeInView>

@@ -7,6 +7,7 @@
 import React, { useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, Animated } from 'react-native';
 import { Trophy, Star, PiggyBank, Award, Target } from 'lucide-react-native';
+import { useTranslation } from 'react-i18next';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { formatCurrency } from '@/services/format-helpers';
 import { useWeeklyEvolution } from '@/hooks/useWeeklyEvolution';
@@ -17,7 +18,7 @@ interface RecordRowDef {
   key: string;
   icon: React.ElementType;
   color: string;
-  getLabel: () => string;
+  labelKey: string;
   getValue: (
     records: ReturnType<typeof useWeeklyEvolution>['records'],
     streaks: ReturnType<typeof useWeeklyEvolution>['streaks'],
@@ -29,7 +30,7 @@ const RECORD_ROWS: RecordRowDef[] = [
     key: 'bestScore',
     icon: Star,
     color: '#FFD700',
-    getLabel: () => 'Meilleur score',
+    labelKey: 'evolution.bestScore',
     getValue: (records) =>
       records.bestScore
         ? `${Math.round(records.bestScore.value)} (Sem. ${records.bestScore.week})`
@@ -39,7 +40,7 @@ const RECORD_ROWS: RecordRowDef[] = [
     key: 'bestSavings',
     icon: PiggyBank,
     color: '#4ADE80',
-    getLabel: () => 'Meilleure epargne',
+    labelKey: 'evolution.bestSavings',
     getValue: (records) =>
       records.bestSavings
         ? `${formatCurrency(records.bestSavings.value)} (S.${records.bestSavings.week})`
@@ -49,7 +50,7 @@ const RECORD_ROWS: RecordRowDef[] = [
     key: 'bestNote',
     icon: Award,
     color: '#FFD700',
-    getLabel: () => 'Meilleure note',
+    labelKey: 'evolution.bestNote',
     getValue: (records) =>
       records.bestNote
         ? `${records.bestNote.value}/10 (S.${records.bestNote.week})`
@@ -59,7 +60,7 @@ const RECORD_ROWS: RecordRowDef[] = [
     key: 'bestBudgetStreak',
     icon: Trophy,
     color: '#4ADE80',
-    getLabel: () => 'Plus longue serie',
+    labelKey: 'evolution.longestStreak',
     getValue: (_records, streaks) =>
       streaks.bestBudgetStreak > 0
         ? `${streaks.bestBudgetStreak} semaine${streaks.bestBudgetStreak > 1 ? 's' : ''}`
@@ -70,6 +71,7 @@ const RECORD_ROWS: RecordRowDef[] = [
 // ─── Component ───
 
 export function PersonalRecordsCard() {
+  const { t } = useTranslation('app');
   const { records, streaks, hasData } = useWeeklyEvolution();
   const fadeAnim = useRef(new Animated.Value(0)).current;
 
@@ -91,7 +93,7 @@ export function PersonalRecordsCard() {
         {/* Header */}
         <View style={styles.header}>
           <Trophy size={18} color="#FFD700" />
-          <Text style={styles.headerLabel}>RECORDS PERSONNELS</Text>
+          <Text style={styles.headerLabel}>{t('evolution.recordsHeader')}</Text>
         </View>
 
         {/* Record rows */}
@@ -108,7 +110,7 @@ export function PersonalRecordsCard() {
                   <Icon size={16} color={row.color} />
                 </View>
                 <View style={styles.recordContent}>
-                  <Text style={styles.recordLabel}>{row.getLabel()}</Text>
+                  <Text style={styles.recordLabel}>{t(row.labelKey)}</Text>
                   <Text style={[styles.recordValue, { color: row.color }]}>
                     {valueStr}
                   </Text>
@@ -124,7 +126,7 @@ export function PersonalRecordsCard() {
             <View style={styles.milestoneRow}>
               <Target size={15} color="#22D3EE" />
               <Text style={styles.milestoneText}>
-                Prochain palier : Score {records.nextScoreMilestone}
+                {t('evolution.nextMilestone', { score: records.nextScoreMilestone })}
               </Text>
             </View>
           </View>

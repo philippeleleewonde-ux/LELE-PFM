@@ -13,22 +13,22 @@ import {
   BookOpen,
 } from 'lucide-react-native';
 
-const CATEGORY_META: Record<COICOPCode, { label: string; icon: typeof ShoppingBasket; color: string; nature: Nature }> = {
-  '01': { label: 'Alimentation', icon: ShoppingBasket, color: '#4ADE80', nature: 'Essentielle' },
-  '02': { label: 'Vetements', icon: Shirt, color: '#F472B6', nature: 'Essentielle' },
-  '03': { label: 'Logement', icon: Home, color: '#60A5FA', nature: 'Essentielle' },
-  '04': { label: 'Sante', icon: HeartPulse, color: '#F87171', nature: 'Essentielle' },
-  '05': { label: 'Transports', icon: Car, color: '#FBBF24', nature: 'Discretionnaire' },
-  '06': { label: 'Telecom', icon: Phone, color: '#A78BFA', nature: 'Discretionnaire' },
-  '07': { label: 'Loisirs', icon: Film, color: '#FB923C', nature: 'Discretionnaire' },
-  '08': { label: 'Education', icon: BookOpen, color: '#34D399', nature: 'Discretionnaire' },
+const CATEGORY_META: Record<COICOPCode, { labelKey: string; icon: typeof ShoppingBasket; color: string; nature: Nature }> = {
+  '01': { labelKey: 'food', icon: ShoppingBasket, color: '#4ADE80', nature: 'Essentielle' },
+  '02': { labelKey: 'clothing', icon: Shirt, color: '#F472B6', nature: 'Essentielle' },
+  '03': { labelKey: 'housing', icon: Home, color: '#60A5FA', nature: 'Essentielle' },
+  '04': { labelKey: 'health', icon: HeartPulse, color: '#F87171', nature: 'Essentielle' },
+  '05': { labelKey: 'transport', icon: Car, color: '#FBBF24', nature: 'Discretionnaire' },
+  '06': { labelKey: 'telecom', icon: Phone, color: '#A78BFA', nature: 'Discretionnaire' },
+  '07': { labelKey: 'leisure', icon: Film, color: '#FB923C', nature: 'Discretionnaire' },
+  '08': { labelKey: 'education', icon: BookOpen, color: '#34D399', nature: 'Discretionnaire' },
 };
 
 const COICOP_CODES: COICOPCode[] = ['01', '02', '03', '04', '05', '06', '07', '08'];
 
 export interface CategoryImpact {
   code: COICOPCode;
-  label: string;
+  labelKey: string;
   icon: typeof ShoppingBasket;
   color: string;
   weeklyBudget: number;
@@ -93,7 +93,7 @@ export function useImpulseCheck(price: number): ImpulseAnalysis {
 
       return {
         code,
-        label: meta.label,
+        labelKey: meta.labelKey,
         icon: meta.icon,
         color: meta.color,
         weeklyBudget: catWeeklyBudget,

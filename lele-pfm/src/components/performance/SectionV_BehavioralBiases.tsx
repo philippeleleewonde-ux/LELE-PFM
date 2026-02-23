@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { PF, PerfGlassCard } from './shared';
 import { useInvestmentStore } from '@/stores/investment-store';
 import { analyzeBiases, BiasDetection } from '@/domain/calculators/behavioral-bias-engine';
@@ -23,6 +24,7 @@ function scoreColor(score: number): string {
 // ─── Component ───
 
 export function SectionV_BehavioralBiases() {
+  const { t } = useTranslation('performance');
   const allocations = useInvestmentStore((s) => s.allocations);
   const investorProfile = useInvestmentStore((s) => s.investorProfile);
 
@@ -32,7 +34,7 @@ export function SectionV_BehavioralBiases() {
     return (
       <PerfGlassCard>
         <Text style={styles.emptyText}>
-          Configurez votre profil investisseur dans les reglages pour voir l'analyse comportementale.
+          {t('behavioral.configureProfile')}
         </Text>
       </PerfGlassCard>
     );
@@ -42,11 +44,11 @@ export function SectionV_BehavioralBiases() {
     <View style={styles.container}>
       {/* Rationality Score */}
       <PerfGlassCard style={styles.section}>
-        <Text style={styles.sectionTitle}>Analyse Comportementale</Text>
+        <Text style={styles.sectionTitle}>{t('behavioral.behavioralAnalysis')}</Text>
         <View style={styles.scoreBadgeRow}>
           <View style={[styles.scoreBadge, { backgroundColor: scoreColor(analysis.overallScore) + '20' }]}>
             <Text style={[styles.scoreBadgeText, { color: scoreColor(analysis.overallScore) }]}>
-              Score : {analysis.overallScore.toFixed(1)}/10 — {analysis.rationalityGrade}
+              {t('behavioral.score')} : {analysis.overallScore.toFixed(1)}/10 — {analysis.rationalityGrade}
             </Text>
           </View>
         </View>
@@ -56,7 +58,7 @@ export function SectionV_BehavioralBiases() {
       {/* Top 3 Risks */}
       {analysis.topRisks.length > 0 && (
         <PerfGlassCard style={styles.section}>
-          <Text style={styles.sectionTitle}>Principaux risques</Text>
+          <Text style={styles.sectionTitle}>{t('behavioral.mainRisks')}</Text>
           <View style={styles.riskList}>
             {analysis.topRisks.map((bias) => (
               <BiasRiskCard key={bias.bias} bias={bias} />
@@ -67,7 +69,7 @@ export function SectionV_BehavioralBiases() {
 
       {/* Full Bias List */}
       <PerfGlassCard style={styles.section}>
-        <Text style={styles.sectionTitle}>Tous les biais</Text>
+        <Text style={styles.sectionTitle}>{t('behavioral.allBiases')}</Text>
         <View style={styles.biasList}>
           {analysis.biases.map((bias) => (
             <View key={bias.bias} style={styles.biasRow}>
@@ -95,7 +97,7 @@ export function SectionV_BehavioralBiases() {
       {/* Footer */}
       <View style={styles.footer}>
         <Text style={styles.footerText}>
-          Analyse basee sur votre allocation actuelle. Les biais comportementaux sont des tendances cognitives normales — les reconnaitre est la premiere etape pour les corriger.
+          {t('behavioral.disclaimer')}
         </Text>
       </View>
     </View>
@@ -105,6 +107,7 @@ export function SectionV_BehavioralBiases() {
 // ─── BiasRiskCard ───
 
 function BiasRiskCard({ bias }: { bias: BiasDetection }) {
+  const { t } = useTranslation('performance');
   const color = severityColor(bias.severity);
   return (
     <View style={styles.riskCard}>
@@ -123,7 +126,7 @@ function BiasRiskCard({ bias }: { bias: BiasDetection }) {
       </View>
       <Text style={styles.riskExplanation}>{bias.explanation}</Text>
       <View style={[styles.debiasingCard, { borderLeftColor: color }]}>
-        <Text style={styles.debiasingTitle}>Conseil</Text>
+        <Text style={styles.debiasingTitle}>{t('behavioral.advice')}</Text>
         <Text style={styles.debiasingText}>{bias.debiasing}</Text>
       </View>
     </View>

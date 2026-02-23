@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, Pressable, StyleSheet, useWindowDimensions } from 'react-native';
-import { ChevronRight, Check } from 'lucide-react-native';
+import { ChevronRight, Check, Zap } from 'lucide-react-native';
+import { useTranslation } from 'react-i18next';
 import { GOAL_CATEGORIES } from '@/constants/goal-categories';
 import { SavingsGoal } from '@/stores/savings-goal-store';
 import { GlassCard } from '@/components/ui/GlassCard';
@@ -13,6 +14,7 @@ interface SavingsGoalCardProps {
 }
 
 export function SavingsGoalCard({ goal, onPress, onContribute }: SavingsGoalCardProps) {
+  const { t } = useTranslation('tracking');
   const { width } = useWindowDimensions();
   const isSmall = width < 360;
 
@@ -29,14 +31,16 @@ export function SavingsGoalCard({ goal, onPress, onContribute }: SavingsGoalCard
 
   // Deadline calculation
   let deadlineBadge: string | null = null;
+  let isOverdue = false;
   if (goal.deadline && !goal.isCompleted) {
     const daysLeft = Math.ceil(
       (new Date(goal.deadline).getTime() - Date.now()) / (1000 * 60 * 60 * 24)
     );
     if (daysLeft > 0) {
-      deadlineBadge = `${daysLeft}j restants`;
+      deadlineBadge = t('reporting.daysRemaining', { days: daysLeft });
     } else {
-      deadlineBadge = 'Echeance depassee';
+      deadlineBadge = t('reporting.deadlineExceeded');
+      isOverdue = true;
     }
   }
 
@@ -69,6 +73,18 @@ export function SavingsGoalCard({ goal, onPress, onContribute }: SavingsGoalCard
           )}
         </View>
 
+        {/* Allocation badge */}
+        {!goal.isCompleted && goal.allocation && goal.allocation.mode !== 'manual' && (
+          <View style={styles.allocationBadge}>
+            <Zap size={11} color="#A78BFA" />
+            <Text style={styles.allocationBadgeText}>
+              {goal.allocation.mode === 'fixed' && formatCurrency(goal.allocation.fixedAmount ?? 0) + t('reporting.perWeek')}
+              {goal.allocation.mode === 'deadline' && t('reporting.autoDeadline')}
+              {goal.allocation.mode === 'percent' && (goal.allocation.percentAmount ?? 0) + t('reporting.surplusPercent')}
+            </Text>
+          </View>
+        )}
+
         {/* Progress bar */}
         <View style={styles.progressBar}>
           <View
@@ -95,7 +111,7 @@ export function SavingsGoalCard({ goal, onPress, onContribute }: SavingsGoalCard
         {goal.isCompleted && (
           <View style={styles.completedBadge}>
             <Check size={12} color="#FBBF24" />
-            <Text style={styles.completedText}>Objectif atteint !</Text>
+            <Text style={styles.completedText}>{t('reporting.goalReached')}</Text>
           </View>
         )}
 
@@ -104,7 +120,7 @@ export function SavingsGoalCard({ goal, onPress, onContribute }: SavingsGoalCard
           <View style={styles.deadlineBadge}>
             <Text style={[
               styles.deadlineText,
-              deadlineBadge === 'Echeance depassee' && { color: '#F87171' },
+              isOverdue && { color: '#F87171' },
             ]}>
               {deadlineBadge}
             </Text>
@@ -114,14 +130,14 @@ export function SavingsGoalCard({ goal, onPress, onContribute }: SavingsGoalCard
         {/* Last contribution */}
         {lastContrib && (
           <Text style={styles.lastContrib}>
-            Dernier : +{formatCurrency(lastContrib.amount)} — {new Date(lastContrib.date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })}
+            {t('reporting.lastContribution', { amount: formatCurrency(lastContrib.amount), date: new Date(lastContrib.date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' }) })}
           </Text>
         )}
 
         {/* Contribute button */}
         {!goal.isCompleted && (
           <Pressable onPress={onContribute} style={styles.contributeBtn}>
-            <Text style={styles.contributeBtnText}>Contribuer</Text>
+            <Text style={styles.contributeBtnText}>{t('reporting.contributeBtn')}</Text>
           </Pressable>
         )}
       </GlassCard>
@@ -163,6 +179,22 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(74,222,128,0.15)',
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  allocationBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    alignSelf: 'flex-start',
+    backgroundColor: 'rgba(167,139,250,0.1)',
+    borderRadius: 6,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    marginBottom: 8,
+  },
+  allocationBadgeText: {
+    color: '#A78BFA',
+    fontSize: 10,
+    fontWeight: '700',
   },
   progressBar: {
     height: 6,

@@ -1,193 +1,193 @@
 {
   "modules": {
-    "1": "Conscience Financiere",
+    "1": "Conscience Financière",
     "2": "Budget & Discipline",
-    "3": "Premiers Pas d'Epargne",
+    "3": "Premiers Pas d'Épargne",
     "4": "Revenus & Diversification",
-    "5": "Maitrise des Categories",
+    "5": "Maîtrise des Catégories",
     "6": "Objectifs & Projets",
-    "7": "Epargne Avancee",
+    "7": "Épargne Avancée",
     "8": "Performance & Analyse",
-    "9": "Strategie & Anticipation",
-    "10": "Resilience Financiere",
+    "9": "Stratégie & Anticipation",
+    "10": "Résilience Financière",
     "11": "Vision Long Terme",
-    "12": "Excellence Financiere"
+    "12": "Excellence Financière"
   },
   "difficulty": {
-    "decouverte": "Decouverte",
-    "intermediaire": "Intermediaire",
-    "avance": "Avance",
+    "decouverte": "Découverte",
+    "intermediaire": "Intermédiaire",
+    "avance": "Avancé",
     "expert": "Expert"
   },
   "S1": {
-    "savoir": "Celui qui ne sait pas ou va son argent ne saura jamais le garder. Suivre ses depenses est le premier acte de liberte financiere.",
-    "faire": "Enregistrer votre premiere depense de la semaine",
-    "maitriserDesc": "Au moins 1 transaction enregistree cette semaine"
+    "savoir": "Celui qui ne sait pas où va son argent ne saura jamais le garder. Suivre ses dépenses est le premier acte de liberté financière.",
+    "faire": "Enregistrer votre première dépense de la semaine",
+    "maitriserDesc": "Au moins 1 transaction enregistrée cette semaine"
   },
   "S2": {
-    "savoir": "En moyenne, on sous-estime ses depenses de 30%. Le cerveau oublie les petits achats — l'app non.",
-    "faire": "Enregistrer des depenses dans au moins 3 categories differentes",
-    "maitriserDesc": "3 categories differentes utilisees cette semaine"
+    "savoir": "En moyenne, on sous-estime ses dépenses de 30%. Le cerveau oublie les petits achats — l'app non.",
+    "faire": "Enregistrer des dépenses dans au moins 3 catégories différentes",
+    "maitriserDesc": "3 catégories différentes utilisées cette semaine"
   },
   "S3": {
-    "savoir": "Connaitre son budget hebdomadaire, c'est comme connaitre la jauge d'essence de sa voiture. Sans ca, on roule a l'aveugle.",
-    "faire": "Avoir enregistre des depenses pour voir la barre de progression",
-    "maitriserDesc": "Depenses enregistrees cette semaine (budget actif)"
+    "savoir": "Connaître son budget hebdomadaire, c'est comme connaître la jauge d'essence de sa voiture. Sans ça, on roule à l'aveugle.",
+    "faire": "Avoir enregistré des dépenses pour voir la barre de progression",
+    "maitriserDesc": "Dépenses enregistrées cette semaine (budget actif)"
   },
   "S4": {
-    "savoir": "La photo de fin de semaine : combien j'ai gagne, depense, economise. C'est le bilan qui cree la conscience.",
-    "faire": "Avoir un bilan hebdomadaire genere (WeeklySummary)",
-    "maitriserDesc": "Un enregistrement de performance sauvegarde cette semaine"
+    "savoir": "La photo de fin de semaine : combien j'ai gagné, dépensé, économisé. C'est le bilan qui crée la conscience.",
+    "faire": "Avoir un bilan hebdomadaire généré (WeeklySummary)",
+    "maitriserDesc": "Un enregistrement de performance sauvegardé cette semaine"
   },
   "S5": {
-    "savoir": "Le budget n'est pas une prison. C'est une route — depasser les lignes est dangereux, rester dans les voies est confortable.",
-    "faire": "Terminer la semaine avec un taux d'execution sous 100%",
-    "maitriserDesc": "Depenses < budget hebdomadaire"
+    "savoir": "Le budget n'est pas une prison. C'est une route — dépasser les lignes est dangereux, rester dans les voies est confortable.",
+    "faire": "Terminer la semaine avec un taux d'exécution sous 100%",
+    "maitriserDesc": "Dépenses < budget hebdomadaire"
   },
   "S6": {
-    "savoir": "Un achat impulsif coute en moyenne 3x plus cher que ce que vous pensez, car c'est de l'argent qui ne travaille plus pour vous.",
+    "savoir": "Un achat impulsif coûte en moyenne 3x plus cher que ce que vous pensez, car c'est de l'argent qui ne travaille plus pour vous.",
     "faire": "Utiliser le bouclier anti-impulsif au moins 1 fois",
-    "maitriserDesc": "Bouclier anti-impulsif utilise cette semaine"
+    "maitriserDesc": "Bouclier anti-impulsif utilisé cette semaine"
   },
   "S7": {
-    "savoir": "La regle des 85% : les meilleurs gestionnaires ne depensent que 85% de leur budget. Les 15% restants sont leur marge de manoeuvre.",
+    "savoir": "La règle des 85% : les meilleurs gestionnaires ne dépensent que 85% de leur budget. Les 15% restants sont leur marge de manœuvre.",
     "faire": "Terminer la semaine sous 85% du budget",
-    "maitriserDesc": "Taux d'execution <= 85%"
+    "maitriserDesc": "Taux d'exécution <= 85%"
   },
   "S8": {
-    "savoir": "La discipline n'est pas la privation. C'est choisir ce qui compte vraiment plutot que ce qui tente sur le moment.",
+    "savoir": "La discipline n'est pas la privation. C'est choisir ce qui compte vraiment plutôt que ce qui tente sur le moment.",
     "faire": "Enregistrer au moins 1 transaction par jour (5 jours minimum)",
     "maitriserDesc": "5 jours avec transactions cette semaine"
   },
   "S9": {
-    "savoir": "Epargner, ce n'est pas garder ce qui reste. C'est mettre de cote AVANT de depenser. Pay Yourself First.",
-    "faire": "Terminer la semaine avec des economies positives",
-    "maitriserDesc": "Economies > 0 cette semaine"
+    "savoir": "Épargner, ce n'est pas garder ce qui reste. C'est mettre de côté AVANT de dépenser. Pay Yourself First.",
+    "faire": "Terminer la semaine avec des économies positives",
+    "maitriserDesc": "Économies > 0 cette semaine"
   },
   "S10": {
-    "savoir": "Un fonds d'urgence couvre 3 mois de depenses. Sans lui, le moindre imprevu peut vous mettre a genoux financierement.",
-    "faire": "Creer un objectif d'epargne avec l'icone urgence",
+    "savoir": "Un fonds d'urgence couvre 3 mois de dépenses. Sans lui, le moindre imprévu peut vous mettre à genoux financièrement.",
+    "faire": "Créer un objectif d'épargne avec l'icône urgence",
     "maitriserDesc": "Un objectif 'urgence' existe"
   },
   "S11": {
-    "savoir": "La constance bat l'intensite. Epargner 5 000 FCFA chaque semaine vaut mieux que 50 000 une fois par trimestre.",
-    "faire": "Faire une contribution a un objectif d'epargne",
+    "savoir": "La constance bat l'intensité. Épargner 5 000 FCFA chaque semaine vaut mieux que 50 000 une fois par trimestre.",
+    "faire": "Faire une contribution à un objectif d'épargne",
     "maitriserDesc": "Au moins 1 contribution cette semaine"
   },
   "S12": {
     "savoir": "Bilan T1 : regardez votre tirelire. Chaque franc ici est une preuve que vous pouvez changer votre avenir.",
     "faire": "Avoir un solde positif dans la tirelire",
-    "maitriserDesc": "Economies cumulees (tirelire) > 0"
+    "maitriserDesc": "Économies cumulées (tirelire) > 0"
   },
   "S13": {
-    "savoir": "Vous ne pouvez pas economiser ce que vous ne gagnez pas. Suivre vos rentrees d'argent est aussi important que suivre vos depenses.",
-    "faire": "Enregistrer une rentree d'argent (salaire ou autre)",
-    "maitriserDesc": "Au moins 1 revenu enregistre cette semaine"
+    "savoir": "Vous ne pouvez pas économiser ce que vous ne gagnez pas. Suivre vos rentrées d'argent est aussi important que suivre vos dépenses.",
+    "faire": "Enregistrer une rentrée d'argent (salaire ou autre)",
+    "maitriserDesc": "Au moins 1 revenu enregistré cette semaine"
   },
   "S14": {
-    "savoir": "Dependre d'une seule source de revenu, c'est marcher sur un fil. La diversification est un filet de securite.",
-    "faire": "Enregistrer une rentree hors salaire (primes, freelance...)",
-    "maitriserDesc": "Un revenu non-salaire enregistre cette semaine"
+    "savoir": "Dépendre d'une seule source de revenu, c'est marcher sur un fil. La diversification est un filet de sécurité.",
+    "faire": "Enregistrer une rentrée hors salaire (primes, freelance...)",
+    "maitriserDesc": "Un revenu non-salaire enregistré cette semaine"
   },
   "S15": {
-    "savoir": "Le ratio revenus/depenses est votre indicateur vital. Au-dessus de 1, vous construisez. En dessous, vous detruisez.",
-    "faire": "Avoir un solde net positif (revenus > depenses) cette semaine",
-    "maitriserDesc": "Revenus hebdo > depenses hebdo"
+    "savoir": "Le ratio revenus/dépenses est votre indicateur vital. Au-dessus de 1, vous construisez. En dessous, vous détruisez.",
+    "faire": "Avoir un solde net positif (revenus > dépenses) cette semaine",
+    "maitriserDesc": "Revenus hebdo > dépenses hebdo"
   },
   "S16": {
-    "savoir": "Chaque source de revenu supplementaire reduit votre vulnerabilite de 25%. Deux sources valent mieux qu'une.",
-    "faire": "Avoir des rentrees dans au moins 2 sources differentes ce mois",
-    "maitriserDesc": "2 sources de revenus differentes ce mois"
+    "savoir": "Chaque source de revenu supplémentaire réduit votre vulnérabilité de 25%. Deux sources valent mieux qu'une.",
+    "faire": "Avoir des rentrées dans au moins 2 sources différentes ce mois",
+    "maitriserDesc": "2 sources de revenus différentes ce mois"
   },
   "S17": {
-    "savoir": "Le poste alimentaire est souvent le premier poste de depense. Le surveiller, c'est surveiller 30 a 40% de votre budget.",
-    "faire": "Consulter le detail d'une categorie de depenses",
-    "maitriserDesc": "Detail categorie consulte"
+    "savoir": "Le poste alimentaire est souvent le premier poste de dépense. Le surveiller, c'est surveiller 30 à 40% de votre budget.",
+    "faire": "Consulter le détail d'une catégorie de dépenses",
+    "maitriserDesc": "Détail catégorie consulté"
   },
   "S18": {
-    "savoir": "Les depenses fixes (logement, telecom) sont les plus dangereuses : on les oublie parce qu'elles sont automatiques.",
-    "faire": "Enregistrer au moins 2 depenses de type Fixe cette semaine",
-    "maitriserDesc": "2 transactions Fixe enregistrees"
+    "savoir": "Les dépenses fixes (logement, télécom) sont les plus dangereuses : on les oublie parce qu'elles sont automatiques.",
+    "faire": "Enregistrer au moins 2 dépenses de type Fixe cette semaine",
+    "maitriserDesc": "2 transactions Fixe enregistrées"
   },
   "S19": {
-    "savoir": "La categorie ou vous depensez le plus est celle ou vous avez le plus de marge d'amelioration.",
-    "faire": "Reduire les depenses de votre categorie n°1 par rapport a la semaine precedente",
-    "maitriserDesc": "Top categorie en baisse vs semaine precedente"
+    "savoir": "La catégorie où vous dépensez le plus est celle où vous avez le plus de marge d'amélioration.",
+    "faire": "Réduire les dépenses de votre catégorie n°1 par rapport à la semaine précédente",
+    "maitriserDesc": "Top catégorie en baisse vs semaine précédente"
   },
   "S20": {
-    "savoir": "Le zero depassement dans une categorie est une victoire. 4 categories sans depassement = semaine excellente.",
-    "faire": "Avoir au moins 4 categories sous budget cette semaine",
-    "maitriserDesc": "4+ categories sous budget"
+    "savoir": "Le zéro dépassement dans une catégorie est une victoire. 4 catégories sans dépassement = semaine excellente.",
+    "faire": "Avoir au moins 4 catégories sous budget cette semaine",
+    "maitriserDesc": "4+ catégories sous budget"
   },
   "S21": {
-    "savoir": "Un objectif sans montant ni echeance n'est qu'un reve. Chiffrez-le et datez-le pour le rendre reel.",
-    "faire": "Creer un objectif avec un montant ET une echeance",
+    "savoir": "Un objectif sans montant ni échéance n'est qu'un rêve. Chiffrez-le et datez-le pour le rendre réel.",
+    "faire": "Créer un objectif avec un montant ET une échéance",
     "maitriserDesc": "Un objectif avec deadline existe"
   },
   "S22": {
-    "savoir": "Les petites contributions regulieres battent les gros versements occasionnels. La regularite cree l'habitude.",
-    "faire": "Faire 2 contributions a vos objectifs cette semaine",
+    "savoir": "Les petites contributions régulières battent les gros versements occasionnels. La régularité crée l'habitude.",
+    "faire": "Faire 2 contributions à vos objectifs cette semaine",
     "maitriserDesc": "2+ contributions cette semaine"
   },
   "S23": {
-    "savoir": "Avoir plusieurs objectifs en parallele force la priorisation — la competence financiere la plus precieuse.",
-    "faire": "Avoir au moins 2 objectifs actifs simultanement",
+    "savoir": "Avoir plusieurs objectifs en parallèle force la priorisation — la compétence financière la plus précieuse.",
+    "faire": "Avoir au moins 2 objectifs actifs simultanément",
     "maitriserDesc": "2+ objectifs actifs"
   },
   "S24": {
-    "savoir": "Bilan T2 : comparez votre score financier d'aujourd'hui a celui du debut. La progression est la vraie victoire.",
+    "savoir": "Bilan T2 : comparez votre score financier d'aujourd'hui à celui du début. La progression est la vraie victoire.",
     "faire": "Avoir un score financier en hausse par rapport au T1",
-    "maitriserDesc": "Score actuel > score sauvegarde precedemment"
+    "maitriserDesc": "Score actuel > score sauvegardé précédemment"
   },
   "S25": {
-    "savoir": "L'EPR (Epargne Potentielle Realisable) est VOTRE cible personnalisee. Elle n'est pas arbitraire — elle est calculee sur VOS revenus et depenses.",
-    "faire": "Avoir un target EPR actif et des depenses enregistrees",
-    "maitriserDesc": "Target EPR > 0 et depenses > 0"
+    "savoir": "L'EPR (Épargne Potentielle Réalisable) est VOTRE cible personnalisée. Elle n'est pas arbitraire — elle est calculée sur VOS revenus et dépenses.",
+    "faire": "Avoir un target EPR actif et des dépenses enregistrées",
+    "maitriserDesc": "Target EPR > 0 et dépenses > 0"
   },
   "S26": {
-    "savoir": "La distribution 67/33 : deux tiers de vos economies pour l'epargne dure, un tiers pour le plaisir. L'equilibre empeche la frustration.",
+    "savoir": "La distribution 67/33 : deux tiers de vos économies pour l'épargne dure, un tiers pour le plaisir. L'équilibre empêche la frustration.",
     "faire": "Atteindre un grade minimum B cette semaine (note >= 7/10)",
-    "maitriserDesc": "Grade B ou superieur"
+    "maitriserDesc": "Grade B ou supérieur"
   },
   "S27": {
-    "savoir": "Le surplus au-dela du target EPR est du capital libre. C'est l'accelerateur de vos projets.",
-    "faire": "Depasser le target EPR (economies > target)",
-    "maitriserDesc": "Economies > target EPR hebdomadaire"
+    "savoir": "Le surplus au-delà du target EPR est du capital libre. C'est l'accélérateur de vos projets.",
+    "faire": "Dépasser le target EPR (économies > target)",
+    "maitriserDesc": "Économies > target EPR hebdomadaire"
   },
   "S28": {
-    "savoir": "4 semaines consecutives d'economies positives = formation d'habitude. Votre cerveau commence a le faire automatiquement.",
-    "faire": "Avoir 4 semaines consecutives avec economies > 0",
-    "maitriserDesc": "4 dernieres semaines toutes positives"
+    "savoir": "4 semaines consécutives d'économies positives = formation d'habitude. Votre cerveau commence à le faire automatiquement.",
+    "faire": "Avoir 4 semaines consécutives avec économies > 0",
+    "maitriserDesc": "4 dernières semaines toutes positives"
   },
   "S29": {
-    "savoir": "Le calendrier de performance est votre miroir financier. Les semaines vertes sont vos victoires, les rouges vos lecons.",
+    "savoir": "Le calendrier de performance est votre miroir financier. Les semaines vertes sont vos victoires, les rouges vos leçons.",
     "faire": "Consulter le calendrier dans l'onglet Performance",
-    "maitriserDesc": "Historique de performance consulte (4+ semaines enregistrees)"
+    "maitriserDesc": "Historique de performance consulté (4+ semaines enregistrées)"
   },
   "S30": {
-    "savoir": "La tendance importe plus que le resultat isole. 3 semaines de hausse valent plus qu'1 semaine parfaite.",
+    "savoir": "La tendance importe plus que le résultat isolé. 3 semaines de hausse valent plus qu'1 semaine parfaite.",
     "faire": "Avoir un trend haussier sur le score financier",
     "maitriserDesc": "Tendance du score = hausse"
   },
   "S31": {
-    "savoir": "Objectif vs Realise : la section qui montre si votre plan tient la route. Un ecart > 20% demande un ajustement.",
-    "faire": "Avoir un prorata d'execution entre 80% et 120%",
+    "savoir": "Objectif vs Réalisé : la section qui montre si votre plan tient la route. Un écart > 20% demande un ajustement.",
+    "faire": "Avoir un prorata d'exécution entre 80% et 120%",
     "maitriserDesc": "Progression globale entre 80-120%"
   },
   "S32": {
-    "savoir": "Le grade A n'est pas un luxe. C'est accessible si vous depensez moins de 70% de votre budget hebdomadaire.",
+    "savoir": "Le grade A n'est pas un luxe. C'est accessible si vous dépensez moins de 70% de votre budget hebdomadaire.",
     "faire": "Obtenir un grade A ou A+ cette semaine",
     "maitriserDesc": "Grade A ou A+"
   },
   "S33": {
-    "savoir": "La fin de mois est le piege classique : les depenses s'accumulent, le budget fond. Anticipez en depensant moins en debut de mois.",
+    "savoir": "La fin de mois est le piège classique : les dépenses s'accumulent, le budget fond. Anticipez en dépensant moins en début de mois.",
     "faire": "Terminer la semaine sous 80% du budget",
-    "maitriserDesc": "Taux d'execution < 80%"
+    "maitriserDesc": "Taux d'exécution < 80%"
   },
   "S34": {
-    "savoir": "Chaque objectif atteint prouve que vous avez la capacite d'atteindre le suivant. La confiance financiere se construit par la preuve.",
-    "faire": "Avoir au moins 1 objectif d'epargne complete",
-    "maitriserDesc": "1+ objectif complete"
+    "savoir": "Chaque objectif atteint prouve que vous avez la capacité d'atteindre le suivant. La confiance financière se construit par la preuve.",
+    "faire": "Avoir au moins 1 objectif d'épargne complété",
+    "maitriserDesc": "1+ objectif complété"
   },
   "S35": {
     "savoir": "Le score financier au-dessus de 70 place dans les 20% des meilleurs gestionnaires. Au-dessus de 80, dans les 10%.",
@@ -196,58 +196,58 @@
   },
   "S36": {
     "savoir": "Bilan T3 : 9 mois de discipline. Votre tirelire et vos objectifs racontent votre transformation.",
-    "faire": "Avoir un cumul d'economies positif significatif",
+    "faire": "Avoir un cumul d'économies positif significatif",
     "maitriserDesc": "Tirelire nette > 0 avec 20+ semaines d'historique"
   },
   "S37": {
-    "savoir": "Tout le monde a des mauvaises semaines. Le maitre financier limite les degats et rebondit la semaine suivante.",
-    "faire": "Si depassement la semaine precedente : revenir sous budget cette semaine",
-    "maitriserDesc": "Rebond apres depassement, ou semaine sous budget"
+    "savoir": "Tout le monde a des mauvaises semaines. Le maître financier limite les dégâts et rebondit la semaine suivante.",
+    "faire": "Si dépassement la semaine précédente : revenir sous budget cette semaine",
+    "maitriserDesc": "Rebond après dépassement, ou semaine sous budget"
   },
   "S38": {
-    "savoir": "Le fonds d'urgence n'est pas un objectif — c'est une obligation. Il doit representer 3x vos depenses mensuelles.",
-    "faire": "Objectif urgence a >= 50% de progression",
-    "maitriserDesc": "Objectif urgence >= 50% complete"
+    "savoir": "Le fonds d'urgence n'est pas un objectif — c'est une obligation. Il doit représenter 3x vos dépenses mensuelles.",
+    "faire": "Objectif urgence à >= 50% de progression",
+    "maitriserDesc": "Objectif urgence >= 50% complété"
   },
   "S39": {
-    "savoir": "La regularite des revenus se mesure sur 8 semaines. Si vous atteignez 80% de vos previsions, votre modele est solide.",
-    "faire": "Avoir des revenus enregistres regulierement",
-    "maitriserDesc": "Revenus enregistres dans au moins 4 des 8 dernieres semaines"
+    "savoir": "La régularité des revenus se mesure sur 8 semaines. Si vous atteignez 80% de vos prévisions, votre modèle est solide.",
+    "faire": "Avoir des revenus enregistrés régulièrement",
+    "maitriserDesc": "Revenus enregistrés dans au moins 4 des 8 dernières semaines"
   },
   "S40": {
     "savoir": "Le stress financier diminue de 60% quand on a un plan ET qu'on le suit. Le plan seul ne suffit pas.",
-    "faire": "Score REG >= 80 ET score PRE >= 70 (via score financier sauvegarde)",
-    "maitriserDesc": "Regularite forte + precision budgetaire solide"
+    "faire": "Score REG >= 80 ET score PRE >= 70 (via score financier sauvegardé)",
+    "maitriserDesc": "Régularité forte + précision budgétaire solide"
   },
   "S41": {
-    "savoir": "L'An 2 du plan double l'objectif EPR. Si vous maitrisez l'An 1, l'An 2 est une acceleration naturelle, pas un choc.",
-    "faire": "Avoir 10+ semaines avec grade B ou superieur dans l'historique",
+    "savoir": "L'An 2 du plan double l'objectif EPR. Si vous maîtrisez l'An 1, l'An 2 est une accélération naturelle, pas un choc.",
+    "faire": "Avoir 10+ semaines avec grade B ou supérieur dans l'historique",
     "maitriserDesc": "10+ semaines grade B/A/A+"
   },
   "S42": {
-    "savoir": "3 objectifs d'epargne actifs = diversification du futur. Urgence + Plaisir + Projet = equilibre parfait.",
-    "faire": "Avoir 3 objectifs actifs de categories differentes",
-    "maitriserDesc": "3 objectifs actifs, 3 icones differentes"
+    "savoir": "3 objectifs d'épargne actifs = diversification du futur. Urgence + Plaisir + Projet = équilibre parfait.",
+    "faire": "Avoir 3 objectifs actifs de catégories différentes",
+    "maitriserDesc": "3 objectifs actifs, 3 icônes différentes"
   },
   "S43": {
-    "savoir": "Vos 5 leviers de score financier sont comme les 5 doigts de la main. Le plus faible determine la force de votre prise.",
+    "savoir": "Vos 5 leviers de score financier sont comme les 5 doigts de la main. Le plus faible détermine la force de votre prise.",
     "faire": "Avoir les 5 leviers du score au-dessus de 50",
     "maitriserDesc": "Tous les leviers >= 50"
   },
   "S44": {
-    "savoir": "Le patrimoine ne se construit pas en un jour, mais il se construit chaque jour. Votre regularite des 11 derniers mois le prouve.",
-    "faire": "Score de regularite d'epargne (REG) >= 85",
+    "savoir": "Le patrimoine ne se construit pas en un jour, mais il se construit chaque jour. Votre régularité des 11 derniers mois le prouve.",
+    "faire": "Score de régularité d'épargne (REG) >= 85",
     "maitriserDesc": "Levier REG >= 85"
   },
   "S45": {
-    "savoir": "Les 3 dernieres semaines de l'annee sont les plus difficiles (fetes, pressions sociales). Tenir le cap ici, c'est l'ultime preuve de maitrise.",
-    "faire": "Maintenir le budget sous 90% malgre la periode",
-    "maitriserDesc": "Taux d'execution <= 90%"
+    "savoir": "Les 3 dernières semaines de l'année sont les plus difficiles (fêtes, pressions sociales). Tenir le cap ici, c'est l'ultime preuve de maîtrise.",
+    "faire": "Maintenir le budget sous 90% malgré la période",
+    "maitriserDesc": "Taux d'exécution <= 90%"
   },
   "S46": {
-    "savoir": "Chaque contribution a vos objectifs est un vote pour la personne que vous voulez devenir.",
-    "faire": "Contribuer a au moins 2 objectifs differents cette semaine",
-    "maitriserDesc": "Contributions a 2+ objectifs differents"
+    "savoir": "Chaque contribution à vos objectifs est un vote pour la personne que vous voulez devenir.",
+    "faire": "Contribuer à au moins 2 objectifs différents cette semaine",
+    "maitriserDesc": "Contributions à 2+ objectifs différents"
   },
   "S47": {
     "savoir": "Score financier >= 75 sur 48 semaines. Vous faites partie des 15% qui terminent ce qu'ils commencent.",
@@ -255,8 +255,8 @@
     "maitriserDesc": "Score >= 75"
   },
   "S48": {
-    "savoir": "Bilan annuel : comptez vos objectifs atteints, vos economies cumulees, votre progression de score. Vous n'etes plus la meme personne qu'a la S1.",
-    "faire": "Avoir complete au moins 40 defis sur 48",
-    "maitriserDesc": "40+ defis completes"
+    "savoir": "Bilan annuel : comptez vos objectifs atteints, vos économies cumulées, votre progression de score. Vous n'êtes plus la même personne qu'à la S1.",
+    "faire": "Avoir complété au moins 40 défis sur 48",
+    "maitriserDesc": "40+ défis complétés"
   }
 }

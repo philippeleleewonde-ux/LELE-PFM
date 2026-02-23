@@ -105,7 +105,7 @@ export function ImpactSimulation({ label, amount, analysis, onBack, onClose }: I
 
     addTransaction({
       profile_id: 'local',
-      type: t('impulse.transactionType') as TransactionType,
+      type: 'Imprévue' as TransactionType,
       category: purchaseCategory,
       label,
       amount,

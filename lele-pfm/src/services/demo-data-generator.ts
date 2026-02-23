@@ -21,14 +21,14 @@ function roundTo(n: number, step: number): number {
 // ─── Constants ───
 
 const PROFILES = [
-  'Salarié', 'Indépendant', 'Fonctionnaire', 'Étudiant', 'Retraité',
-  'Entrepreneur', 'Intérimaire', 'Auto-entrepreneur', 'Sans emploi',
-  'Cadre', 'Profession libérale', 'Agriculteur',
+  'salarie', 'independant', 'fonctionnaire', 'etudiant', 'retraite',
+  'entrepreneur', 'interimaire', 'autoEntrepreneur', 'sansEmploi',
+  'cadre', 'professionLiberale', 'agriculteur',
 ] as const;
 
 const SITUATIONS = [
-  'Célibataire', 'En couple', 'Pacsé(e)', 'Marié(e)',
-  'Séparé(e)', 'Divorcé(e)', 'Veuf/Veuve',
+  'celibataire', 'enCouple', 'pacse', 'marie',
+  'separe', 'divorce', 'veuf',
 ] as const;
 
 const ENGAGEMENT_LEVELS = ['beginner', 'curious', 'active', 'expert'] as const;

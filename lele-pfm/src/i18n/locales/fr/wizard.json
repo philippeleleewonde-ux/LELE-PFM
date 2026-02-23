@@ -20,7 +20,7 @@
     "calculatingProfile": "Calcul de votre profil financier"
   },
   "step1": {
-    "demoButton": "Donnees de demo",
+    "demoButton": "Données de démo",
     "professionalProfile": "Profil professionnel",
     "selectProfession": "Sélectionnez votre situation professionnelle actuelle",
     "familySituation": "Situation familiale",
@@ -258,15 +258,15 @@
     "confirm": "Confirmer",
     "unsupported": "Reconnaissance vocale non disponible",
     "unsupportedHint": "Utilisez Chrome ou Edge sur ordinateur",
-    "listening": "Ecoute en cours...",
+    "listening": "Écoute en cours...",
     "tapToSpeak": "Appuyez pour parler",
-    "retry": "Reessayer",
+    "retry": "Réessayer",
     "redo": "Refaire",
     "validate": "Valider",
     "amount": "Montant",
-    "category": "Categorie",
+    "category": "Catégorie",
     "description": "Description",
-    "descriptionPlaceholder": "Ex: Supermarche, Taxi...",
+    "descriptionPlaceholder": "Ex: Supermarché, Taxi...",
     "transcript": "Transcription",
     "auto": "(auto)",
     "close": "Fermer"
@@ -331,7 +331,7 @@
     "locatifs": "Revenus locatifs",
     "aides": "Aides / Allocations",
     "freelance": "Freelance / Missions",
-    "dividendes": "Dividendes / Interets",
+    "dividendes": "Dividendes / Intérêts",
     "pension": "Pension",
     "autres_revenus": "Autres revenus"
   },
@@ -344,9 +344,9 @@
     "logement": "Logement",
     "alimentation": "Alimentation",
     "transport": "Transport",
-    "sante": "Sante",
-    "telecom": "Telecom & Abonnements",
-    "education": "Education",
+    "sante": "Santé",
+    "telecom": "Télécom & Abonnements",
+    "education": "Éducation",
     "loisirs": "Loisirs & Sorties",
     "habillement": "Habillement & Divers"
   }

@@ -24,7 +24,7 @@ export function WeeklyChallengeCard({ week, year }: WeeklyChallengeCardProps = {
     onReadSavoir,
     onManualFaire,
   } = useWeeklyChallenge(week, year);
-  const { t } = useTranslation('tracking');
+  const { t } = useTranslation(['tracking', 'challenges']);
   const { width } = useWindowDimensions();
   const isSmall = width < 360;
 
@@ -52,9 +52,9 @@ export function WeeklyChallengeCard({ week, year }: WeeklyChallengeCardProps = {
 
       {/* Module info */}
       <View style={styles.moduleRow}>
-        <Text style={styles.moduleTitle}>{challenge.moduleTitle}</Text>
+        <Text style={styles.moduleTitle}>{t(`challenges:${challenge.moduleTitle}`)}</Text>
         <Text style={[styles.diffBadge, { color: diffColor }]}>
-          {DIFFICULTY_LABELS[challenge.difficulty]}
+          {t(`challenges:${DIFFICULTY_LABELS[challenge.difficulty]}`)}
         </Text>
       </View>
 
@@ -72,7 +72,7 @@ export function WeeklyChallengeCard({ week, year }: WeeklyChallengeCardProps = {
         <View style={styles.savoirBox}>
           <BookOpen size={16} color="#22D3EE" />
           <Text style={[styles.savoirText, isSmall && { fontSize: 13 }]}>
-            {challenge.savoir}
+            {t(`challenges:${challenge.savoir}`)}
           </Text>
           <Pressable onPress={onReadSavoir} style={styles.savoirBtn}>
             <Text style={styles.savoirBtnText}>{t('challenge.understood')}</Text>
@@ -83,7 +83,7 @@ export function WeeklyChallengeCard({ week, year }: WeeklyChallengeCardProps = {
         <View style={styles.savoirDone}>
           <CheckCircle size={14} color="#22D3EE" />
           <Text style={styles.savoirDoneText} numberOfLines={2}>
-            {challenge.savoir.slice(0, 80)}...
+            {t(`challenges:${challenge.savoir}`).slice(0, 80)}...
           </Text>
         </View>
       )}
@@ -95,7 +95,7 @@ export function WeeklyChallengeCard({ week, year }: WeeklyChallengeCardProps = {
           <View style={styles.faireContent}>
             <Text style={styles.faireLabel}>{t('challenge.actionLabel')}</Text>
             <Text style={[styles.faireText, isSmall && { fontSize: 13 }]}>
-              {challenge.faire}
+              {t(`challenges:${challenge.faire}`)}
             </Text>
           </View>
           {conditionMet ? (
@@ -122,7 +122,7 @@ export function WeeklyChallengeCard({ week, year }: WeeklyChallengeCardProps = {
             styles.maitriserStatus,
             { color: conditionMet ? '#4ADE80' : '#52525B' },
           ]}>
-            {conditionMet ? t('challenge.validatedBang') : challenge.maitriserDesc}
+            {conditionMet ? t('tracking:challenge.validatedBang') : t(`challenges:${challenge.maitriserDesc}`)}
           </Text>
         </View>
       )}

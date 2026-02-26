@@ -1,11 +1,21 @@
 import React from 'react';
 import { View, Text, Pressable, StyleSheet, useWindowDimensions } from 'react-native';
-import { ChevronRight, Check, Zap } from 'lucide-react-native';
+import { ChevronRight, Check, CheckCircle, Zap, Shield, Scale, Rocket, Sliders, Pause } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
 import { GOAL_CATEGORIES } from '@/constants/goal-categories';
 import { SavingsGoal } from '@/stores/savings-goal-store';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { formatCurrency } from '@/services/format-helpers';
+import { getWeekNumber, getISOYear } from '@/utils/week-helpers';
+import { SCENARIO_COLORS, type ScenarioId } from '@/domain/calculators/savings-scenario-engine';
+
+const SCENARIO_ICONS: Record<ScenarioId, React.ComponentType<any>> = {
+  prudent: Shield,
+  equilibre: Scale,
+  ambitieux: Rocket,
+  accelere: Zap,
+  custom: Sliders,
+};
 
 interface SavingsGoalCardProps {
   goal: SavingsGoal;
@@ -29,6 +39,17 @@ export function SavingsGoalCard({ goal, onPress, onContribute }: SavingsGoalCard
   // Progress bar color: cyan normal, gold >80%, green if complete
   const progressColor = goal.isCompleted ? '#4ADE80' : progressPercent >= 80 ? '#FBBF24' : '#22D3EE';
 
+  // Plan info
+  const hasPlan = !!goal.plan;
+  const plan = goal.plan;
+  const planColor = plan ? SCENARIO_COLORS[plan.scenarioId] ?? '#60A5FA' : '#60A5FA';
+  const ScenarioIcon = plan ? SCENARIO_ICONS[plan.scenarioId] : null;
+  const isPaused = plan?.status === 'paused';
+  const adherenceRate = plan && plan.weeksExecuted > 0
+    ? Math.min(100, Math.round((plan.planContributions / (plan.weeklyAmount * plan.weeksExecuted)) * 100))
+    : 0;
+  const adherenceColor = adherenceRate >= 90 ? '#4ADE80' : adherenceRate >= 70 ? '#FBBF24' : '#F87171';
+
   // Deadline calculation
   let deadlineBadge: string | null = null;
   let isOverdue = false;
@@ -44,6 +65,19 @@ export function SavingsGoalCard({ goal, onPress, onContribute }: SavingsGoalCard
     }
   }
 
+  // This week contributions
+  const now = new Date();
+  const currentWeek = getWeekNumber(now);
+  const currentYear = getISOYear(now);
+  const thisWeekContribs = goal.contributions.filter((c) => {
+    const d = new Date(c.date);
+    return getWeekNumber(d) === currentWeek && getISOYear(d) === currentYear;
+  });
+  const thisWeekTotal = thisWeekContribs.reduce((s, c) => s + c.amount, 0);
+  const thisWeekPlan = thisWeekContribs.filter((c) => c.source === 'plan').reduce((s, c) => s + c.amount, 0);
+  const thisWeekExtra = thisWeekContribs.filter((c) => c.source === 'extra').reduce((s, c) => s + c.amount, 0);
+  const thisWeekAuto = thisWeekContribs.filter((c) => c.source === 'auto').reduce((s, c) => s + c.amount, 0);
+
   // Last contribution
   const lastContrib = goal.contributions.length > 0 ? goal.contributions[0] : null;
 
@@ -54,13 +88,14 @@ export function SavingsGoalCard({ goal, onPress, onContribute }: SavingsGoalCard
         style={[
           styles.card,
           goal.isCompleted && styles.cardCompleted,
+          isPaused && styles.cardPaused,
         ]}
       >
         {/* Header row */}
         <View style={styles.headerRow}>
           <View style={styles.headerLeft}>
             {Icon && <Icon size={18} color={goal.isCompleted ? '#FBBF24' : cat.color} />}
-            <Text style={[styles.goalName, isSmall && { fontSize: 14 }]} numberOfLines={1}>
+            <Text style={[styles.goalName, isSmall && { fontSize: 14 }, isPaused && { opacity: 0.6 }]} numberOfLines={1}>
               {goal.name}
             </Text>
           </View>
@@ -68,13 +103,32 @@ export function SavingsGoalCard({ goal, onPress, onContribute }: SavingsGoalCard
             <View style={styles.checkBadge}>
               <Check size={14} color="#4ADE80" />
             </View>
+          ) : isPaused ? (
+            <View style={styles.pauseBadge}>
+              <Pause size={12} color="#71717A" />
+            </View>
           ) : (
             <ChevronRight size={16} color="#52525B" />
           )}
         </View>
 
-        {/* Allocation badge */}
-        {!goal.isCompleted && goal.allocation && goal.allocation.mode !== 'manual' && (
+        {/* Plan badge (replaces old allocation badge) */}
+        {hasPlan && plan && !goal.isCompleted && (
+          <View style={[styles.planBadge, { backgroundColor: planColor + '12', borderColor: planColor + '30' }]}>
+            {ScenarioIcon && <ScenarioIcon size={11} color={planColor} />}
+            <Text style={[styles.planBadgeText, { color: planColor }]}>
+              {t(`scenarios.${plan.scenarioId}`)} | {formatCurrency(plan.weeklyAmount)}{t('scenarios.perWeek')}
+            </Text>
+            {isPaused && (
+              <View style={styles.pauseTag}>
+                <Text style={styles.pauseTagText}>PAUSE</Text>
+              </View>
+            )}
+          </View>
+        )}
+
+        {/* Legacy allocation badge */}
+        {!hasPlan && !goal.isCompleted && goal.allocation && goal.allocation.mode !== 'manual' && (
           <View style={styles.allocationBadge}>
             <Zap size={11} color="#A78BFA" />
             <Text style={styles.allocationBadgeText}>
@@ -107,11 +161,53 @@ export function SavingsGoalCard({ goal, onPress, onContribute }: SavingsGoalCard
           </Text>
         </View>
 
-        {/* Completed badge */}
-        {goal.isCompleted && (
-          <View style={styles.completedBadge}>
+        {/* Plan adherence mini bar */}
+        {hasPlan && plan && plan.weeksExecuted > 0 && !goal.isCompleted && (
+          <View style={styles.adherenceRow}>
+            <View style={styles.adherenceBarBg}>
+              <View style={[styles.adherenceBarFill, { width: `${adherenceRate}%`, backgroundColor: adherenceColor }]} />
+            </View>
+            <Text style={[styles.adherenceText, { color: adherenceColor }]}>{adherenceRate}%</Text>
+          </View>
+        )}
+
+        {/* This week badge */}
+        {thisWeekTotal > 0 && !goal.isCompleted && (
+          <View style={styles.thisWeekBadge}>
+            {hasPlan ? (
+              <Text style={styles.thisWeekText}>
+                {thisWeekPlan > 0 && `+${formatCurrency(thisWeekPlan)} ${t('scenarios.planTag').toLowerCase()}`}
+                {thisWeekPlan > 0 && thisWeekExtra > 0 && ' + '}
+                {thisWeekExtra > 0 && `${formatCurrency(thisWeekExtra)} ${t('scenarios.extraTag').toLowerCase()}`}
+                {thisWeekPlan === 0 && thisWeekExtra === 0 && `+${formatCurrency(thisWeekTotal)} ${t('goals.thisWeek')}`}
+              </Text>
+            ) : (
+              <>
+                <Text style={styles.thisWeekText}>
+                  +{formatCurrency(thisWeekTotal)} {t('goals.thisWeek')}
+                </Text>
+                {thisWeekAuto > 0 && (
+                  <View style={styles.autoTag}>
+                    <Zap size={9} color="#A78BFA" />
+                    <Text style={styles.autoTagText}>AUTO</Text>
+                  </View>
+                )}
+              </>
+            )}
+          </View>
+        )}
+
+        {/* Completed badge — differentiated */}
+        {goal.isCompleted && goal.expenseValidated && (
+          <View style={styles.validatedBadge}>
+            <CheckCircle size={12} color="#4ADE80" />
+            <Text style={styles.validatedText}>{t('maturity.expenseValidated')}</Text>
+          </View>
+        )}
+        {goal.isCompleted && !goal.expenseValidated && (
+          <View style={styles.pendingValidationBadge}>
             <Check size={12} color="#FBBF24" />
-            <Text style={styles.completedText}>{t('reporting.goalReached')}</Text>
+            <Text style={styles.pendingValidationText}>{t('maturity.pendingValidation')}</Text>
           </View>
         )}
 
@@ -134,10 +230,17 @@ export function SavingsGoalCard({ goal, onPress, onContribute }: SavingsGoalCard
           </Text>
         )}
 
-        {/* Contribute button */}
+        {/* Contribute / Validate button */}
         {!goal.isCompleted && (
           <Pressable onPress={onContribute} style={styles.contributeBtn}>
-            <Text style={styles.contributeBtnText}>{t('reporting.contributeBtn')}</Text>
+            <Text style={styles.contributeBtnText}>
+              {hasPlan ? t('scenarios.extraContribution') : t('reporting.contributeBtn')}
+            </Text>
+          </Pressable>
+        )}
+        {goal.isCompleted && !goal.expenseValidated && (
+          <Pressable onPress={onPress} style={styles.validateBtn}>
+            <Text style={styles.validateBtnText}>{t('maturity.validateCTA')}</Text>
           </Pressable>
         )}
       </GlassCard>
@@ -153,6 +256,9 @@ const styles = StyleSheet.create({
   cardCompleted: {
     borderWidth: 1,
     borderColor: 'rgba(251,189,35,0.3)',
+  },
+  cardPaused: {
+    opacity: 0.75,
   },
   headerRow: {
     flexDirection: 'row',
@@ -180,6 +286,44 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  pauseBadge: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: 'rgba(113,113,122,0.2)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  // ── Plan badge ──
+  planBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    alignSelf: 'flex-start',
+    borderRadius: 6,
+    borderWidth: 1,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    marginBottom: 8,
+  },
+  planBadgeText: {
+    fontSize: 10,
+    fontWeight: '700',
+  },
+  pauseTag: {
+    backgroundColor: 'rgba(113,113,122,0.2)',
+    borderRadius: 3,
+    paddingHorizontal: 4,
+    paddingVertical: 1,
+    marginLeft: 4,
+  },
+  pauseTagText: {
+    color: '#71717A',
+    fontSize: 8,
+    fontWeight: '800',
+    letterSpacing: 0.5,
+  },
+  // ── Legacy allocation badge ──
   allocationBadge: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -225,7 +369,47 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '800',
   },
-  completedBadge: {
+  // ── Adherence mini bar ──
+  adherenceRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginBottom: 6,
+  },
+  adherenceBarBg: {
+    flex: 1,
+    height: 3,
+    backgroundColor: 'rgba(255,255,255,0.06)',
+    borderRadius: 2,
+    overflow: 'hidden',
+  },
+  adherenceBarFill: {
+    height: 3,
+    borderRadius: 2,
+  },
+  adherenceText: {
+    fontSize: 10,
+    fontWeight: '700',
+    minWidth: 28,
+    textAlign: 'right',
+  },
+  validatedBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: 'rgba(74,222,128,0.1)',
+    borderRadius: 8,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    alignSelf: 'flex-start',
+    marginTop: 4,
+  },
+  validatedText: {
+    color: '#4ADE80',
+    fontSize: 12,
+    fontWeight: '700',
+  },
+  pendingValidationBadge: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
@@ -236,7 +420,7 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-start',
     marginTop: 4,
   },
-  completedText: {
+  pendingValidationText: {
     color: '#FBBF24',
     fontSize: 12,
     fontWeight: '700',
@@ -253,6 +437,37 @@ const styles = StyleSheet.create({
     color: '#71717A',
     fontSize: 11,
     fontWeight: '600',
+  },
+  thisWeekBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    alignSelf: 'flex-start',
+    backgroundColor: 'rgba(34,211,238,0.08)',
+    borderRadius: 6,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    marginBottom: 4,
+  },
+  thisWeekText: {
+    color: '#22D3EE',
+    fontSize: 11,
+    fontWeight: '700',
+  },
+  autoTag: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 2,
+    backgroundColor: 'rgba(167,139,250,0.12)',
+    borderRadius: 4,
+    paddingHorizontal: 4,
+    paddingVertical: 1,
+  },
+  autoTagText: {
+    color: '#A78BFA',
+    fontSize: 8,
+    fontWeight: '800',
+    letterSpacing: 0.5,
   },
   lastContrib: {
     color: '#52525B',
@@ -271,6 +486,21 @@ const styles = StyleSheet.create({
   },
   contributeBtnText: {
     color: '#22D3EE',
+    fontSize: 13,
+    fontWeight: '700',
+  },
+  validateBtn: {
+    marginTop: 10,
+    height: 38,
+    borderRadius: 12,
+    backgroundColor: 'rgba(74,222,128,0.12)',
+    borderWidth: 1,
+    borderColor: 'rgba(74,222,128,0.3)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  validateBtnText: {
+    color: '#4ADE80',
     fontSize: 13,
     fontWeight: '700',
   },

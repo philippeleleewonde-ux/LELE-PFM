@@ -23,6 +23,8 @@
     "remainingToBudget": "Resta por gastar",
     "scoreLabel": "Puntaje financiero",
     "spentOf": "{{spent}} gastado de {{budget}}",
+    "goalAllocated": "a objetivos",
+    "goalsLabel": "Metas",
     "tipOfTheDay": "Consejo del dia",
     "accounts": "Cuentas",
     "addAccount": "Agregar",

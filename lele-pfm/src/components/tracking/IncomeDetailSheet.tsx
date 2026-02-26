@@ -54,7 +54,7 @@ export function IncomeDetailSheet({ visible, source, onClose, onAddIncome }: Inc
       <Animated.View style={[styles.sheet, { maxHeight: height * (isSmall ? 0.85 : 0.75), transform: [{ translateY }] }]}>
         <View style={styles.header}>
           <View>
-            <Text style={styles.title}>{source.label}</Text>
+            <Text style={styles.title}>{t(source.label)}</Text>
             <Text style={styles.subtitle}>
               {formatCurrency(source.weeklyActual)}
               {source.weeklyExpected > 0 && ` / ${formatCurrency(source.weeklyExpected)} ${t('incomeDetail.expected')}`}

@@ -30,11 +30,25 @@ export interface ActiveCompensation {
   purchaseLabel: string;
 }
 
+export interface DetailedCompensation {
+  purchaseId: string;
+  purchaseLabel: string;
+  purchaseAmount: number;
+  purchaseDate: string;
+  category: COICOPCode;
+  weeklyReduction: number;
+  totalWeeks: number;
+  currentWeekIndex: number;     // 1-based (semaine 3 sur 8)
+  remainingWeeks: number;       // semaines restantes apres celle-ci
+  remainingToCompensate: number; // weeklyReduction * remainingWeeks
+}
+
 interface ImpulseState {
   purchases: ImpulsePurchase[];
   addPurchase: (p: Omit<ImpulsePurchase, 'id'>) => void;
   clearPurchases: () => void;
   getActiveCompensations: (week: number, year: number) => ActiveCompensation[];
+  getDetailedCompensations: (week: number, year: number) => DetailedCompensation[];
 }
 
 function isCompensationActive(
@@ -76,6 +90,33 @@ export const useImpulseStore = create<ImpulseState>()(
                 category: comp.category,
                 weeklyReduction: comp.weeklyReduction,
                 purchaseLabel: purchase.label,
+              });
+            }
+          }
+        }
+        return result;
+      },
+
+      getDetailedCompensations: (week, year) => {
+        const result: DetailedCompensation[] = [];
+        const currentAbsolute = year * 52 + week;
+        for (const purchase of get().purchases) {
+          for (const comp of purchase.compensations) {
+            if (isCompensationActive(comp, week, year)) {
+              const compAbsolute = comp.startYear * 52 + comp.startWeek;
+              const currentWeekIndex = currentAbsolute - compAbsolute + 1;
+              const remainingWeeks = comp.totalWeeks - currentWeekIndex;
+              result.push({
+                purchaseId: purchase.id,
+                purchaseLabel: purchase.label,
+                purchaseAmount: purchase.amount,
+                purchaseDate: purchase.date,
+                category: comp.category,
+                weeklyReduction: comp.weeklyReduction,
+                totalWeeks: comp.totalWeeks,
+                currentWeekIndex,
+                remainingWeeks,
+                remainingToCompensate: comp.weeklyReduction * remainingWeeks,
               });
             }
           }

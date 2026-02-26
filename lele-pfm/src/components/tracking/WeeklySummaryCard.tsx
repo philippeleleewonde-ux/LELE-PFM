@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import {
@@ -11,12 +11,14 @@ import { getGradeColor, getNoteColor, WeeklySavingsResult } from '@/domain/calcu
 import { usePerformanceStore } from '@/stores/performance-store';
 import { useInvestmentStore } from '@/stores/investment-store';
 import { useIncomeStore } from '@/stores/income-store';
-import { useSavingsGoalStore } from '@/stores/savings-goal-store';
+import { addAutoContributionsWithAudit } from '@/services/goal-contribution-service';
 import { useViewMode } from '@/hooks/useViewMode';
 import { useFinancialScore } from '@/hooks/useFinancialScore';
 import { useWeeklyAllocation } from '@/hooks/useWeeklyAllocation';
+import { useActiveCompensations } from '@/hooks/useActiveCompensations';
 import { getCurrentWeek, getWeekRangeLabel } from '@/utils/week-helpers';
 import { GOAL_CATEGORIES, GoalIcon } from '@/constants/goal-categories';
+import { SCENARIO_COLORS } from '@/domain/calculators/savings-scenario-engine';
 
 interface WeeklySummaryCardProps {
   week: number;
@@ -27,6 +29,9 @@ interface WeeklySummaryCardProps {
   savings: WeeklySavingsResult;
   planYear: 1 | 2 | 3;
   currentQuarter: 1 | 2 | 3 | 4;
+  catchUpBanner?: string | null;
+  /** Total engaged by active savings plans (Sinking Fund) */
+  planCommitment?: number;
 }
 
 export function WeeklySummaryCard({
@@ -38,6 +43,8 @@ export function WeeklySummaryCard({
   savings,
   planYear,
   currentQuarter,
+  catchUpBanner,
+  planCommitment = 0,
 }: WeeklySummaryCardProps) {
   const { t } = useTranslation('tracking');
   const saveWeeklyRecord = usePerformanceStore((s) => s.saveWeeklyRecord);
@@ -58,7 +65,7 @@ export function WeeklySummaryCard({
   const leverScoresRef = React.useRef<Record<string, number>>({});
   leverScoresRef.current = levers.reduce((acc, l) => ({ ...acc, [l.code]: l.score }), {} as Record<string, number>);
 
-  // Auto-save weekly record when savings change
+  // Auto-save weekly record when savings or allocation change
   useEffect(() => {
     if (weeklyBudget > 0 && weeklySpent > 0) {
       saveWeeklyRecord({
@@ -81,6 +88,13 @@ export function WeeklySummaryCard({
         tauxExecution: savings.tauxExecution,
         financialScore: financialScoreRef.current,
         leverScores: leverScoresRef.current,
+        // Waterfall real values (Bug #4 fix — these override engine theoretical values)
+        waterfallEpargne: allocation.epargne,
+        waterfallDiscretionnaire: allocation.discretionnaire,
+        waterfallTotalEpargne: allocation.totalEpargne,
+        waterfallGoalAllocations: allocation.totalGoals,
+        waterfallPlanAllocations: allocation.totalPendingPlan,
+        _schemaVersion: 1,
       });
 
       if (isInvestor && savings.investissement > 0) {
@@ -92,12 +106,13 @@ export function WeeklySummaryCard({
         });
       }
     }
-  }, [week, year, weeklyBudget, weeklyTarget, weeklySpent, savings, isInvestor]);
+  }, [week, year, weeklyBudget, weeklyTarget, weeklySpent, savings, isInvestor, allocation]);
 
-  // ── Auto-allocation side-effect ──
-  const addAutoContributions = useSavingsGoalStore((s) => s.addAutoContributions);
+  // ── Auto-allocation side-effect (legacy only — plan provisioning moved to usePlanProvisioning) ──
   const autoAllocatedRef = useRef<string>('');
+  const [autoAllocBanner, setAutoAllocBanner] = useState(false);
 
+  // Legacy auto-allocations (fixed/deadline/percent modes — NOT plan)
   useEffect(() => {
     const { week: currentW, year: currentY } = getCurrentWeek();
     const isRealWeek = week === currentW && year === currentY;
@@ -109,31 +124,42 @@ export function WeeklySummaryCard({
     );
     if (pending.length === 0) return;
 
-    // Guard: don't re-trigger for the same week
     const weekTag = `${week}-${year}`;
     if (autoAllocatedRef.current === weekTag) return;
     autoAllocatedRef.current = weekTag;
 
-    addAutoContributions(
+    // Use audit service — creates contributions + internal transfer transactions (ISA 500)
+    addAutoContributionsWithAudit(
       pending.map((p) => ({
         goalId: p.goalId,
         amount: p.allocatedAmount,
         weekKey: p.weekKey,
       }))
     );
-  }, [week, year, savings.economies, allocation.pendingAutoAllocations, addAutoContributions]);
+
+    setAutoAllocBanner(true);
+    setTimeout(() => setAutoAllocBanner(false), 4000);
+  }, [week, year, savings.economies, allocation.pendingAutoAllocations]);
 
   if (weeklyBudget <= 0) return null;
 
+  const compensationSummary = useActiveCompensations(week, year);
+
   const hasGoals = allocation.goalAllocations.length > 0;
+  const hasPlanAllocations = allocation.planAllocations.length > 0;
   const hasImpulse = allocation.impulseTotal > 0;
+  const hasOngoingCompensation = compensationSummary.hasActiveCompensations && !hasImpulse;
+  const pendingAutoCount = allocation.pendingAutoAllocations.filter((p) => p.alreadyDone).length
+    || allocation.pendingAutoAllocations.filter((p) => !p.alreadyDone).length;
+  const totalPendingAutoAmount = allocation.pendingAutoAllocations.reduce((s, p) => s + p.allocatedAmount, 0)
+    + allocation.planAllocations.reduce((s, p) => s + p.actualAllocated, 0);
 
   return (
     <GlassCard variant="dark" style={styles.card}>
       {/* ── Header ── */}
       <View style={styles.header}>
         <Award size={18} color={getGradeColor(savings.grade)} />
-        <Text style={styles.title}>Bilan {getWeekRangeLabel(week, year)}</Text>
+        <Text style={styles.title}>{t('summary.assessment')} {getWeekRangeLabel(week, year)}</Text>
         <View style={[styles.gradeBadge, { backgroundColor: getGradeColor(savings.grade) + '20', borderColor: getGradeColor(savings.grade) + '40' }]}>
           <Text style={[styles.gradeText, { color: getGradeColor(savings.grade) }]}>
             {savings.grade}
@@ -141,9 +167,27 @@ export function WeeklySummaryCard({
         </View>
       </View>
 
+      {/* ── Catch-up banner (Sinking Fund retroactive) ── */}
+      {catchUpBanner && (
+        <View style={styles.catchUpBanner}>
+          <Shield size={12} color="#22D3EE" />
+          <Text style={styles.catchUpBannerText}>{catchUpBanner}</Text>
+        </View>
+      )}
+
+      {/* ── Auto-allocation banner ── */}
+      {autoAllocBanner && totalPendingAutoAmount > 0 && (
+        <View style={styles.autoAllocBanner}>
+          <Zap size={12} color="#4ADE80" />
+          <Text style={styles.autoAllocBannerText}>
+            {t('goals.autoAllocated', { count: pendingAutoCount, amount: formatCurrency(totalPendingAutoAmount) })}
+          </Text>
+        </View>
+      )}
+
       {/* ── Note ── */}
       <View style={styles.noteRow}>
-        <Text style={styles.noteLabel}>Note</Text>
+        <Text style={styles.noteLabel}>{t('summary.note')}</Text>
         <Text style={[styles.noteValue, { color: getNoteColor(savings.note) }]}>
           {savings.note}/10
         </Text>
@@ -192,12 +236,22 @@ export function WeeklySummaryCard({
                 <Shield size={13} color={allocation.eprAtteint ? '#4ADE80' : '#FBBF24'} />
                 <Text style={styles.eprLabel}>{t('summary.eprRealized')}</Text>
               </View>
-              <Text style={[styles.eprValue, { color: allocation.eprAtteint ? '#4ADE80' : '#FBBF24' }]}>
-                {formatCurrency(allocation.eprProvision)}
-                {allocation.surplus > 0 && (
-                  <Text style={{ color: '#4ADE80', fontSize: 11 }}> +{formatCurrency(allocation.surplus)}</Text>
+              <View style={styles.eprValueCol}>
+                <Text style={[styles.eprValue, { color: allocation.eprAtteint ? '#4ADE80' : '#FBBF24' }]}>
+                  {formatCurrency(allocation.eprProvision)}
+                  {allocation.surplus > 0 && planCommitment <= 0 && (
+                    <Text style={{ color: '#4ADE80', fontSize: 11 }}> +{formatCurrency(allocation.surplus)}</Text>
+                  )}
+                  {allocation.surplus > 0 && planCommitment > 0 && (
+                    <Text style={{ color: '#4ADE80', fontSize: 11 }}> +{formatCurrency(Math.max(0, allocation.surplus - allocation.totalPendingPlan))} {t('scenarios.libre')}</Text>
+                  )}
+                </Text>
+                {allocation.surplus > 0 && planCommitment > 0 && allocation.totalPendingPlan > 0 && (
+                  <Text style={styles.planEngagedText}>
+                    ({formatCurrency(allocation.totalPendingPlan)} {t('scenarios.planDeduction')})
+                  </Text>
                 )}
-              </Text>
+              </View>
             </View>
           </View>
 
@@ -211,6 +265,16 @@ export function WeeklySummaryCard({
               <AlertTriangle size={12} color="#FBBF24" />
               <Text style={styles.impulseBannerText}>
                 {t('summary.impulseMessage')} ({formatCurrency(allocation.impulseTotal)}), {t('summary.impulseExtra')} {formatCurrency(allocation.economiesIfNoImpulse)}
+              </Text>
+            </View>
+          )}
+
+          {/* Ongoing compensation banner (not the purchase week) */}
+          {hasOngoingCompensation && (
+            <View style={styles.compensationBanner}>
+              <Shield size={12} color="#A78BFA" />
+              <Text style={styles.compensationBannerText}>
+                {t('compensation.summaryBanner', { amount: formatCurrency(compensationSummary.totalWeeklyReduction) })} ({compensationSummary.activePurchaseCount} {compensationSummary.activePurchaseCount > 1 ? 'achats' : 'achat'})
               </Text>
             </View>
           )}
@@ -230,6 +294,44 @@ export function WeeklySummaryCard({
                     </View>
                     <Text style={[styles.cascadeValue, { color: g.goalColor }]}>
                       {formatCurrency(g.amount)}
+                    </Text>
+                  </View>
+                );
+              })}
+            </View>
+          )}
+
+          {/* Plan allocations (both pending and already-done) */}
+          {hasPlanAllocations && (
+            <View style={styles.cascadeSection}>
+              {allocation.planAllocations.map((pa) => {
+                const color = SCENARIO_COLORS[pa.scenarioId] ?? '#60A5FA';
+                return (
+                  <View key={pa.goalId} style={styles.cascadeRow}>
+                    <View style={styles.cascadeItem}>
+                      <Target size={13} color={pa.alreadyDone ? color : color + '80'} />
+                      <Text style={styles.cascadeLabel} numberOfLines={1}>
+                        {pa.goalName}
+                      </Text>
+                      <View style={[styles.planTag, { backgroundColor: color + '20' }]}>
+                        <Text style={[styles.planTagText, { color }]}>{t('scenarios.planTag')}</Text>
+                      </View>
+                      {pa.alreadyDone && (
+                        <View style={styles.doneBadge}>
+                          <Text style={styles.doneBadgeText}>OK</Text>
+                        </View>
+                      )}
+                    </View>
+                    <Text style={[
+                      styles.cascadeValue,
+                      { color: pa.isPartial ? '#FBBF24' : color },
+                    ]}>
+                      {formatCurrency(pa.actualAllocated)}
+                      {pa.isPartial && (
+                        <Text style={{ color: '#71717A', fontSize: 10 }}>
+                          /{formatCurrency(pa.planWeeklyAmount)}
+                        </Text>
+                      )}
                     </Text>
                   </View>
                 );
@@ -278,6 +380,11 @@ export function WeeklySummaryCard({
                     Net: {formatCurrency(allocation.discretionnaireNet)}
                   </Text>
                 </>
+              )}
+              {hasOngoingCompensation && (
+                <Text style={styles.compensationNote}>
+                  ({t('compensation.budgetReduced', { amount: formatCurrency(compensationSummary.totalWeeklyReduction) })})
+                </Text>
               )}
             </View>
           </View>
@@ -427,6 +534,15 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: '700',
   },
+  eprValueCol: {
+    alignItems: 'flex-end',
+  },
+  planEngagedText: {
+    color: '#60A5FA',
+    fontSize: 10,
+    fontWeight: '500',
+    textAlign: 'right',
+  },
   // ── Cascade ──
   cascadeDivider: {
     height: 1,
@@ -485,6 +601,30 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: '700',
   },
+  planTag: {
+    borderRadius: 4,
+    paddingHorizontal: 5,
+    paddingVertical: 1,
+    marginLeft: 4,
+  },
+  planTagText: {
+    fontSize: 8,
+    fontWeight: '800',
+    letterSpacing: 0.5,
+  },
+  doneBadge: {
+    backgroundColor: 'rgba(74,222,128,0.15)',
+    borderRadius: 3,
+    paddingHorizontal: 4,
+    paddingVertical: 1,
+    marginLeft: 2,
+  },
+  doneBadgeText: {
+    color: '#4ADE80',
+    fontSize: 7,
+    fontWeight: '800',
+    letterSpacing: 0.3,
+  },
   // ── Distribution ──
   distributionRow: {
     flexDirection: 'row',
@@ -514,6 +654,30 @@ const styles = StyleSheet.create({
     color: '#FBBF24',
     fontSize: 10,
     fontWeight: '700',
+  },
+  compensationBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: 'rgba(167,139,250,0.06)',
+    borderRadius: 8,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    marginBottom: 10,
+    borderWidth: 1,
+    borderColor: 'rgba(167,139,250,0.12)',
+  },
+  compensationBannerText: {
+    color: '#A78BFA',
+    fontSize: 10,
+    fontWeight: '500',
+    flex: 1,
+  },
+  compensationNote: {
+    color: '#A78BFA',
+    fontSize: 9,
+    fontWeight: '600',
+    marginTop: 1,
   },
   // ── Debt banner ──
   debtBanner: {
@@ -554,6 +718,44 @@ const styles = StyleSheet.create({
     color: '#52525B',
     fontSize: 9,
     fontWeight: '700',
+  },
+  // ── Auto-allocation banner ──
+  autoAllocBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: 'rgba(74,222,128,0.06)',
+    borderRadius: 8,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    marginBottom: 10,
+    borderWidth: 1,
+    borderColor: 'rgba(74,222,128,0.15)',
+  },
+  autoAllocBannerText: {
+    color: '#4ADE80',
+    fontSize: 10,
+    fontWeight: '600',
+    flex: 1,
+  },
+  // ── Catch-up banner ──
+  catchUpBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: 'rgba(34,211,238,0.06)',
+    borderRadius: 8,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    marginBottom: 10,
+    borderWidth: 1,
+    borderColor: 'rgba(34,211,238,0.15)',
+  },
+  catchUpBannerText: {
+    color: '#22D3EE',
+    fontSize: 10,
+    fontWeight: '600',
+    flex: 1,
   },
   // ── Income ──
   incomeSection: {

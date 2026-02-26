@@ -98,6 +98,29 @@ export function getWeekRangeLabel(week: number, year: number): string {
 }
 
 /**
+ * Get all ISO weeks between two week/year pairs (inclusive).
+ * Used by plan catch-up mechanism (Sinking Fund retroactive provisioning).
+ */
+export function getWeeksBetween(
+  startWeek: number,
+  startYear: number,
+  endWeek: number,
+  endYear: number,
+): Array<{ week: number; year: number }> {
+  const result: Array<{ week: number; year: number }> = [];
+  const { start: startDate } = getWeekDates(startWeek, startYear);
+  const { start: endDate } = getWeekDates(endWeek, endYear);
+
+  const d = new Date(startDate);
+  while (d <= endDate) {
+    result.push({ week: getWeekNumber(d), year: getISOYear(d) });
+    d.setUTCDate(d.getUTCDate() + 7);
+  }
+
+  return result;
+}
+
+/**
  * Check if a date falls within a given ISO week.
  */
 export function isDateInWeek(date: Date, week: number, year: number): boolean {

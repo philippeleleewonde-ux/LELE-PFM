@@ -19,7 +19,9 @@
     "income": "Receitas",
     "balance": "Saldo",
     "debtWarning": "Excesso nao compensado",
-    "goalLine": "Bolso Projetos"
+    "goalLine": "Bolso Projetos",
+    "assessment": "Balanco",
+    "note": "Nota"
   },
   "progress": {
     "spent": "Gasto",
@@ -163,7 +165,11 @@
     "confirmDeletion": "Confirmar exclusao",
     "deleteGoal": "Excluir",
     "daysRemaining": "{{days}}d restantes",
-    "overdue": "vencido"
+    "overdue": "vencido",
+    "thisWeek": "esta semana",
+    "weeklyAllocated": "+{{amount}} esta sem.",
+    "ofSurplus": "do excedente",
+    "autoAllocated": "Auto-alocado: {{count}} meta(s), {{amount}}"
   },
   "incomeCard": {
     "received": "Recebido",
@@ -306,5 +312,16 @@
   },
   "weekNavigator": {
     "thisWeek": "esta semana"
+  },
+  "compensation": {
+    "title": "COMPENSACAO ATIVA",
+    "weekProgress": "Semana {{current}} de {{total}}",
+    "weeklyReduction": "-{{amount}}/sem",
+    "totalReduction": "Total reducoes esta semana",
+    "remaining": "Resta a compensar",
+    "summaryBanner": "Compensacao ativa: -{{amount}}/sem",
+    "budgetReduced": "orcamento reduzido em {{amount}}",
+    "dashboardHint": "Compensacao impulsiva: -{{amount}}/sem",
+    "lastWeek": "Ultima semana"
   }
 }

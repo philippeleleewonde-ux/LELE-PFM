@@ -23,6 +23,8 @@
     "remainingToBudget": "Remaining to spend",
     "scoreLabel": "Financial score",
     "spentOf": "{{spent}} spent out of {{budget}}",
+    "goalAllocated": "to goals",
+    "goalsLabel": "Goals",
     "tipOfTheDay": "Tip of the day",
     "accounts": "Accounts",
     "addAccount": "Add",

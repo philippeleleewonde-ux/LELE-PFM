@@ -5,15 +5,19 @@
  *
  * ECONOMIES REALISEES (Budget - Depenses)
  *   │
+ *   ├── Niveau 0 : PLAN RING-FENCE (Sinking Fund / LDI / DCA)
+ *   │   = MIN(planDesired, economies)
+ *   │   → obligation contractuelle, prioritaire
+ *   │   → Ref: Brealey & Myers (Sinking Fund), Das (GBI)
+ *   │
  *   ├── Niveau 1 : EPR Provision (plancher discipline)
  *   │   = MIN(economies, target_hebdo)
- *   │   → mesure la note/grade
+ *   │   → mesure la note/grade (scoring inchange)
  *   │
- *   ├── Niveau 2 : SURPLUS = economies - EPR
+ *   ├── Niveau 2 : SURPLUS AJUSTE = MAX(0, economies - planAllocated - EPR)
+ *   │   [surplus = ce qui reste apres plan + EPR]
  *   │
- *   │   ├── Poche PROJETS (objectifs d'epargne)
- *   │   │   = contributions manuelles + auto-allocations
- *   │   │   Plafonne au surplus disponible
+ *   │   ├── Poche PROJETS (contributions manuelles + auto legacy)
  *   │   │
  *   │   ├── Poche EPARGNE (67% du reste)
  *   │   │   → matelas de securite long terme
@@ -22,7 +26,7 @@
  *   │       → argent libre
  *   │       → achats impulsifs deduits en priorite
  *   │
- *   └── TOTAL = EPR + Projets + Epargne + Liberte = Economies ✓
+ *   └── TOTAL = Plan + EPR(net) + Projets + Epargne + Liberte = Economies ✓
  */
 
 import { useMemo } from 'react';
@@ -31,6 +35,7 @@ import { useImpulseStore } from '@/stores/impulse-store';
 import { useInvestmentStore } from '@/stores/investment-store';
 import { WeeklySavingsResult } from '@/domain/calculators/weekly-savings-engine';
 import { getWeekNumber, getISOYear } from '@/utils/week-helpers';
+import type { ScenarioId } from '@/domain/calculators/savings-scenario-engine';
 
 // ─── Distribution ratios (same as weekly-savings-engine) ───
 const EPARGNE_RATIO = 0.67;
@@ -56,17 +61,32 @@ export interface PendingAutoAllocation {
   alreadyDone: boolean;
 }
 
+export interface PlanAllocationInfo {
+  goalId: string;
+  goalName: string;
+  planWeeklyAmount: number;     // engagement plan
+  actualAllocated: number;      // reel cette semaine
+  isPartial: boolean;           // actual < planned
+  scenarioId: ScenarioId;
+  alreadyDone: boolean;         // plan contribution already made this week
+}
+
 export interface WeeklyAllocation {
   // ── Source ──
   economies: number;
+
+  // ── Niveau 0 : Plan ring-fence (Sinking Fund) ──
+  planAllocations: PlanAllocationInfo[];
+  totalPendingPlan: number;
 
   // ── Niveau 1 : EPR (mesure discipline) ──
   eprProvision: number;
   eprTarget: number;
   eprAtteint: boolean;
 
-  // ── Niveau 2 : Surplus ──
-  surplus: number;
+  // ── Niveau 2 : Surplus ajuste ──
+  surplus: number;         // surplus brut (economies - EPR)
+  adjustedSurplus: number; // surplus apres plan ring-fence
 
   // ── Poche Projets ──
   goalAllocations: GoalAllocation[];
@@ -76,7 +96,7 @@ export interface WeeklyAllocation {
   pendingAutoAllocations: PendingAutoAllocation[];
   totalPendingAuto: number;
 
-  // ── Distribution du reste (surplus - goals - pendingAuto) ──
+  // ── Distribution du reste ──
   remainder: number;
   epargne: number;        // 67% du remainder
   investissement: number; // part investissement (si profil investisseur)
@@ -112,20 +132,100 @@ export function useWeeklyAllocation(
   return useMemo(() => {
     const { economies, eprProvision, surplus, weeklyTarget } = savings;
 
-    // ── Niveau 1 : EPR ──
+    // ═══════════════════════════════════════════════════════════════
+    // NIVEAU 0 : PLAN RING-FENCE (Sinking Fund / LDI / DCA)
+    // Plans are funded from TOTAL economies, not just surplus.
+    // This is the contractual obligation — ring-fenced, prioritaire.
+    // ═══════════════════════════════════════════════════════════════
+    const planWeekKey = `Plan S${week}-${year}`;
+    const planAllocations: PlanAllocationInfo[] = [];
+
+    const activePlanGoals = goals.filter(
+      (g) => !g.isCompleted && g.plan && g.plan.status === 'active' && g.allocation?.mode === 'plan'
+    );
+
+    for (const goal of activePlanGoals) {
+      if (!goal.plan) continue;
+      const totalContributed = goal.contributions.reduce((s, c) => s + c.amount, 0);
+      const planRemaining = Math.max(0, goal.targetAmount - totalContributed);
+
+      const doneContrib = goal.contributions.find(
+        (c) => c.source === 'plan' && c.label === planWeekKey
+      );
+
+      if (doneContrib) {
+        // Already executed this week — show as done
+        planAllocations.push({
+          goalId: goal.id,
+          goalName: goal.name,
+          planWeeklyAmount: goal.plan.weeklyAmount,
+          actualAllocated: doneContrib.amount,
+          isPartial: doneContrib.amount < goal.plan.weeklyAmount,
+          scenarioId: goal.plan.scenarioId,
+          alreadyDone: true,
+        });
+      } else if (planRemaining > 0 && economies > 0) {
+        // Pending — fund from total economies (ring-fenced)
+        const desiredAmount = Math.min(goal.plan.weeklyAmount, planRemaining);
+        planAllocations.push({
+          goalId: goal.id,
+          goalName: goal.name,
+          planWeeklyAmount: goal.plan.weeklyAmount,
+          actualAllocated: desiredAmount,
+          isPartial: false,
+          scenarioId: goal.plan.scenarioId,
+          alreadyDone: false,
+        });
+      }
+    }
+
+    // Prorate pending plans if total exceeds available economies
+    const donePlanAllocations = planAllocations.filter((p) => p.alreadyDone);
+    const pendingPlanAllocations = planAllocations.filter((p) => !p.alreadyDone);
+    const totalDonePlan = donePlanAllocations.reduce((s, p) => s + p.actualAllocated, 0);
+    const totalPendingPlanDesired = pendingPlanAllocations.reduce((s, p) => s + p.actualAllocated, 0);
+
+    // Plan draws from total economies (ring-fence)
+    const availableForPlans = Math.max(0, economies - totalDonePlan);
+
+    if (totalPendingPlanDesired > availableForPlans && totalPendingPlanDesired > 0) {
+      const ratio = availableForPlans / totalPendingPlanDesired;
+      for (const p of pendingPlanAllocations) {
+        p.actualAllocated = Math.round(p.actualAllocated * ratio);
+        p.isPartial = p.actualAllocated < p.planWeeklyAmount;
+      }
+    }
+
+    const totalPendingPlan = totalDonePlan + pendingPlanAllocations.reduce((s, p) => s + p.actualAllocated, 0);
+
+    // ═══════════════════════════════════════════════════════════════
+    // NIVEAU 1 : EPR (scoring inchange)
+    // EPR measures discipline: economies vs target. Not affected by plan.
+    // ═══════════════════════════════════════════════════════════════
     const eprAtteint = eprProvision >= weeklyTarget;
 
-    // ── Niveau 2 : Manual goal contributions this week ──
+    // ═══════════════════════════════════════════════════════════════
+    // NIVEAU 2 : SURPLUS AJUSTE
+    // After plan ring-fence, what's left for distribution
+    // adjustedSurplus = MAX(0, economies - planAllocated - eprProvision)
+    // ═══════════════════════════════════════════════════════════════
+    const adjustedSurplus = Math.max(0, economies - totalPendingPlan - eprProvision);
+
+    // ── Manual/extra goal contributions this week ──
     const goalAllocations: GoalAllocation[] = [];
     let rawGoalTotal = 0;
 
     for (const goal of goals) {
-      // Include both active and recently completed goals for this week
       const weekContribs = goal.contributions.filter((c) => {
         const d = new Date(c.date);
         return getWeekNumber(d) === week && getISOYear(d) === year;
       });
-      const total = weekContribs.reduce((s, c) => s + c.amount, 0);
+      // Plan/auto contributions shown separately
+      const hasPlanMode = goal.plan && goal.allocation?.mode === 'plan';
+      const relevantContribs = hasPlanMode
+        ? weekContribs.filter((c) => c.source === 'manual' || c.source === 'extra')
+        : weekContribs.filter((c) => c.source !== 'auto');
+      const total = relevantContribs.reduce((s, c) => s + c.amount, 0);
       if (total > 0) {
         goalAllocations.push({
           goalId: goal.id,
@@ -138,15 +238,14 @@ export function useWeeklyAllocation(
       }
     }
 
-    // Cap goal contributions to surplus
-    const totalGoals = Math.min(rawGoalTotal, surplus);
+    const totalGoals = Math.min(rawGoalTotal, adjustedSurplus);
 
-    // ── Niveau 2b : Auto-allocations (pure calculation) ──
+    // ── Auto-allocations (legacy modes: fixed/deadline/percent) ──
     const weekKey = `Auto S${week}-${year}`;
     const pendingAutoAllocations: PendingAutoAllocation[] = [];
 
     const activeAutoGoals = goals.filter(
-      (g) => !g.isCompleted && g.allocation && g.allocation.mode !== 'manual'
+      (g) => !g.isCompleted && g.allocation && g.allocation.mode !== 'manual' && g.allocation.mode !== 'plan'
     );
 
     for (const goal of activeAutoGoals) {
@@ -155,7 +254,6 @@ export function useWeeklyAllocation(
       const remaining = Math.max(0, goal.targetAmount - totalContributed);
       if (remaining <= 0) continue;
 
-      // Check if already done for this week
       const alreadyDone = goal.contributions.some(
         (c) => c.source === 'auto' && c.label === weekKey
       );
@@ -179,7 +277,7 @@ export function useWeeklyAllocation(
 
         case 'percent':
           desiredAmount = Math.min(
-            Math.round(surplus * (allocation.percentAmount ?? 0) / 100),
+            Math.round(adjustedSurplus * (allocation.percentAmount ?? 0) / 100),
             remaining
           );
           break;
@@ -190,7 +288,7 @@ export function useWeeklyAllocation(
           goalId: goal.id,
           goalName: goal.name,
           desiredAmount,
-          allocatedAmount: desiredAmount, // will be prorated below if needed
+          allocatedAmount: desiredAmount,
           mode: allocation.mode,
           weekKey,
           alreadyDone,
@@ -198,8 +296,8 @@ export function useWeeklyAllocation(
       }
     }
 
-    // Prorate if total desired exceeds available surplus (after manual goals)
-    const availableSurplusForAuto = Math.max(0, surplus - totalGoals);
+    // Prorate auto-allocations if needed
+    const availableSurplusForAuto = Math.max(0, adjustedSurplus - totalGoals);
     const totalDesired = pendingAutoAllocations
       .filter((p) => !p.alreadyDone)
       .reduce((s, p) => s + p.desiredAmount, 0);
@@ -213,15 +311,15 @@ export function useWeeklyAllocation(
       }
     }
 
-    // Total pending auto (only not-yet-done entries count towards remainder reduction)
     const totalPendingAuto = pendingAutoAllocations
       .filter((p) => !p.alreadyDone)
       .reduce((s, p) => s + p.allocatedAmount, 0);
 
-    // ── Niveau 3 : Distribution du reste ──
-    // Note: already-done auto allocations are already counted in goalAllocations
-    // since they exist as real contributions. Only pending ones reduce remainder.
-    const remainder = Math.max(0, surplus - totalGoals - totalPendingAuto);
+    // ═══════════════════════════════════════════════════════════════
+    // NIVEAU 3 : Distribution du reste
+    // remainder = adjustedSurplus - goals - auto
+    // ═══════════════════════════════════════════════════════════════
+    const remainder = Math.max(0, adjustedSurplus - totalGoals - totalPendingAuto);
     const investRatio = investmentRatio / 100;
     const effectiveEpargneRatio = EPARGNE_RATIO - investRatio;
 
@@ -240,7 +338,7 @@ export function useWeeklyAllocation(
 
     // ── Informationnel ──
     const economiesIfNoImpulse = economies + impulseTotal;
-    const availableForGoals = Math.max(0, surplus - totalGoals - totalPendingAuto);
+    const availableForGoals = Math.max(0, adjustedSurplus - totalGoals - totalPendingAuto);
 
     // Total epargne = EPR provision + epargne from distribution
     const totalEpargne = eprProvision + epargne;
@@ -251,6 +349,9 @@ export function useWeeklyAllocation(
       eprTarget: weeklyTarget,
       eprAtteint,
       surplus,
+      adjustedSurplus,
+      planAllocations,
+      totalPendingPlan,
       goalAllocations,
       totalGoals,
       pendingAutoAllocations,

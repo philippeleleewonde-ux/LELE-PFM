@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Pressable, Text, StyleSheet } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { GOAL_CATEGORIES, GOAL_ICON_CODES, GoalIcon } from '@/constants/goal-categories';
 
 interface GoalIconSelectorProps {
@@ -8,6 +9,7 @@ interface GoalIconSelectorProps {
 }
 
 export function GoalIconSelector({ selected, onSelect }: GoalIconSelectorProps) {
+  const { t } = useTranslation('tracking');
   return (
     <View style={styles.grid}>
       {GOAL_ICON_CODES.map((code) => {
@@ -32,7 +34,7 @@ export function GoalIconSelector({ selected, onSelect }: GoalIconSelectorProps) 
               ]}
               numberOfLines={1}
             >
-              {cat.label}
+              {t(cat.label)}
             </Text>
           </Pressable>
         );

@@ -7,7 +7,7 @@ import { useTransactionStore } from '@/stores/transaction-store';
 import { useImpulseStore } from '@/stores/impulse-store';
 import { COICOPCode, TransactionType } from '@/types';
 import { getWeekNumber, getISOYear, formatDateISO } from '@/utils/week-helpers';
-import { CategorySelector } from '@/components/tracking/CategorySelector';
+import { CategorySelector, CATEGORY_CONFIGS } from '@/components/tracking/CategorySelector';
 import { ImpulseAnalysis } from '@/hooks/useImpulseCheck';
 
 type SubStep = 'simulation' | 'compensation' | 'confirmation';
@@ -40,9 +40,9 @@ export function ImpactSimulation({ label, amount, analysis, onBack, onClose }: I
   const [percents, setPercents] = useState<Record<string, number>>({});
   const [purchaseCategory, setPurchaseCategory] = useState<COICOPCode | null>(null);
 
-  // Only categories with budget > 0 can participate
+  // All categories can participate in compensation
   const eligibleCategories = useMemo(
-    () => analysis.impactByCategory.filter((c) => c.weeklyBudget > 0),
+    () => analysis.impactByCategory,
     [analysis.impactByCategory],
   );
 
@@ -145,13 +145,18 @@ export function ImpactSimulation({ label, amount, analysis, onBack, onClose }: I
 
   // ── Sub-step B1: Simulation ──
   if (subStep === 'simulation') {
+    const canProceed = !!purchaseCategory;
     return (
       <View style={styles.container}>
         <Text style={styles.purchaseLabel} numberOfLines={1}>
           {label} — {formatAmount(amount)} {currency}
         </Text>
 
-        <Text style={styles.heading}>{t('impulse.impactHeading')}</Text>
+        {/* Category selection — choose where to classify this purchase */}
+        <Text style={styles.sectionLabel}>{t('impulse.chargeOn')}</Text>
+        <CategorySelector selected={purchaseCategory} onSelect={setPurchaseCategory} />
+
+        <Text style={[styles.heading, { marginTop: 16 }]}>{t('impulse.impactHeading')}</Text>
         <Text style={styles.subHeading}>
           {t('impulse.impactSubheading')}
         </Text>
@@ -186,9 +191,15 @@ export function ImpactSimulation({ label, amount, analysis, onBack, onClose }: I
             <ChevronLeft size={16} color="#A1A1AA" />
             <Text style={styles.backText}>{t('impulse.back')}</Text>
           </Pressable>
-          <Pressable onPress={() => setSubStep('compensation')} style={styles.primaryBtn}>
-            <Text style={styles.primaryBtnText}>{t('impulse.compensate')}</Text>
-            <ChevronRight size={16} color="#0F1014" />
+          <Pressable
+            onPress={() => setSubStep('compensation')}
+            disabled={!canProceed}
+            style={[styles.primaryBtn, !canProceed && styles.primaryBtnDisabled]}
+          >
+            <Text style={[styles.primaryBtnText, !canProceed && styles.primaryBtnTextDisabled]}>
+              {t('impulse.compensate')}
+            </Text>
+            <ChevronRight size={16} color={canProceed ? '#0F1014' : '#52525B'} />
           </Pressable>
         </View>
       </View>
@@ -353,10 +364,25 @@ export function ImpactSimulation({ label, amount, analysis, onBack, onClose }: I
         <Text style={styles.confirmValue}>{formatAmount(amount)} {currency}</Text>
       </View>
 
-      <Text style={[styles.sectionLabel, { marginTop: 16 }]}>{t('impulse.chargeOn')}</Text>
-      <CategorySelector selected={purchaseCategory} onSelect={setPurchaseCategory} />
+      {/* Show selected category as read-only badge */}
+      {purchaseCategory && (() => {
+        const catInfo = CATEGORY_CONFIGS.find((c) => c.code === purchaseCategory);
+        if (!catInfo) return null;
+        const CatIcon = catInfo.icon;
+        return (
+          <View style={styles.confirmSection}>
+            <Text style={styles.confirmLabel}>{t('impulse.chargeOn')}</Text>
+            <View style={styles.confirmCategoryBadge}>
+              <CatIcon size={16} color={catInfo.color} />
+              <Text style={[styles.confirmCategoryText, { color: catInfo.color }]}>
+                {t(`categories.${catInfo.labelKey}`)}
+              </Text>
+            </View>
+          </View>
+        );
+      })()}
 
-      <View style={[styles.confirmSection, { marginTop: 16 }]}>
+      <View style={styles.confirmSection}>
         <Text style={styles.confirmLabel}>{t('impulse.compensations', { weeks })}</Text>
         {activeReductions.map(([code, weeklyAmount]) => {
           const cat = analysis.impactByCategory.find((c) => c.code === code);
@@ -386,14 +412,8 @@ export function ImpactSimulation({ label, amount, analysis, onBack, onClose }: I
           <ChevronLeft size={16} color="#A1A1AA" />
           <Text style={styles.backText}>{t('impulse.modify')}</Text>
         </Pressable>
-        <Pressable
-          onPress={handleConfirm}
-          disabled={!purchaseCategory}
-          style={[styles.confirmBtn, !purchaseCategory && styles.primaryBtnDisabled]}
-        >
-          <Text style={[styles.confirmBtnText, !purchaseCategory && styles.primaryBtnTextDisabled]}>
-            {t('impulse.validatePurchase')}
-          </Text>
+        <Pressable onPress={handleConfirm} style={styles.confirmBtn}>
+          <Text style={styles.confirmBtnText}>{t('impulse.validatePurchase')}</Text>
         </Pressable>
       </View>
     </View>
@@ -685,6 +705,20 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 14,
     fontWeight: '600',
+  },
+  confirmCategoryBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 10,
+    backgroundColor: 'rgba(255,255,255,0.06)',
+    alignSelf: 'flex-start',
+  },
+  confirmCategoryText: {
+    fontSize: 14,
+    fontWeight: '700',
   },
   confirmCompLine: {
     color: '#D4D4D8',

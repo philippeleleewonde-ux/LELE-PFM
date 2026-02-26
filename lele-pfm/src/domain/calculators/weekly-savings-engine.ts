@@ -68,11 +68,12 @@ export interface WeeklySavingsResult {
   note: number;
   /** Grade A+ to E */
   grade: Grade;
-  /** Part épargne des économies totales */
+  /** @deprecated Use waterfall allocation (useWeeklyAllocation) for real distribution values.
+   *  Engine computes theoretical 67/33 split on total economies, ignoring goals/plans. */
   epargne: number;
-  /** Part investissement des économies totales (0 si pas investisseur) */
+  /** @deprecated Use waterfall allocation (useWeeklyAllocation) for real distribution values. */
   investissement: number;
-  /** Part discrétionnaire des économies totales */
+  /** @deprecated Use waterfall allocation (useWeeklyAllocation) for real distribution values. */
   discretionnaire: number;
   /** Budget respecté (spent ≤ budget) */
   budgetRespecte: boolean;

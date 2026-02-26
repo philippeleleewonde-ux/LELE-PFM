@@ -32,7 +32,7 @@ export function IncomeProgressRow({ source, onPress }: IncomeProgressRowProps) {
 
       <View style={styles.content}>
         <View style={styles.topRow}>
-          <Text style={styles.label} numberOfLines={1}>{source.label}</Text>
+          <Text style={styles.label} numberOfLines={1}>{t(source.label)}</Text>
           <Text style={styles.amounts}>
             <Text style={{ color: '#4ADE80', fontWeight: '700' }}>
               +{formatCurrency(source.weeklyActual)}

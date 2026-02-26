@@ -270,6 +270,14 @@ export interface Transaction {
   year: number;
   is_reconciled: boolean;
   notes: string | null;
+  /** Marks goal maturity expenses (excluded from weeklySpent) */
+  isGoalExpense?: boolean;
+  /** Links to the savings goal that triggered this expense */
+  goalId?: string;
+  /** Marks internal allocation transfers — audit trail for goal contributions (ISA 500) */
+  isInternalTransfer?: boolean;
+  /** Source of the internal transfer: goal_contribution | goal_expense */
+  transferType?: 'goal_contribution' | 'goal_expense';
   created_at: string; // ISO 8601
   updated_at: string; // ISO 8601
 }

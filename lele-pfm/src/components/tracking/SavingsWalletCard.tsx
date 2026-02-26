@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, Pressable, StyleSheet, useWindowDimensions } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { PiggyBank, Wallet, ChevronRight, Banknote } from 'lucide-react-native';
+import { PiggyBank, Wallet, ChevronRight, Banknote, Target, ShieldCheck } from 'lucide-react-native';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { formatCurrency } from '@/services/format-helpers';
 import { useSavingsWallet } from '@/hooks/useSavingsWallet';
@@ -66,6 +66,44 @@ export function SavingsWalletCard() {
                   {formatCurrency(wallet.allTimeDiscretionnaire)}
                 </Text>
                 <Text style={styles.distPercent}>33%</Text>
+              </View>
+            </View>
+          )}
+
+          {/* ── Reconciliation IAS 1.15 ── */}
+          {(wallet.allTimeValidatedGoalExpenses > 0 || wallet.allTimeGoalAllocations > 0) && (
+            <View style={styles.reconSection}>
+              <View style={styles.reconDivider} />
+              <View style={styles.reconHeader}>
+                <ShieldCheck size={12} color="#22D3EE" />
+                <Text style={styles.reconTitle}>{t('wallet.reconciliation')}</Text>
+              </View>
+              {wallet.allTimeGoalAllocations > 0 && (
+                <View style={styles.reconRow}>
+                  <Target size={11} color="#60A5FA" />
+                  <Text style={styles.reconLabel}>{t('wallet.goalAllocations')}</Text>
+                  <Text style={[styles.reconValue, { color: '#60A5FA' }]}>
+                    {formatCurrency(wallet.allTimeGoalAllocations)}
+                  </Text>
+                </View>
+              )}
+              {wallet.allTimeValidatedGoalExpenses > 0 && (
+                <View style={styles.reconRow}>
+                  <Target size={11} color="#FBBF24" />
+                  <Text style={styles.reconLabel}>{t('wallet.goalExpenses')}</Text>
+                  <Text style={[styles.reconValue, { color: '#FBBF24' }]}>
+                    -{formatCurrency(wallet.allTimeValidatedGoalExpenses)}
+                  </Text>
+                </View>
+              )}
+              <View style={styles.reconRow}>
+                <PiggyBank size={11} color="#4ADE80" />
+                <Text style={[styles.reconLabel, { color: '#E4E4E7', fontWeight: '700' }]}>
+                  {t('wallet.netDisponible')}
+                </Text>
+                <Text style={[styles.reconValue, { color: '#4ADE80', fontWeight: '800' }]}>
+                  {formatCurrency(wallet.allTimeNetDisponible)}
+                </Text>
               </View>
             </View>
           )}
@@ -188,6 +226,44 @@ const styles = StyleSheet.create({
     color: '#52525B',
     fontSize: 10,
     fontWeight: '600',
+  },
+  // ── Reconciliation ──
+  reconSection: {
+    marginBottom: 12,
+  },
+  reconDivider: {
+    height: 1,
+    backgroundColor: 'rgba(34,211,238,0.12)',
+    marginBottom: 8,
+  },
+  reconHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginBottom: 8,
+  },
+  reconTitle: {
+    color: '#22D3EE',
+    fontSize: 9,
+    fontWeight: '700',
+    letterSpacing: 1.2,
+    textTransform: 'uppercase',
+  },
+  reconRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingVertical: 3,
+  },
+  reconLabel: {
+    color: '#A1A1AA',
+    fontSize: 11,
+    fontWeight: '600',
+    flex: 1,
+  },
+  reconValue: {
+    fontSize: 12,
+    fontWeight: '700',
   },
   detailSection: {
     gap: 0,

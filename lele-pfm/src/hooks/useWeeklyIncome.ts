@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { useIncomeStore, IncomeTransaction } from '@/stores/income-store';
 import { useEngineStore } from '@/stores/engine-store';
-import { INCOME_CATEGORIES, IncomeCode } from '@/constants/income-categories';
+import { INCOME_CATEGORIES, INCOME_CODES, IncomeCode } from '@/constants/income-categories';
 
 export interface IncomeSourceTracking {
   code: IncomeCode;
@@ -32,24 +32,8 @@ export function useWeeklyIncome(week: number, year: number): WeeklyIncomeData {
       (inc) => inc.week_number === week && inc.year === year
     );
 
-    // Build per-source tracking — only for sources with targets or transactions
-    const activeSources = new Set<IncomeCode>();
-
-    // Add sources from targets
-    if (incomeTargets) {
-      for (const source of Object.keys(incomeTargets)) {
-        if (INCOME_CATEGORIES[source as IncomeCode]) {
-          activeSources.add(source as IncomeCode);
-        }
-      }
-    }
-
-    // Add sources from transactions
-    for (const inc of weekIncomes) {
-      activeSources.add(inc.source);
-    }
-
-    const bySource: IncomeSourceTracking[] = Array.from(activeSources).map((code) => {
+    // Build per-source tracking for ALL 8 income categories
+    const bySource: IncomeSourceTracking[] = INCOME_CODES.map((code) => {
       const config = INCOME_CATEGORIES[code];
       const sourceTxs = weekIncomes.filter((inc) => inc.source === code);
       const actual = sourceTxs.reduce((sum, inc) => sum + inc.amount, 0);
@@ -74,11 +58,12 @@ export function useWeeklyIncome(week: number, year: number): WeeklyIncomeData {
       };
     });
 
-    // Sort: sources with expected first, then by actual descending
+    // Sort: sources with expected first, then sources with transactions, then rest
     bySource.sort((a, b) => {
-      if (a.weeklyExpected > 0 && b.weeklyExpected === 0) return -1;
-      if (a.weeklyExpected === 0 && b.weeklyExpected > 0) return 1;
-      return b.weeklyActual - a.weeklyActual;
+      const aActive = a.weeklyExpected > 0 ? 2 : a.weeklyActual > 0 ? 1 : 0;
+      const bActive = b.weeklyExpected > 0 ? 2 : b.weeklyActual > 0 ? 1 : 0;
+      if (aActive !== bActive) return bActive - aActive;
+      return b.weeklyExpected - a.weeklyExpected;
     });
 
     const totalExpectedWeekly = bySource.reduce((sum, s) => sum + s.weeklyExpected, 0);

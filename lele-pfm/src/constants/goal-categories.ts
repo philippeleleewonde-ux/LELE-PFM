@@ -98,6 +98,20 @@ export const GOAL_CATEGORIES: Record<GoalIcon, GoalCategoryConfig> = {
   },
 };
 
+/** Map each goal icon to a COICOP category for expense validation at maturity */
+export const GOAL_ICON_TO_COICOP: Record<GoalIcon, import('@/types').COICOPCode> = {
+  voyage: '07',    // Loisirs
+  maison: '03',    // Logement
+  voiture: '05',   // Transport
+  education: '08', // Education
+  cadeau: '07',    // Loisirs
+  tech: '07',      // Loisirs
+  sante: '04',     // Sante
+  luxe: '07',      // Loisirs
+  urgence: '01',   // Alimentation (essential emergency)
+  autre: '07',     // Default
+};
+
 export const GOAL_ICON_CODES: GoalIcon[] = [
   'voyage',
   'maison',

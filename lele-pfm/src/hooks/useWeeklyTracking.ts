@@ -4,6 +4,7 @@ import { useEngineStore } from '@/stores/engine-store';
 import { useInvestmentStore } from '@/stores/investment-store';
 import { useIncomeStore } from '@/stores/income-store';
 import { useImpulseStore } from '@/stores/impulse-store';
+// savingsGoalStore no longer needed here — plan deduction moved to waterfall (useWeeklyAllocation)
 import { COICOP_CATEGORIES } from '@/constants';
 import { Transaction, COICOPCode, Nature, Grade } from '@/types';
 import { getWeekLabel, getDayOfWeek } from '@/utils/week-helpers';
@@ -99,8 +100,14 @@ export interface CategoryTracking {
 
 export interface WeeklyTrackingData {
   weekLabel: string;
-  /** Budget variable hebdomadaire (Reste à vivre / 4 = plafond de dépense) */
+  /** Budget variable hebdomadaire BRUT (Reste à vivre / 4 = plafond de dépense) */
   weeklyBudget: number;
+  /** Budget effectif après déduction des compensations et plans d'épargne actifs */
+  effectiveBudget: number;
+  /** Total des réductions de compensation actives cette semaine */
+  totalCompensation: number;
+  /** Total engagé par les plans d'épargne actifs (Sinking Fund) */
+  totalPlanCommitment: number;
   /** Objectif d'épargne hebdomadaire (pondéré par trimestre du plan) */
   weeklyTarget: number;
   weeklySpent: number;
@@ -133,7 +140,6 @@ export function useWeeklyTracking(week: number, year: number): WeeklyTrackingDat
   const allIncomes = useIncomeStore((s) => s.incomes);
   const investmentRatio = useInvestmentStore((s) => s.investorProfile?.investmentRatio ?? 0);
   const getActiveCompensations = useImpulseStore((s) => s.getActiveCompensations);
-
   return useMemo(() => {
     const weekLabel = getWeekLabel(week, year);
     const dayOfWeek = getDayOfWeek(new Date());
@@ -143,10 +149,28 @@ export function useWeeklyTracking(week: number, year: number): WeeklyTrackingDat
       (tx) => tx.week_number === week && tx.year === year
     );
 
-    const weeklySpent = weekTxs.reduce((sum, tx) => sum + tx.amount, 0);
+    // Exclude goal maturity expenses and internal transfers from spending
+    // Goal expenses: savings already counted (Bug #1)
+    // Internal transfers: audit trail entries, not real spending (ISA 500)
+    const weeklySpent = weekTxs
+      .filter((tx) => !tx.isGoalExpense && !tx.isInternalTransfer)
+      .reduce((sum, tx) => sum + tx.amount, 0);
 
-    // Budget variable hebdo = Reste à vivre × 12 / 48 (from engine step9)
+    // Budget variable hebdo BRUT = Reste à vivre × 12 / 48 (from engine step9)
     const weeklyBudget = engineOutput?.step9?.weekly_budget ?? 0;
+
+    // ─── Active compensations (dette impulsive en cours de service) ───
+    const activeCompensations = getActiveCompensations(week, year);
+    const totalCompensation = activeCompensations.reduce((sum, c) => sum + c.weeklyReduction, 0);
+
+    // ─── Plan d'épargne ───
+    // Plans are a DISTRIBUTION of savings (handled by waterfall in useWeeklyAllocation),
+    // NOT a reduction of budget. Deducting here AND in waterfall caused double-counting (Bug #3).
+    // totalPlanCommitment is kept at 0 for interface compat; waterfall handles the real deduction.
+    const totalPlanCommitment = 0;
+
+    // Budget EFFECTIF = budget brut - compensations
+    const effectiveBudget = Math.max(0, weeklyBudget - totalCompensation);
 
     // ─── Quarter-weighted EPR target ───
     // Determine plan year and quarter from engine calculatedAt
@@ -167,12 +191,12 @@ export function useWeeklyTracking(week: number, year: number): WeeklyTrackingDat
       ? getQuarterlyWeeklyTarget(eprAnnual, currentQuarter)
       : (engineOutput?.step9?.weekly_target_n1 ?? 0);
 
-    // Remaining = budget - spent (combien on peut encore dépenser)
-    const weeklyRemaining = Math.max(0, weeklyBudget - weeklySpent);
+    // Remaining = effectiveBudget - spent (combien on peut encore dépenser)
+    const weeklyRemaining = Math.max(0, effectiveBudget - weeklySpent);
 
-    // Progress = % du budget utilisé (spent / budget)
-    const progressPercent = weeklyBudget > 0
-      ? Math.round((weeklySpent / weeklyBudget) * 100)
+    // Progress = % du budget effectif utilisé (spent / effectiveBudget)
+    const progressPercent = effectiveBudget > 0
+      ? Math.round((weeklySpent / effectiveBudget) * 100)
       : 0;
 
     // Projected week total based on current spending rate
@@ -180,20 +204,22 @@ export function useWeeklyTracking(week: number, year: number): WeeklyTrackingDat
       ? Math.round(weeklySpent * (7 / dayOfWeek))
       : weeklySpent;
 
-    // On track = projected total stays within budget
-    const isOnTrack = projectedWeekTotal <= weeklyBudget;
+    // On track = projected total stays within effective budget
+    const isOnTrack = projectedWeekTotal <= effectiveBudget;
 
-    // Global weekly savings (with quarter-weighted target and investment ratio)
-    const savings = calculateWeeklySavings(weeklyBudget, weeklyTarget, weeklySpent, investmentRatio);
+    // Global weekly savings — based on EFFECTIVE budget (post-compensation)
+    // Economies = MAX(0, effectiveBudget - spent) → reflects real available resources
+    const savings = calculateWeeklySavings(effectiveBudget, weeklyTarget, weeklySpent, investmentRatio);
 
     // Build per-category tracking
     const categoryVentilation = engineOutput?.step10?.by_category;
-    const activeCompensations = getActiveCompensations(week, year);
 
     const byCategory: CategoryTracking[] = COICOP_CODES.map((code) => {
       const catConfig = COICOP_CATEGORIES[code as keyof typeof COICOP_CATEGORIES];
       const catTxs = weekTxs.filter((tx) => tx.category === code);
-      const catSpent = catTxs.reduce((sum, tx) => sum + tx.amount, 0);
+      const catSpent = catTxs
+        .filter((tx) => !tx.isGoalExpense && !tx.isInternalTransfer)
+        .reduce((sum, tx) => sum + tx.amount, 0);
 
       const catVentilation = categoryVentilation?.[code];
 
@@ -258,6 +284,9 @@ export function useWeeklyTracking(week: number, year: number): WeeklyTrackingDat
     return {
       weekLabel,
       weeklyBudget,
+      effectiveBudget,
+      totalCompensation,
+      totalPlanCommitment,
       weeklyTarget,
       weeklySpent,
       weeklyRemaining,

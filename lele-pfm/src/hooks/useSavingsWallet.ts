@@ -1,5 +1,7 @@
 import { useMemo } from 'react';
 import { usePerformanceStore, WeeklyRecord } from '@/stores/performance-store';
+import { useTransactionStore } from '@/stores/transaction-store';
+import { useSavingsGoalStore } from '@/stores/savings-goal-store';
 import { getGradeFromNote } from '@/domain/calculators/weekly-savings-engine';
 import { getCurrentWeek } from '@/utils/week-helpers';
 import { getWeeksInMonth } from '@/domain/calculators/weekly-savings-engine';
@@ -52,10 +54,22 @@ export interface SavingsWallet {
   // First and last record dates
   firstRecordDate: string | null;
   lastRecordDate: string | null;
+
+  // ─── Reconciliation (IAS 1.15 — Image fidèle) ───
+  /** Total contributions allouées aux objectifs (waterfall goal allocations cumulées) */
+  allTimeGoalAllocations: number;
+  /** Total des dépenses objectifs validées (cash sorti via maturity) */
+  allTimeValidatedGoalExpenses: number;
+  /** Total contributions internes tracées (piste d'audit ISA 500) */
+  allTimeInternalTransfers: number;
+  /** Épargne nette disponible = épargne + discrétionnaire (exclut objectifs dépensés) */
+  allTimeNetDisponible: number;
 }
 
 export function useSavingsWallet(): SavingsWallet {
   const records = usePerformanceStore((s) => s.records);
+  const transactions = useTransactionStore((s) => s.transactions);
+  const goals = useSavingsGoalStore((s) => s.goals);
   const { week: nowWeek, year: nowYear } = getCurrentWeek();
   const nowMonth = new Date().getMonth() + 1;
 
@@ -83,6 +97,10 @@ export function useSavingsWallet(): SavingsWallet {
         allWeeksSorted: [],
         firstRecordDate: null,
         lastRecordDate: null,
+        allTimeGoalAllocations: 0,
+        allTimeValidatedGoalExpenses: 0,
+        allTimeInternalTransfers: 0,
+        allTimeNetDisponible: 0,
       };
     }
 
@@ -118,11 +136,15 @@ export function useSavingsWallet(): SavingsWallet {
     let lastDate: string | null = null;
 
     for (const r of records) {
+      // Prefer waterfall values when available (Bug #4 fix), fallback to engine values
+      const epargne = r.waterfallEpargne ?? r.epargne;
+      const discretionnaire = r.waterfallDiscretionnaire ?? r.discretionnaire;
+
       // All-time
       allTimeEconomies += r.economiesCappees;
       allTimeNonDepense += r.economies; // uncapped: real budget - spent
-      allTimeEpargne += r.epargne;
-      allTimeDiscretionnaire += r.discretionnaire;
+      allTimeEpargne += epargne;
+      allTimeDiscretionnaire += discretionnaire;
       allTimeDepassement += r.depassement;
 
       // By year
@@ -133,30 +155,30 @@ export function useSavingsWallet(): SavingsWallet {
       }
       bucket.economies += r.economiesCappees;
       bucket.economiesReelles += r.economies;
-      bucket.epargne += r.epargne;
-      bucket.discretionnaire += r.discretionnaire;
+      bucket.epargne += epargne;
+      bucket.discretionnaire += discretionnaire;
       bucket.depassement += r.depassement;
       bucket.nbSemaines += 1;
 
       // Current year
       if (r.year === nowYear) {
         currentYearEconomies += r.economiesCappees;
-        currentYearEpargne += r.epargne;
-        currentYearDiscretionnaire += r.discretionnaire;
+        currentYearEpargne += epargne;
+        currentYearDiscretionnaire += discretionnaire;
 
         // Current month
         if (currentMonthWeeks.has(r.week_number)) {
           currentMonthEconomies += r.economiesCappees;
-          currentMonthEpargne += r.epargne;
-          currentMonthDiscretionnaire += r.discretionnaire;
+          currentMonthEpargne += epargne;
+          currentMonthDiscretionnaire += discretionnaire;
         }
       }
 
       // Current week
       if (r.year === nowYear && r.week_number === nowWeek) {
         currentWeekEconomies = r.economiesCappees;
-        currentWeekEpargne = r.epargne;
-        currentWeekDiscretionnaire = r.discretionnaire;
+        currentWeekEpargne = epargne;
+        currentWeekDiscretionnaire = discretionnaire;
       }
 
       // Date tracking
@@ -178,8 +200,8 @@ export function useSavingsWallet(): SavingsWallet {
 
         const economies = monthRecords.reduce((s, r) => s + r.economiesCappees, 0);
         const economiesReelles = monthRecords.reduce((s, r) => s + r.economies, 0);
-        const epargne = monthRecords.reduce((s, r) => s + r.epargne, 0);
-        const discretionnaire = monthRecords.reduce((s, r) => s + r.discretionnaire, 0);
+        const epargne = monthRecords.reduce((s, r) => s + (r.waterfallEpargne ?? r.epargne), 0);
+        const discretionnaire = monthRecords.reduce((s, r) => s + (r.waterfallDiscretionnaire ?? r.discretionnaire), 0);
         const depassement = monthRecords.reduce((s, r) => s + r.depassement, 0);
         const noteMoyenne =
           Math.round(
@@ -207,6 +229,25 @@ export function useSavingsWallet(): SavingsWallet {
       (a, b) => b.year - a.year || b.week_number - a.week_number,
     );
 
+    // ─── Reconciliation IAS 1.15 ───
+    // Goal allocations from waterfall records
+    const allTimeGoalAllocations = records.reduce(
+      (s, r) => s + (r.waterfallGoalAllocations ?? 0) + (r.waterfallPlanAllocations ?? 0), 0
+    );
+
+    // Validated goal expenses (cash actually spent on matured goals)
+    const allTimeValidatedGoalExpenses = transactions
+      .filter((tx) => tx.isGoalExpense)
+      .reduce((s, tx) => s + tx.amount, 0);
+
+    // Internal transfer transactions (audit trail for contributions)
+    const allTimeInternalTransfers = transactions
+      .filter((tx) => tx.isInternalTransfer)
+      .reduce((s, tx) => s + tx.amount, 0);
+
+    // Net disponible = épargne + discrétionnaire (already excludes goals via waterfall)
+    const allTimeNetDisponible = allTimeEpargne + allTimeDiscretionnaire;
+
     return {
       allTimeEconomies,
       allTimeNonDepense,
@@ -229,6 +270,10 @@ export function useSavingsWallet(): SavingsWallet {
       allWeeksSorted,
       firstRecordDate: firstDate,
       lastRecordDate: lastDate,
+      allTimeGoalAllocations,
+      allTimeValidatedGoalExpenses,
+      allTimeInternalTransfers,
+      allTimeNetDisponible,
     };
-  }, [records, nowWeek, nowYear, nowMonth]);
+  }, [records, transactions, goals, nowWeek, nowYear, nowMonth]);
 }

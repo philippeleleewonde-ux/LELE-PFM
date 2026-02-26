@@ -28,11 +28,15 @@ import { GlassCard } from '@/components/ui/GlassCard';
 import { ImpulseCheckModal } from '@/components/impulse/ImpulseCheckModal';
 import { useViewMode } from '@/hooks/useViewMode';
 import { SavingsGoalsSection } from '@/components/tracking/SavingsGoalsSection';
+import { GoalExpensesSection } from '@/components/tracking/GoalExpensesSection';
 import { CreateGoalModal } from '@/components/tracking/CreateGoalModal';
 import { ContributeGoalModal } from '@/components/tracking/ContributeGoalModal';
 import { GoalDetailSheet } from '@/components/tracking/GoalDetailSheet';
+import { GoalMaturityModal } from '@/components/tracking/GoalMaturityModal';
 import { WeeklyChallengeCard } from '@/components/tracking/WeeklyChallengeCard';
+import { ActiveCompensationCard } from '@/components/tracking/ActiveCompensationCard';
 import { VoiceExpenseModal } from '@/components/tracking/VoiceExpenseModal';
+import { usePlanProvisioning } from '@/hooks/usePlanProvisioning';
 
 export default function TransactionsScreen() {
   const { t } = useTranslation('app');
@@ -45,6 +49,9 @@ export default function TransactionsScreen() {
 
   const tracking = useWeeklyTracking(currentWeek, currentYear);
   const incomeData = useWeeklyIncome(currentWeek, currentYear);
+
+  // Sinking Fund / Standing Order / DCA — always runs regardless of expenses
+  const { catchUpBanner } = usePlanProvisioning(currentWeek, currentYear, tracking.effectiveBudget);
 
   // Expense modals
   const [showAddModal, setShowAddModal] = useState(false);
@@ -66,6 +73,7 @@ export default function TransactionsScreen() {
   const [showCreateGoal, setShowCreateGoal] = useState(false);
   const [contributeGoal, setContributeGoal] = useState<SavingsGoal | null>(null);
   const [detailGoalId, setDetailGoalId] = useState<string | null>(null);
+  const [maturityGoal, setMaturityGoal] = useState<SavingsGoal | null>(null);
 
   // Expandable FAB
   const [fabExpanded, setFabExpanded] = useState(false);
@@ -167,6 +175,17 @@ export default function TransactionsScreen() {
     }
   }, [detailGoalId]);
 
+  const handleValidateExpenseFromDetail = useCallback(() => {
+    if (detailGoalId) {
+      const goal = useSavingsGoalStore.getState().goals.find((g) => g.id === detailGoalId);
+      if (goal) {
+        setDetailGoalId(null);
+        // Small delay to let the detail sheet close before opening maturity modal
+        setTimeout(() => setMaturityGoal(goal), 200);
+      }
+    }
+  }, [detailGoalId]);
+
   const handleGenerateDemo = useCallback(() => {
     if (!engineOutput) return;
     const demoTxs = generateDemoTransactions(engineOutput, currency, currentWeek, currentYear);
@@ -253,9 +272,9 @@ export default function TransactionsScreen() {
         {/* Weekly Challenge */}
         <WeeklyChallengeCard week={currentWeek} year={currentYear} />
 
-        {/* Weekly Progress Card — expenses */}
+        {/* Weekly Progress Card — expenses (effective budget = post-compensation - plan) */}
         <WeeklyProgressCard
-          weeklyBudget={tracking.weeklyBudget}
+          weeklyBudget={tracking.effectiveBudget + tracking.totalPlanCommitment}
           weeklyTarget={tracking.weeklyTarget}
           weeklySpent={tracking.weeklySpent}
           weeklyRemaining={tracking.weeklyRemaining}
@@ -264,19 +283,27 @@ export default function TransactionsScreen() {
           isOnTrack={tracking.isOnTrack}
           planYear={tracking.planYear}
           currentQuarter={tracking.currentQuarter}
+          hasActiveCompensation={tracking.totalCompensation > 0}
+          planCommitment={tracking.totalPlanCommitment}
+          effectiveBudget={tracking.effectiveBudget}
         />
+
+        {/* Active Compensation Card */}
+        <ActiveCompensationCard week={currentWeek} year={currentYear} />
 
         {/* Weekly Savings Summary */}
         {tracking.weeklySpent > 0 && (
           <WeeklySummaryCard
             week={currentWeek}
             year={currentYear}
-            weeklyBudget={tracking.weeklyBudget}
+            weeklyBudget={tracking.effectiveBudget}
             weeklyTarget={tracking.weeklyTarget}
             weeklySpent={tracking.weeklySpent}
             savings={tracking.savings}
             planYear={tracking.planYear}
             currentQuarter={tracking.currentQuarter}
+            catchUpBanner={catchUpBanner}
+            planCommitment={tracking.totalPlanCommitment}
           />
         )}
 
@@ -288,6 +315,9 @@ export default function TransactionsScreen() {
           onGoalPress={handleGoalPress}
           onContribute={handleGoalContribute}
         />
+
+        {/* Goal Expenses (validated goal maturity expenses) */}
+        <GoalExpensesSection />
 
         {/* Investment Wallet (investor only) */}
         {isInvestor && <InvestmentWalletCard />}
@@ -484,7 +514,17 @@ export default function TransactionsScreen() {
         goalId={detailGoalId}
         onClose={() => setDetailGoalId(null)}
         onContribute={handleContributeFromDetail}
+        onValidateExpense={handleValidateExpenseFromDetail}
       />
+
+      {/* Goal Maturity Modal — top level (NOT nested inside another Modal) */}
+      {maturityGoal && (
+        <GoalMaturityModal
+          visible={maturityGoal !== null}
+          goal={maturityGoal}
+          onClose={() => setMaturityGoal(null)}
+        />
+      )}
 
       {/* Voice Expense Modal */}
       <VoiceExpenseModal

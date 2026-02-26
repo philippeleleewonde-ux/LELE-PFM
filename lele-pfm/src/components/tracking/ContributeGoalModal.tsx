@@ -9,14 +9,16 @@ import {
   StyleSheet,
   useWindowDimensions,
 } from 'react-native';
-import { X, PartyPopper, Info, Zap } from 'lucide-react-native';
+import { X, PartyPopper, Info, Zap, Target } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
 import { useSavingsGoalStore } from '@/stores/savings-goal-store';
+import { addContributionWithAudit } from '@/services/goal-contribution-service';
 import { formatCurrency } from '@/services/format-helpers';
 import { AmountInput } from './AmountInput';
 import { useWeeklyAllocation } from '@/hooks/useWeeklyAllocation';
 import { useWeeklyTracking } from '@/hooks/useWeeklyTracking';
 import { getCurrentWeek } from '@/utils/week-helpers';
+import { SCENARIO_COLORS } from '@/domain/calculators/savings-scenario-engine';
 
 interface ContributeGoalModalProps {
   visible: boolean;
@@ -30,10 +32,12 @@ export function ContributeGoalModal({ visible, goalId, goalName, remaining, onCl
   const { t } = useTranslation('tracking');
   const { width, height } = useWindowDimensions();
   const isSmall = width < 360;
-  const addContribution = useSavingsGoalStore((s) => s.addContribution);
   const goals = useSavingsGoalStore((s) => s.goals);
   const goal = goalId ? goals.find((g) => g.id === goalId) : null;
-  const hasAutoAllocation = goal?.allocation && goal.allocation.mode !== 'manual';
+  const hasPlan = !!goal?.plan;
+  const plan = goal?.plan;
+  const planColor = plan ? SCENARIO_COLORS[plan.scenarioId] ?? '#60A5FA' : '#60A5FA';
+  const hasAutoAllocation = !hasPlan && goal?.allocation && goal.allocation.mode !== 'manual';
   const translateY = useRef(new Animated.Value(height)).current;
 
   // Get available surplus from allocation waterfall
@@ -68,12 +72,15 @@ export function ContributeGoalModal({ visible, goalId, goalName, remaining, onCl
   }, [visible]);
 
   const isOverSurplus = availableSurplus > 0 && amount > availableSurplus;
-  const isValid = amount > 0 && label.trim().length > 0;
+  const isOverRemaining = amount > remaining;
+  // Hard-block: amount must not exceed surplus (solvability) nor remaining (over-funding) — Bug #5
+  const isValid = amount > 0 && label.trim().length > 0 && !isOverSurplus && !isOverRemaining;
 
   const handleSubmit = useCallback(() => {
     if (!isValid || !goalId) return;
 
-    addContribution(goalId, amount, label.trim());
+    // Use audit service — creates contribution + internal transfer transaction (ISA 500)
+    addContributionWithAudit(goalId, amount, label.trim(), hasPlan ? 'extra' : 'manual');
 
     if (amount >= remaining) {
       setShowCongrats(true);
@@ -84,7 +91,7 @@ export function ContributeGoalModal({ visible, goalId, goalName, remaining, onCl
     } else {
       onClose();
     }
-  }, [isValid, goalId, amount, label, remaining, addContribution, onClose]);
+  }, [isValid, goalId, amount, label, remaining, hasPlan, onClose]);
 
   return (
     <Modal visible={visible} transparent animationType="none" onRequestClose={onClose}>
@@ -103,7 +110,9 @@ export function ContributeGoalModal({ visible, goalId, goalName, remaining, onCl
             <>
               <View style={styles.header}>
                 <View style={styles.headerLeft}>
-                  <Text style={styles.title}>{t('goals.contribute')}</Text>
+                  <Text style={styles.title}>
+                    {hasPlan ? t('scenarios.extraContribution') : t('goals.contribute')}
+                  </Text>
                   <Text style={styles.subtitle} numberOfLines={1}>
                     {goalName} — {t('goals.remaining', { amount: formatCurrency(Math.max(0, remaining)) })}
                   </Text>
@@ -114,7 +123,31 @@ export function ContributeGoalModal({ visible, goalId, goalName, remaining, onCl
               </View>
 
               <View style={[styles.body, { paddingHorizontal: isSmall ? 14 : 20 }]}>
-                {/* Auto-allocation banner */}
+                {/* Plan info banner */}
+                {hasPlan && plan && (
+                  <View style={[styles.planBanner, { borderColor: planColor + '25' }]}>
+                    <Target size={12} color={planColor} />
+                    <Text style={[styles.planBannerText, { color: planColor }]}>
+                      {t('scenarios.extraContributionInfo')}
+                    </Text>
+                  </View>
+                )}
+
+                {/* Plan summary */}
+                {hasPlan && plan && (
+                  <View style={styles.planSummaryRow}>
+                    <Text style={styles.planSummaryText}>
+                      {t('scenarios.planSummary', {
+                        plan: formatCurrency(plan.planContributions),
+                        extra: formatCurrency(plan.extraContributions),
+                        total: formatCurrency(plan.planContributions + plan.extraContributions),
+                        target: formatCurrency(goal?.targetAmount ?? 0),
+                      })}
+                    </Text>
+                  </View>
+                )}
+
+                {/* Legacy auto-allocation banner */}
                 {hasAutoAllocation && (
                   <View style={styles.autoBanner}>
                     <Zap size={12} color="#A78BFA" />
@@ -152,6 +185,13 @@ export function ContributeGoalModal({ visible, goalId, goalName, remaining, onCl
                   </Text>
                 )}
 
+                {/* Over-remaining warning */}
+                {isOverRemaining && !isOverSurplus && (
+                  <Text style={styles.overSurplusText}>
+                    {t('goals.exceedsRemaining', { amount: formatCurrency(remaining) })}
+                  </Text>
+                )}
+
                 <Text style={[styles.sectionLabel, { marginTop: 16 }]}>{t('addExpense.description')}</Text>
                 <TextInput
                   style={styles.textInput}
@@ -169,7 +209,7 @@ export function ContributeGoalModal({ visible, goalId, goalName, remaining, onCl
                 style={[styles.submitBtn, !isValid && styles.submitBtnDisabled]}
               >
                 <Text style={[styles.submitText, !isValid && styles.submitTextDisabled]}>
-                  {t('goals.contribute')}
+                  {hasPlan ? t('scenarios.extraContribution') : t('goals.contribute')}
                 </Text>
               </Pressable>
             </>
@@ -293,6 +333,36 @@ const styles = StyleSheet.create({
     color: '#A1A1AA',
     fontSize: 14,
   },
+  // ── Plan banner ──
+  planBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: 'rgba(96,165,250,0.06)',
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    marginBottom: 10,
+    borderWidth: 1,
+  },
+  planBannerText: {
+    fontSize: 12,
+    fontWeight: '600',
+    flex: 1,
+  },
+  planSummaryRow: {
+    backgroundColor: 'rgba(255,255,255,0.03)',
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    marginBottom: 14,
+  },
+  planSummaryText: {
+    color: '#71717A',
+    fontSize: 11,
+    fontWeight: '600',
+  },
+  // ── Legacy auto ──
   autoBanner: {
     flexDirection: 'row',
     alignItems: 'center',

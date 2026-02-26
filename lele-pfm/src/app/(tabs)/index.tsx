@@ -6,7 +6,7 @@ import { useAuthStore } from '../../stores/auth.store';
 import { useAppStore } from '../../stores/app.store';
 import { useEngineStore } from '../../stores/engine-store';
 import { GlassCard } from '../../components/ui/GlassCard';
-import { ArrowUpRight, TrendingUp, AlertTriangle, Shield, Wallet, RotateCcw, Award } from 'lucide-react-native';
+import { ArrowUpRight, TrendingUp, AlertTriangle, Shield, Wallet, RotateCcw, Award, Target } from 'lucide-react-native';
 
 // Dashboard Components
 import { HomeHeader } from '../../components/dashboard/HomeHeader';
@@ -28,6 +28,8 @@ import { useViewMode } from '../../hooks/useViewMode';
 import { SimpleDashboardHero } from '../../components/dashboard/SimpleDashboardHero';
 import { InvestmentSummaryCard } from '../../components/dashboard/InvestmentSummaryCard';
 import { IncomeVsExpenseCard } from '../../components/dashboard/IncomeVsExpenseCard';
+import { useActiveCompensations } from '../../hooks/useActiveCompensations';
+import { useSavingsGoals } from '../../hooks/useSavingsGoals';
 
 export default function DashboardScreen() {
   const { t } = useTranslation('app');
@@ -44,6 +46,8 @@ export default function DashboardScreen() {
   const { showSection, isSimple, isInvestor } = useViewMode();
   const { globalScore: dynamicScore, grade: dynamicGrade } = useFinancialScore();
   const hasWeeklyData = usePerformanceStore((s) => s.records.length > 0);
+  const compensationInfo = useActiveCompensations(currentWeek, currentYear);
+  const goalsAgg = useSavingsGoals();
 
   const handleResetAll = () => {
     const doReset = () => {
@@ -88,12 +92,13 @@ export default function DashboardScreen() {
         {engineOutput ? (
           <>
             {/* Simple Dashboard Hero (simple mode only) */}
-            {isSimple && weeklyTracking.weeklyBudget > 0 && (
+            {isSimple && weeklyTracking.effectiveBudget > 0 && (
               <View style={{ paddingHorizontal: 0, marginBottom: 8 }}>
                 <SimpleDashboardHero
                   grade={hasWeeklyData ? dynamicGrade : engineOutput.grade}
                   score={hasWeeklyData ? dynamicScore : engineOutput.globalScore}
-                  weeklyBudget={weeklyTracking.weeklyBudget}
+                  weeklyBudget={weeklyTracking.effectiveBudget}
+                  hasActiveCompensation={compensationInfo.hasActiveCompensations}
                   weeklySpent={weeklyTracking.weeklySpent}
                   savings={weeklyTracking.savings}
                   currentWeek={currentWeek}
@@ -176,30 +181,30 @@ export default function DashboardScreen() {
         )}
 
         {/* Mini Weekly Progress */}
-        {engineOutput && weeklyTracking.weeklyBudget > 0 && (
+        {engineOutput && weeklyTracking.effectiveBudget > 0 && (
           <Pressable onPress={() => router.push('/(tabs)/transactions')} style={miniStyles.wrapper}>
             <GlassCard variant="dark">
               <View style={miniStyles.row}>
                 <View style={miniStyles.left}>
                   <Text style={miniStyles.label}>{t('dashboard.week')} {getWeekRangeLabel(currentWeek, currentYear)} · An{weeklyTracking.planYear} T{weeklyTracking.currentQuarter}</Text>
                   <Text style={miniStyles.amounts}>
-                    <Text style={{ color: weeklyTracking.isOnTrack ? '#4ADE80' : '#F87171', fontWeight: '800' }}>
+                    <Text style={{ color: compensationInfo.hasActiveCompensations ? '#A78BFA' : weeklyTracking.isOnTrack ? '#4ADE80' : '#F87171', fontWeight: '800' }}>
                       {formatCurrency(weeklyTracking.weeklySpent)}
                     </Text>
-                    <Text style={{ color: '#52525B' }}> / {formatCurrency(weeklyTracking.weeklyBudget)}</Text>
+                    <Text style={{ color: compensationInfo.hasActiveCompensations ? '#A78BFA' : '#52525B' }}> / {formatCurrency(weeklyTracking.effectiveBudget)}</Text>
                   </Text>
                 </View>
                 <View style={miniStyles.right}>
                   {weeklyTracking.weeklySpent > 0 && (
-                    <View style={miniStyles.gradeBadge}>
+                    <View style={[miniStyles.gradeBadge, compensationInfo.hasActiveCompensations && { backgroundColor: 'rgba(167,139,250,0.1)' }]}>
                       <Text style={[miniStyles.gradeText, {
-                        color: weeklyTracking.savings.budgetRespecte ? '#4ADE80' : '#F87171'
+                        color: compensationInfo.hasActiveCompensations ? '#A78BFA' : weeklyTracking.savings.budgetRespecte ? '#4ADE80' : '#F87171'
                       }]}>
                         {weeklyTracking.savings.grade}
                       </Text>
                     </View>
                   )}
-                  <Text style={[miniStyles.percent, { color: weeklyTracking.isOnTrack ? '#4ADE80' : '#F87171' }]}>
+                  <Text style={[miniStyles.percent, { color: compensationInfo.hasActiveCompensations ? '#A78BFA' : weeklyTracking.isOnTrack ? '#4ADE80' : '#F87171' }]}>
                     {weeklyTracking.progressPercent}%
                   </Text>
                   <ArrowUpRight size={16} color="#A1A1AA" />
@@ -208,19 +213,38 @@ export default function DashboardScreen() {
               <View style={miniStyles.barBg}>
                 <View style={[miniStyles.barFill, {
                   width: `${Math.min(weeklyTracking.progressPercent, 100)}%`,
-                  backgroundColor: weeklyTracking.progressPercent > 100 ? '#F87171'
+                  backgroundColor: compensationInfo.hasActiveCompensations ? '#A78BFA'
+                    : weeklyTracking.progressPercent > 100 ? '#F87171'
                     : weeklyTracking.progressPercent > 80 ? '#FBBF24' : '#4ADE80',
                 }]} />
               </View>
               {weeklyTracking.savings.economies > 0 && (
                 <View style={miniStyles.savingsRow}>
-                  <Award size={12} color="#4ADE80" />
-                  <Text style={miniStyles.savingsText}>
+                  <Award size={12} color={compensationInfo.hasActiveCompensations ? '#A78BFA' : '#4ADE80'} />
+                  <Text style={[miniStyles.savingsText, compensationInfo.hasActiveCompensations && { color: '#A78BFA' }]}>
                     {formatCurrency(weeklyTracking.savings.economies)} {t('dashboard.saved')}
                     {weeklyTracking.savings.eprProvision >= weeklyTracking.savings.weeklyTarget
                       ? ` (${t('dashboard.eprReached')})`
                       : ` (EPR ${Math.round((weeklyTracking.savings.eprProvision / weeklyTracking.savings.weeklyTarget) * 100)}%)`
                     }
+                  </Text>
+                </View>
+              )}
+              {compensationInfo.hasActiveCompensations && (
+                <View style={miniStyles.compensationRow}>
+                  <Shield size={12} color="#A78BFA" />
+                  <Text style={miniStyles.compensationText}>
+                    {t('tracking:compensation.dashboardHint', { amount: formatCurrency(compensationInfo.totalWeeklyReduction) })}
+                  </Text>
+                </View>
+              )}
+              {goalsAgg.thisWeekContributions > 0 && (
+                <View style={miniStyles.savingsRow}>
+                  <Target size={12} color="#22D3EE" />
+                  <Text style={[miniStyles.savingsText, { color: '#22D3EE' }]}>
+                    {formatCurrency(goalsAgg.thisWeekContributions)} {t('dashboard.goalAllocated')}
+                    {goalsAgg.thisWeekAutoContributions > 0
+                      && ` (auto ${formatCurrency(goalsAgg.thisWeekAutoContributions)})`}
                   </Text>
                 </View>
               )}
@@ -269,7 +293,10 @@ const miniStyles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 8,
   },
-  left: {},
+  left: {
+    flex: 1,
+    marginRight: 8,
+  },
   label: {
     color: '#A1A1AA',
     fontSize: 11,
@@ -285,9 +312,10 @@ const miniStyles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
+    flexShrink: 0,
   },
   percent: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: '800',
   },
   barBg: {
@@ -319,6 +347,17 @@ const miniStyles = StyleSheet.create({
   },
   savingsText: {
     color: '#4ADE80',
+    fontSize: 11,
+    fontWeight: '600',
+  },
+  compensationRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    marginTop: 4,
+  },
+  compensationText: {
+    color: '#A78BFA',
     fontSize: 11,
     fontWeight: '600',
   },

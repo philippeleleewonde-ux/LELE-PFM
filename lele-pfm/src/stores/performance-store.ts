@@ -44,6 +44,18 @@ export interface WeeklyRecord {
   financialScore?: number;
   /** Scores individuels des 5 leviers {REG: 78, PRE: 62, ...} */
   leverScores?: Record<string, number>;
+  /** Poche epargne post-allocation waterfall (EPR exclu) */
+  waterfallEpargne?: number;
+  /** Poche liberte post-allocation waterfall */
+  waterfallDiscretionnaire?: number;
+  /** Total epargne = EPR + waterfallEpargne */
+  waterfallTotalEpargne?: number;
+  /** Total alloue aux objectifs cette semaine */
+  waterfallGoalAllocations?: number;
+  /** Total plan ring-fence cette semaine */
+  waterfallPlanAllocations?: number;
+  /** Schema version for migration */
+  _schemaVersion?: number;
   /** When this record was saved */
   savedAt: string;
 }
@@ -134,7 +146,21 @@ export const usePerformanceStore = create<PerformanceState>()(
     {
       name: 'lele-pfm-performance',
       storage: createJSONStorage(() => AsyncStorage),
+      version: 1,
       partialize: (state) => ({ records: state.records }),
+      migrate: (persistedState: any, version: number) => {
+        if (version === 0 || version === undefined) {
+          // v0 → v1: mark existing records with _schemaVersion: 0
+          const state = persistedState as { records: any[] };
+          if (state.records) {
+            state.records = state.records.map((r: any) => ({
+              ...r,
+              _schemaVersion: r._schemaVersion ?? 0,
+            }));
+          }
+        }
+        return persistedState as any;
+      },
     },
   ),
 );

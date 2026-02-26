@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Pressable, Text, StyleSheet } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { INCOME_CATEGORIES, INCOME_CODES, IncomeCode } from '@/constants/income-categories';
 
 interface IncomeCategorySelectorProps {
@@ -8,6 +9,7 @@ interface IncomeCategorySelectorProps {
 }
 
 export function IncomeCategorySelector({ selected, onSelect }: IncomeCategorySelectorProps) {
+  const { t } = useTranslation('tracking');
   return (
     <View style={styles.grid}>
       {INCOME_CODES.map((code) => {
@@ -32,7 +34,7 @@ export function IncomeCategorySelector({ selected, onSelect }: IncomeCategorySel
               ]}
               numberOfLines={1}
             >
-              {cat.label}
+              {t(cat.label)}
             </Text>
           </Pressable>
         );

@@ -89,7 +89,7 @@ export function CategoryProgressRow({ category, onPress }: CategoryProgressRowPr
           </View>
           {category.weeklyTarget > 0 && (
             <Text style={styles.targetHint}>
-              Obj. {formatCurrency(category.weeklyTarget)}
+              {t('category.objective')}{formatCurrency(category.weeklyTarget)}
             </Text>
           )}
           <Text style={[styles.percent, { color: barColor }]}>

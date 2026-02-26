@@ -8,6 +8,7 @@ import { WeeklySavingsResult } from '@/domain/calculators/weekly-savings-engine'
 import { Grade } from '@/types';
 import { getWeekRangeLabel } from '@/utils/week-helpers';
 import { Lightbulb } from 'lucide-react-native';
+import { useSavingsGoals } from '@/hooks/useSavingsGoals';
 import { FinancialScoreRing } from '@/components/performance/FinancialScoreRing';
 import { usePerformanceStore } from '@/stores/performance-store';
 
@@ -35,6 +36,8 @@ function getDailyTipIndex(score: number): { range: string; index: number } {
 
 // ─── Component ───
 
+const VIOLET = '#A78BFA';
+
 interface Props {
   grade: Grade;
   score: number;
@@ -45,6 +48,7 @@ interface Props {
   currentYear: number;
   planYear: 1 | 2 | 3;
   currentQuarter: 1 | 2 | 3 | 4;
+  hasActiveCompensation?: boolean;
 }
 
 export function SimpleDashboardHero({
@@ -57,6 +61,7 @@ export function SimpleDashboardHero({
   currentYear,
   planYear,
   currentQuarter,
+  hasActiveCompensation = false,
 }: Props) {
   const { t } = useTranslation('app');
   const { width } = useWindowDimensions();
@@ -70,6 +75,7 @@ export function SimpleDashboardHero({
   const tips = t(`dashboard.tips.${tipInfo.range}`, { returnObjects: true }) as string[];
   const tip = Array.isArray(tips) ? tips[tipInfo.index] : '';
   const hasWeeklyData = usePerformanceStore((s) => s.records.length > 0);
+  const goalsAgg = useSavingsGoals();
 
   return (
     <GlassCard
@@ -127,7 +133,7 @@ export function SimpleDashboardHero({
           <Text
             style={[
               styles.numberValue,
-              { color: remaining > 0 ? '#4ADE80' : '#F87171' },
+              { color: hasActiveCompensation ? VIOLET : remaining > 0 ? '#4ADE80' : '#F87171' },
               isSmall && { fontSize: 15 },
             ]}
           >
@@ -140,7 +146,7 @@ export function SimpleDashboardHero({
           <Text
             style={[
               styles.numberValue,
-              { color: '#4ADE80' },
+              { color: hasActiveCompensation ? VIOLET : '#4ADE80' },
               isSmall && { fontSize: 15 },
             ]}
           >
@@ -156,8 +162,9 @@ export function SimpleDashboardHero({
             style={[
               styles.numberValue,
               {
-                color:
-                  savings.eprProvision >= savings.weeklyTarget
+                color: hasActiveCompensation
+                  ? VIOLET
+                  : savings.eprProvision >= savings.weeklyTarget
                     ? '#4ADE80'
                     : '#60A5FA',
               },
@@ -167,6 +174,23 @@ export function SimpleDashboardHero({
             {formatCurrency(savings.weeklyTarget)}
           </Text>
         </View>
+        {goalsAgg.thisWeekContributions > 0 && (
+          <>
+            <View style={styles.separator} />
+            <View style={styles.numberBox}>
+              <Text style={styles.numberLabel}>{t('dashboard.goalsLabel')}</Text>
+              <Text
+                style={[
+                  styles.numberValue,
+                  { color: '#22D3EE' },
+                  isSmall && { fontSize: 15 },
+                ]}
+              >
+                {formatCurrency(goalsAgg.thisWeekContributions)}
+              </Text>
+            </View>
+          </>
+        )}
       </View>
 
       {/* Simple progress bar */}
@@ -176,8 +200,9 @@ export function SimpleDashboardHero({
             styles.barFill,
             {
               width: `${progressPercent}%`,
-              backgroundColor:
-                progressPercent > 100
+              backgroundColor: hasActiveCompensation
+                ? VIOLET
+                : progressPercent > 100
                   ? '#F87171'
                   : progressPercent > 80
                     ? '#FBBF24'
@@ -186,7 +211,7 @@ export function SimpleDashboardHero({
           ]}
         />
       </View>
-      <Text style={styles.barLabel}>
+      <Text style={[styles.barLabel, hasActiveCompensation && { color: VIOLET }]}>
         {t('dashboard.spentOf', { spent: formatCurrency(weeklySpent), budget: formatCurrency(weeklyBudget) })}
       </Text>
 

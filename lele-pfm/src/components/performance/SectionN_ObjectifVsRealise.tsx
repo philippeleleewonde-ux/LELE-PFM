@@ -179,12 +179,13 @@ function CategoryRow({
   progression: number;
   status: 'ahead' | 'on_track' | 'behind';
 }) {
+  const { t } = useTranslation('performance');
   const sColor = statusColor(status);
   return (
     <View style={s.catRow}>
       <View style={s.catHeader}>
         <View style={[s.catDot, { backgroundColor: color }]} />
-        <Text style={s.catLabel}>{label}</Text>
+        <Text style={s.catLabel}>{t(label)}</Text>
         <Text style={[s.catAmount, { color: sColor }]}>{formatCurrency(realiseAnnuel)}</Text>
       </View>
       <View style={s.catBarWrap}>

@@ -128,7 +128,14 @@
       "emergingMarkets": "Radar Marchés Émergents",
       "compliance": "Conformité Réglementaire",
       "socraticCoach": "Coach Socratique",
-      "globalSynthesis": "Synthèse Globale"
+      "globalSynthesis": "Synthèse Globale",
+      "patrimoine": "Pipeline Patrimoine"
+    },
+    "tabs": {
+      "score": "Score",
+      "analyse": "Analyse",
+      "strategie": "Stratégie",
+      "investisseur": "Investisseur"
     }
   },
   "settings": {
@@ -348,7 +355,105 @@
     "indifferentDesc": "Tous les produits",
     "investmentShare": "Part investissement ({{ratio}}%)",
     "ratioHint": "Épargne {{savings}}% \u00B7 Investissement {{investment}}% \u00B7 Plaisir 33%",
-    "validateProfile": "Valider mon profil"
+    "validateProfile": "Valider mon profil",
+    "bouclierTitle": "Bouclier de liquidité",
+    "bouclierFull": "Complet",
+    "bouclierFullDesc": "6+ mois de dépenses en réserve",
+    "bouclierPartial": "Partiel",
+    "bouclierPartialDesc": "3 à 6 mois de dépenses",
+    "bouclierNone": "Pas encore",
+    "bouclierNoneDesc": "Moins de 3 mois de réserve",
+    "stressTitle": "Stress test émotionnel",
+    "stressSellAll": "Tout vendre",
+    "stressSellAllDesc": "Limiter les pertes immédiatement",
+    "stressSellSome": "Vendre partiellement",
+    "stressSellSomeDesc": "Réduire l'exposition au risque",
+    "stressHold": "Ne rien faire",
+    "stressHoldDesc": "Attendre que ça remonte",
+    "stressBuyMore": "Acheter plus",
+    "stressBuyMoreDesc": "Profiter des prix bas",
+    "capitalTitle": "Capital de départ",
+    "capitalPlaceholder": "Ex: 500 000"
+  },
+  "gps": {
+    "tabs": {
+      "courbe": "Ma Courbe",
+      "strategie": "Ma Stratégie",
+      "mission": "Ma Mission",
+      "simulateur": "Simulateur"
+    },
+    "pillars": {
+      "croissance": "Moteur de Croissance",
+      "croissanceDesc": "Actions, fonds, crypto — faire grandir le capital",
+      "amortisseur": "Amortisseur de Chocs",
+      "amortisseurDesc": "Obligations, sukuk — stabilité et revenus fixes",
+      "refuge": "Refuge",
+      "refugeDesc": "Or, immobilier — protection contre l'inflation",
+      "baseArriere": "Base Arrière",
+      "baseArriereDesc": "Épargne, dépôts, tontine — sécurité maximale"
+    },
+    "courbe": {
+      "title": "Intérêts composés",
+      "horizon10": "10 ans",
+      "horizon20": "20 ans",
+      "horizon30": "30 ans",
+      "invested": "Capital investi",
+      "interests": "Intérêts gagnés",
+      "total": "Valeur totale",
+      "tippingPoint": "Point de Bascule",
+      "tippingPointDesc": "Le mois où vos revenus passifs dépassent vos revenus actifs",
+      "savingsOnly": "Épargne seule",
+      "noStrategy": "Complétez votre profil pour voir votre courbe"
+    },
+    "strategie": {
+      "title": "Votre stratégie",
+      "allWeatherScore": "Score All-Weather",
+      "target": "Cible",
+      "current": "Actuel",
+      "rebalance": "Rééquilibrer",
+      "drift": "Écart",
+      "noStrategy": "Complétez votre profil pour voir votre stratégie",
+      "returnRate": "Rendement"
+    },
+    "mission": {
+      "title": "Mission mensuelle",
+      "progress": "{{completed}} / {{total}} missions",
+      "confirm": "Mission accomplie",
+      "skip": "Passer",
+      "history": "Historique",
+      "completed": "Complétée",
+      "skipped": "Passée",
+      "pending": "En cours",
+      "done": "Mission du mois complétée !",
+      "noMission": "Générez votre stratégie pour débloquer les missions"
+    },
+    "missions": {
+      "m01": { "title": "Ouvrir un compte épargne", "desc": "Trouvez le meilleur compte d'épargne disponible dans votre pays et ouvrez-le." },
+      "m02": { "title": "Mettre en place un virement automatique", "desc": "Configurez un virement mensuel automatique vers votre compte épargne." },
+      "m03": { "title": "Premier investissement en actions", "desc": "Investissez un petit montant dans un fonds indiciel ou des actions locales." },
+      "m04": { "title": "Diversifier la croissance", "desc": "Ajoutez un deuxième produit de croissance : fonds commun ou actions locales." },
+      "m05": { "title": "Premier investissement obligataire", "desc": "Investissez dans des obligations d'État ou des obligations d'entreprise." },
+      "m06": { "title": "Position refuge", "desc": "Ouvrez une position en or ou dans un fonds immobilier." },
+      "m07": { "title": "Revue du fonds d'urgence", "desc": "Vérifiez que votre fonds d'urgence couvre bien 3 à 6 mois de dépenses." },
+      "m08": { "title": "Rééquilibrer la croissance", "desc": "Ajustez vos positions de croissance pour maintenir l'allocation cible." },
+      "m09": { "title": "Diversifier les obligations", "desc": "Ajoutez un second produit obligataire pour diversifier votre amortisseur." },
+      "m10": { "title": "Diversifier le refuge", "desc": "Complétez votre pilier refuge avec un second instrument." },
+      "m11": { "title": "Revue de performance", "desc": "Analysez la performance de votre portefeuille et identifiez les ajustements." },
+      "m12": { "title": "Rééquilibrage annuel", "desc": "Rééquilibrez l'ensemble de votre portefeuille pour la nouvelle année." }
+    },
+    "simulateur": {
+      "title": "Simulateur",
+      "monthlyAmount": "Montant mensuel",
+      "duration": "Durée (années)",
+      "return": "Rendement (%)",
+      "savingsOnly": "Épargne seule",
+      "strategy": "Stratégie GPS",
+      "opportunityCost": "Coût d'opportunité",
+      "delta": "Différence"
+    },
+    "completeProfile": "Complétez votre profil investisseur",
+    "completeDiagnosis": "Complétez le diagnostic financier",
+    "noBudget": "Votre budget investissement est à 0. Ajustez votre profil."
   },
   "categories": {
     "food": "Alimentation",

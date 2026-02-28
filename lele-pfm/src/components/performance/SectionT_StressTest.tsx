@@ -5,6 +5,7 @@ import { PF, PerfGlassCard } from './shared';
 import { useInvestmentStore } from '@/stores/investment-store';
 import { stressTestPortfolio } from '@/domain/calculators/stress-test-engine';
 import { HISTORICAL_CRISES } from '@/domain/models/historical-scenarios';
+import { MiniSparkline } from '@/components/charts/MiniSparkline';
 
 export function SectionT_StressTest() {
   const { t } = useTranslation('performance');
@@ -121,9 +122,20 @@ export function SectionT_StressTest() {
             <Text style={styles.verdictExpl}>{selectedResult.verdictText}</Text>
           </PerfGlassCard>
 
-          {/* Simplified path visualization */}
+          {/* Drawdown path sparkline */}
           <PerfGlassCard>
             <Text style={styles.sectionTitle}>{t('stressTest.simplifiedPath')}</Text>
+            {selectedResult.monthlyPath && selectedResult.monthlyPath.length >= 2 ? (
+              <View style={styles.sparkContainer}>
+                <MiniSparkline
+                  data={selectedResult.monthlyPath}
+                  width={280}
+                  height={56}
+                  color={verdictColor}
+                  strokeWidth={2}
+                />
+              </View>
+            ) : null}
             <View style={styles.pathRow}>
               <View style={styles.pathNode}>
                 <Text style={styles.pathValue}>100</Text>
@@ -243,6 +255,9 @@ const styles = StyleSheet.create({
   },
   verdictText: { fontSize: 13, fontWeight: '800', textAlign: 'center' },
   verdictExpl: { color: PF.textSecondary, fontSize: 12, lineHeight: 18, textAlign: 'center' },
+
+  // Sparkline
+  sparkContainer: { alignItems: 'center', marginBottom: 12 },
 
   // Path
   pathRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, marginTop: 8 },

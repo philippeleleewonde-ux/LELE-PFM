@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { IndicatorCard } from './IndicatorCard';
+import RadarChart from '@/components/charts/RadarChart';
 import { PF, FadeInView } from './shared';
 import { formatCurrency } from '@/services/format-helpers';
 import type { IndicatorDisplayItem } from '@/hooks/usePerformanceData';
@@ -14,6 +15,16 @@ interface Props {
 
 export function SectionIndicators({ year, indicators, eprTotal }: Props) {
   const { t } = useTranslation('performance');
+
+  // Radar chart data: each indicator as a dimension
+  const radarData = useMemo(() => {
+    if (indicators.length < 3) return [];
+    return indicators.map((ind) => ({
+      label: ind.name.length > 8 ? ind.name.slice(0, 8) + '.' : ind.name,
+      value: ind.rate,
+      max: 100,
+    }));
+  }, [indicators]);
 
   if (indicators.length === 0) {
     return (
@@ -44,6 +55,18 @@ export function SectionIndicators({ year, indicators, eprTotal }: Props) {
           <Text style={styles.summaryValue}>{indicators.length}</Text>
         </View>
       </View>
+
+      {/* Mini radar chart */}
+      {radarData.length >= 3 && (
+        <View style={styles.radarContainer}>
+          <RadarChart
+            data={radarData}
+            size={150}
+            color={PF.accent}
+            fillOpacity={0.2}
+          />
+        </View>
+      )}
 
       {/* Indicator cards */}
       {indicators.map((ind, idx) => (
@@ -79,6 +102,10 @@ const styles = StyleSheet.create({
     color: PF.textPrimary,
     fontSize: 16,
     fontWeight: '800',
+  },
+  radarContainer: {
+    alignItems: 'center',
+    marginBottom: 16,
   },
   empty: {
     padding: 20,

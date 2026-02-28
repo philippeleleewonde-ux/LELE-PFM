@@ -44,6 +44,7 @@ import { useIncomeStore } from '@/stores/income-store';
 import { useImpulseStore } from '@/stores/impulse-store';
 import { useSavingsGoalStore } from '@/stores/savings-goal-store';
 import { useChallengeStore } from '@/stores/challenge-store';
+import { useAssetStore } from '@/stores/asset-store';
 import { InvestorProfileSheet } from '@/components/investment/InvestorProfileSheet';
 
 interface SettingsRowProps {
@@ -112,6 +113,7 @@ export default function SettingsScreen() {
   const clearGoals = useSavingsGoalStore((s) => s.clearGoals);
   const clearChallenges = useChallengeStore((s) => s.clearChallenges);
   const clearInvestmentRecords = useInvestmentStore((s) => s.clearInvestmentRecords);
+  const clearAssets = useAssetStore((s) => s.clearAssets);
 
   const handleRegenerateDemo = async () => {
     setIsGenerating(true);
@@ -124,6 +126,7 @@ export default function SettingsScreen() {
       clearChallenges();
       clearRecords();
       clearInvestmentRecords();
+      clearAssets();
 
       // 2. Generate wizard data + run engine calculation
       const demoData = generateDemoData();
@@ -165,6 +168,7 @@ export default function SettingsScreen() {
       clearChallenges();
       clearRecords();
       clearInvestmentRecords();
+      clearAssets();
       if (Platform.OS === 'web') {
         window.alert(t('app:settings.trackingDeletedSuccess'));
       } else {
@@ -198,6 +202,7 @@ export default function SettingsScreen() {
       clearChallenges();
       clearRecords();
       clearInvestmentRecords();
+      clearAssets();
       // Clear engine + wizard
       useEngineStore.getState().clearEngineOutput();
       resetWizard();

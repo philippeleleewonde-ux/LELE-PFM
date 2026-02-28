@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { View, Text, Pressable, StyleSheet } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { ChevronRight, ChevronDown } from 'lucide-react-native';
 import { ProgressBar } from '../charts/ProgressBar';
+import { StackedBarChart } from '../charts/StackedBarChart';
 import { PerfGlassCard, PF } from './shared';
 import { formatCurrency } from '@/services/format-helpers';
 
@@ -58,8 +59,41 @@ export function SectionG_DrivingDashboard(props: SectionGProps) {
   // Labels mois : Mois 1-12 selon le trimestre
   const getMonthLabel = (qi: number, mi: number) => t('drivingDashboard.monthLabel', { n: qi * 3 + mi + 1 });
 
+  const quarterColors = [
+    PF.accent + 'FF',      // T1 — full
+    PF.accent + 'CC',      // T2 — 80%
+    PF.accent + '99',      // T3 — 60%
+    PF.accent + '66',      // T4 — 40%
+  ];
+
+  const eprStackedData = useMemo(() => {
+    return years.map((yr) => ({
+      label: yr.label,
+      segments: QUARTER_WEIGHTS.map((q, qi) => ({
+        label: q.label,
+        value: yr.epr * q.pct / 100,
+        color: quarterColors[qi],
+      })),
+    }));
+  }, [props.eprN1, props.eprN2, props.eprN3, t]);
+
   return (
     <View style={styles.container}>
+      {/* EPR quarterly breakdown chart */}
+      {eprStackedData.length > 0 && (
+        <PerfGlassCard style={styles.overviewChart}>
+          <Text style={styles.sectionTitle}>
+            {t('drivingDashboard.quarterBreakdown', { defaultValue: 'Repartition trimestrielle' })}
+          </Text>
+          <StackedBarChart
+            data={eprStackedData}
+            barHeight={18}
+            showLegend
+            formatValue={(v) => formatCurrency(v)}
+          />
+        </PerfGlassCard>
+      )}
+
       {/* ──── Niveau 1 : Annuel ──── */}
       {years.map((year, idx) => {
         const isActive = drill.yearIndex === idx;
@@ -195,6 +229,10 @@ export function SectionG_DrivingDashboard(props: SectionGProps) {
 const styles = StyleSheet.create({
   container: {
     gap: 8,
+  },
+  overviewChart: {
+    gap: 12,
+    marginBottom: 4,
   },
 
   /* ── Niveau 1 : Annuel ── */

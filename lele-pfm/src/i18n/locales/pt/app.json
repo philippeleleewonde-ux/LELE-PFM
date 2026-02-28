@@ -128,6 +128,12 @@
       "compliance": "Conformidade Regulatoria",
       "socraticCoach": "Coach Socratico",
       "globalSynthesis": "Sintese Global"
+    },
+    "tabs": {
+      "score": "Score",
+      "analyse": "Análise",
+      "strategie": "Estratégia",
+      "investisseur": "Investidor"
     }
   },
   "settings": {

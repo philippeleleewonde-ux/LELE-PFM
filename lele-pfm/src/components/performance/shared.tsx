@@ -179,12 +179,13 @@ interface PerfGlassCardProps {
 export function PerfGlassCard({ children, style }: PerfGlassCardProps) {
   return (
     <View style={[perfGlassStyles.card, style]}>
-      <BlurView intensity={20} tint="dark" style={StyleSheet.absoluteFill} />
+      <BlurView intensity={20} tint="dark" style={StyleSheet.absoluteFill} pointerEvents="none" />
       <LinearGradient
         colors={['rgba(255,255,255,0.04)', 'rgba(255,255,255,0.01)']}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
         style={StyleSheet.absoluteFill}
+        pointerEvents="none"
       />
       {children}
     </View>

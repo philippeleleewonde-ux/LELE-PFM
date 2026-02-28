@@ -9,6 +9,9 @@
 export type RiskTolerance = 'conservative' | 'moderate' | 'aggressive';
 export type InvestmentHorizon = 'short' | 'medium' | 'long'; // <2y, 2-5y, 5y+
 export type ShariaCompliance = 'required' | 'preferred' | 'not_required';
+export type BouclierLiquidite = 'full' | 'partial' | 'none';
+export type StressReaction = 'sell_all' | 'sell_some' | 'hold' | 'buy_more';
+export type InvestmentPillar = 'croissance' | 'amortisseur' | 'refuge' | 'base_arriere';
 
 export interface InvestorProfile {
   riskTolerance: RiskTolerance;
@@ -18,6 +21,52 @@ export interface InvestorProfile {
   investmentRatio: number; // % of savings allocated to investment (0-100)
   preferredAssets: AssetClass[];
   taxAdvantageAccount?: string; // PEA, 401k, ISA, etc.
+  bouclierLiquidite?: BouclierLiquidite;
+  stressReaction?: StressReaction;
+  capitalInitial?: number;
+}
+
+// ─── GPS Strategique Types ───
+
+export interface PillarAllocation {
+  pillar: InvestmentPillar;
+  targetPercent: number;
+  currentPercent: number;
+  products: AllocationRecommendation[];
+  drift: number; // absolute difference target vs current
+}
+
+export interface PillarConfig {
+  code: InvestmentPillar;
+  labelKey: string;
+  descKey: string;
+  color: string;
+  icon: string;
+  defaultWeight: number;
+}
+
+export interface MissionTemplate {
+  id: string;
+  month: number; // 1-12
+  titleKey: string;
+  descKey: string;
+  pillar: InvestmentPillar;
+  difficulty: 1 | 2 | 3;
+  actionType: 'open_account' | 'setup_transfer' | 'first_invest' | 'rebalance' | 'review' | 'diversify';
+}
+
+export interface MissionRecord {
+  templateId: string;
+  month: number;
+  year: number;
+  status: 'pending' | 'completed' | 'skipped';
+  completedAt?: string;
+}
+
+export interface TippingPoint {
+  monthsToReach: number;
+  valueAtTipping: number;
+  monthlyPassiveIncome: number;
 }
 
 // ─── Asset Classes ───

@@ -8,6 +8,7 @@ import {
   type FailureMode,
   type PreMortemAnalysis,
 } from '@/domain/calculators/pre-mortem-engine';
+import BubbleChart from '@/components/charts/BubbleChart';
 
 // ─── Color helpers ───
 
@@ -79,6 +80,17 @@ export function SectionW_PreMortem() {
 
   const survColor = riskColor(analysis.overallRiskLevel);
 
+  const bubbleData = useMemo(() => {
+    if (!analysis) return [];
+    return analysis.failureModes.map((fm) => ({
+      label: fm.title.slice(0, 6),
+      x: fm.probability,
+      y: fm.impactPercent,
+      size: fm.probability * fm.impactPercent / 100,
+      color: impactColor(fm.impact),
+    }));
+  }, [analysis]);
+
   return (
     <View style={styles.container}>
       {/* Header */}
@@ -106,6 +118,22 @@ export function SectionW_PreMortem() {
           </View>
         </View>
       </PerfGlassCard>
+
+      {/* Bubble map */}
+      {bubbleData.length > 0 && (
+        <PerfGlassCard style={styles.section}>
+          <Text style={styles.sectionTitle}>{t('premortem.mainThreats')}</Text>
+          <View style={styles.chartWrap}>
+            <BubbleChart
+              data={bubbleData}
+              width={280}
+              height={200}
+              xLabel="Probabilit\u00E9"
+              yLabel="Impact"
+            />
+          </View>
+        </PerfGlassCard>
+      )}
 
       {/* Top 3 threats */}
       <PerfGlassCard style={styles.section}>
@@ -216,6 +244,7 @@ const styles = StyleSheet.create({
     fontSize: 13,
     textAlign: 'center',
   },
+  chartWrap: { alignItems: 'center', marginTop: 8 },
 
   // Survival
   survivalRow: {

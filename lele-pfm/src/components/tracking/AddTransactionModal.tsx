@@ -131,7 +131,7 @@ export function AddTransactionModal({ visible, onClose, defaultCategory }: AddTr
     return new Date();
   }, [selectedDate, customDate]);
 
-  const isValid = category !== null && amount > 0 && label.trim().length > 0 &&
+  const isValid = category !== null && amount > 0 && amount <= 999_999_999 && label.trim().length > 0 &&
     (selectedDate !== 'custom' || customDate !== null);
 
   const handleSubmit = useCallback(() => {

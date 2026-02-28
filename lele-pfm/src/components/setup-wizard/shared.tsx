@@ -47,12 +47,13 @@ interface GlassCardProps {
 export function GlassCard({ style, children }: GlassCardProps) {
   return (
     <View style={[glassStyles.card, style]}>
-      <BlurView intensity={30} tint="dark" style={StyleSheet.absoluteFill} />
+      <BlurView intensity={30} tint="dark" style={StyleSheet.absoluteFill} pointerEvents="none" />
       <LinearGradient
         colors={['rgba(255,255,255,0.05)', 'rgba(255,255,255,0.02)']}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
         style={StyleSheet.absoluteFill}
+        pointerEvents="none"
       />
       {children}
     </View>

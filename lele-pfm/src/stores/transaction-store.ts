@@ -2,7 +2,8 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Transaction, COICOPCode } from '@/types';
-import { getWeekNumber, getISOYear, getCurrentWeek } from '@/utils/week-helpers';
+import { COICOP_CATEGORIES } from '@/constants';
+import { getCurrentWeek } from '@/utils/week-helpers';
 
 interface TransactionState {
   transactions: Transaction[];
@@ -77,8 +78,7 @@ export const useTransactionStore = create<TransactionState>()(
           (tx) => tx.week_number === week && tx.year === year
         );
         const totals = {} as Record<COICOPCode, number>;
-        const codes: COICOPCode[] = ['01', '02', '03', '04', '05', '06', '07', '08'];
-        for (const code of codes) {
+        for (const code of Object.keys(COICOP_CATEGORIES) as COICOPCode[]) {
           totals[code] = 0;
         }
         for (const tx of txs) {

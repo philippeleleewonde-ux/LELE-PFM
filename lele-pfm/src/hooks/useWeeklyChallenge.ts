@@ -2,7 +2,7 @@
  * useWeeklyChallenge — Selects the current week's challenge,
  * auto-checks the maitriser condition, and provides actions.
  */
-import { useMemo, useCallback } from 'react';
+import { useMemo, useCallback, useEffect } from 'react';
 import { FINANCIAL_CHALLENGES, FinancialChallenge } from '@/constants/financial-challenges';
 import { useChallengeStore, ChallengeRecord } from '@/stores/challenge-store';
 import { useTransactionStore } from '@/stores/transaction-store';
@@ -199,7 +199,9 @@ export function useWeeklyChallenge(selectedWeek?: number, selectedYear?: number)
     const catSpent: Record<string, number> = {};
     if (Array.isArray(engineOutput?.step10?.by_category)) {
       for (const cat of engineOutput.step10.by_category) {
-        catBudgets[cat.code] = cat.monthly_target_n1 / 4;
+        if (cat.code && cat.code.length === 2) {
+          catBudgets[cat.code] = cat.monthly_target_n1 / 4;
+        }
       }
     }
     for (const tx of weekTxs) {
@@ -374,15 +376,15 @@ export function useWeeklyChallenge(selectedWeek?: number, selectedYear?: number)
     return checker(condCtx);
   }, [challenge, record, condCtx]);
 
-  // Auto-save condition when met
-  useMemo(() => {
+  // C3 fix: Auto-save condition when met — useEffect (side effect), not useMemo
+  useEffect(() => {
     if (challenge && conditionMet && record && !record.conditionMet) {
       markConditionMet(
         challenge.id, planWeek, calWeek, calYear,
         challenge.points.faire, challenge.points.maitriser,
       );
     }
-  }, [challenge, conditionMet, record?.conditionMet]);
+  }, [challenge, conditionMet, record, markConditionMet, planWeek, calWeek, calYear]);
 
   const savoirRead = record?.savoirRead ?? false;
   const isFullyComplete = savoirRead && (record?.conditionMet ?? conditionMet);

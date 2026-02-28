@@ -137,11 +137,6 @@ export const lightColors = {
   borderLight: '#F5F5F5',
   divider: '#D4D4D4',
 
-  // Status
-  success: '#16A34A',
-  error: '#DC2626',
-  warning: '#F59E0B',
-  info: '#2563EB',
 };
 
 export const darkColors = {
@@ -288,9 +283,4 @@ export const darkColors = {
   borderLight: '#1A1C23',
   divider: 'rgba(255,255,255,0.08)',
 
-  // Status
-  success: '#4ADE80',
-  error: '#F87171',
-  warning: '#FBBF24',
-  info: '#60A5FA',
 };

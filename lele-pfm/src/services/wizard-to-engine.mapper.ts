@@ -12,12 +12,12 @@ import {
   RiskAssessment,
   EKHScore,
   ImprovementLever,
+  LeverType,
   ProfileType,
   COICOPCode,
 } from '@/types/database';
 import { WizardFormData } from '@/stores/wizard-store';
 
-const COICOP_CODES: COICOPCode[] = ['01', '02', '03', '04', '05', '06', '07', '08'];
 
 const PROFILE_TYPE_MAP: Record<string, ProfileType> = {
   'salarie': 'Salarié',
@@ -293,7 +293,7 @@ export function mapWizardToEngineInput(formData: WizardFormData): EngineInput {
   for (const [wizardKey, dbKey] of Object.entries(RISK_KEY_MAP)) {
     const val = formData.risks[wizardKey];
     if (val !== undefined) {
-      (riskAssessment as any)[dbKey] = val * 20; // 1-5 → 20-100
+      (riskAssessment as unknown as Record<string, number>)[dbKey] = val * 20; // 1-5 → 20-100
     }
   }
 
@@ -323,7 +323,7 @@ export function mapWizardToEngineInput(formData: WizardFormData): EngineInput {
     .map(([key, val], idx) => ({
       id: `lever-${idx}`,
       profile_id: 'wizard-profile',
-      lever_type: (LEVER_TYPE_MAP[key] ?? 'reduction_depenses') as any,
+      lever_type: (LEVER_TYPE_MAP[key] ?? 'reduction_depenses') as LeverType,
       label: key,
       description: '',
       estimated_impact: toCents(val),

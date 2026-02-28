@@ -6,7 +6,7 @@ import { useIncomeStore } from '@/stores/income-store';
 import { useImpulseStore } from '@/stores/impulse-store';
 // savingsGoalStore no longer needed here — plan deduction moved to waterfall (useWeeklyAllocation)
 import { COICOP_CATEGORIES } from '@/constants';
-import { Transaction, COICOPCode, Nature, Grade } from '@/types';
+import { Transaction, COICOPCode, Nature } from '@/types';
 import { getWeekLabel, getDayOfWeek } from '@/utils/week-helpers';
 import {
   calculateWeeklySavings,
@@ -24,8 +24,7 @@ function getCategoryNature(code: COICOPCode): Nature {
 
 // ─── Quarterly-weighted EPR target helpers ───
 
-/** Quarterly weights: T1=20%, T2=23%, T3=27%, T4=30% (progressive ramp-up) */
-const QUARTERLY_WEIGHTS = [0.20, 0.23, 0.27, 0.30];
+import { QUARTERLY_WEIGHTS } from '@/constants/financial-quarters';
 const WEEKS_PER_QUARTER = 12; // 48 active weeks / 4 quarters
 
 /**
@@ -140,6 +139,10 @@ export function useWeeklyTracking(week: number, year: number): WeeklyTrackingDat
   const allIncomes = useIncomeStore((s) => s.incomes);
   const investmentRatio = useInvestmentStore((s) => s.investorProfile?.investmentRatio ?? 0);
   const getActiveCompensations = useImpulseStore((s) => s.getActiveCompensations);
+
+  // C2 fix: call store getter outside useMemo to avoid function ref instability in deps
+  const activeCompensations = getActiveCompensations(week, year);
+
   return useMemo(() => {
     const weekLabel = getWeekLabel(week, year);
     const dayOfWeek = getDayOfWeek(new Date());
@@ -158,9 +161,6 @@ export function useWeeklyTracking(week: number, year: number): WeeklyTrackingDat
 
     // Budget variable hebdo BRUT = Reste à vivre × 12 / 48 (from engine step9)
     const weeklyBudget = engineOutput?.step9?.weekly_budget ?? 0;
-
-    // ─── Active compensations (dette impulsive en cours de service) ───
-    const activeCompensations = getActiveCompensations(week, year);
     const totalCompensation = activeCompensations.reduce((sum, c) => sum + c.weeklyReduction, 0);
 
     // ─── Plan d'épargne ───
@@ -272,10 +272,11 @@ export function useWeeklyTracking(week: number, year: number): WeeklyTrackingDat
     const weeklyIncomeActual = weekIncomes.reduce((sum, inc) => sum + inc.amount, 0);
 
     // Expected weekly income from persisted targets
+    // Use 52/12 (~4.33) for accurate monthly-to-weekly conversion
     let weeklyIncomeExpected = 0;
     if (incomeTargets) {
       for (const target of Object.values(incomeTargets)) {
-        weeklyIncomeExpected += Math.round(target.monthlyAmount / 4);
+        weeklyIncomeExpected += Math.round(target.monthlyAmount / (52 / 12));
       }
     }
 
@@ -302,5 +303,5 @@ export function useWeeklyTracking(week: number, year: number): WeeklyTrackingDat
       planYear,
       currentQuarter,
     };
-  }, [transactions, engineOutput, incomeTargets, allIncomes, week, year, investmentRatio, getActiveCompensations]);
+  }, [transactions, engineOutput, incomeTargets, allIncomes, week, year, investmentRatio, activeCompensations]);
 }

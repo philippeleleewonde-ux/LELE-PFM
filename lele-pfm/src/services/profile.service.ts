@@ -1,6 +1,7 @@
 import { supabase } from '@/infrastructure/supabase/client';
 import { Profile } from '@/types/database';
 import { useAuthStore } from '@/stores/auth.store';
+import { withTimeout } from '@/utils/timeout';
 
 export const profileService = {
   async getProfile(): Promise<{ success: boolean; data?: Profile; error?: string }> {
@@ -10,11 +11,11 @@ export const profileService = {
         return { success: false, error: 'User not authenticated' };
       }
 
-      const { data, error } = await supabase
+      const { data, error } = await withTimeout(supabase
         .from('profiles')
         .select('*')
         .eq('user_id', userId)
-        .single();
+        .single());
 
       if (error) {
         return { success: false, error: error.message };
@@ -36,7 +37,7 @@ export const profileService = {
         return { success: false, error: 'User not authenticated' };
       }
 
-      const { data, error } = await supabase
+      const { data, error } = await withTimeout(supabase
         .from('profiles')
         .insert({
           user_id: userId,
@@ -52,7 +53,7 @@ export const profileService = {
           risk_profile: profileData.risk_profile || 'Modéré',
         })
         .select()
-        .single();
+        .single());
 
       if (error) {
         return { success: false, error: error.message };
@@ -74,7 +75,7 @@ export const profileService = {
         return { success: false, error: 'User not authenticated' };
       }
 
-      const { data, error } = await supabase
+      const { data, error } = await withTimeout(supabase
         .from('profiles')
         .update({
           ...updates,
@@ -82,7 +83,7 @@ export const profileService = {
         })
         .eq('user_id', userId)
         .select()
-        .single();
+        .single());
 
       if (error) {
         return { success: false, error: error.message };

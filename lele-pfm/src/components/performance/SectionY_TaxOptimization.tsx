@@ -9,6 +9,7 @@ import {
   AssetTaxProfile,
   TaxStrategy,
 } from '@/domain/calculators/tax-optimization-engine';
+import { HorizontalBarChart, HorizontalBarItem } from '@/components/charts/HorizontalBarChart';
 
 export function SectionY_TaxOptimization() {
   const { t } = useTranslation('performance');
@@ -22,6 +23,15 @@ export function SectionY_TaxOptimization() {
     if (!investorProfile || allocations.length === 0) return null;
     return analyzePortfolioTax(allocations, regime.id);
   }, [allocations, regime, investorProfile]);
+
+  const taxBarData: HorizontalBarItem[] = useMemo(() => {
+    if (!result) return [];
+    return result.assetProfiles.map((p) => ({
+      label: p.assetName.length > 12 ? p.assetName.slice(0, 11) + '..' : p.assetName,
+      value: p.taxEfficiency,
+      color: getScoreColor(p.taxEfficiency),
+    }));
+  }, [result]);
 
   if (!investorProfile) {
     return (
@@ -79,6 +89,15 @@ export function SectionY_TaxOptimization() {
               {t('taxOptimization.grossToNet', { gross: result.portfolioGrossReturn.toFixed(2), net: result.portfolioNetReturn.toFixed(2), drag: result.portfolioTaxDrag.toFixed(2) })}
             </Text>
             <Text style={styles.verdict}>{result.verdict}</Text>
+            {taxBarData.length > 0 && (
+              <View style={styles.chartWrap}>
+                <HorizontalBarChart
+                  data={taxBarData}
+                  maxValue={100}
+                  formatValue={(v) => `${Math.round(v)}%`}
+                />
+              </View>
+            )}
           </PerfGlassCard>
 
           {/* Per-asset breakdown */}
@@ -239,6 +258,7 @@ const styles = StyleSheet.create({
     marginTop: 8,
     lineHeight: 18,
   },
+  chartWrap: { marginTop: 12 },
 
   // Assets
   assetList: { gap: 12 },

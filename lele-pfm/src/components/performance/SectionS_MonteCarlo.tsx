@@ -6,6 +6,7 @@ import { useInvestmentStore } from '@/stores/investment-store';
 import { useEngineStore } from '@/stores/engine-store';
 import { formatCurrency } from '@/services/format-helpers';
 import { runMonteCarlo, MonteCarloResult } from '@/domain/calculators/monte-carlo-simulator';
+import { MiniSparkline } from '@/components/charts/MiniSparkline';
 
 // ─── Helpers ───
 
@@ -59,6 +60,17 @@ export function SectionS_MonteCarlo() {
     return runMonteCarlo(allocations, monthlyInvestCalc);
   }, [allocations, monthlyInvestCalc]);
 
+  const fanLines = useMemo(() => {
+    if (!result) return [];
+    return [
+      { data: result.percentile95.map((p) => p.value), color: PF.green, label: 'P95' },
+      { data: result.percentile75.map((p) => p.value), color: PF.greenLight, label: 'P75' },
+      { data: result.median.map((p) => p.value), color: PF.accent, label: 'P50' },
+      { data: result.percentile25.map((p) => p.value), color: PF.orange, label: 'P25' },
+      { data: result.percentile5.map((p) => p.value), color: PF.red, label: 'P5' },
+    ].filter((l) => l.data.length >= 2);
+  }, [result]);
+
   if (!investorProfile || !engineOutput) {
     return (
       <PerfGlassCard>
@@ -84,6 +96,28 @@ export function SectionS_MonteCarlo() {
 
   return (
     <View style={styles.container}>
+      {/* Fan chart - percentile bands */}
+      {fanLines.length > 0 && (
+        <PerfGlassCard>
+          <Text style={styles.sectionTitle}>{t('monteCarlo.distribution')}</Text>
+          <View style={styles.fanContainer}>
+            {fanLines.map((line) => (
+              <View key={line.label} style={styles.fanLine}>
+                <MiniSparkline
+                  data={line.data}
+                  width={240}
+                  height={32}
+                  color={line.color}
+                  strokeWidth={1.5}
+                  showDots={false}
+                />
+                <Text style={[styles.fanLabel, { color: line.color }]}>{line.label}</Text>
+              </View>
+            ))}
+          </View>
+        </PerfGlassCard>
+      )}
+
       {/* Distribution grid */}
       <PerfGlassCard>
         <Text style={styles.sectionTitle}>{t('monteCarlo.distribution')}</Text>
@@ -196,6 +230,11 @@ const styles = StyleSheet.create({
     fontSize: 13,
     textAlign: 'center',
   },
+
+  // Fan chart
+  fanContainer: { alignItems: 'center', gap: 2 },
+  fanLine: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+  fanLabel: { fontSize: 9, fontWeight: '700', width: 28 },
 
   // Distribution grid
   distGrid: { gap: 10 },

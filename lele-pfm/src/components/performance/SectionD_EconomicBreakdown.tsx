@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { DonutChart } from '../charts/DonutChart';
 import { ProgressBar } from '../charts/ProgressBar';
-import { PerfGlassCard, PF, COICOP_LABELS, COICOP_COLORS } from './shared';
+import { StackedBarChart } from '../charts/StackedBarChart';
+import { PerfGlassCard, PF, COICOP_COLORS } from './shared';
 import { CategoryItem } from '@/hooks/usePerformanceData';
 import { formatCurrency, formatPercent } from '@/services/format-helpers';
 
@@ -21,6 +22,24 @@ export function SectionD_EconomicBreakdown({ categories, elRevenue, elExpense, c
     value: cat.budgetRate,
     color: COICOP_COLORS[cat.code] || PF.textMuted,
   }));
+
+  const stackedBarData = useMemo(() => {
+    return categories.map((cat) => ({
+      label: cat.label,
+      segments: [
+        {
+          label: t('economicBreakdown.targetN1', { defaultValue: 'An 1' }),
+          value: cat.annualTargetN1,
+          color: COICOP_COLORS[cat.code] || PF.textMuted,
+        },
+        {
+          label: t('economicBreakdown.targetN2', { defaultValue: 'An 2' }),
+          value: cat.annualTargetN2 - cat.annualTargetN1,
+          color: (COICOP_COLORS[cat.code] || PF.textMuted) + 'AA',
+        },
+      ],
+    }));
+  }, [categories, t]);
 
   const totalEL = elRevenue + elExpense;
   const elRevPercent = totalEL > 0 ? (elRevenue / totalEL) * 100 : 50;
@@ -42,6 +61,21 @@ export function SectionD_EconomicBreakdown({ categories, elRevenue, elExpense, c
         centerLabel={t('actions.budget')}
         centerValue="100%"
       />
+
+      {/* Budget targets stacked bar chart */}
+      {stackedBarData.length > 0 && (
+        <PerfGlassCard style={styles.stackedChartCard}>
+          <Text style={styles.splitTitle}>
+            {t('economicBreakdown.budgetTargets', { defaultValue: 'Objectifs par categorie' })}
+          </Text>
+          <StackedBarChart
+            data={stackedBarData}
+            barHeight={16}
+            showLegend
+            formatValue={(v) => formatCurrency(v)}
+          />
+        </PerfGlassCard>
+      )}
 
       {/* EL Split bar */}
       <PerfGlassCard style={styles.splitCard}>
@@ -95,6 +129,9 @@ const styles = StyleSheet.create({
   },
   splitCard: {
     gap: 10,
+  },
+  stackedChartCard: {
+    gap: 12,
   },
   splitTitle: {
     color: PF.textMuted,

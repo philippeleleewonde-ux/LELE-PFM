@@ -8,6 +8,7 @@ import {
   ComplianceRule,
   FrameworkResult,
 } from '@/domain/calculators/regulatory-engine';
+import RadarChart from '@/components/charts/RadarChart';
 
 export function SectionAA_RegulatoryCompliance() {
   const { t } = useTranslation('performance');
@@ -28,6 +29,15 @@ export function SectionAA_RegulatoryCompliance() {
       </PerfGlassCard>
     );
   }
+
+  const radarData = useMemo(() => {
+    if (!analysis || analysis.frameworks.length < 3) return [];
+    return analysis.frameworks.map((fw) => ({
+      label: fw.label.slice(0, 10),
+      value: fw.score,
+      max: 100,
+    }));
+  }, [analysis]);
 
   if (!analysis) {
     return (
@@ -66,6 +76,11 @@ export function SectionAA_RegulatoryCompliance() {
           </View>
         </View>
         <Text style={styles.summaryText}>{analysis.summary}</Text>
+        {radarData.length >= 3 && (
+          <View style={styles.chartWrap}>
+            <RadarChart data={radarData} size={220} color={PF.green} />
+          </View>
+        )}
       </PerfGlassCard>
 
       {/* Framework cards */}
@@ -231,6 +246,7 @@ const styles = StyleSheet.create({
     fontSize: 12,
     lineHeight: 18,
   },
+  chartWrap: { alignItems: 'center', marginTop: 12 },
 
   // Framework card
   fwHeader: {

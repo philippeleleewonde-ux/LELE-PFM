@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useObjectifVsRealise, ObjectifVsRealise, IndicatorOvR } from '@/hooks/useObjectifVsRealise';
 import { PerfGlassCard, PF, FadeInView } from './shared';
 import { ProgressBar } from '@/components/charts/ProgressBar';
+import { GroupedBarChart } from '@/components/charts/GroupedBarChart';
 import { formatCurrency, formatPercent } from '@/services/format-helpers';
 
 // ─── Status helpers ───
@@ -161,7 +162,7 @@ function PeriodRows({ data }: { data: ObjectifVsRealise }) {
 // ─── CategoryBreakdown ───
 
 function CategoryRow({
-  code,
+  code: _code,
   label,
   color,
   objectifProrata,
@@ -210,7 +211,7 @@ function CategoryBreakdown({ data }: { data: ObjectifVsRealise }) {
   return (
     <PerfGlassCard style={s.sectionCard}>
       <Text style={s.sectionTitle}>{t('objectifVsRealise.byCategory')}</Text>
-      {data.byCategory.map((cat, i) => (
+      {data.byCategory.map((cat) => (
         <CategoryRow key={cat.code} {...cat} />
       ))}
     </PerfGlassCard>
@@ -311,6 +312,42 @@ function IndicatorBreakdown({ data }: { data: ObjectifVsRealise }) {
 
 // ─── Main Component ───
 
+function OvRBarChart({ data }: { data: ObjectifVsRealise }) {
+  const { t } = useTranslation('performance');
+
+  const { groups, legend } = useMemo(() => {
+    const periods = [
+      { label: t('objectifVsRealise.weekly'), obj: data.weekly.objectif, real: data.weekly.realise },
+      { label: t('objectifVsRealise.monthlyLabel'), obj: data.monthly.objectif, real: data.monthly.realise },
+      { label: `T${data.quarterly.quarter}`, obj: data.quarterly.objectif, real: data.quarterly.realise },
+      { label: t('objectifVsRealise.annual'), obj: data.annual.objectif, real: data.annual.realise },
+    ];
+
+    return {
+      groups: periods.map((p) => ({
+        label: p.label,
+        bars: [
+          { label: 'Objectif', value: p.obj, color: PF.blue },
+          { label: 'Realise', value: p.real, color: PF.green },
+        ],
+      })),
+      legend: [
+        { label: t('objectifVsRealise.annualObjective'), color: PF.blue },
+        { label: t('objectifVsRealise.realized'), color: PF.green },
+      ],
+    };
+  }, [data, t]);
+
+  const hasValues = groups.some((g) => g.bars.some((b) => b.value > 0));
+  if (!hasValues) return null;
+
+  return (
+    <View style={s.chartWrap}>
+      <GroupedBarChart groups={groups} height={160} legend={legend} />
+    </View>
+  );
+}
+
 export function SectionN_ObjectifVsRealise() {
   const data = useObjectifVsRealise();
 
@@ -321,13 +358,16 @@ export function SectionN_ObjectifVsRealise() {
       <FadeInView>
         <GlobalProgressCard data={data} />
       </FadeInView>
-      <FadeInView delay={100}>
+      <FadeInView delay={80}>
+        <OvRBarChart data={data} />
+      </FadeInView>
+      <FadeInView delay={160}>
         <PeriodRows data={data} />
       </FadeInView>
-      <FadeInView delay={200}>
+      <FadeInView delay={240}>
         <IndicatorBreakdown data={data} />
       </FadeInView>
-      <FadeInView delay={300}>
+      <FadeInView delay={320}>
         <CategoryBreakdown data={data} />
       </FadeInView>
     </View>
@@ -339,6 +379,16 @@ export function SectionN_ObjectifVsRealise() {
 const s = StyleSheet.create({
   container: {
     gap: 12,
+  },
+
+  // Grouped bar chart
+  chartWrap: {
+    paddingVertical: 8,
+    paddingHorizontal: 4,
+    backgroundColor: 'rgba(255,255,255,0.03)',
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: PF.border,
   },
 
   // Hero card

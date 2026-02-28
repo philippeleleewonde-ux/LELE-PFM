@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
-import { View, Text, ScrollView, StyleSheet, Pressable, useWindowDimensions } from 'react-native';
-import { TrendingUp, Shield, Zap, Clock, Calendar, Hourglass } from 'lucide-react-native';
+import { View, Text, ScrollView, StyleSheet, Pressable, useWindowDimensions, TextInput } from 'react-native';
+import { TrendingUp, Shield, Zap, Clock, Calendar, Hourglass, ShieldCheck, Heart, Ban, ShoppingCart } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
 import { WZ, GlassCard, FadeInView, PrimaryButton } from '../shared';
 import { useInvestmentStore } from '@/stores/investment-store';
 import { useWizardStore } from '@/stores/wizard-store';
 import { useEngineStore } from '@/stores/engine-store';
-import { RiskTolerance, InvestmentHorizon, ShariaCompliance, AssetClass } from '@/types/investment';
+import { RiskTolerance, InvestmentHorizon, ShariaCompliance, AssetClass, BouclierLiquidite, StressReaction } from '@/types/investment';
 import { recommendAllocation } from '@/domain/calculators/investment-simulator';
 
 interface Props {
@@ -63,6 +63,9 @@ export default function Step7InvestorProfile({ isActive }: Props) {
   const [horizon, setHorizon] = useState<InvestmentHorizon>(existingProfile?.horizon ?? 'medium');
   const [sharia, setSharia] = useState<ShariaCompliance>(existingProfile?.shariaCompliance ?? 'not_required');
   const [investRatio, setInvestRatio] = useState(existingProfile?.investmentRatio ?? 20);
+  const [bouclier, setBouclier] = useState<BouclierLiquidite>(existingProfile?.bouclierLiquidite ?? 'none');
+  const [stressReaction, setStressReaction] = useState<StressReaction>(existingProfile?.stressReaction ?? 'hold');
+  const [capitalInitial, setCapitalInitial] = useState(String(existingProfile?.capitalInitial ?? ''));
 
   const ratioOptions = [10, 15, 20, 25, 30, 35, 40];
   const iconSize = isSmall ? 16 : 20;
@@ -75,6 +78,9 @@ export default function Step7InvestorProfile({ isActive }: Props) {
       monthlyInvestTarget: 0,
       investmentRatio: investRatio,
       preferredAssets: [] as AssetClass[],
+      bouclierLiquidite: bouclier,
+      stressReaction: stressReaction,
+      capitalInitial: Number(capitalInitial) || 0,
     };
     setInvestorProfile(profile);
 
@@ -238,6 +244,99 @@ export default function Step7InvestorProfile({ isActive }: Props) {
       </FadeInView>
 
       <FadeInView active={isActive} delay={700}>
+        <Text style={[styles.sectionTitle, isSmall && { fontSize: 13 }]}>
+          {t('step7.bouclierTitle')}
+        </Text>
+        <View style={styles.choices}>
+          <ChoiceCard
+            icon={<ShieldCheck size={iconSize} color="#4ADE80" />}
+            label={t('step7.bouclierFull')}
+            description={t('step7.bouclierFullDesc')}
+            selected={bouclier === 'full'}
+            color="#4ADE80"
+            onPress={() => setBouclier('full')}
+            compact={isSmall}
+          />
+          <ChoiceCard
+            icon={<Shield size={iconSize} color="#FBBF24" />}
+            label={t('step7.bouclierPartial')}
+            description={t('step7.bouclierPartialDesc')}
+            selected={bouclier === 'partial'}
+            color="#FBBF24"
+            onPress={() => setBouclier('partial')}
+            compact={isSmall}
+          />
+          <ChoiceCard
+            icon={<Ban size={iconSize} color="#F87171" />}
+            label={t('step7.bouclierNone')}
+            description={t('step7.bouclierNoneDesc')}
+            selected={bouclier === 'none'}
+            color="#F87171"
+            onPress={() => setBouclier('none')}
+            compact={isSmall}
+          />
+        </View>
+      </FadeInView>
+
+      <FadeInView active={isActive} delay={850}>
+        <Text style={[styles.sectionTitle, isSmall && { fontSize: 13 }]}>
+          {t('step7.stressTitle')}
+        </Text>
+        <View style={styles.choices}>
+          <ChoiceCard
+            icon={<Ban size={iconSize} color="#F87171" />}
+            label={t('step7.stressSellAll')}
+            description={t('step7.stressSellAllDesc')}
+            selected={stressReaction === 'sell_all'}
+            color="#F87171"
+            onPress={() => setStressReaction('sell_all')}
+            compact={isSmall}
+          />
+          <ChoiceCard
+            icon={<TrendingUp size={iconSize} color="#FB923C" />}
+            label={t('step7.stressSellSome')}
+            description={t('step7.stressSellSomeDesc')}
+            selected={stressReaction === 'sell_some'}
+            color="#FB923C"
+            onPress={() => setStressReaction('sell_some')}
+            compact={isSmall}
+          />
+          <ChoiceCard
+            icon={<Heart size={iconSize} color="#60A5FA" />}
+            label={t('step7.stressHold')}
+            description={t('step7.stressHoldDesc')}
+            selected={stressReaction === 'hold'}
+            color="#60A5FA"
+            onPress={() => setStressReaction('hold')}
+            compact={isSmall}
+          />
+          <ChoiceCard
+            icon={<ShoppingCart size={iconSize} color="#4ADE80" />}
+            label={t('step7.stressBuyMore')}
+            description={t('step7.stressBuyMoreDesc')}
+            selected={stressReaction === 'buy_more'}
+            color="#4ADE80"
+            onPress={() => setStressReaction('buy_more')}
+            compact={isSmall}
+          />
+        </View>
+      </FadeInView>
+
+      <FadeInView active={isActive} delay={1000}>
+        <Text style={[styles.sectionTitle, isSmall && { fontSize: 13 }]}>
+          {t('step7.capitalTitle')}
+        </Text>
+        <TextInput
+          style={styles.capitalInput}
+          value={capitalInitial}
+          onChangeText={setCapitalInitial}
+          placeholder={t('step7.capitalPlaceholder')}
+          placeholderTextColor="#52525B"
+          keyboardType="numeric"
+        />
+      </FadeInView>
+
+      <FadeInView active={isActive} delay={1150}>
         <View style={[styles.buttons, isSmall && { marginTop: 16 }]}>
           <PrimaryButton label={t('step7.validateProfile')} onPress={handleSave} />
           <Pressable onPress={handleSkip} style={styles.skipButton}>
@@ -318,6 +417,17 @@ const styles = StyleSheet.create({
     fontSize: 11,
     marginTop: 12,
     textAlign: 'center',
+  },
+  capitalInput: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '600',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.08)',
+    borderRadius: 12,
+    backgroundColor: 'rgba(255,255,255,0.04)',
   },
   buttons: { marginTop: 24, gap: 12 },
   skipButton: { alignItems: 'center', paddingVertical: 12 },

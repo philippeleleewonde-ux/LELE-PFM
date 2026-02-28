@@ -7,13 +7,14 @@ import {
   Pressable,
   StyleSheet,
   useWindowDimensions,
+  TextInput,
 } from 'react-native';
-import { X, TrendingUp, Shield, Zap, Clock, Calendar, Hourglass } from 'lucide-react-native';
+import { X, TrendingUp, Shield, Zap, Clock, Calendar, Hourglass, ShieldCheck, Heart, Ban, ShoppingCart } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
 import { useInvestmentStore } from '@/stores/investment-store';
 import { useWizardStore } from '@/stores/wizard-store';
 import { useEngineStore } from '@/stores/engine-store';
-import { RiskTolerance, InvestmentHorizon, ShariaCompliance, AssetClass } from '@/types/investment';
+import { RiskTolerance, InvestmentHorizon, ShariaCompliance, AssetClass, BouclierLiquidite, StressReaction } from '@/types/investment';
 import { recommendAllocation } from '@/domain/calculators/investment-simulator';
 
 interface Props {
@@ -71,6 +72,9 @@ export function InvestorProfileSheet({ visible, onClose }: Props) {
   const [horizon, setHorizon] = useState<InvestmentHorizon>(existingProfile?.horizon ?? 'medium');
   const [sharia, setSharia] = useState<ShariaCompliance>(existingProfile?.shariaCompliance ?? 'not_required');
   const [investRatio, setInvestRatio] = useState(existingProfile?.investmentRatio ?? 20);
+  const [bouclier, setBouclier] = useState<BouclierLiquidite>(existingProfile?.bouclierLiquidite ?? 'none');
+  const [stressReaction, setStressReaction] = useState<StressReaction>(existingProfile?.stressReaction ?? 'hold');
+  const [capitalInitial, setCapitalInitial] = useState(String(existingProfile?.capitalInitial ?? ''));
 
   // Sync with existing profile when modal opens
   useEffect(() => {
@@ -79,6 +83,9 @@ export function InvestorProfileSheet({ visible, onClose }: Props) {
       setHorizon(existingProfile.horizon);
       setSharia(existingProfile.shariaCompliance);
       setInvestRatio(existingProfile.investmentRatio);
+      setBouclier(existingProfile.bouclierLiquidite ?? 'none');
+      setStressReaction(existingProfile.stressReaction ?? 'hold');
+      setCapitalInitial(String(existingProfile.capitalInitial ?? ''));
     }
   }, [visible, existingProfile]);
 
@@ -93,6 +100,9 @@ export function InvestorProfileSheet({ visible, onClose }: Props) {
       monthlyInvestTarget: 0,
       investmentRatio: investRatio,
       preferredAssets: [] as AssetClass[],
+      bouclierLiquidite: bouclier,
+      stressReaction: stressReaction,
+      capitalInitial: Number(capitalInitial) || 0,
     };
     setInvestorProfile(profile);
 
@@ -266,6 +276,98 @@ export function InvestorProfileSheet({ visible, onClose }: Props) {
               <Text style={[styles.ratioHint, isSmall && { fontSize: 10 }]}>
                 {t('investment.ratioHint', { savings: 67 - investRatio, investment: investRatio })}
               </Text>
+            </View>
+
+            {/* Bouclier Liquidité */}
+            <Text style={[styles.sectionTitle, isSmall && { fontSize: 13 }]}>
+              {t('investment.bouclierTitle')}
+            </Text>
+            <View style={styles.choices}>
+              <ChoiceCard
+                icon={<ShieldCheck size={iconSize} color="#4ADE80" />}
+                label={t('investment.bouclierFull')}
+                description={t('investment.bouclierFullDesc')}
+                selected={bouclier === 'full'}
+                color="#4ADE80"
+                onPress={() => setBouclier('full')}
+                compact={isSmall}
+              />
+              <ChoiceCard
+                icon={<Shield size={iconSize} color="#FBBF24" />}
+                label={t('investment.bouclierPartial')}
+                description={t('investment.bouclierPartialDesc')}
+                selected={bouclier === 'partial'}
+                color="#FBBF24"
+                onPress={() => setBouclier('partial')}
+                compact={isSmall}
+              />
+              <ChoiceCard
+                icon={<Ban size={iconSize} color="#F87171" />}
+                label={t('investment.bouclierNone')}
+                description={t('investment.bouclierNoneDesc')}
+                selected={bouclier === 'none'}
+                color="#F87171"
+                onPress={() => setBouclier('none')}
+                compact={isSmall}
+              />
+            </View>
+
+            {/* Stress Test Émotionnel */}
+            <Text style={[styles.sectionTitle, isSmall && { fontSize: 13 }]}>
+              {t('investment.stressTitle')}
+            </Text>
+            <View style={styles.choices}>
+              <ChoiceCard
+                icon={<Ban size={iconSize} color="#F87171" />}
+                label={t('investment.stressSellAll')}
+                description={t('investment.stressSellAllDesc')}
+                selected={stressReaction === 'sell_all'}
+                color="#F87171"
+                onPress={() => setStressReaction('sell_all')}
+                compact={isSmall}
+              />
+              <ChoiceCard
+                icon={<TrendingUp size={iconSize} color="#FB923C" />}
+                label={t('investment.stressSellSome')}
+                description={t('investment.stressSellSomeDesc')}
+                selected={stressReaction === 'sell_some'}
+                color="#FB923C"
+                onPress={() => setStressReaction('sell_some')}
+                compact={isSmall}
+              />
+              <ChoiceCard
+                icon={<Heart size={iconSize} color="#60A5FA" />}
+                label={t('investment.stressHold')}
+                description={t('investment.stressHoldDesc')}
+                selected={stressReaction === 'hold'}
+                color="#60A5FA"
+                onPress={() => setStressReaction('hold')}
+                compact={isSmall}
+              />
+              <ChoiceCard
+                icon={<ShoppingCart size={iconSize} color="#4ADE80" />}
+                label={t('investment.stressBuyMore')}
+                description={t('investment.stressBuyMoreDesc')}
+                selected={stressReaction === 'buy_more'}
+                color="#4ADE80"
+                onPress={() => setStressReaction('buy_more')}
+                compact={isSmall}
+              />
+            </View>
+
+            {/* Capital Initial */}
+            <Text style={[styles.sectionTitle, isSmall && { fontSize: 13 }]}>
+              {t('investment.capitalTitle')}
+            </Text>
+            <View style={[styles.ratioCard, isSmall && { padding: 12 }]}>
+              <TextInput
+                style={styles.capitalInput}
+                value={capitalInitial}
+                onChangeText={setCapitalInitial}
+                placeholder={t('investment.capitalPlaceholder')}
+                placeholderTextColor="#52525B"
+                keyboardType="numeric"
+              />
             </View>
 
             {/* Save Button */}
@@ -442,6 +544,17 @@ const styles = StyleSheet.create({
     fontSize: 11,
     marginTop: 12,
     textAlign: 'center',
+  },
+  capitalInput: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '600',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.08)',
+    borderRadius: 12,
+    backgroundColor: 'rgba(255,255,255,0.04)',
   },
   saveButton: {
     marginTop: 28,

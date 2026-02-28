@@ -4,8 +4,8 @@
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useEngineStore } from '@/stores/engine-store';
-import { EngineOutput, CategoryVentilation, IndicatorDistribution } from '@/types/engine';
-import { formatCurrency, formatPercent, formatGrade } from '@/services/format-helpers';
+import { EngineOutput } from '@/types/engine';
+import { formatCurrency } from '@/services/format-helpers';
 import { COICOP_LABELS } from '@/components/performance/shared';
 import { PFM_INDICATORS } from '@/constants/pfm-indicators';
 

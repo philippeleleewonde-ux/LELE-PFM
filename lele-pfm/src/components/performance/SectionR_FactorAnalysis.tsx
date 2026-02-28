@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { PF, PerfGlassCard } from './shared';
 import { useInvestmentStore } from '@/stores/investment-store';
 import { analyzeFactors, FACTOR_INFO, InvestmentFactor } from '@/domain/calculators/factor-scoring-engine';
+import RadarChart from '@/components/charts/RadarChart';
 
 function levelColor(level: string): string {
   switch (level) {
@@ -24,6 +25,15 @@ export function SectionR_FactorAnalysis() {
     return analyzeFactors(allocations);
   }, [allocations]);
 
+  const radarData = useMemo(() => {
+    if (!analysis) return [];
+    return analysis.factors.map((f) => ({
+      label: f.label,
+      value: f.score,
+      max: 10,
+    }));
+  }, [analysis]);
+
   if (!investorProfile || !analysis) {
     return (
       <PerfGlassCard>
@@ -36,6 +46,17 @@ export function SectionR_FactorAnalysis() {
 
   return (
     <View style={styles.container}>
+      {/* Radar chart */}
+      {radarData.length >= 3 && (
+        <PerfGlassCard>
+          <RadarChart
+            data={radarData}
+            size={200}
+            color={PF.violet}
+          />
+        </PerfGlassCard>
+      )}
+
       {/* Factor bars */}
       <PerfGlassCard>
         <Text style={styles.sectionTitle}>{t('factorAnalysis.factorExposure')}</Text>

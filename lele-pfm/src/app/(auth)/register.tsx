@@ -138,6 +138,7 @@ export default function RegisterScreen() {
                 placeholderTextColor={C.textMuted}
                 autoCapitalize="words"
                 editable={!isLoading}
+                accessibilityLabel="Prénom"
               />
             </View>
 
@@ -151,6 +152,7 @@ export default function RegisterScreen() {
                 placeholderTextColor={C.textMuted}
                 autoCapitalize="words"
                 editable={!isLoading}
+                accessibilityLabel="Nom de famille"
               />
             </View>
           </View>
@@ -167,6 +169,7 @@ export default function RegisterScreen() {
               keyboardType="email-address"
               autoComplete="email"
               editable={!isLoading}
+              accessibilityLabel="Adresse email"
             />
           </View>
 
@@ -180,6 +183,7 @@ export default function RegisterScreen() {
               placeholderTextColor={C.textMuted}
               secureTextEntry
               editable={!isLoading}
+              accessibilityLabel="Mot de passe"
             />
           </View>
 
@@ -193,6 +197,7 @@ export default function RegisterScreen() {
               placeholderTextColor={C.textMuted}
               secureTextEntry
               editable={!isLoading}
+              accessibilityLabel="Confirmer le mot de passe"
             />
           </View>
 

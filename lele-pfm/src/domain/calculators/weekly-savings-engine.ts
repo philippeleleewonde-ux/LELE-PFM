@@ -57,7 +57,7 @@ export interface WeeklySavingsResult {
   /** Économies réelles = MAX(0, budget - spent) */
   economies: number;
   /** Économies totales = economies (pas de cap — finance personnelle) */
-  economiesCappees: number;
+  economiesTotal: number;
   /** Provision EPR = MIN(économies, target) — cashback minimum garanti */
   eprProvision: number;
   /** Surplus = MAX(0, économies - target) — capital libre au-dessus de l'EPR */
@@ -85,7 +85,7 @@ export interface CategorySavingsResult {
   code: COICOPCode;
   catBudget: number;
   economies: number;
-  economiesCappees: number;
+  economiesTotal: number;
   eprProvision: number;
   surplus: number;
   depassement: number;
@@ -141,12 +141,16 @@ export function calculateWeeklySavings(
   weeklySpent: number,
   investmentRatio: number = 0,
 ): WeeklySavingsResult {
+  if (investmentRatio < 0 || investmentRatio > 100) {
+    throw new Error('investmentRatio must be between 0 and 100');
+  }
+
   if (weeklyBudget <= 0 || weeklyTarget <= 0) {
     return {
       weeklyBudget,
       weeklyTarget,
       economies: 0,
-      economiesCappees: 0,
+      economiesTotal: 0,
       eprProvision: 0,
       surplus: 0,
       depassement: 0,
@@ -164,7 +168,7 @@ export function calculateWeeklySavings(
   const economies = Math.max(0, weeklyBudget - weeklySpent);
 
   // PFM: pas de cap — les économies totales sont préservées
-  const economiesCappees = economies;
+  const economiesTotal = economies;
 
   // EPR provision = cashback minimum garanti (plancher, pas plafond)
   const eprProvision = Math.min(economies, weeklyTarget);
@@ -199,7 +203,7 @@ export function calculateWeeklySavings(
     weeklyBudget,
     weeklyTarget,
     economies,
-    economiesCappees,
+    economiesTotal,
     eprProvision,
     surplus,
     depassement,
@@ -230,7 +234,7 @@ export function calculateCategorySavings(
       code,
       catBudget,
       economies: 0,
-      economiesCappees: 0,
+      economiesTotal: 0,
       eprProvision: 0,
       surplus: 0,
       depassement: 0,
@@ -245,7 +249,7 @@ export function calculateCategorySavings(
   }
 
   const economies = Math.max(0, catBudget - catSpent);
-  const economiesCappees = economies;
+  const economiesTotal = economies;
   const eprProvision = Math.min(economies, catTarget);
   const surplus = Math.max(0, economies - catTarget);
   const depassement = Math.max(0, catSpent - catBudget);
@@ -263,7 +267,7 @@ export function calculateCategorySavings(
     code,
     catBudget,
     economies,
-    economiesCappees,
+    economiesTotal,
     eprProvision,
     surplus,
     depassement,
@@ -334,7 +338,7 @@ export function aggregatePeriodSavings(
     };
   }
 
-  const totalEconomies = weeklyResults.reduce((s, r) => s + r.economiesCappees, 0);
+  const totalEconomies = weeklyResults.reduce((s, r) => s + r.economiesTotal, 0);
   const totalDepassement = weeklyResults.reduce((s, r) => s + r.depassement, 0);
   const economiesNettes = totalEconomies - totalDepassement;
   const noteMoyenne = Math.round(

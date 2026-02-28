@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, ScrollView, Text, Pressable } from 'react-native';
+import { View, ScrollView, Text, Pressable, useWindowDimensions } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Plus } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
@@ -8,6 +8,8 @@ import { NeonText, Caption, H2 } from '../ui/Typography';
 
 export function BalanceCards() {
     const { t } = useTranslation('app');
+    const { width } = useWindowDimensions();
+    const cardWidth = Math.min(280, width * 0.7);
     return (
         <View className="px-6 mb-8">
             <View className="flex-row justify-between items-center mb-4">
@@ -22,7 +24,7 @@ export function BalanceCards() {
 
             <ScrollView horizontal showsHorizontalScrollIndicator={false} className="overflow-visible">
                 {/* Carte Principale */}
-                <View className="mr-4 w-[280px] h-[180px] rounded-3xl bg-gray-200 overflow-hidden relative shadow-lg shadow-black/50">
+                <View style={{ width: cardWidth }} className="mr-4 h-[180px] rounded-3xl bg-gray-200 overflow-hidden relative shadow-lg shadow-black/50">
                     <LinearGradient colors={['#1A1C23', '#0F1014']} className="absolute inset-0" />
                     <View className="p-6 justify-between h-full">
                         <View className="flex-row justify-between items-start">
@@ -46,7 +48,7 @@ export function BalanceCards() {
                 </View>
 
                 {/* Carte Solde Neon */}
-                <GlassCard variant="neon" className="mr-4 w-[280px] h-[180px] justify-between relative">
+                <GlassCard variant="neon" style={{ width: cardWidth }} className="mr-4 h-[180px] justify-between relative">
                     <View className="absolute right-0 top-0 bottom-0 w-1/3 bg-black/20" />
                     <View className="p-1">
                         <NeonText color="cyan" className="text-3xl font-bold tracking-widest">0 FCFA</NeonText>

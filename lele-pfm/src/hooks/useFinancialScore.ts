@@ -25,6 +25,7 @@ import { getGradeFromNote } from '@/domain/calculators/weekly-savings-engine';
 import { getCurrentWeek } from '@/utils/week-helpers';
 import { INCOME_CATEGORIES, IncomeCode } from '@/constants/income-categories';
 import { Grade } from '@/types';
+import { QUARTERLY_WEIGHTS } from '@/constants/financial-quarters';
 
 export interface LeverDetails {
   // REG (audit-grade — EWMA frequence, intensite epargne, serie comportementale)
@@ -262,10 +263,15 @@ export function useFinancialScore(): FinancialScoreResult {
         ? recentRecords[0]?.weeklyBudget ?? 0
         : 0;
 
+      // M3 fix: guard against zero budget — no meaningful PRE score possible
+      if (weeklyBudgetTotal <= 0) {
+        preScore = 0;
+      } else {
+
       // Budget par categorie (hebdo) depuis budget_rate
       const categoryBudgets: Record<string, number> = {};
       for (const [key, cat] of Object.entries(byCategory)) {
-        categoryBudgets[key] = (cat.budget_rate / 100) * (weeklyBudgetTotal || 1);
+        categoryBudgets[key] = (cat.budget_rate / 100) * weeklyBudgetTotal;
       }
 
       // Agregation SUM/SUM rolling 8 semaines — 3 niveaux
@@ -378,12 +384,13 @@ export function useFinancialScore(): FinancialScoreResult {
       }
 
       // Fonction CV : ecart-type / moyenne
+      // M6 fix: bound CV to prevent extreme penalty values
       const computeCV = (ratios: number[]): number => {
         if (ratios.length < 3) return 0; // pas assez de data → pas de penalite
         const mean = ratios.reduce((s, v) => s + v, 0) / ratios.length;
         if (mean === 0) return 0;
         const variance = ratios.reduce((s, v) => s + (v - mean) ** 2, 0) / ratios.length;
-        return Math.sqrt(variance) / mean;
+        return Math.min(10, Math.sqrt(variance) / mean);
       };
 
       preCvIncomp = computeCV(weekRatiosIncomp);
@@ -439,6 +446,7 @@ export function useFinancialScore(): FinancialScoreResult {
         preBestWeek = Math.max(...weekScores);
         preWorstWeek = Math.min(...weekScores);
       }
+      } // end M3 weeklyBudgetTotal > 0
     }
 
     // ── SEC: Securite Financiere (20%) — AUDIT GRADE ──
@@ -452,7 +460,8 @@ export function useFinancialScore(): FinancialScoreResult {
     let planYear = 1;
     let weeksElapsedTotal = 0;
     if (lastCalculatedAt) {
-      const msElapsed = Date.now() - new Date(lastCalculatedAt).getTime();
+      // H3 fix: guard against negative elapsed time (device clock drift)
+      const msElapsed = Math.max(0, Date.now() - new Date(lastCalculatedAt).getTime());
       weeksElapsedTotal = Math.floor(msElapsed / (7 * 24 * 60 * 60 * 1000));
       const monthsElapsed = Math.floor(msElapsed / (30.44 * 24 * 60 * 60 * 1000));
       if (monthsElapsed >= 24) planYear = 3;
@@ -472,7 +481,7 @@ export function useFinancialScore(): FinancialScoreResult {
       : 0;
 
     // Prorated target using quarterly weights (actuarial ramp-up schedule)
-    const SEC_QUARTERLY_WEIGHTS = [0.20, 0.23, 0.27, 0.30];
+    const SEC_QUARTERLY_WEIGHTS = QUARTERLY_WEIGHTS;
     const SEC_WEEKS_PER_Q = 12;
     let secProrata = 0;
     {
@@ -541,7 +550,7 @@ export function useFinancialScore(): FinancialScoreResult {
     if (incomeTargets) {
       for (const [code, target] of Object.entries(incomeTargets)) {
         const monthly = (target as { monthlyAmount?: number }).monthlyAmount ?? 0;
-        if (monthly > 0) weeklyExpBySource[code] = Math.round(monthly / 4);
+        if (monthly > 0) weeklyExpBySource[code] = Math.round(monthly / (52 / 12));
       }
     }
 
@@ -688,7 +697,6 @@ export function useFinancialScore(): FinancialScoreResult {
     const grade = getGradeFromNote(Math.round(globalScore / 10));
 
     // Build lever array with details
-    const sharedDetails: LeverDetails = {};
     const levers: LeverScore[] = [
       { code: 'REG', score: regScore, ...LEVER_CONFIG.REG, label: tp('leverShort.REG'), description: tp('leverDescs.REG'), details: {
         regWeeksWithSavings,
@@ -773,7 +781,7 @@ export function useFinancialScore(): FinancialScoreResult {
     const prevRecord = sorted.length > 1 ? sorted[1] : null;
     if (prevRecord && typeof (prevRecord as any).financialScore === 'number') {
       previousScore = (prevRecord as any).financialScore;
-      const diff = globalScore - previousScore;
+      const diff = globalScore - previousScore!;
       if (diff > 3) weeklyTrend = 'up';
       else if (diff < -3) weeklyTrend = 'down';
     }

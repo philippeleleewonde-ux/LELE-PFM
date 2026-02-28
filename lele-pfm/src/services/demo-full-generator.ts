@@ -19,7 +19,7 @@ import { useChallengeStore } from '@/stores/challenge-store';
 import { generateDemoTransactions } from '@/services/demo-transactions-generator';
 import { calculateWeeklySavings } from '@/domain/calculators/weekly-savings-engine';
 import { getCurrentWeek, getWeekDates, formatDateISO } from '@/utils/week-helpers';
-import { INCOME_CATEGORIES, IncomeCode } from '@/constants/income-categories';
+import { IncomeCode } from '@/constants/income-categories';
 import { FINANCIAL_CHALLENGES } from '@/constants/financial-challenges';
 import { EngineOutput, COICOPCode } from '@/types';
 import { IncomeTarget } from '@/stores/engine-store';
@@ -72,7 +72,6 @@ const INCOME_LABELS: Record<string, string[]> = {
 // ─── Fixed vs Variable income sources ───
 
 const FIXED_INCOME_SOURCES: IncomeCode[] = ['salaire', 'locatifs', 'pension', 'dividendes'];
-const VARIABLE_INCOME_SOURCES: IncomeCode[] = ['primes', 'freelance', 'aides', 'autres_revenus'];
 
 // ─── Main function ───
 
@@ -181,7 +180,7 @@ function populateIncomes(
   incomeTargets: Record<string, IncomeTarget> | null,
   weeks: Array<{ week: number; year: number; profileIdx: number }>,
   roundStep: number,
-  isFCFA: boolean,
+  _isFCFA: boolean,
 ): void {
   if (!incomeTargets || Object.keys(incomeTargets).length === 0) return;
 
@@ -251,7 +250,7 @@ function populatePerformanceRecords(
       weeklyTarget,
       weeklySpent,
       economies: result.economies,
-      economiesCappees: result.economiesCappees,
+      economiesTotal: result.economiesTotal,
       eprProvision: result.eprProvision,
       surplus: result.surplus,
       depassement: result.depassement,
@@ -332,6 +331,7 @@ function populateSavingsGoals(
       icon: def.icon,
       color: def.color,
       allocation: def.allocation,
+      plan: null,
     });
 
     // Get the freshly created goal (first in array since addGoal prepends)

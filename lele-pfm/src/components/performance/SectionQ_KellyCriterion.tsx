@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { PF, PerfGlassCard } from './shared';
 import { useInvestmentStore } from '@/stores/investment-store';
 import { analyzePortfolioKelly, PositionSizeResult } from '@/domain/calculators/kelly-criterion';
+import { HorizontalBarChart, HorizontalBarItem } from '@/components/charts/HorizontalBarChart';
 
 function getStatusColor(status: PositionSizeResult['status']): string {
   switch (status) {
@@ -31,6 +32,14 @@ export function SectionQ_KellyCriterion() {
     return analyzePortfolioKelly(allocations);
   }, [allocations]);
 
+  const kellyBarData = useMemo<HorizontalBarItem[]>(() => {
+    return positions.map((pos) => ({
+      label: pos.assetName,
+      value: pos.kellyOptimal,
+      color: getStatusColor(pos.status),
+    }));
+  }, [positions]);
+
   if (!investorProfile || positions.length === 0) {
     return (
       <PerfGlassCard>
@@ -46,6 +55,18 @@ export function SectionQ_KellyCriterion() {
 
   return (
     <View style={styles.container}>
+      {/* Kelly optimal allocation chart */}
+      {kellyBarData.length > 0 && (
+        <PerfGlassCard style={styles.section}>
+          <Text style={styles.sectionTitle}>{t('kelly.kellyLabel')}</Text>
+          <HorizontalBarChart
+            data={kellyBarData}
+            barHeight={12}
+            formatValue={(v) => `${v}%`}
+          />
+        </PerfGlassCard>
+      )}
+
       {/* Position sizing table */}
       <PerfGlassCard style={styles.section}>
         <Text style={styles.sectionTitle}>{t('kelly.positionSizing')}</Text>

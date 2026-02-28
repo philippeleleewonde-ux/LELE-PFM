@@ -7,6 +7,7 @@ import {
   analyzeAllWeather,
   type ScenarioProtection,
 } from '@/domain/calculators/all-weather-engine';
+import { HorizontalBarChart, HorizontalBarItem } from '@/components/charts/HorizontalBarChart';
 
 // ─── Asset label keys (for adjustments display via i18n) ───
 
@@ -57,6 +58,15 @@ export function SectionP_AllWeather() {
     return analyzeAllWeather(allocations);
   }, [allocations]);
 
+  const scenarioBarData = useMemo<HorizontalBarItem[]>(() => {
+    if (!analysis) return [];
+    return analysis.scenarios.map((s) => ({
+      label: s.label,
+      value: s.score,
+      color: statusColor(s.status),
+    }));
+  }, [analysis]);
+
   if (!investorProfile || !analysis) {
     return (
       <PerfGlassCard>
@@ -72,28 +82,16 @@ export function SectionP_AllWeather() {
       {/* Scenario resilience */}
       <PerfGlassCard style={styles.section}>
         <Text style={styles.sectionTitle}>{t('allWeather.macroResilience')}</Text>
-        <View style={styles.scenarioList}>
-          {analysis.scenarios.map((s) => (
-            <View key={s.scenario} style={styles.scenarioRow}>
-              <Text style={styles.scenarioIcon}>{statusIcon(s.status)}</Text>
-              <Text style={styles.scenarioLabel}>{s.label}</Text>
-              <View style={styles.progressBarBg}>
-                <View
-                  style={[
-                    styles.progressBarFill,
-                    {
-                      width: `${s.score}%`,
-                      backgroundColor: statusColor(s.status),
-                    },
-                  ]}
-                />
-              </View>
-              <Text style={[styles.scenarioScore, { color: statusColor(s.status) }]}>
-                {s.score}%
-              </Text>
-            </View>
-          ))}
-        </View>
+        {scenarioBarData.length > 0 && (
+          <View style={styles.chartContainer}>
+            <HorizontalBarChart
+              data={scenarioBarData}
+              barHeight={12}
+              maxValue={100}
+              formatValue={(v) => `${v}%`}
+            />
+          </View>
+        )}
 
         {/* Overall score */}
         <View style={styles.overallRow}>
@@ -162,6 +160,9 @@ const styles = StyleSheet.create({
     fontSize: 13,
     textAlign: 'center',
   },
+
+  // Chart
+  chartContainer: { marginBottom: 16 },
 
   // Scenarios
   scenarioList: { gap: 10 },

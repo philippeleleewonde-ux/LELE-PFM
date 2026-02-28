@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { PF, PerfGlassCard } from './shared';
 import { useInvestmentStore } from '@/stores/investment-store';
 import { synthesizeWisdom, PillarScore, WisdomAction } from '@/domain/calculators/wisdom-synthesis-engine';
+import RadarChart from '@/components/charts/RadarChart';
 
 // ─── Grade badge color ───
 
@@ -118,6 +119,15 @@ export function SectionAC_WisdomSynthesis() {
     return synthesizeWisdom(allocations);
   }, [allocations, investorProfile]);
 
+  const radarData = useMemo(() => {
+    if (!synthesis || synthesis.pillars.length < 3) return [];
+    return synthesis.pillars.map((p) => ({
+      label: p.label.slice(0, 10),
+      value: p.score,
+      max: 100,
+    }));
+  }, [synthesis]);
+
   if (!investorProfile || !synthesis) {
     return (
       <PerfGlassCard>
@@ -141,6 +151,15 @@ export function SectionAC_WisdomSynthesis() {
           <MaturityPill label={synthesis.maturityLabel} grade={synthesis.globalGrade} />
         </View>
       </PerfGlassCard>
+
+      {/* Wisdom Radar */}
+      {radarData.length >= 3 && (
+        <PerfGlassCard style={styles.section}>
+          <View style={styles.chartWrap}>
+            <RadarChart data={radarData} size={220} color={PF.accent} />
+          </View>
+        </PerfGlassCard>
+      )}
 
       {/* Pillar Scores Card */}
       <PerfGlassCard style={styles.section}>
@@ -203,6 +222,7 @@ const styles = StyleSheet.create({
   container: { gap: 12 },
   section: { marginBottom: 0 },
   emptyText: { color: PF.textMuted, fontSize: 13, textAlign: 'center' },
+  chartWrap: { alignItems: 'center' },
 
   // Global score
   globalScoreWrap: {

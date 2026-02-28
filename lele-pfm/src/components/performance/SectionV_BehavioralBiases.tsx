@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { PF, PerfGlassCard } from './shared';
 import { useInvestmentStore } from '@/stores/investment-store';
 import { analyzeBiases, BiasDetection } from '@/domain/calculators/behavioral-bias-engine';
+import { HorizontalBarChart, HorizontalBarItem } from '@/components/charts/HorizontalBarChart';
 
 // ─── Helpers ───
 
@@ -30,6 +31,17 @@ export function SectionV_BehavioralBiases() {
 
   const analysis = useMemo(() => analyzeBiases(allocations), [allocations]);
 
+  const biasBarData: HorizontalBarItem[] = useMemo(() => {
+    if (!analysis) return [];
+    return [...analysis.biases]
+      .sort((a, b) => b.score - a.score)
+      .map((bias) => ({
+        label: bias.label,
+        value: bias.score,
+        color: severityColor(bias.severity),
+      }));
+  }, [analysis]);
+
   if (!investorProfile) {
     return (
       <PerfGlassCard>
@@ -53,6 +65,15 @@ export function SectionV_BehavioralBiases() {
           </View>
         </View>
         <Text style={styles.summaryText}>{analysis.summary}</Text>
+        {biasBarData.length > 0 && (
+          <View style={styles.chartWrap}>
+            <HorizontalBarChart
+              data={biasBarData}
+              maxValue={10}
+              formatValue={(v) => `${v.toFixed(1)}`}
+            />
+          </View>
+        )}
       </PerfGlassCard>
 
       {/* Top 3 Risks */}
@@ -169,6 +190,7 @@ const styles = StyleSheet.create({
     fontSize: 12,
     lineHeight: 18,
   },
+  chartWrap: { marginTop: 12 },
 
   // Top risks
   riskList: { gap: 14 },

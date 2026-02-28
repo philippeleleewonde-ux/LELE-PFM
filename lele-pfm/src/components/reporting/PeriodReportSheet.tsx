@@ -64,16 +64,16 @@ export function WeekReportSheet({ visible, entry, onClose }: WeekReportProps) {
               <StatRow icon={TrendingUp} label={t('reporting.savingsTarget')} value={formatCurrency(target)} color="#A78BFA" />
               <View style={styles.divider} />
               <StatRow
-                icon={savings.economiesCappees > 0 ? PiggyBank : TrendingDown}
-                label={savings.economiesCappees > 0 ? t('reporting.validatedSavings') : t('reporting.overspend')}
-                value={formatCurrency(savings.economiesCappees > 0 ? savings.economiesCappees : savings.depassement)}
-                color={savings.economiesCappees > 0 ? '#4ADE80' : '#F87171'}
+                icon={savings.economiesTotal > 0 ? PiggyBank : TrendingDown}
+                label={savings.economiesTotal > 0 ? t('reporting.validatedSavings') : t('reporting.overspend')}
+                value={formatCurrency(savings.economiesTotal > 0 ? savings.economiesTotal : savings.depassement)}
+                color={savings.economiesTotal > 0 ? '#4ADE80' : '#F87171'}
                 bold
               />
             </GlassCard>
 
             {/* Distribution */}
-            {savings.economiesCappees > 0 && (
+            {savings.economiesTotal > 0 && (
               <GlassCard variant="dark" style={styles.cardSpacing}>
                 <Text style={styles.sectionLabel}>{t('reporting.savingsDistribution')}</Text>
                 <StatRow icon={PiggyBank} label={t('reporting.savingsPocket67')} value={formatCurrency(savings.epargne)} color="#4ADE80" />

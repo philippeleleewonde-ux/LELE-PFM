@@ -73,7 +73,7 @@ export function SavingsDetailSheet({ visible, wallet, onClose }: SavingsDetailSh
                     key={r.id}
                     label={`S${r.week_number}`}
                     sublabel={getWeekLabel(r.week_number, r.year)}
-                    economies={r.economiesCappees}
+                    economies={r.economiesTotal}
                     economiesReelles={r.economies}
                     depassement={r.depassement}
                     grade={r.grade}

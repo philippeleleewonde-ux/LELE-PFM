@@ -10,7 +10,6 @@ import {
   PeriodSavingsResult,
   getMonthName,
 } from '@/domain/calculators/weekly-savings-engine';
-import { Grade } from '@/types';
 
 export interface WeekCalendarEntry {
   week: number;
@@ -38,7 +37,7 @@ export type ReportPeriod = 'week' | 'month' | 'year';
 
 // ─── Quarter-weighted EPR target helpers (mirrored from useWeeklyTracking) ───
 
-const QUARTERLY_WEIGHTS = [0.20, 0.23, 0.27, 0.30];
+import { QUARTERLY_WEIGHTS } from '@/constants/financial-quarters';
 const WEEKS_PER_QUARTER = 12;
 
 function determinePlanYear(calculatedAt: string): 1 | 2 | 3 {

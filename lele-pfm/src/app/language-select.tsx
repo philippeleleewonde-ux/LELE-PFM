@@ -44,6 +44,7 @@ export default function LanguageSelectScreen() {
           <Pressable
             key={lang.code}
             onPress={() => handleSelect(lang.code)}
+            accessibilityLabel={`Sélectionner ${lang.native}`}
             style={({ pressed }) => [
               styles.card,
               pressed && styles.cardPressed,

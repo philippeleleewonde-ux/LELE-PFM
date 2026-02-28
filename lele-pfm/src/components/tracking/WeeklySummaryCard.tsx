@@ -75,7 +75,7 @@ export function WeeklySummaryCard({
         weeklyTarget,
         weeklySpent,
         economies: savings.economies,
-        economiesCappees: savings.economiesCappees,
+        economiesTotal: savings.economiesTotal,
         eprProvision: savings.eprProvision,
         surplus: savings.surplus,
         depassement: savings.depassement,

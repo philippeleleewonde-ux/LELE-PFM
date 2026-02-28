@@ -19,7 +19,7 @@ export interface WeeklyRecord {
   /** Économies réelles = MAX(0, budget - spent) */
   economies: number;
   /** Économies totales = economies (pas de cap en finance perso) */
-  economiesCappees: number;
+  economiesTotal: number;
   /** Provision EPR = MIN(économies, target) — cashback minimum garanti */
   eprProvision?: number;
   /** Surplus = MAX(0, économies - target) — capital libre au-dessus de l'EPR */

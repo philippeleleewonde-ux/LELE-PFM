@@ -8,6 +8,7 @@ import { lightColors, darkColors } from '../theme/colors';
 import { useAuthStore } from '../stores/auth.store';
 import { useAppStore } from '../stores/app.store';
 import { supabase } from '../infrastructure/supabase/client';
+import { ErrorBoundary } from '../components/ui/ErrorBoundary';
 import { NativeWindStyleSheet } from "nativewind";
 
 NativeWindStyleSheet.setOutput({
@@ -144,20 +145,22 @@ export default function RootLayout() {
           {isAuthenticated && isSetupComplete && inAuthGroup && (
             <Redirect href="/(tabs)" />
           )}
-          <Stack
-            screenOptions={{
-              headerShown: false,
-              contentStyle: {
-                backgroundColor: colors.background,
-              },
-            }}
-          >
-            <Stack.Screen name="language-select" />
-            <Stack.Screen name="onboarding" />
-            <Stack.Screen name="(auth)" />
-            <Stack.Screen name="setup-wizard" />
-            <Stack.Screen name="(tabs)" />
-          </Stack>
+          <ErrorBoundary>
+            <Stack
+              screenOptions={{
+                headerShown: false,
+                contentStyle: {
+                  backgroundColor: colors.background,
+                },
+              }}
+            >
+              <Stack.Screen name="language-select" />
+              <Stack.Screen name="onboarding" />
+              <Stack.Screen name="(auth)" />
+              <Stack.Screen name="setup-wizard" />
+              <Stack.Screen name="(tabs)" />
+            </Stack>
+          </ErrorBoundary>
         </View>
       </View>
     </SafeAreaProvider>

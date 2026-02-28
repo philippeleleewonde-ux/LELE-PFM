@@ -134,6 +134,7 @@ export default function LoginScreen() {
               keyboardType="email-address"
               autoComplete="email"
               editable={!isLoading}
+              accessibilityLabel="Adresse email"
             />
           </View>
 
@@ -148,6 +149,7 @@ export default function LoginScreen() {
               secureTextEntry
               autoComplete="password"
               editable={!isLoading}
+              accessibilityLabel="Mot de passe"
             />
           </View>
 

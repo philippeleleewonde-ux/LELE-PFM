@@ -1,9 +1,9 @@
 import { useMemo } from 'react';
 import { useEngineStore } from '@/stores/engine-store';
-import { usePerformanceStore, WeeklyRecord } from '@/stores/performance-store';
+import { usePerformanceStore } from '@/stores/performance-store';
 import { useTransactionStore } from '@/stores/transaction-store';
-import { getCurrentWeek, getWeekNumber, getISOYear, getWeekDates } from '@/utils/week-helpers';
-import { COICOPCode, IndicatorDistribution } from '@/types';
+import { getCurrentWeek, getWeekNumber, getISOYear } from '@/utils/week-helpers';
+import { COICOPCode } from '@/types';
 import { COICOP_LABELS, COICOP_COLORS } from '@/components/performance/shared';
 import { PFM_INDICATORS } from '@/constants/pfm-indicators';
 
@@ -242,16 +242,7 @@ export function useObjectifVsRealise(): ObjectifVsRealise | null {
       let total = 0;
       for (const p of pairs) {
         const rec = records.find((r) => r.week_number === p.week && r.year === p.year);
-        if (rec) total += rec.economiesCappees;
-      }
-      return total;
-    }
-
-    function sumSpent(pairs: { week: number; year: number }[]): number {
-      let total = 0;
-      for (const p of pairs) {
-        const rec = records.find((r) => r.week_number === p.week && r.year === p.year);
-        if (rec) total += rec.weeklySpent;
+        if (rec) total += rec.economiesTotal;
       }
       return total;
     }
@@ -277,7 +268,7 @@ export function useObjectifVsRealise(): ObjectifVsRealise | null {
     const weekRecord = records.find(
       (r) => r.week_number === curWeek && r.year === curYear,
     );
-    const weeklyRealise = weekRecord?.economiesCappees ?? 0;
+    const weeklyRealise = weekRecord?.economiesTotal ?? 0;
     const weeklyProgression = safeDiv(weeklyRealise, weeklyTarget);
 
     const weekly: PeriodData = {

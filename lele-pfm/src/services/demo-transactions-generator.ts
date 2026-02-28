@@ -7,16 +7,12 @@
  */
 
 import { COICOPCode, TransactionType, PaymentMethod, EngineOutput } from '@/types';
-import { getWeekDates, formatDateISO, getWeekNumber, getISOYear } from '@/utils/week-helpers';
+import { getWeekDates, formatDateISO } from '@/utils/week-helpers';
 
 // ─── Helpers ───
 
 function randInt(min: number, max: number): number {
   return Math.floor(Math.random() * (max - min + 1)) + min;
-}
-
-function randPick<T>(arr: readonly T[]): T {
-  return arr[Math.floor(Math.random() * arr.length)];
 }
 
 function maybe(chance: number): boolean {

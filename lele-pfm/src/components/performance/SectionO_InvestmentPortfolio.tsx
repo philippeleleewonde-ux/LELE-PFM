@@ -10,16 +10,27 @@ import {
   simulateInvestment,
   compareStrategies,
 } from '@/domain/calculators/investment-simulator';
+import { DonutChart } from '@/components/charts/DonutChart';
+import { MiniSparkline } from '@/components/charts/MiniSparkline';
 
 export function SectionO_InvestmentPortfolio() {
   const { width } = useWindowDimensions();
   const isSmall = width < 360;
   const allocations = useInvestmentStore((s) => s.allocations);
   const investorProfile = useInvestmentStore((s) => s.investorProfile);
-  const totalInvested = useInvestmentStore((s) => s.getTotalInvested)();
+  // totalInvested available via: useInvestmentStore((s) => s.getTotalInvested)()
   const engineOutput = useEngineStore((s) => s.engineOutput);
 
   const annualReturn = useMemo(() => portfolioReturn(allocations), [allocations]);
+
+  const donutData = useMemo(() => {
+    if (allocations.length === 0) return [];
+    return allocations.map((a) => ({
+      label: a.product.name,
+      value: a.weight,
+      color: getAllocColor(a.product.riskLevel),
+    }));
+  }, [allocations]);
 
   // Compute monthly invest dynamically from EPR × ratio (not step9.monthly_invest_n1 which may be 0)
   const monthlyInvestCalc = useMemo(() => {
@@ -34,6 +45,11 @@ export function SectionO_InvestmentPortfolio() {
     const comparison = compareStrategies(monthlyInvestCalc, 3, annualReturn, inflation);
     return { p36, comparison };
   }, [monthlyInvestCalc, annualReturn]);
+
+  const projectionSparkData = useMemo(() => {
+    if (!projection) return [];
+    return projection.p36.map((p) => p.total);
+  }, [projection]);
 
   const { t } = useTranslation('performance');
 
@@ -72,14 +88,15 @@ export function SectionO_InvestmentPortfolio() {
         <Text style={styles.sectionHint}>{t('investmentPortfolio.productsHint')}</Text>
         {allocations.length > 0 ? (
           <View style={styles.allocList}>
-            {allocations.map((a) => (
-              <View key={a.product.code} style={styles.allocRow}>
-                <View style={[styles.allocDot, { backgroundColor: getAllocColor(a.product.riskLevel) }]} />
-                <Text style={styles.allocName} numberOfLines={1}>{a.product.name}</Text>
-                <Text style={styles.allocReturn}>{a.product.returnRate}%</Text>
-                <Text style={styles.allocWeight}>{a.weight}%</Text>
-              </View>
-            ))}
+            {donutData.length > 0 && (
+              <DonutChart
+                data={donutData}
+                size={isSmall ? 140 : 160}
+                strokeWidth={18}
+                centerLabel={t('investmentPortfolio.averageReturn')}
+                centerValue={`${annualReturn.toFixed(1)}%`}
+              />
+            )}
             <View style={styles.allocSummary}>
               <Text style={styles.summaryLabel}>{t('investmentPortfolio.averageReturn')}</Text>
               <Text style={[styles.summaryValue, { color: PF.green }]}>
@@ -99,6 +116,17 @@ export function SectionO_InvestmentPortfolio() {
           <Text style={styles.sectionHint}>
             {t('investmentPortfolio.projectionHint', { monthly: monthlyFormatted, annualReturn: annualReturn.toFixed(1) })}
           </Text>
+          {projectionSparkData.length >= 2 && (
+            <View style={styles.sparkContainer}>
+              <MiniSparkline
+                data={projectionSparkData}
+                width={isSmall ? 260 : 300}
+                height={48}
+                color={PF.green}
+                strokeWidth={2}
+              />
+            </View>
+          )}
           <View style={styles.projGrid}>
             <View style={styles.projItem}>
               <Text style={styles.projLabel}>{t('investmentPortfolio.yourMoneyInvested')}</Text>
@@ -217,6 +245,9 @@ const styles = StyleSheet.create({
   },
   summaryLabel: { color: PF.textMuted, fontSize: 12 },
   summaryValue: { fontSize: 14, fontWeight: '800' },
+
+  // Sparkline
+  sparkContainer: { alignItems: 'center', marginBottom: 12 },
 
   // Projection
   projGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },

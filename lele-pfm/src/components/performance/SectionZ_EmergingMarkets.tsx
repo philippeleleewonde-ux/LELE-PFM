@@ -8,6 +8,7 @@ import {
   RegionExposure,
   RegionOutlook,
 } from '@/domain/calculators/emerging-markets-engine';
+import RadarChart from '@/components/charts/RadarChart';
 
 // ─── Outlook helpers ───
 
@@ -35,6 +36,15 @@ export function SectionZ_EmergingMarkets() {
   const investorProfile = useInvestmentStore((s) => s.investorProfile);
 
   const analysis = useMemo(() => analyzeEmergingMarkets(allocations), [allocations]);
+
+  const radarData = useMemo(() => {
+    if (!analysis || analysis.regions.length < 3) return [];
+    return analysis.regions.map((re) => ({
+      label: re.region.name.slice(0, 10),
+      value: re.region.opportunityScore,
+      max: 100,
+    }));
+  }, [analysis]);
 
   if (!investorProfile) {
     return (
@@ -66,6 +76,11 @@ export function SectionZ_EmergingMarkets() {
           </View>
         </View>
         <Text style={styles.summaryText}>{analysis.summary}</Text>
+        {radarData.length >= 3 && (
+          <View style={styles.chartWrap}>
+            <RadarChart data={radarData} size={220} color={PF.orange} />
+          </View>
+        )}
       </PerfGlassCard>
 
       {/* Region cards */}
@@ -220,6 +235,7 @@ const styles = StyleSheet.create({
   scoreLabel: { color: PF.textMuted, fontSize: 10, fontWeight: '600', textTransform: 'uppercase', marginBottom: 4 },
   scoreValue: { fontSize: 20, fontWeight: '800' },
   summaryText: { color: PF.textSecondary, fontSize: 12, lineHeight: 18 },
+  chartWrap: { alignItems: 'center', marginTop: 12 },
 
   // Region card
   regionHeader: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 12 },

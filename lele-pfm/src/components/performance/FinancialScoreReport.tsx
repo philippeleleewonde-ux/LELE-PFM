@@ -9,7 +9,7 @@
  * - LIT : "Score EKH 73/100"
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import {
@@ -20,9 +20,11 @@ import {
   GraduationCap,
   LucideIcon,
 } from 'lucide-react-native';
-import { useFinancialScore, LeverScore, LeverDetails } from '@/hooks/useFinancialScore';
+import { useFinancialScore } from '@/hooks/useFinancialScore';
+import type { LeverDetails } from '@/hooks/useFinancialScore';
 import { formatCurrency } from '@/services/format-helpers';
 import { PF } from './shared';
+import RadarChart from '@/components/charts/RadarChart';
 
 // ─── Lever icons ───
 
@@ -163,7 +165,7 @@ function buildKeyFigures(code: string, d: LeverDetails, t: (key: string, opts?: 
 
 // ─── Data-driven comment builder ───
 
-function buildComment(code: string, score: number, d: LeverDetails, t: (key: string, opts?: any) => string): string {
+function buildComment(code: string, _score: number, d: LeverDetails, t: (key: string, opts?: any) => string): string {
   switch (code) {
     case 'REG': {
       const tw = d.regTotalWeeks ?? 0;
@@ -279,6 +281,11 @@ export function FinancialScoreReport() {
   const { globalScore, grade, levers } = useFinancialScore();
   const globalLevel = getScoreLevel(globalScore, t);
 
+  const radarData = useMemo(
+    () => levers.map((l) => ({ label: l.code, value: l.score, max: 100 })),
+    [levers],
+  );
+
   return (
     <View style={styles.container}>
       {/* Global summary */}
@@ -296,6 +303,13 @@ export function FinancialScoreReport() {
           {grade} — {globalLevel.label}
         </Text>
       </View>
+
+      {/* Radar chart — 5 levers overview */}
+      {radarData.length >= 3 && (
+        <View style={styles.radarWrap}>
+          <RadarChart data={radarData} size={200} color={PF.accent} />
+        </View>
+      )}
 
       {/* Lever rows */}
       {levers.map((lever) => {
@@ -404,6 +418,13 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: '800',
     textAlign: 'center',
+  },
+
+  // Radar chart
+  radarWrap: {
+    alignItems: 'center',
+    marginBottom: 4,
+    paddingVertical: 8,
   },
 
   // Lever card

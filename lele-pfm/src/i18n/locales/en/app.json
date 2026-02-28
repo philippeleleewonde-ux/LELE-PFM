@@ -127,7 +127,14 @@
       "emergingMarkets": "Emerging Markets Radar",
       "compliance": "Regulatory Compliance",
       "socraticCoach": "Socratic Coach",
-      "globalSynthesis": "Global Synthesis"
+      "globalSynthesis": "Global Synthesis",
+      "patrimoine": "Wealth Pipeline"
+    },
+    "tabs": {
+      "score": "Score",
+      "analyse": "Analysis",
+      "strategie": "Strategy",
+      "investisseur": "Investor"
     }
   },
   "settings": {
@@ -347,7 +354,105 @@
     "indifferentDesc": "All products",
     "investmentShare": "Investment share ({{ratio}}%)",
     "ratioHint": "Savings {{savings}}% \u00B7 Investment {{investment}}% \u00B7 Fun 33%",
-    "validateProfile": "Validate my profile"
+    "validateProfile": "Validate my profile",
+    "bouclierTitle": "Liquidity shield",
+    "bouclierFull": "Full",
+    "bouclierFullDesc": "6+ months of expenses in reserve",
+    "bouclierPartial": "Partial",
+    "bouclierPartialDesc": "3 to 6 months of expenses",
+    "bouclierNone": "Not yet",
+    "bouclierNoneDesc": "Less than 3 months of reserve",
+    "stressTitle": "Emotional stress test",
+    "stressSellAll": "Sell everything",
+    "stressSellAllDesc": "Limit losses immediately",
+    "stressSellSome": "Sell partially",
+    "stressSellSomeDesc": "Reduce risk exposure",
+    "stressHold": "Do nothing",
+    "stressHoldDesc": "Wait for recovery",
+    "stressBuyMore": "Buy more",
+    "stressBuyMoreDesc": "Take advantage of low prices",
+    "capitalTitle": "Starting capital",
+    "capitalPlaceholder": "E.g.: 500,000"
+  },
+  "gps": {
+    "tabs": {
+      "courbe": "My Curve",
+      "strategie": "My Strategy",
+      "mission": "My Mission",
+      "simulateur": "Simulator"
+    },
+    "pillars": {
+      "croissance": "Growth Engine",
+      "croissanceDesc": "Stocks, funds, crypto — grow your capital",
+      "amortisseur": "Shock Absorber",
+      "amortisseurDesc": "Bonds, sukuk — stability and fixed income",
+      "refuge": "Safe Haven",
+      "refugeDesc": "Gold, real estate — inflation protection",
+      "baseArriere": "Safety Net",
+      "baseArriereDesc": "Savings, deposits, tontine — maximum security"
+    },
+    "courbe": {
+      "title": "Compound interest",
+      "horizon10": "10 years",
+      "horizon20": "20 years",
+      "horizon30": "30 years",
+      "invested": "Invested capital",
+      "interests": "Interest earned",
+      "total": "Total value",
+      "tippingPoint": "Tipping Point",
+      "tippingPointDesc": "The month when your passive income exceeds your active income",
+      "savingsOnly": "Savings only",
+      "noStrategy": "Complete your profile to see your curve"
+    },
+    "strategie": {
+      "title": "Your strategy",
+      "allWeatherScore": "All-Weather Score",
+      "target": "Target",
+      "current": "Current",
+      "rebalance": "Rebalance",
+      "drift": "Drift",
+      "noStrategy": "Complete your profile to see your strategy",
+      "returnRate": "Return rate"
+    },
+    "mission": {
+      "title": "Monthly mission",
+      "progress": "{{completed}} / {{total}} missions",
+      "confirm": "Mission accomplished",
+      "skip": "Skip",
+      "history": "History",
+      "completed": "Completed",
+      "skipped": "Skipped",
+      "pending": "In progress",
+      "done": "This month's mission completed!",
+      "noMission": "Generate your strategy to unlock missions"
+    },
+    "missions": {
+      "m01": { "title": "Open a savings account", "desc": "Find the best savings account available in your country and open it." },
+      "m02": { "title": "Set up automatic transfer", "desc": "Set up a monthly automatic transfer to your savings account." },
+      "m03": { "title": "First stock investment", "desc": "Invest a small amount in an index fund or local stocks." },
+      "m04": { "title": "Diversify growth", "desc": "Add a second growth product: mutual fund or local stocks." },
+      "m05": { "title": "First bond investment", "desc": "Invest in government bonds or corporate bonds." },
+      "m06": { "title": "Safe haven position", "desc": "Open a position in gold or a real estate fund." },
+      "m07": { "title": "Emergency fund review", "desc": "Check that your emergency fund covers 3 to 6 months of expenses." },
+      "m08": { "title": "Rebalance growth", "desc": "Adjust your growth positions to maintain target allocation." },
+      "m09": { "title": "Diversify bonds", "desc": "Add a second bond product to diversify your shock absorber." },
+      "m10": { "title": "Diversify safe haven", "desc": "Complete your safe haven pillar with a second instrument." },
+      "m11": { "title": "Performance review", "desc": "Analyze your portfolio performance and identify adjustments." },
+      "m12": { "title": "Annual rebalancing", "desc": "Rebalance your entire portfolio for the new year." }
+    },
+    "simulateur": {
+      "title": "Simulator",
+      "monthlyAmount": "Monthly amount",
+      "duration": "Duration (years)",
+      "return": "Return (%)",
+      "savingsOnly": "Savings only",
+      "strategy": "GPS Strategy",
+      "opportunityCost": "Opportunity cost",
+      "delta": "Difference"
+    },
+    "completeProfile": "Complete your investor profile",
+    "completeDiagnosis": "Complete the financial diagnosis",
+    "noBudget": "Your investment budget is 0. Adjust your profile."
   },
   "categories": {
     "food": "Food",

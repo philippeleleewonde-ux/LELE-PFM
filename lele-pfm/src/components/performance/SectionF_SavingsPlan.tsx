@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { ProgressRing } from './ProgressRing';
 import { PerfGlassCard, PF } from './shared';
+import MiniLineChart from '@/components/charts/MiniLineChart';
 import { formatCurrency, formatPercent } from '@/services/format-helpers';
 
 interface SectionFProps {
@@ -32,6 +33,19 @@ export function SectionF_SavingsPlan(props: SectionFProps) {
     { label: t('drivingDashboard.year', { n: 3 }), epr: props.eprN3, epargne: props.epargneN3, discr: props.discretionnaireN3, monthly: props.monthlyTargetN3 },
   ];
 
+  // Cumulative savings projection line chart data
+  const savingsLineData = useMemo(() => {
+    const cumN1 = props.epargneN1 + props.discretionnaireN1;
+    const cumN2 = cumN1 + props.epargneN2 + props.discretionnaireN2;
+    const cumN3 = cumN2 + props.epargneN3 + props.discretionnaireN3;
+    return [
+      { label: 'An 0', value: 0 },
+      { label: 'An 1', value: cumN1 },
+      { label: 'An 2', value: cumN2 },
+      { label: 'An 3', value: cumN3 },
+    ];
+  }, [props.epargneN1, props.discretionnaireN1, props.epargneN2, props.discretionnaireN2, props.epargneN3, props.discretionnaireN3]);
+
   return (
     <View style={styles.container}>
       {/* POB Ring */}
@@ -53,6 +67,18 @@ export function SectionF_SavingsPlan(props: SectionFProps) {
           </View>
         </View>
       </View>
+
+      {/* Cumulative savings projection */}
+      {savingsLineData.length > 0 && (
+        <MiniLineChart
+          data={savingsLineData}
+          color={PF.green}
+          showArea
+          showLabels
+          showDots
+          height={130}
+        />
+      )}
 
       {/* PEP Table */}
       <PerfGlassCard>

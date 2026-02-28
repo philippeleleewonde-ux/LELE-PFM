@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { PF, PerfGlassCard } from './shared';
 import { useInvestmentStore } from '@/stores/investment-store';
 import { calculateACE, ACEDimension, ACEFactor } from '@/domain/calculators/ace-score-engine';
+import RadarChart from '@/components/charts/RadarChart';
 
 // ─── Grade badge color ───
 
@@ -117,6 +118,15 @@ export function SectionX_PsychScore() {
     return calculateACE(allocations);
   }, [allocations, investorProfile]);
 
+  const radarData = useMemo(() => {
+    if (!ace) return [];
+    return [
+      { label: 'A — ' + ace.awareness.label.slice(0, 8), value: ace.awareness.score, max: 100 },
+      { label: 'C — ' + ace.control.label.slice(0, 8), value: ace.control.score, max: 100 },
+      { label: 'E — ' + ace.execution.label.slice(0, 8), value: ace.execution.score, max: 100 },
+    ];
+  }, [ace]);
+
   if (!investorProfile || !ace) {
     return (
       <PerfGlassCard>
@@ -145,6 +155,16 @@ export function SectionX_PsychScore() {
           <Text style={styles.globalScoreMax}>/100</Text>
         </View>
       </PerfGlassCard>
+
+      {/* ACE Radar */}
+      {radarData.length >= 3 && (
+        <PerfGlassCard style={styles.section}>
+          <Text style={styles.sectionTitle}>{t('psychScore.aceDimensions')}</Text>
+          <View style={styles.chartWrap}>
+            <RadarChart data={radarData} size={200} color={PF.blue} />
+          </View>
+        </PerfGlassCard>
+      )}
 
       {/* 3 Dimension summary rows */}
       <PerfGlassCard style={styles.section}>
@@ -192,6 +212,7 @@ const styles = StyleSheet.create({
   container: { gap: 12 },
   section: { marginBottom: 0 },
   emptyText: { color: PF.textMuted, fontSize: 13, textAlign: 'center' },
+  chartWrap: { alignItems: 'center', marginBottom: 8 },
 
   // Profile
   profileRow: { marginBottom: 16 },

@@ -141,7 +141,7 @@ export function useSavingsWallet(): SavingsWallet {
       const discretionnaire = r.waterfallDiscretionnaire ?? r.discretionnaire;
 
       // All-time
-      allTimeEconomies += r.economiesCappees;
+      allTimeEconomies += r.economiesTotal;
       allTimeNonDepense += r.economies; // uncapped: real budget - spent
       allTimeEpargne += epargne;
       allTimeDiscretionnaire += discretionnaire;
@@ -153,7 +153,7 @@ export function useSavingsWallet(): SavingsWallet {
         bucket = { economies: 0, economiesReelles: 0, epargne: 0, discretionnaire: 0, depassement: 0, nbSemaines: 0 };
         byYear.set(r.year, bucket);
       }
-      bucket.economies += r.economiesCappees;
+      bucket.economies += r.economiesTotal;
       bucket.economiesReelles += r.economies;
       bucket.epargne += epargne;
       bucket.discretionnaire += discretionnaire;
@@ -162,13 +162,13 @@ export function useSavingsWallet(): SavingsWallet {
 
       // Current year
       if (r.year === nowYear) {
-        currentYearEconomies += r.economiesCappees;
+        currentYearEconomies += r.economiesTotal;
         currentYearEpargne += epargne;
         currentYearDiscretionnaire += discretionnaire;
 
         // Current month
         if (currentMonthWeeks.has(r.week_number)) {
-          currentMonthEconomies += r.economiesCappees;
+          currentMonthEconomies += r.economiesTotal;
           currentMonthEpargne += epargne;
           currentMonthDiscretionnaire += discretionnaire;
         }
@@ -176,7 +176,7 @@ export function useSavingsWallet(): SavingsWallet {
 
       // Current week
       if (r.year === nowYear && r.week_number === nowWeek) {
-        currentWeekEconomies = r.economiesCappees;
+        currentWeekEconomies = r.economiesTotal;
         currentWeekEpargne = epargne;
         currentWeekDiscretionnaire = discretionnaire;
       }
@@ -198,7 +198,7 @@ export function useSavingsWallet(): SavingsWallet {
         );
         if (monthRecords.length === 0) continue;
 
-        const economies = monthRecords.reduce((s, r) => s + r.economiesCappees, 0);
+        const economies = monthRecords.reduce((s, r) => s + r.economiesTotal, 0);
         const economiesReelles = monthRecords.reduce((s, r) => s + r.economies, 0);
         const epargne = monthRecords.reduce((s, r) => s + (r.waterfallEpargne ?? r.epargne), 0);
         const discretionnaire = monthRecords.reduce((s, r) => s + (r.waterfallDiscretionnaire ?? r.discretionnaire), 0);

@@ -9,6 +9,7 @@ import {
   MACRO_LABELS,
   MacroScenarioResult,
 } from '@/domain/calculators/macro-scenario-engine';
+import WaterfallChart from '@/components/charts/WaterfallChart';
 
 export function SectionU_MacroScenarios() {
   const { t } = useTranslation('performance');
@@ -38,6 +39,29 @@ export function SectionU_MacroScenarios() {
       </PerfGlassCard>
     );
   }
+
+  // Waterfall chart data: base → per-asset adjustments → result
+  const waterfallData = useMemo(() => {
+    if (!result) return [];
+    const items: { label: string; value: number; type: 'increase' | 'decrease' | 'total' }[] = [
+      { label: 'Base', value: Math.round(result.portfolioBaseReturn * 100) / 100, type: 'total' },
+    ];
+    for (const ai of result.assetImpacts) {
+      if (Math.abs(ai.impact) >= 0.01) {
+        items.push({
+          label: ai.assetName.length > 8 ? ai.assetName.slice(0, 7) : ai.assetName,
+          value: Math.abs(Math.round(ai.impact * 100) / 100),
+          type: ai.impact >= 0 ? 'increase' : 'decrease',
+        });
+      }
+    }
+    items.push({
+      label: 'Ajust\u00E9',
+      value: Math.round(result.portfolioAdjustedReturn * 100) / 100,
+      type: 'total',
+    });
+    return items;
+  }, [result]);
 
   const hypothesis = result.hypothesis;
   const varMeta = MACRO_LABELS[hypothesis.variable];
@@ -118,6 +142,11 @@ export function SectionU_MacroScenarios() {
           </View>
         </View>
         <Text style={styles.explanationText}>{result.explanation}</Text>
+        {waterfallData.length > 2 && (
+          <View style={styles.chartWrap}>
+            <WaterfallChart data={waterfallData} width={300} height={180} />
+          </View>
+        )}
       </PerfGlassCard>
 
       {/* Per-asset impacts */}
@@ -222,6 +251,9 @@ const styles = StyleSheet.create({
 
   // Explanation
   explanationText: { color: PF.textSecondary, fontSize: 12, lineHeight: 18 },
+
+  // Chart
+  chartWrap: { alignItems: 'center', marginTop: 12 },
 
   // Asset list
   assetList: { gap: 8 },

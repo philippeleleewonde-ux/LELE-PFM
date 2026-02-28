@@ -73,8 +73,9 @@ export function ContributeGoalModal({ visible, goalId, goalName, remaining, onCl
 
   const isOverSurplus = availableSurplus > 0 && amount > availableSurplus;
   const isOverRemaining = amount > remaining;
+  const isOverMax = amount > 999_999_999;
   // Hard-block: amount must not exceed surplus (solvability) nor remaining (over-funding) — Bug #5
-  const isValid = amount > 0 && label.trim().length > 0 && !isOverSurplus && !isOverRemaining;
+  const isValid = amount > 0 && label.trim().length > 0 && !isOverSurplus && !isOverRemaining && !isOverMax;
 
   const handleSubmit = useCallback(() => {
     if (!isValid || !goalId) return;

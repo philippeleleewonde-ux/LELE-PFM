@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { ProgressBar } from '../charts/ProgressBar';
-import { PerfGlassCard, PF, COICOP_LABELS, COICOP_COLORS } from './shared';
+import { HorizontalBarChart } from '@/components/charts/HorizontalBarChart';
+import { PerfGlassCard, PF, COICOP_COLORS } from './shared';
 import { CategoryItem } from '@/hooks/usePerformanceData';
 import { formatCurrency, formatPercent } from '@/services/format-helpers';
 
@@ -18,6 +19,15 @@ export function SectionActions({ year, categories }: SectionActionsProps) {
     .filter((cat) => cat.elasticity > 0)
     .sort((a, b) => b.elasticity - a.elasticity);
 
+  // Horizontal bar chart data: elasticity by category, sorted descending
+  const barChartData = useMemo(() => {
+    return actionable.map((cat) => ({
+      label: cat.label,
+      value: cat.elasticity,
+      color: COICOP_COLORS[cat.code] || PF.textMuted,
+    }));
+  }, [actionable]);
+
   if (actionable.length === 0) {
     return (
       <View style={styles.empty}>
@@ -28,6 +38,16 @@ export function SectionActions({ year, categories }: SectionActionsProps) {
 
   return (
     <View style={styles.container}>
+      {/* Overview: elasticity ranking */}
+      {barChartData.length > 0 && (
+        <PerfGlassCard style={styles.card}>
+          <Text style={styles.chartTitle}>{t('actions.margin')}</Text>
+          <HorizontalBarChart
+            data={barChartData}
+            formatValue={(v) => `${v.toFixed(0)}%`}
+          />
+        </PerfGlassCard>
+      )}
       {actionable.map((cat) => {
         const color = COICOP_COLORS[cat.code] || PF.textMuted;
         const isEssential = cat.nature === 'Essentielle';
@@ -107,6 +127,14 @@ const styles = StyleSheet.create({
   },
   card: {
     gap: 12,
+  },
+  chartTitle: {
+    color: PF.textMuted,
+    fontSize: 11,
+    fontWeight: '600',
+    textTransform: 'uppercase',
+    letterSpacing: 0.3,
+    marginBottom: 4,
   },
   cardHeader: {
     flexDirection: 'row',

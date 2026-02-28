@@ -2,6 +2,7 @@ import { supabase } from '@/infrastructure/supabase/client';
 import { useAuthStore } from '@/stores/auth.store';
 import { AuthenticationError, ValidationError } from '@/utils/errors';
 import { validateEmail, validatePassword } from '@/utils/validation';
+import { withTimeout } from '@/utils/timeout';
 
 export const authService = {
   async signUp(
@@ -25,7 +26,7 @@ export const authService = {
         throw new ValidationError('First name and last name are required');
       }
 
-      const { data, error } = await supabase.auth.signUp({
+      const { data, error } = await withTimeout(supabase.auth.signUp({
         email,
         password,
         options: {
@@ -34,7 +35,7 @@ export const authService = {
             last_name: lastName,
           },
         },
-      });
+      }));
 
       if (error) {
         throw new AuthenticationError(error.message);
@@ -66,10 +67,10 @@ export const authService = {
         throw new ValidationError('Invalid email format');
       }
 
-      const { data, error } = await supabase.auth.signInWithPassword({
+      const { data, error } = await withTimeout(supabase.auth.signInWithPassword({
         email,
         password,
-      });
+      }));
 
       if (error) {
         throw new AuthenticationError(error.message);
@@ -105,7 +106,7 @@ export const authService = {
 
   async signOut(): Promise<{ success: boolean; error?: string }> {
     try {
-      const { error } = await supabase.auth.signOut();
+      const { error } = await withTimeout(supabase.auth.signOut());
 
       if (error) {
         throw new AuthenticationError(error.message);
@@ -125,9 +126,9 @@ export const authService = {
         throw new ValidationError('Invalid email format');
       }
 
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      const { error } = await withTimeout(supabase.auth.resetPasswordForEmail(email, {
         redirectTo: 'lele-pfm://reset-password',
-      });
+      }));
 
       if (error) {
         throw new AuthenticationError(error.message);
@@ -147,9 +148,9 @@ export const authService = {
         throw new ValidationError(passwordValidation.errors[0]);
       }
 
-      const { error } = await supabase.auth.updateUser({
+      const { error } = await withTimeout(supabase.auth.updateUser({
         password: newPassword,
-      });
+      }));
 
       if (error) {
         throw new AuthenticationError(error.message);
@@ -164,7 +165,7 @@ export const authService = {
 
   async getSession(): Promise<{ success: boolean; error?: string }> {
     try {
-      const { data, error } = await supabase.auth.getSession();
+      const { data, error } = await withTimeout(supabase.auth.getSession());
 
       if (error) {
         throw new AuthenticationError(error.message);

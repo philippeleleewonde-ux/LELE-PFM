@@ -31,36 +31,12 @@ export default function RootLayout() {
 
   const [isReady, setIsReady] = useState(false);
 
-  // DEV BYPASS: si isSetupComplete est true (données wizard déjà injectées),
-  // on simule une authentification pour pouvoir tester le reporting.
-  // TODO: Retirer ce bloc avant production.
-  const devBypassAuth = isSetupComplete && !isAuthenticated;
-
   useEffect(() => {
     i18n.changeLanguage(language);
   }, [language]);
 
-  // DEV: auto-set user if setup complete but not authenticated
-  useEffect(() => {
-    if (devBypassAuth) {
-      setUser({
-        id: 'dev-user',
-        email: 'dev@lele-pfm.test',
-        firstName: 'Testeur',
-        lastName: 'PFM',
-        currency: 'FCFA',
-        locale: 'fr',
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      });
-      setSession('dev-token', 'dev-refresh', Date.now() + 86400000);
-      setIsReady(true);
-    }
-  }, [devBypassAuth]);
-
   // Listen for Supabase auth state changes
   useEffect(() => {
-    if (devBypassAuth) return; // Skip Supabase listener in dev bypass mode
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
         if (session?.user) {

@@ -1,0 +1,440 @@
+{
+  "FR_savings_account": {
+    "countryCode": "FR",
+    "assetClass": "savings_account",
+    "steps": [
+      {
+        "order": 1,
+        "titleKey": "procedures.FR.savings_account.step1.title",
+        "descriptionKey": "procedures.FR.savings_account.step1.desc",
+        "institution": "Banque traditionnelle (BNP Paribas, Société Générale, Crédit Agricole, LCL) ou banque en ligne (Boursorama, Fortuneo, Hello bank!)",
+        "documents": ["Pièce d'identité (CNI ou passeport)", "Justificatif de domicile (< 3 mois)", "RIB si transfert depuis une autre banque"],
+        "estimatedCostEUR": 0,
+        "estimatedDays": 1,
+        "tips": ["Le Livret A est le produit d'épargne le plus populaire — taux fixé par l'État (3% en 2025)", "Plafond Livret A : 22 950 EUR — intérêts totalement exonérés d'impôt", "Le LDDS (Livret de Développement Durable et Solidaire) complète le Livret A — plafond 12 000 EUR"]
+      },
+      {
+        "order": 2,
+        "titleKey": "procedures.FR.savings_account.step2.title",
+        "descriptionKey": "procedures.FR.savings_account.step2.desc",
+        "institution": "Banque choisie",
+        "documents": ["Formulaire d'ouverture (en ligne ou en agence)", "Signature du contrat"],
+        "estimatedCostEUR": 0,
+        "estimatedDays": 1,
+        "tips": ["Le LEP (Livret d'Épargne Populaire) offre 5% — sous conditions de revenus", "Le PEL (Plan d'Épargne Logement) bloque l'épargne 4 ans mais offre un taux garanti"]
+      },
+      {
+        "order": 3,
+        "titleKey": "procedures.FR.savings_account.step3.title",
+        "descriptionKey": "procedures.FR.savings_account.step3.desc",
+        "institution": "Banque choisie",
+        "documents": ["Code d'accès banque en ligne", "RIB du nouveau compte"],
+        "estimatedCostEUR": 0,
+        "estimatedDays": 1,
+        "tips": ["Mettre en place un virement automatique mensuel", "Utiliser l'appli mobile pour suivre les intérêts en temps réel"]
+      }
+    ],
+    "lastUpdated": "2026-01-15",
+    "sourceNotes": "Banque de France / ACPR / Code monétaire et financier"
+  },
+  "FR_government_bonds": {
+    "countryCode": "FR",
+    "assetClass": "government_bonds",
+    "steps": [
+      {
+        "order": 1,
+        "titleKey": "procedures.FR.government_bonds.step1.title",
+        "descriptionKey": "procedures.FR.government_bonds.step1.desc",
+        "institution": "Courtier en ligne (Boursorama, Degiro, Saxo, Interactive Brokers) ou banque avec CTO/PEA",
+        "documents": ["Pièce d'identité", "Justificatif de domicile", "RIB", "Numéro fiscal"],
+        "estimatedCostEUR": 0,
+        "estimatedDays": 3,
+        "tips": ["Les OAT (Obligations Assimilables du Trésor) françaises sont émises par l'AFT (Agence France Trésor)", "Accessible via un CTO (Compte-Titres Ordinaire) — pas éligible au PEA", "Alternative : fonds obligataires (ETF ou OPCVM) — plus accessible"]
+      },
+      {
+        "order": 2,
+        "titleKey": "procedures.FR.government_bonds.step2.title",
+        "descriptionKey": "procedures.FR.government_bonds.step2.desc",
+        "institution": "AFT (Agence France Trésor) / Euronext",
+        "documents": ["Note d'information", "Calendrier des adjudications"],
+        "estimatedCostEUR": 0,
+        "estimatedDays": 5,
+        "tips": ["Les OAT sont cotées sur Euronext Paris — achat comme une action", "Rendement OAT 10 ans : 2,5-3,5% (selon les taux directeurs BCE)", "Les OATi (indexées sur l'inflation) protègent le pouvoir d'achat"]
+      },
+      {
+        "order": 3,
+        "titleKey": "procedures.FR.government_bonds.step3.title",
+        "descriptionKey": "procedures.FR.government_bonds.step3.desc",
+        "institution": "Courtier / Euroclear France",
+        "documents": ["Ordre d'achat", "Confirmation de transaction"],
+        "estimatedCostEUR": 100,
+        "estimatedDays": 2,
+        "tips": ["Minimum : 1 EUR nominal — très accessible", "Les OAT sont liquides — revente possible à tout moment sur Euronext"]
+      },
+      {
+        "order": 4,
+        "titleKey": "procedures.FR.government_bonds.step4.title",
+        "descriptionKey": "procedures.FR.government_bonds.step4.desc",
+        "institution": "Courtier / DGFiP",
+        "documents": ["IFU (Imprimé Fiscal Unique)", "Déclaration de revenus"],
+        "estimatedCostEUR": 0,
+        "estimatedDays": 0,
+        "tips": ["Les coupons sont soumis au PFU (Prélèvement Forfaitaire Unique) de 30%", "Ou option pour le barème progressif de l'IR", "Les plus-values suivent le même régime fiscal"]
+      }
+    ],
+    "lastUpdated": "2026-01-15",
+    "sourceNotes": "AFT / AMF / Euronext Paris"
+  },
+  "FR_local_stocks": {
+    "countryCode": "FR",
+    "assetClass": "local_stocks",
+    "steps": [
+      {
+        "order": 1,
+        "titleKey": "procedures.FR.local_stocks.step1.title",
+        "descriptionKey": "procedures.FR.local_stocks.step1.desc",
+        "institution": "Courtier en ligne (Boursorama, Fortuneo, Degiro, Trade Republic, Saxo) ou banque",
+        "documents": ["Pièce d'identité", "Justificatif de domicile", "RIB", "Numéro fiscal (NIF)"],
+        "estimatedCostEUR": 0,
+        "estimatedDays": 2,
+        "tips": ["L'AMF (Autorité des Marchés Financiers) régule les marchés en France", "Choisir entre PEA (avantages fiscaux) et CTO (plus de flexibilité)", "Le PEA est limité aux actions européennes — 150 000 EUR de versements max"]
+      },
+      {
+        "order": 2,
+        "titleKey": "procedures.FR.local_stocks.step2.title",
+        "descriptionKey": "procedures.FR.local_stocks.step2.desc",
+        "institution": "Courtier / Euroclear France",
+        "documents": ["Convention PEA ou CTO signée"],
+        "estimatedCostEUR": 0,
+        "estimatedDays": 1,
+        "tips": ["Le PEA offre une exonération d'IR sur les gains après 5 ans", "Le PEA-PME (75 000 EUR max) cible les PME/ETI européennes"]
+      },
+      {
+        "order": 3,
+        "titleKey": "procedures.FR.local_stocks.step3.title",
+        "descriptionKey": "procedures.FR.local_stocks.step3.desc",
+        "institution": "Euronext Paris",
+        "documents": ["Liste des valeurs cotées", "Analyses financières"],
+        "estimatedCostEUR": 0,
+        "estimatedDays": 1,
+        "tips": ["Euronext Paris cote ~800 sociétés — CAC 40 est l'indice phare", "Blue chips : LVMH, TotalEnergies, L'Oréal, Hermès, Sanofi, Air Liquide", "Le SBF 120 couvre les 120 plus grandes capitalisations"]
+      },
+      {
+        "order": 4,
+        "titleKey": "procedures.FR.local_stocks.step4.title",
+        "descriptionKey": "procedures.FR.local_stocks.step4.desc",
+        "institution": "Courtier / Euronext",
+        "documents": ["Ordre d'achat (marché, limite, stop)", "Avis d'opéré"],
+        "estimatedCostEUR": 0,
+        "estimatedDays": 2,
+        "tips": ["Règlement-livraison en T+2", "Frais de courtage : 0 EUR (Trade Republic, Degiro) à 5-15 EUR (banques traditionnelles)", "La TTF (Taxe sur les Transactions Financières) de 0,3% s'applique aux achats de grandes capitalisations"]
+      },
+      {
+        "order": 5,
+        "titleKey": "procedures.FR.local_stocks.step5.title",
+        "descriptionKey": "procedures.FR.local_stocks.step5.desc",
+        "institution": "Courtier / DGFiP",
+        "documents": ["IFU annuel", "Relevé de portefeuille"],
+        "estimatedCostEUR": 0,
+        "estimatedDays": 0,
+        "tips": ["CTO : PFU 30% (flat tax) ou barème progressif sur plus-values et dividendes", "PEA après 5 ans : uniquement 17,2% de prélèvements sociaux", "Abattement de 40% sur les dividendes si option barème progressif"]
+      }
+    ],
+    "lastUpdated": "2026-01-15",
+    "sourceNotes": "AMF / Euronext Paris"
+  },
+  "FR_real_estate_fund": {
+    "countryCode": "FR",
+    "assetClass": "real_estate_fund",
+    "steps": [
+      {
+        "order": 1,
+        "titleKey": "procedures.FR.real_estate_fund.step1.title",
+        "descriptionKey": "procedures.FR.real_estate_fund.step1.desc",
+        "institution": "Société de gestion de SCPI (Corum, Primonial, Amundi Immobilier, Perial, La Française)",
+        "documents": ["Pièce d'identité", "Justificatif de domicile", "Avis d'imposition"],
+        "estimatedCostEUR": 0,
+        "estimatedDays": 5,
+        "tips": ["Les SCPI (Sociétés Civiles de Placement Immobilier) sont le produit phare — 'pierre-papier'", "Plus de 200 SCPI disponibles en France", "Types : SCPI de rendement, de plus-value, fiscales (Pinel, Malraux)"]
+      },
+      {
+        "order": 2,
+        "titleKey": "procedures.FR.real_estate_fund.step2.title",
+        "descriptionKey": "procedures.FR.real_estate_fund.step2.desc",
+        "institution": "Société de gestion / Courtier SCPI (Louve Invest, France SCPI)",
+        "documents": ["Bulletin de souscription", "Preuve de virement ou financement bancaire"],
+        "estimatedCostEUR": 200,
+        "estimatedDays": 14,
+        "tips": ["Prix d'une part SCPI : 150-1 000 EUR typiquement", "Les SCPI sont finançables à crédit — effet de levier possible", "Rendement moyen : 4-6% annuel (taux de distribution)", "Frais de souscription : 8-12% (amortis sur la durée de détention)"]
+      },
+      {
+        "order": 3,
+        "titleKey": "procedures.FR.real_estate_fund.step3.title",
+        "descriptionKey": "procedures.FR.real_estate_fund.step3.desc",
+        "institution": "Société de gestion / DGFiP",
+        "documents": ["Relevé de parts", "IFU", "Déclaration 2044 (revenus fonciers)"],
+        "estimatedCostEUR": 0,
+        "estimatedDays": 0,
+        "tips": ["Les revenus SCPI sont imposés comme des revenus fonciers (IR + PS 17,2%)", "Alternative fiscale : SCPI en assurance-vie ou en PER — fiscalité allégée", "Les SCPI européennes bénéficient de conventions fiscales avantageuses"]
+      }
+    ],
+    "lastUpdated": "2026-01-15",
+    "sourceNotes": "AMF / ASPIM (Association des Sociétés de Placement Immobilier)"
+  },
+  "FR_mutual_fund": {
+    "countryCode": "FR",
+    "assetClass": "mutual_fund",
+    "steps": [
+      {
+        "order": 1,
+        "titleKey": "procedures.FR.mutual_fund.step1.title",
+        "descriptionKey": "procedures.FR.mutual_fund.step1.desc",
+        "institution": "Société de gestion (Amundi, Carmignac, Comgest, Edmond de Rothschild AM) ou courtier en ligne",
+        "documents": ["Pièce d'identité", "RIB", "Numéro fiscal"],
+        "estimatedCostEUR": 0,
+        "estimatedDays": 2,
+        "tips": ["Les OPCVM français sont agréés par l'AMF", "Les ETF (trackers) offrent des frais très bas (0,1-0,5%/an)", "L'assurance-vie est l'enveloppe fiscale privilégiée pour les OPCVM en France"]
+      },
+      {
+        "order": 2,
+        "titleKey": "procedures.FR.mutual_fund.step2.title",
+        "descriptionKey": "procedures.FR.mutual_fund.step2.desc",
+        "institution": "Assureur (Linxea, Lucya, Spirica) ou PEA / CTO",
+        "documents": ["Contrat d'assurance-vie ou convention PEA/CTO", "Bulletin de souscription", "Versement initial (100-1 000 EUR)"],
+        "estimatedCostEUR": 0,
+        "estimatedDays": 3,
+        "tips": ["Assurance-vie : abattement de 4 600 EUR/an après 8 ans sur les gains", "PEA : exonération IR après 5 ans, uniquement PS 17,2%", "Les ETF World (MSCI World) sont très populaires — diversification globale"]
+      },
+      {
+        "order": 3,
+        "titleKey": "procedures.FR.mutual_fund.step3.title",
+        "descriptionKey": "procedures.FR.mutual_fund.step3.desc",
+        "institution": "Assureur / Société de gestion / DGFiP",
+        "documents": ["Relevé annuel de situation", "IFU si CTO"],
+        "estimatedCostEUR": 0,
+        "estimatedDays": 0,
+        "tips": ["Frais de gestion UC assurance-vie : 0,5-0,75%/an (en sus des frais du fonds)", "DCA (Dollar Cost Averaging) = versements programmés mensuels — stratégie recommandée"]
+      }
+    ],
+    "lastUpdated": "2026-01-15",
+    "sourceNotes": "AMF / ACPR France"
+  },
+  "FR_esg_bonds": {
+    "countryCode": "FR",
+    "assetClass": "esg_bonds",
+    "steps": [
+      {
+        "order": 1,
+        "titleKey": "procedures.FR.esg_bonds.step1.title",
+        "descriptionKey": "procedures.FR.esg_bonds.step1.desc",
+        "institution": "Courtier ou assurance-vie avec fonds ESG (Nalo, Goodvest, Yomoni)",
+        "documents": ["Pièce d'identité", "RIB", "Questionnaire ESG/ISR"],
+        "estimatedCostEUR": 0,
+        "estimatedDays": 2,
+        "tips": ["Le label ISR (Investissement Socialement Responsable) garantit les critères ESG", "Le label Greenfin certifie les fonds verts excluant les énergies fossiles", "La France est le 1er émetteur mondial de Green OAT (obligations vertes souveraines)"]
+      },
+      {
+        "order": 2,
+        "titleKey": "procedures.FR.esg_bonds.step2.title",
+        "descriptionKey": "procedures.FR.esg_bonds.step2.desc",
+        "institution": "Courtier / Assureur / Euronext",
+        "documents": ["Bulletin de souscription", "Preuve de virement"],
+        "estimatedCostEUR": 100,
+        "estimatedDays": 3,
+        "tips": ["Green OAT directement sur Euronext", "Fonds obligataires ESG via assurance-vie ou PER", "Rendement comparable aux obligations classiques (2,5-4%)"]
+      },
+      {
+        "order": 3,
+        "titleKey": "procedures.FR.esg_bonds.step3.title",
+        "descriptionKey": "procedures.FR.esg_bonds.step3.desc",
+        "institution": "Courtier / AMF",
+        "documents": ["Relevé de portefeuille", "Rapport d'impact ESG annuel"],
+        "estimatedCostEUR": 0,
+        "estimatedDays": 0,
+        "tips": ["Les obligations vertes financent la transition écologique", "Le reporting SFDR (Sustainable Finance Disclosure Regulation) est obligatoire en UE"]
+      }
+    ],
+    "lastUpdated": "2026-01-15",
+    "sourceNotes": "AMF / Label ISR / Label Greenfin"
+  },
+  "BE_savings_account": {
+    "countryCode": "BE",
+    "assetClass": "savings_account",
+    "steps": [
+      {
+        "order": 1,
+        "titleKey": "procedures.BE.savings_account.step1.title",
+        "descriptionKey": "procedures.BE.savings_account.step1.desc",
+        "institution": "Banque (BNP Paribas Fortis, KBC, ING Belgique, Belfius, Keytrade Bank)",
+        "documents": ["Carte d'identité belge (eID) ou passeport", "Numéro national", "Justificatif de domicile"],
+        "estimatedCostEUR": 0,
+        "estimatedDays": 1,
+        "tips": ["Le compte d'épargne réglementé belge offre une exonération fiscale sur les premiers 1 020 EUR d'intérêts/an (2 040 EUR pour un couple)", "Les taux sont historiquement bas en Belgique (0,5-2%)", "Les comptes à terme offrent 2-3,5%"]
+      },
+      {
+        "order": 2,
+        "titleKey": "procedures.BE.savings_account.step2.title",
+        "descriptionKey": "procedures.BE.savings_account.step2.desc",
+        "institution": "Banque choisie",
+        "documents": ["Convention de compte (signée via eID)", "Dépôt initial"],
+        "estimatedCostEUR": 0,
+        "estimatedDays": 1,
+        "tips": ["Le taux de base + prime de fidélité constituent le rendement total", "La prime de fidélité nécessite de garder l'argent 12 mois consécutifs"]
+      }
+    ],
+    "lastUpdated": "2026-01-15",
+    "sourceNotes": "BNB (Banque Nationale de Belgique) / FSMA"
+  },
+  "BE_government_bonds": {
+    "countryCode": "BE",
+    "assetClass": "government_bonds",
+    "steps": [
+      {
+        "order": 1,
+        "titleKey": "procedures.BE.government_bonds.step1.title",
+        "descriptionKey": "procedures.BE.government_bonds.step1.desc",
+        "institution": "Agence de la Dette (Agentschap van de Schuld) / Banque",
+        "documents": ["eID ou passeport", "Compte bancaire belge", "Numéro national"],
+        "estimatedCostEUR": 0,
+        "estimatedDays": 3,
+        "tips": ["Le Bon d'État belge est accessible aux particuliers — très populaire", "L'OLO (Obligation Linéaire) est le titre souverain belge standard", "En 2023, le Bon d'État à 1 an a attiré 22 milliards EUR de souscriptions"]
+      },
+      {
+        "order": 2,
+        "titleKey": "procedures.BE.government_bonds.step2.title",
+        "descriptionKey": "procedures.BE.government_bonds.step2.desc",
+        "institution": "Agence de la Dette / Banque",
+        "documents": ["Formulaire de souscription", "Preuve de virement"],
+        "estimatedCostEUR": 100,
+        "estimatedDays": 5,
+        "tips": ["Minimum de souscription Bon d'État : 100 EUR", "Rendement : 2,5-3,5% selon la maturité", "Précompte mobilier : 30% sur les intérêts (mais réduit à 15% pour certaines émissions)"]
+      },
+      {
+        "order": 3,
+        "titleKey": "procedures.BE.government_bonds.step3.title",
+        "descriptionKey": "procedures.BE.government_bonds.step3.desc",
+        "institution": "Banque / NBB Securities",
+        "documents": ["Relevé de compte-titres", "Certificat fiscal"],
+        "estimatedCostEUR": 0,
+        "estimatedDays": 3,
+        "tips": ["Les Bons d'État sont négociables sur le marché secondaire", "Les OLO sont cotées sur Euronext Bruxelles"]
+      }
+    ],
+    "lastUpdated": "2026-01-15",
+    "sourceNotes": "Agence de la Dette belge / FSMA"
+  },
+  "BE_local_stocks": {
+    "countryCode": "BE",
+    "assetClass": "local_stocks",
+    "steps": [
+      {
+        "order": 1,
+        "titleKey": "procedures.BE.local_stocks.step1.title",
+        "descriptionKey": "procedures.BE.local_stocks.step1.desc",
+        "institution": "Courtier (Keytrade Bank, Bolero by KBC, Degiro, Saxo, Interactive Brokers)",
+        "documents": ["eID ou passeport", "Numéro national", "Compte bancaire", "Numéro fiscal"],
+        "estimatedCostEUR": 0,
+        "estimatedDays": 2,
+        "tips": ["La FSMA (Financial Services and Markets Authority) régule les marchés belges", "Euronext Bruxelles cote ~130 sociétés", "Le BEL 20 est l'indice phare"]
+      },
+      {
+        "order": 2,
+        "titleKey": "procedures.BE.local_stocks.step2.title",
+        "descriptionKey": "procedures.BE.local_stocks.step2.desc",
+        "institution": "Courtier / Euronext Bruxelles",
+        "documents": ["Ordre d'achat", "Confirmation de transaction"],
+        "estimatedCostEUR": 0,
+        "estimatedDays": 2,
+        "tips": ["Blue chips BEL 20 : AB InBev, KBC, UCB, Solvay, Ageas, Umicore", "Frais de courtage : 0 EUR (Degiro) à 7,50 EUR (Bolero) par ordre"]
+      },
+      {
+        "order": 3,
+        "titleKey": "procedures.BE.local_stocks.step3.title",
+        "descriptionKey": "procedures.BE.local_stocks.step3.desc",
+        "institution": "Courtier / SPF Finances",
+        "documents": ["Relevé de portefeuille", "Fiches fiscales"],
+        "estimatedCostEUR": 0,
+        "estimatedDays": 0,
+        "tips": ["Précompte mobilier sur dividendes : 30%", "Pas de taxe sur les plus-values pour les particuliers (gestion normale du patrimoine)", "TOB (Taxe sur les Opérations de Bourse) : 0,35% sur les actions belges"]
+      }
+    ],
+    "lastUpdated": "2026-01-15",
+    "sourceNotes": "FSMA / Euronext Bruxelles"
+  },
+  "BE_real_estate_fund": {
+    "countryCode": "BE",
+    "assetClass": "real_estate_fund",
+    "steps": [
+      {
+        "order": 1,
+        "titleKey": "procedures.BE.real_estate_fund.step1.title",
+        "descriptionKey": "procedures.BE.real_estate_fund.step1.desc",
+        "institution": "Courtier / Euronext Bruxelles",
+        "documents": ["eID ou passeport", "Compte-titres ouvert"],
+        "estimatedCostEUR": 0,
+        "estimatedDays": 1,
+        "tips": ["Les SIR (Sociétés Immobilières Réglementées) sont les REITs belges", "Les SIR sont cotées sur Euronext Bruxelles", "SIR notables : Aedifica (maisons de repos), Cofinimmo (santé), WDP (logistique)"]
+      },
+      {
+        "order": 2,
+        "titleKey": "procedures.BE.real_estate_fund.step2.title",
+        "descriptionKey": "procedures.BE.real_estate_fund.step2.desc",
+        "institution": "Courtier / Euronext",
+        "documents": ["Ordre d'achat", "Confirmation de transaction"],
+        "estimatedCostEUR": 50,
+        "estimatedDays": 2,
+        "tips": ["Les SIR distribuent au moins 80% de leurs bénéfices", "Rendement dividende moyen : 4-7%", "Les SIR bénéficient d'un régime fiscal transparent"]
+      },
+      {
+        "order": 3,
+        "titleKey": "procedures.BE.real_estate_fund.step3.title",
+        "descriptionKey": "procedures.BE.real_estate_fund.step3.desc",
+        "institution": "Courtier / SPF Finances",
+        "documents": ["Relevé de portefeuille", "Fiche de dividendes"],
+        "estimatedCostEUR": 0,
+        "estimatedDays": 0,
+        "tips": ["Précompte mobilier sur dividendes SIR : 30%", "Pas de plus-value taxable pour les particuliers en gestion normale"]
+      }
+    ],
+    "lastUpdated": "2026-01-15",
+    "sourceNotes": "FSMA / Loi SIR Belgique"
+  },
+  "BE_mutual_fund": {
+    "countryCode": "BE",
+    "assetClass": "mutual_fund",
+    "steps": [
+      {
+        "order": 1,
+        "titleKey": "procedures.BE.mutual_fund.step1.title",
+        "descriptionKey": "procedures.BE.mutual_fund.step1.desc",
+        "institution": "Banque ou courtier (KBC, BNP Paribas Fortis, Keytrade Bank, MeDirect)",
+        "documents": ["eID ou passeport", "Numéro national", "Compte bancaire"],
+        "estimatedCostEUR": 0,
+        "estimatedDays": 2,
+        "tips": ["Les OPCVM/SICAV belges sont réglementés par la FSMA", "Les fonds de capitalisation évitent le précompte sur les distributions", "Les ETF sont soumis à la TOB (Taxe sur Opérations de Bourse)"]
+      },
+      {
+        "order": 2,
+        "titleKey": "procedures.BE.mutual_fund.step2.title",
+        "descriptionKey": "procedures.BE.mutual_fund.step2.desc",
+        "institution": "Banque / Courtier",
+        "documents": ["Bulletin de souscription", "Preuve de virement"],
+        "estimatedCostEUR": 0,
+        "estimatedDays": 2,
+        "tips": ["Frais d'entrée : 0% (courtiers en ligne) à 3% (banques traditionnelles)", "Les ETF indiciels ont des frais annuels de 0,1-0,5%", "Plan d'investissement programmé disponible chez la plupart des courtiers"]
+      },
+      {
+        "order": 3,
+        "titleKey": "procedures.BE.mutual_fund.step3.title",
+        "descriptionKey": "procedures.BE.mutual_fund.step3.desc",
+        "institution": "Banque / SPF Finances",
+        "documents": ["Relevé de position", "Attestation fiscale annuelle"],
+        "estimatedCostEUR": 0,
+        "estimatedDays": 0,
+        "tips": ["TOB sur ETF de capitalisation : 1,32% (si enregistré en Belgique) ou 0,12%", "La taxe Reynders (30%) s'applique sur la composante obligataire à la revente", "Pas de taxe sur les plus-values des fonds actions pour les particuliers"]
+      }
+    ],
+    "lastUpdated": "2026-01-15",
+    "sourceNotes": "FSMA / SPF Finances Belgique"
+  }
+}

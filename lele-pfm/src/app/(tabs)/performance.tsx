@@ -3,6 +3,7 @@ import { View, Text, Pressable, StyleSheet } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useRouter } from 'expo-router';
 import { BarChart3, Radar, PieChart, Target, Briefcase } from 'lucide-react-native';
+import { ErrorBoundary } from '../../components/ui/ErrorBoundary';
 
 import { usePerformanceData } from '../../hooks/usePerformanceData';
 import { PF } from '../../components/performance/shared';
@@ -14,7 +15,7 @@ import { AnalyseTab } from '../../components/performance/tabs/AnalyseTab';
 import { StrategieTab } from '../../components/performance/tabs/StrategieTab';
 import { InvestisseurTab } from '../../components/performance/tabs/InvestisseurTab';
 
-export default function PerformanceScreen() {
+function PerformanceScreenInner() {
   const { t } = useTranslation('app');
   const router = useRouter();
   const data = usePerformanceData();
@@ -76,6 +77,14 @@ export default function PerformanceScreen() {
         {tabChildren}
       </SwipeableTabs>
     </View>
+  );
+}
+
+export default function PerformanceScreen() {
+  return (
+    <ErrorBoundary>
+      <PerformanceScreenInner />
+    </ErrorBoundary>
   );
 }
 

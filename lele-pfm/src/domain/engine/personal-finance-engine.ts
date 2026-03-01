@@ -89,6 +89,13 @@ export class PersonalFinanceEngine {
   public async execute(): Promise<EngineOutput> {
     const startTime = Date.now();
     try {
+      // Input guard — fail fast on missing critical fields
+      if (!this.input.profile) throw new Error('Missing profile in engine input');
+      if (!this.input.ekhScore) throw new Error('Missing ekhScore in engine input');
+      if (!Array.isArray(this.input.revenues)) throw new Error('revenues must be an array');
+      if (!Array.isArray(this.input.expenses)) throw new Error('expenses must be an array');
+      if (!Array.isArray(this.input.commitments)) throw new Error('commitments must be an array');
+      if (!Array.isArray(this.input.levers)) throw new Error('levers must be an array');
       const step1 = this.calculatePotentials();
       const step2 = this.calculateExpectedLosses(step1);
       const step3 = this.calculateVolatility();
@@ -305,11 +312,12 @@ export class PersonalFinanceEngine {
       const expenseVolatility = expMean > 0 ? (expStdDev / expMean) * 100 : 10;
 
       // Formule Markowitz avec corrélation pays : σ = √(σ_rev² + σ_exp² + 2ρσ_revσ_exp)
-      const combinedVolatility = Math.sqrt(
-        revenueVolatility ** 2 +
+      // Guard: clamp rho to [-1,1] and radicand to ≥0 to prevent NaN
+      const rhoSafe = Math.max(-1, Math.min(1, rho));
+      const radicand = revenueVolatility ** 2 +
         expenseVolatility ** 2 +
-        2 * rho * revenueVolatility * expenseVolatility
-      );
+        2 * rhoSafe * revenueVolatility * expenseVolatility;
+      const combinedVolatility = Math.sqrt(Math.max(0, radicand));
 
       const result: VolatilityResult = {
         revenue_volatility: Math.round(revenueVolatility * 100) / 100,
@@ -378,8 +386,9 @@ export class PersonalFinanceEngine {
 
       const variations = this.input.history.map((h) => h.epr_actual - h.epr_planned);
       const sortedVariations = [...variations].sort((a, b) => a - b);
-      const index = Math.ceil(sortedVariations.length * 0.05) - 1;
-      const percentile5 = Math.abs(sortedVariations[index]);
+      // Guard: ensure index is within bounds (≥0)
+      const index = Math.max(0, Math.ceil(sortedVariations.length * 0.05) - 1);
+      const percentile5 = Math.abs(sortedVariations[index] ?? 0);
 
       const result: HistoricalVaRResult = {
         percentile_5: Math.round(percentile5),
@@ -513,8 +522,9 @@ export class PersonalFinanceEngine {
       // POB via distribution normale (conforme RiskMetrics / Hull)
       // surplus = revenue attendu - pertes attendues
       // σ = volatilité absolue du surplus
-      const surplus = Math.max(0, revenue - el);
-      const sigma = Math.max(1, combinedVolatility * revenue / 100);
+      const safeRevenue = Math.max(0, revenue);
+      const surplus = Math.max(0, safeRevenue - el);
+      const sigma = Math.max(1, combinedVolatility * safeRevenue / 100);
       const zPOB = sigma > 0 ? surplus / sigma : 0;
       const pob = Math.max(0, Math.min(100, normalCDF(zPOB) * 100));
 
@@ -682,10 +692,12 @@ export class PersonalFinanceEngine {
           const targetN2 = step9.epr_n2 * leverRate * (budgetRate / 100);
           const targetN3 = step9.epr_n3 * leverRate * (budgetRate / 100);
 
-          // Weighted average elasticity (by amount)
-          const weightedElasticity = agg.expenses.reduce(
-            (sum, e) => sum + (e.elasticity ?? 0) * e.amount, 0
-          ) / agg.totalAmount;
+          // Weighted average elasticity (by amount) — guard division by zero
+          const weightedElasticity = agg.totalAmount > 0
+            ? agg.expenses.reduce(
+                (sum, e) => sum + (e.elasticity ?? 0) * e.amount, 0
+              ) / agg.totalAmount
+            : 0;
 
           // Nature: "Essentielle" if majority by amount, else "Discrétionnaire"
           const essentialAmount = agg.expenses

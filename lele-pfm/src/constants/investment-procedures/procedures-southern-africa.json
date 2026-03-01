@@ -1,0 +1,478 @@
+{
+  "ZA_savings_account": {
+    "countryCode": "ZA",
+    "assetClass": "savings_account",
+    "steps": [
+      {
+        "order": 1,
+        "titleKey": "procedures.ZA.savings_account.step1.title",
+        "descriptionKey": "procedures.ZA.savings_account.step1.desc",
+        "institution": "Commercial bank (FNB, Standard Bank, Absa, Nedbank, Capitec, TymeBank)",
+        "documents": ["South African ID or passport", "Proof of residence (utility bill < 3 months)", "FICA documents (Financial Intelligence Centre Act compliance)"],
+        "estimatedCostUSD": 0,
+        "estimatedDays": 1,
+        "tips": ["Capitec and TymeBank offer zero-fee savings accounts", "Tax-Free Savings Account (TFSA) — up to R36,000/year, R500,000 lifetime — tax-free interest", "Compare rates on deposits.org.za"]
+      },
+      {
+        "order": 2,
+        "titleKey": "procedures.ZA.savings_account.step2.title",
+        "descriptionKey": "procedures.ZA.savings_account.step2.desc",
+        "institution": "Chosen bank",
+        "documents": ["Account opening form (many available fully online)", "Initial deposit"],
+        "estimatedCostUSD": 0,
+        "estimatedDays": 1,
+        "tips": ["Fixed deposits: 7-10% depending on term", "Notice deposits: 6-8% with 32/90-day notice", "All interest above R23,800/year is taxed (R34,500 for over-65s)"]
+      },
+      {
+        "order": 3,
+        "titleKey": "procedures.ZA.savings_account.step3.title",
+        "descriptionKey": "procedures.ZA.savings_account.step3.desc",
+        "institution": "Bank / SARS",
+        "documents": ["IT3(b) tax certificate", "Mobile banking activation"],
+        "estimatedCostUSD": 0,
+        "estimatedDays": 1,
+        "tips": ["Set up a debit order for automatic monthly savings", "Interest earned is reported automatically to SARS via IT3(b)"]
+      }
+    ],
+    "lastUpdated": "2026-01-15",
+    "sourceNotes": "SARB / FSCA regulations"
+  },
+  "ZA_government_bonds": {
+    "countryCode": "ZA",
+    "assetClass": "government_bonds",
+    "steps": [
+      {
+        "order": 1,
+        "titleKey": "procedures.ZA.government_bonds.step1.title",
+        "descriptionKey": "procedures.ZA.government_bonds.step1.desc",
+        "institution": "National Treasury / Licensed broker (EasyEquities, Strate, Standard Bank Online Trading)",
+        "documents": ["South African ID", "FICA documents", "Bank account details"],
+        "estimatedCostUSD": 0,
+        "estimatedDays": 3,
+        "tips": ["RSA Retail Savings Bonds available directly from National Treasury online", "No brokerage fees for Retail Savings Bonds", "Available in Fixed Rate and Inflation-Linked variants"]
+      },
+      {
+        "order": 2,
+        "titleKey": "procedures.ZA.government_bonds.step2.title",
+        "descriptionKey": "procedures.ZA.government_bonds.step2.desc",
+        "institution": "National Treasury (rsaretailbonds.gov.za) / JSE",
+        "documents": ["Online application", "Proof of payment (EFT)"],
+        "estimatedCostUSD": 65,
+        "estimatedDays": 1,
+        "tips": ["Minimum: R1,000 for Retail Savings Bonds", "Fixed Rate bonds: 2, 3, 5 year tenors — rates 8-10%", "Inflation-linked bonds protect against rising CPI", "Government bonds on JSE: minimum R100 via EasyEquities"]
+      },
+      {
+        "order": 3,
+        "titleKey": "procedures.ZA.government_bonds.step3.title",
+        "descriptionKey": "procedures.ZA.government_bonds.step3.desc",
+        "institution": "National Treasury / SARS",
+        "documents": ["Bond certificate (online)", "IT3(b) for tax purposes"],
+        "estimatedCostUSD": 0,
+        "estimatedDays": 0,
+        "tips": ["Interest is subject to income tax at marginal rate", "Capital gains on bond trading are subject to CGT", "RSA Retail Savings Bonds cannot be traded — hold to maturity"]
+      }
+    ],
+    "lastUpdated": "2026-01-15",
+    "sourceNotes": "National Treasury RSA / JSE"
+  },
+  "ZA_local_stocks": {
+    "countryCode": "ZA",
+    "assetClass": "local_stocks",
+    "steps": [
+      {
+        "order": 1,
+        "titleKey": "procedures.ZA.local_stocks.step1.title",
+        "descriptionKey": "procedures.ZA.local_stocks.step1.desc",
+        "institution": "Licensed broker (EasyEquities, Standard Bank Online Trading, Investec Click & Invest, PSG Wealth)",
+        "documents": ["South African ID", "FICA documents", "Bank account details", "Tax number"],
+        "estimatedCostUSD": 0,
+        "estimatedDays": 1,
+        "tips": ["EasyEquities allows fractional share ownership from R1", "No minimum investment with EasyEquities or FNB Share Investing", "FSCA (Financial Sector Conduct Authority) licenses all brokers"]
+      },
+      {
+        "order": 2,
+        "titleKey": "procedures.ZA.local_stocks.step2.title",
+        "descriptionKey": "procedures.ZA.local_stocks.step2.desc",
+        "institution": "Strate (Central Securities Depository)",
+        "documents": ["Strate account (created automatically by broker)"],
+        "estimatedCostUSD": 0,
+        "estimatedDays": 1,
+        "tips": ["Strate holds your shares electronically — dematerialized", "Your broker manages the Strate account on your behalf"]
+      },
+      {
+        "order": 3,
+        "titleKey": "procedures.ZA.local_stocks.step3.title",
+        "descriptionKey": "procedures.ZA.local_stocks.step3.desc",
+        "institution": "JSE (Johannesburg Stock Exchange)",
+        "documents": ["Market data access", "Listed companies analysis"],
+        "estimatedCostUSD": 0,
+        "estimatedDays": 1,
+        "tips": ["The JSE is Africa's largest stock exchange — ~400 listed companies", "Top 40 index: Naspers, BHP, Richemont, Anglo American, FirstRand, MTN", "JSE All Share Index (ALSI) is the main benchmark"]
+      },
+      {
+        "order": 4,
+        "titleKey": "procedures.ZA.local_stocks.step4.title",
+        "descriptionKey": "procedures.ZA.local_stocks.step4.desc",
+        "institution": "Broker / JSE",
+        "documents": ["Buy order (online)", "Trade confirmation", "Contract note"],
+        "estimatedCostUSD": 0,
+        "estimatedDays": 3,
+        "tips": ["Settlement is T+3", "Brokerage: 0% (EasyEquities) to 0.5% (traditional brokers)", "Securities Transfer Tax: 0.25% on purchases", "Investor Protection Levy: 0.0002%"]
+      },
+      {
+        "order": 5,
+        "titleKey": "procedures.ZA.local_stocks.step5.title",
+        "descriptionKey": "procedures.ZA.local_stocks.step5.desc",
+        "institution": "Broker / SARS",
+        "documents": ["Portfolio statement", "IT3(b) tax certificate", "CGT calculations"],
+        "estimatedCostUSD": 0,
+        "estimatedDays": 0,
+        "tips": ["Dividends tax: 20% (withheld at source)", "Capital gains: 18% effective rate (at 45% marginal)", "Annual CGT exclusion: R40,000", "Use TFSA wrapper for up to R36,000/year in tax-free investments"]
+      }
+    ],
+    "lastUpdated": "2026-01-15",
+    "sourceNotes": "JSE / FSCA / Strate"
+  },
+  "ZA_real_estate_fund": {
+    "countryCode": "ZA",
+    "assetClass": "real_estate_fund",
+    "steps": [
+      {
+        "order": 1,
+        "titleKey": "procedures.ZA.real_estate_fund.step1.title",
+        "descriptionKey": "procedures.ZA.real_estate_fund.step1.desc",
+        "institution": "Licensed broker / Fund manager",
+        "documents": ["South African ID", "FICA documents", "Broker account"],
+        "estimatedCostUSD": 0,
+        "estimatedDays": 1,
+        "tips": ["South Africa has a mature REIT market — ~30 REITs on JSE", "Top REITs: Growthpoint, Redefine, NEPI Rockcastle, Resilient", "SA REITs must distribute 75%+ of distributable income"]
+      },
+      {
+        "order": 2,
+        "titleKey": "procedures.ZA.real_estate_fund.step2.title",
+        "descriptionKey": "procedures.ZA.real_estate_fund.step2.desc",
+        "institution": "Broker / JSE",
+        "documents": ["Buy order", "Trade confirmation"],
+        "estimatedCostUSD": 0,
+        "estimatedDays": 3,
+        "tips": ["Buy REITs like regular shares on the JSE", "Fractional shares available via EasyEquities", "Average distribution yield: 6-10%"]
+      },
+      {
+        "order": 3,
+        "titleKey": "procedures.ZA.real_estate_fund.step3.title",
+        "descriptionKey": "procedures.ZA.real_estate_fund.step3.desc",
+        "institution": "REIT company / SARS",
+        "documents": ["Distribution statements", "IT3(b) tax certificate"],
+        "estimatedCostUSD": 0,
+        "estimatedDays": 0,
+        "tips": ["REIT distributions are taxed as income (not dividends)", "Listed property provides inflation-linked income growth"]
+      }
+    ],
+    "lastUpdated": "2026-01-15",
+    "sourceNotes": "JSE / SA REIT Association"
+  },
+  "ZA_mining_assets": {
+    "countryCode": "ZA",
+    "assetClass": "mining_assets",
+    "steps": [
+      {
+        "order": 1,
+        "titleKey": "procedures.ZA.mining_assets.step1.title",
+        "descriptionKey": "procedures.ZA.mining_assets.step1.desc",
+        "institution": "DMRE (Department of Mineral Resources and Energy)",
+        "documents": ["Prospecting right application", "Environmental Management Programme (EMPr)", "BEE (Black Economic Empowerment) compliance plan", "Financial provision for rehabilitation"],
+        "estimatedCostUSD": 5000,
+        "estimatedDays": 90,
+        "tips": ["MPRDA (Mineral and Petroleum Resources Development Act) governs mining rights", "BEE ownership of 26%+ is mandatory for mining rights", "Prospecting rights are valid for 5 years"]
+      },
+      {
+        "order": 2,
+        "titleKey": "procedures.ZA.mining_assets.step2.title",
+        "descriptionKey": "procedures.ZA.mining_assets.step2.desc",
+        "institution": "DFFE (Department of Forestry, Fisheries and the Environment)",
+        "documents": ["Environmental Impact Assessment (EIA)", "Water Use License (DWS)", "Public participation record", "Environmental Authorization"],
+        "estimatedCostUSD": 50000,
+        "estimatedDays": 180,
+        "tips": ["EIA is mandatory under NEMA (National Environmental Management Act)", "Water use license from DWS is critical for mining operations"]
+      },
+      {
+        "order": 3,
+        "titleKey": "procedures.ZA.mining_assets.step3.title",
+        "descriptionKey": "procedures.ZA.mining_assets.step3.desc",
+        "institution": "DMRE / Mining companies",
+        "documents": ["Mining right application", "Mining Work Programme", "Social and Labour Plan (SLP)", "BEE plan"],
+        "estimatedCostUSD": 25000,
+        "estimatedDays": 180,
+        "tips": ["Mining rights are valid for up to 30 years (renewable)", "SLP (Social and Labour Plan) is mandatory — community development commitments"]
+      },
+      {
+        "order": 4,
+        "titleKey": "procedures.ZA.mining_assets.step4.title",
+        "descriptionKey": "procedures.ZA.mining_assets.step4.desc",
+        "institution": "JSE / Private equity firms",
+        "documents": ["Investment agreement", "Due diligence reports", "Shareholder agreement"],
+        "estimatedCostUSD": 0,
+        "estimatedDays": 60,
+        "tips": ["Alternatively, invest in mining via JSE-listed mining companies", "Top mining stocks: Anglo American, BHP, Sibanye-Stillwater, AngloGold Ashanti", "Mining royalties: 0.5-7% of gross sales depending on commodity"]
+      }
+    ],
+    "lastUpdated": "2026-01-15",
+    "sourceNotes": "MPRDA / DMRE South Africa"
+  },
+  "ZA_private_equity": {
+    "countryCode": "ZA",
+    "assetClass": "private_equity",
+    "steps": [
+      {
+        "order": 1,
+        "titleKey": "procedures.ZA.private_equity.step1.title",
+        "descriptionKey": "procedures.ZA.private_equity.step1.desc",
+        "institution": "SAVCA-registered PE firms (Ethos Private Equity, Medu Capital, Actis Africa, Harith)",
+        "documents": ["Proof of accredited investor status", "South African ID / passport", "FICA documents"],
+        "estimatedCostUSD": 0,
+        "estimatedDays": 14,
+        "tips": ["SAVCA (SA Venture Capital Association) is the industry body", "Minimum commitment: typically R1M-R10M", "SA has the most developed PE market in Africa"]
+      },
+      {
+        "order": 2,
+        "titleKey": "procedures.ZA.private_equity.step2.title",
+        "descriptionKey": "procedures.ZA.private_equity.step2.desc",
+        "institution": "PE fund manager",
+        "documents": ["Fund prospectus / PPM", "Track record documentation", "Fee structure disclosure"],
+        "estimatedCostUSD": 0,
+        "estimatedDays": 21,
+        "tips": ["Typical IRR target: 15-25% net", "Fund life: 8-12 years", "Focus areas: financial services, consumer, TMT, healthcare"]
+      },
+      {
+        "order": 3,
+        "titleKey": "procedures.ZA.private_equity.step3.title",
+        "descriptionKey": "procedures.ZA.private_equity.step3.desc",
+        "institution": "PE fund / Legal advisor",
+        "documents": ["Limited Partnership Agreement (LPA)", "Subscription agreement", "AML/KYC forms"],
+        "estimatedCostUSD": 2000,
+        "estimatedDays": 14,
+        "tips": ["Standard fee structure: 2% management + 20% carried interest (above 8% hurdle)", "Have the LPA reviewed by a specialist attorney"]
+      },
+      {
+        "order": 4,
+        "titleKey": "procedures.ZA.private_equity.step4.title",
+        "descriptionKey": "procedures.ZA.private_equity.step4.desc",
+        "institution": "PE fund manager",
+        "documents": ["Capital call notices", "Quarterly reports", "Annual audited statements"],
+        "estimatedCostUSD": 0,
+        "estimatedDays": 0,
+        "tips": ["Capital calls are spread over 3-5 years", "Maintain liquidity reserves for unfunded commitments", "Reporting is governed by IPEV (International Private Equity Valuation) guidelines"]
+      }
+    ],
+    "lastUpdated": "2026-01-15",
+    "sourceNotes": "FSCA / SAVCA South Africa"
+  },
+  "ZA_mutual_fund": {
+    "countryCode": "ZA",
+    "assetClass": "mutual_fund",
+    "steps": [
+      {
+        "order": 1,
+        "titleKey": "procedures.ZA.mutual_fund.step1.title",
+        "descriptionKey": "procedures.ZA.mutual_fund.step1.desc",
+        "institution": "ASISA member fund managers (Allan Gray, Coronation, Ninety One, Sanlam, Old Mutual)",
+        "documents": ["South African ID", "FICA documents", "Bank details", "Tax number"],
+        "estimatedCostUSD": 0,
+        "estimatedDays": 1,
+        "tips": ["ASISA (Association for Savings and Investment SA) sets industry standards", "Unit trusts (CIS) are the most popular investment vehicle in SA", "Over 1,500 registered unit trusts to choose from"]
+      },
+      {
+        "order": 2,
+        "titleKey": "procedures.ZA.mutual_fund.step2.title",
+        "descriptionKey": "procedures.ZA.mutual_fund.step2.desc",
+        "institution": "Fund manager / Online platform (Allan Gray, EasyEquities)",
+        "documents": ["Application form (online)", "Proof of initial investment", "Debit order mandate for monthly contributions"],
+        "estimatedCostUSD": 0,
+        "estimatedDays": 2,
+        "tips": ["Minimums vary: R500/month lump sum or R300/month debit order (Allan Gray)", "Total Expense Ratio (TER): 0.5% (index) to 2.5% (active)", "Consider Regulation 28 compliant funds for retirement savings"]
+      },
+      {
+        "order": 3,
+        "titleKey": "procedures.ZA.mutual_fund.step3.title",
+        "descriptionKey": "procedures.ZA.mutual_fund.step3.desc",
+        "institution": "Fund manager / SARS",
+        "documents": ["Unit statement", "Annual tax certificate", "Quarterly factsheets"],
+        "estimatedCostUSD": 0,
+        "estimatedDays": 0,
+        "tips": ["Distributions are taxed as income or dividends depending on composition", "Switching between funds within the same provider is a taxable event"]
+      }
+    ],
+    "lastUpdated": "2026-01-15",
+    "sourceNotes": "FSCA / ASISA South Africa"
+  },
+  "NA_savings_account": {
+    "countryCode": "NA",
+    "assetClass": "savings_account",
+    "steps": [
+      {
+        "order": 1,
+        "titleKey": "procedures.NA.savings_account.step1.title",
+        "descriptionKey": "procedures.NA.savings_account.step1.desc",
+        "institution": "Commercial bank (FNB Namibia, Standard Bank Namibia, Bank Windhoek, Nedbank Namibia)",
+        "documents": ["Namibian ID or passport", "Proof of residence", "Tax number from IRD"],
+        "estimatedCostUSD": 0,
+        "estimatedDays": 1,
+        "tips": ["Bank Windhoek is Namibia's oldest commercial bank", "The NAD is pegged 1:1 to the ZAR — interchangeable"]
+      },
+      {
+        "order": 2,
+        "titleKey": "procedures.NA.savings_account.step2.title",
+        "descriptionKey": "procedures.NA.savings_account.step2.desc",
+        "institution": "Chosen bank",
+        "documents": ["Account opening form", "Initial deposit"],
+        "estimatedCostUSD": 0,
+        "estimatedDays": 1,
+        "tips": ["Fixed deposit rates: 6-9% (similar to SA rates)", "Tax-free savings accounts are available in Namibia"]
+      }
+    ],
+    "lastUpdated": "2026-01-15",
+    "sourceNotes": "Bank of Namibia / NAMFISA regulations"
+  },
+  "NA_local_stocks": {
+    "countryCode": "NA",
+    "assetClass": "local_stocks",
+    "steps": [
+      {
+        "order": 1,
+        "titleKey": "procedures.NA.local_stocks.step1.title",
+        "descriptionKey": "procedures.NA.local_stocks.step1.desc",
+        "institution": "Licensed broker (IJG Securities, Simonis Storm Securities, PSG Namibia)",
+        "documents": ["Namibian ID or passport", "Tax number", "Bank details", "FICA documents"],
+        "estimatedCostUSD": 0,
+        "estimatedDays": 5,
+        "tips": ["The NSX (Namibian Stock Exchange) is the second largest in Africa by market cap", "Many JSE dual-listed stocks trade on the NSX"]
+      },
+      {
+        "order": 2,
+        "titleKey": "procedures.NA.local_stocks.step2.title",
+        "descriptionKey": "procedures.NA.local_stocks.step2.desc",
+        "institution": "NSX / Broker",
+        "documents": ["Buy order", "Trade confirmation"],
+        "estimatedCostUSD": 50,
+        "estimatedDays": 3,
+        "tips": ["Key local listings: Capricorn Group, First National Bank Namibia, Namibia Breweries", "Many South African dual-listed stocks available (Anglo, Old Mutual, etc.)"]
+      },
+      {
+        "order": 3,
+        "titleKey": "procedures.NA.local_stocks.step3.title",
+        "descriptionKey": "procedures.NA.local_stocks.step3.desc",
+        "institution": "Broker / NAMFISA",
+        "documents": ["Portfolio statement", "Dividend notifications"],
+        "estimatedCostUSD": 0,
+        "estimatedDays": 0,
+        "tips": ["No capital gains tax in Namibia — a major advantage", "Dividends subject to 10% non-resident withholding tax"]
+      }
+    ],
+    "lastUpdated": "2026-01-15",
+    "sourceNotes": "NSX / NAMFISA Namibia"
+  },
+  "BW_savings_account": {
+    "countryCode": "BW",
+    "assetClass": "savings_account",
+    "steps": [
+      {
+        "order": 1,
+        "titleKey": "procedures.BW.savings_account.step1.title",
+        "descriptionKey": "procedures.BW.savings_account.step1.desc",
+        "institution": "Commercial bank (First National Bank BW, Stanbic Botswana, Absa Botswana, BancABC)",
+        "documents": ["Omang (national ID) or passport", "Proof of residence", "TIN from BURS"],
+        "estimatedCostUSD": 0,
+        "estimatedDays": 1,
+        "tips": ["Botswana has one of Africa's strongest banking sectors", "Interest rates: 4-8% on fixed deposits"]
+      },
+      {
+        "order": 2,
+        "titleKey": "procedures.BW.savings_account.step2.title",
+        "descriptionKey": "procedures.BW.savings_account.step2.desc",
+        "institution": "Chosen bank",
+        "documents": ["Account opening form", "Initial deposit (BWP 100-500)"],
+        "estimatedCostUSD": 0,
+        "estimatedDays": 1,
+        "tips": ["Orange Money and MyZaka (BTC) are available mobile money options"]
+      }
+    ],
+    "lastUpdated": "2026-01-15",
+    "sourceNotes": "Bank of Botswana / NBFIRA regulations"
+  },
+  "BW_local_stocks": {
+    "countryCode": "BW",
+    "assetClass": "local_stocks",
+    "steps": [
+      {
+        "order": 1,
+        "titleKey": "procedures.BW.local_stocks.step1.title",
+        "descriptionKey": "procedures.BW.local_stocks.step1.desc",
+        "institution": "Licensed broker (Motswedi Securities, Stockbrokers Botswana, Imara Capital Securities)",
+        "documents": ["Omang or passport", "TIN", "Bank details", "CSD account"],
+        "estimatedCostUSD": 0,
+        "estimatedDays": 5,
+        "tips": ["The BSE (Botswana Stock Exchange) lists ~30 companies", "NBFIRA (Non-Bank Financial Institutions Regulatory Authority) regulates the market"]
+      },
+      {
+        "order": 2,
+        "titleKey": "procedures.BW.local_stocks.step2.title",
+        "descriptionKey": "procedures.BW.local_stocks.step2.desc",
+        "institution": "BSE / Broker",
+        "documents": ["Buy order", "Trade confirmation"],
+        "estimatedCostUSD": 50,
+        "estimatedDays": 3,
+        "tips": ["Key BSE stocks: Letshego, Choppies, FNBB, Sechaba", "Botswana has no capital gains tax — attractive for equity investors"]
+      },
+      {
+        "order": 3,
+        "titleKey": "procedures.BW.local_stocks.step3.title",
+        "descriptionKey": "procedures.BW.local_stocks.step3.desc",
+        "institution": "Broker / CSDB",
+        "documents": ["Portfolio statement", "Dividend notifications"],
+        "estimatedCostUSD": 0,
+        "estimatedDays": 0,
+        "tips": ["Withholding tax on dividends: 7.5% for residents", "The DCI (Domestic Companies Index) is the main benchmark"]
+      }
+    ],
+    "lastUpdated": "2026-01-15",
+    "sourceNotes": "BSE / NBFIRA Botswana"
+  },
+  "BW_government_bonds": {
+    "countryCode": "BW",
+    "assetClass": "government_bonds",
+    "steps": [
+      {
+        "order": 1,
+        "titleKey": "procedures.BW.government_bonds.step1.title",
+        "descriptionKey": "procedures.BW.government_bonds.step1.desc",
+        "institution": "Bank of Botswana / Licensed broker",
+        "documents": ["Omang or passport", "TIN", "Bank account details"],
+        "estimatedCostUSD": 0,
+        "estimatedDays": 5,
+        "tips": ["BoB issues government bonds and Treasury bills", "Minimum: BWP 5,000 for T-bills"]
+      },
+      {
+        "order": 2,
+        "titleKey": "procedures.BW.government_bonds.step2.title",
+        "descriptionKey": "procedures.BW.government_bonds.step2.desc",
+        "institution": "Bank of Botswana",
+        "documents": ["Bid form", "Proof of payment"],
+        "estimatedCostUSD": 50,
+        "estimatedDays": 7,
+        "tips": ["Government bond yields: 5-8%", "Botswana has an A-/A3 credit rating — very low sovereign risk"]
+      },
+      {
+        "order": 3,
+        "titleKey": "procedures.BW.government_bonds.step3.title",
+        "descriptionKey": "procedures.BW.government_bonds.step3.desc",
+        "institution": "BoB / CSDB",
+        "documents": ["Allotment confirmation", "Bond certificate"],
+        "estimatedCostUSD": 0,
+        "estimatedDays": 3,
+        "tips": ["Government bonds are listed on the BSE for secondary trading"]
+      }
+    ],
+    "lastUpdated": "2026-01-15",
+    "sourceNotes": "Bank of Botswana"
+  }
+}

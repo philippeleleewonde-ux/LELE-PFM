@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../theme';
+import { ErrorBoundary } from '../../components/ui/ErrorBoundary';
 import { useAuthStore } from '../../stores/auth.store';
 import { useAppStore } from '../../stores/app.store';
 import { authService } from '../../services/auth.service';
@@ -45,6 +46,7 @@ import { useImpulseStore } from '@/stores/impulse-store';
 import { useSavingsGoalStore } from '@/stores/savings-goal-store';
 import { useChallengeStore } from '@/stores/challenge-store';
 import { useAssetStore } from '@/stores/asset-store';
+import { useJourneyStore } from '@/stores/journey-store';
 import { InvestorProfileSheet } from '@/components/investment/InvestorProfileSheet';
 
 interface SettingsRowProps {
@@ -86,7 +88,7 @@ function SettingsRow({ icon, label, value, onPress, rightElement, colors, isLast
   );
 }
 
-export default function SettingsScreen() {
+function SettingsScreenInner() {
   const theme = useTheme();
   const colors = theme.colors;
   const { t } = useTranslation(['common', 'app']);
@@ -113,7 +115,9 @@ export default function SettingsScreen() {
   const clearGoals = useSavingsGoalStore((s) => s.clearGoals);
   const clearChallenges = useChallengeStore((s) => s.clearChallenges);
   const clearInvestmentRecords = useInvestmentStore((s) => s.clearInvestmentRecords);
+  const resetInvestment = useInvestmentStore((s) => s.resetAll);
   const clearAssets = useAssetStore((s) => s.clearAssets);
+  const resetJourney = useJourneyStore((s) => s.resetJourney);
 
   const handleRegenerateDemo = async () => {
     setIsGenerating(true);
@@ -126,7 +130,9 @@ export default function SettingsScreen() {
       clearChallenges();
       clearRecords();
       clearInvestmentRecords();
+      resetInvestment();
       clearAssets();
+      resetJourney();
 
       // 2. Generate wizard data + run engine calculation
       const demoData = generateDemoData();
@@ -168,7 +174,9 @@ export default function SettingsScreen() {
       clearChallenges();
       clearRecords();
       clearInvestmentRecords();
+      resetInvestment();
       clearAssets();
+      resetJourney();
       if (Platform.OS === 'web') {
         window.alert(t('app:settings.trackingDeletedSuccess'));
       } else {
@@ -202,7 +210,9 @@ export default function SettingsScreen() {
       clearChallenges();
       clearRecords();
       clearInvestmentRecords();
+      resetInvestment();
       clearAssets();
+      resetJourney();
       // Clear engine + wizard
       useEngineStore.getState().clearEngineOutput();
       resetWizard();
@@ -511,6 +521,14 @@ export default function SettingsScreen() {
         onClose={() => setShowInvestorSheet(false)}
       />
     </ScrollView>
+  );
+}
+
+export default function SettingsScreen() {
+  return (
+    <ErrorBoundary>
+      <SettingsScreenInner />
+    </ErrorBoundary>
   );
 }
 

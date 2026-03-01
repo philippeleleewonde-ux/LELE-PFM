@@ -1,0 +1,762 @@
+{
+  "CI_savings_account": {
+    "countryCode": "CI",
+    "assetClass": "savings_account",
+    "steps": [
+      {
+        "order": 1,
+        "titleKey": "procedures.CI.savings_account.step1.title",
+        "descriptionKey": "procedures.CI.savings_account.step1.desc",
+        "institution": "Banque commerciale (Société Générale CI, Ecobank CI, NSIA Banque, BOA, Bridge Bank)",
+        "documents": ["Carte nationale d'identité (CNI) ou passeport", "Justificatif de domicile (facture CIE/SODECI < 3 mois)", "2 photos d'identité", "Attestation de travail ou justificatif de revenus"],
+        "estimatedCostXOF": 10000,
+        "estimatedDays": 1,
+        "tips": ["NSIA Banque et BOA offrent souvent les meilleurs taux d'épargne en CI", "Les comptes d'épargne UEMOA sont réglementés par la BCEAO — taux plancher de 3,5%"]
+      },
+      {
+        "order": 2,
+        "titleKey": "procedures.CI.savings_account.step2.title",
+        "descriptionKey": "procedures.CI.savings_account.step2.desc",
+        "institution": "Banque choisie",
+        "documents": ["Formulaire d'ouverture de compte", "Versement initial (10 000 à 50 000 FCFA selon banque)"],
+        "estimatedCostXOF": 25000,
+        "estimatedDays": 1,
+        "tips": ["Le Livret d'Épargne Réglementé est exonéré d'impôts sur les intérêts", "Négocier la gratuité de la carte de retrait"]
+      },
+      {
+        "order": 3,
+        "titleKey": "procedures.CI.savings_account.step3.title",
+        "descriptionKey": "procedures.CI.savings_account.step3.desc",
+        "institution": "Banque choisie",
+        "documents": ["Code PIN mobile banking", "RIB"],
+        "estimatedCostXOF": 0,
+        "estimatedDays": 2,
+        "tips": ["Activer le mobile banking (SG Money, Ecobank Mobile)", "Mettre en place un virement automatique mensuel"]
+      }
+    ],
+    "lastUpdated": "2026-01-15",
+    "sourceNotes": "BCEAO — Réglementation bancaire UEMOA"
+  },
+  "CI_government_bonds": {
+    "countryCode": "CI",
+    "assetClass": "government_bonds",
+    "steps": [
+      {
+        "order": 1,
+        "titleKey": "procedures.CI.government_bonds.step1.title",
+        "descriptionKey": "procedures.CI.government_bonds.step1.desc",
+        "institution": "SGI agréée CREPMF (Hudson & Cie, Atlantique Finance, NSIA Finance, CGF Bourse)",
+        "documents": ["CNI ou passeport", "RIB compte bancaire", "Justificatif de domicile", "Formulaire KYC (Know Your Customer)"],
+        "estimatedCostXOF": 25000,
+        "estimatedDays": 3,
+        "tips": ["Le CREPMF (Conseil Régional de l'Épargne Publique et des Marchés Financiers) régule la zone UEMOA", "Choisir une SGI (Société de Gestion et d'Intermédiation) agréée par le CREPMF", "La CI est le plus gros émetteur d'obligations souveraines de la zone UEMOA"]
+      },
+      {
+        "order": 2,
+        "titleKey": "procedures.CI.government_bonds.step2.title",
+        "descriptionKey": "procedures.CI.government_bonds.step2.desc",
+        "institution": "BCEAO / Agence UMOA-Titres / Trésor Public ivoirien",
+        "documents": ["Calendrier des émissions UMOA-Titres", "Note d'information de l'émission", "Fiche descriptive de l'obligation"],
+        "estimatedCostXOF": 0,
+        "estimatedDays": 5,
+        "tips": ["UMOA-Titres gère le marché des titres publics pour toute la zone UEMOA", "Les OAT ivoiriennes offrent 5,5-6,5% de rendement", "Les BAT (court terme) offrent 3-5% avec une liquidité supérieure", "Minimum de souscription : 1 000 000 FCFA"]
+      },
+      {
+        "order": 3,
+        "titleKey": "procedures.CI.government_bonds.step3.title",
+        "descriptionKey": "procedures.CI.government_bonds.step3.desc",
+        "institution": "SGI / BCEAO",
+        "documents": ["Bulletin de souscription signé", "Preuve de virement des fonds"],
+        "estimatedCostXOF": 1000000,
+        "estimatedDays": 3,
+        "tips": ["Les souscriptions se font lors des adjudications organisées par UMOA-Titres", "Possibilité de souscrire via l'application mobile de certaines SGI"]
+      },
+      {
+        "order": 4,
+        "titleKey": "procedures.CI.government_bonds.step4.title",
+        "descriptionKey": "procedures.CI.government_bonds.step4.desc",
+        "institution": "DC/BR (Dépositaire Central / Banque de Règlement) / SGI",
+        "documents": ["Avis d'attribution", "Relevé de compte-titres DC/BR"],
+        "estimatedCostXOF": 0,
+        "estimatedDays": 5,
+        "tips": ["Les titres sont inscrits en compte au DC/BR basé à Abidjan", "Les coupons sont versés directement sur le compte bancaire"]
+      }
+    ],
+    "lastUpdated": "2026-01-15",
+    "sourceNotes": "UMOA-Titres / CREPMF / BCEAO"
+  },
+  "CI_local_stocks": {
+    "countryCode": "CI",
+    "assetClass": "local_stocks",
+    "steps": [
+      {
+        "order": 1,
+        "titleKey": "procedures.CI.local_stocks.step1.title",
+        "descriptionKey": "procedures.CI.local_stocks.step1.desc",
+        "institution": "SGI agréée CREPMF (Hudson & Cie, CGF Bourse, NSIA Finance, BNI Finances)",
+        "documents": ["CNI ou passeport", "RIB bancaire", "Justificatif de domicile", "Formulaire d'ouverture de compte-titres"],
+        "estimatedCostXOF": 50000,
+        "estimatedDays": 3,
+        "tips": ["Comparer les frais de courtage des SGI (0,5% à 1,5% par transaction)", "Certaines SGI offrent des plateformes de trading en ligne"]
+      },
+      {
+        "order": 2,
+        "titleKey": "procedures.CI.local_stocks.step2.title",
+        "descriptionKey": "procedures.CI.local_stocks.step2.desc",
+        "institution": "DC/BR (Dépositaire Central / Banque de Règlement)",
+        "documents": ["Numéro de compte DC/BR", "Confirmation d'ouverture"],
+        "estimatedCostXOF": 0,
+        "estimatedDays": 3,
+        "tips": ["Le DC/BR gère la conservation des titres pour toute la BRVM", "Un seul compte DC/BR permet d'investir dans les 8 pays UEMOA"]
+      },
+      {
+        "order": 3,
+        "titleKey": "procedures.CI.local_stocks.step3.title",
+        "descriptionKey": "procedures.CI.local_stocks.step3.desc",
+        "institution": "BRVM (Bourse Régionale des Valeurs Mobilières)",
+        "documents": ["Liste des valeurs cotées", "Guide de l'investisseur BRVM"],
+        "estimatedCostXOF": 0,
+        "estimatedDays": 1,
+        "tips": ["La BRVM cote ~46 sociétés de 8 pays UEMOA", "Les blue chips incluent Sonatel (SN), Ecobank TG, SOLIBRA (CI), Orange CI", "Le BRVM Composite est l'indice de référence"]
+      },
+      {
+        "order": 4,
+        "titleKey": "procedures.CI.local_stocks.step4.title",
+        "descriptionKey": "procedures.CI.local_stocks.step4.desc",
+        "institution": "SGI / BRVM",
+        "documents": ["Ordre d'achat signé ou en ligne", "Confirmation de transaction", "Avis d'opéré"],
+        "estimatedCostXOF": 100000,
+        "estimatedDays": 3,
+        "tips": ["Le règlement-livraison est en T+3", "Les frais BRVM s'ajoutent aux frais SGI (~0,3% BRVM + 0,5-1% SGI)"]
+      },
+      {
+        "order": 5,
+        "titleKey": "procedures.CI.local_stocks.step5.title",
+        "descriptionKey": "procedures.CI.local_stocks.step5.desc",
+        "institution": "SGI / DC/BR",
+        "documents": ["Relevé de portefeuille mensuel", "Avis d'opéré", "Calendrier des dividendes"],
+        "estimatedCostXOF": 0,
+        "estimatedDays": 0,
+        "tips": ["Les dividendes BRVM sont soumis à une retenue à la source de 10%", "Suivre le site brvm.org pour les annonces corporate"]
+      }
+    ],
+    "lastUpdated": "2026-01-15",
+    "sourceNotes": "BRVM / CREPMF / DC/BR Abidjan"
+  },
+  "CI_corporate_bonds": {
+    "countryCode": "CI",
+    "assetClass": "corporate_bonds",
+    "steps": [
+      {
+        "order": 1,
+        "titleKey": "procedures.CI.corporate_bonds.step1.title",
+        "descriptionKey": "procedures.CI.corporate_bonds.step1.desc",
+        "institution": "SGI agréée CREPMF",
+        "documents": ["CNI ou passeport", "RIB", "Formulaire d'ouverture de compte-titres"],
+        "estimatedCostXOF": 25000,
+        "estimatedDays": 3,
+        "tips": ["Les obligations corporate BRVM sont émises par de grandes entreprises ouest-africaines"]
+      },
+      {
+        "order": 2,
+        "titleKey": "procedures.CI.corporate_bonds.step2.title",
+        "descriptionKey": "procedures.CI.corporate_bonds.step2.desc",
+        "institution": "CREPMF / SGI arrangeur",
+        "documents": ["Prospectus d'émission visé par le CREPMF", "Note d'information"],
+        "estimatedCostXOF": 0,
+        "estimatedDays": 5,
+        "tips": ["Vérifier la notation de l'émetteur (Bloomfield, WARA)", "Les corporate bonds BRVM offrent 6-8% de rendement"]
+      },
+      {
+        "order": 3,
+        "titleKey": "procedures.CI.corporate_bonds.step3.title",
+        "descriptionKey": "procedures.CI.corporate_bonds.step3.desc",
+        "institution": "SGI",
+        "documents": ["Bulletin de souscription", "Preuve de virement"],
+        "estimatedCostXOF": 500000,
+        "estimatedDays": 5,
+        "tips": ["Minimum : 100 000 à 500 000 FCFA selon l'émission", "Émetteurs fréquents : BOAD, BIDC, BOA, Orange CI"]
+      },
+      {
+        "order": 4,
+        "titleKey": "procedures.CI.corporate_bonds.step4.title",
+        "descriptionKey": "procedures.CI.corporate_bonds.step4.desc",
+        "institution": "DC/BR / SGI",
+        "documents": ["Confirmation de souscription", "Relevé DC/BR"],
+        "estimatedCostXOF": 0,
+        "estimatedDays": 5,
+        "tips": ["Les obligations corporate BRVM sont négociables sur le marché secondaire"]
+      }
+    ],
+    "lastUpdated": "2026-01-15",
+    "sourceNotes": "BRVM / CREPMF"
+  },
+  "CI_agrobusiness": {
+    "countryCode": "CI",
+    "assetClass": "agrobusiness",
+    "steps": [
+      {
+        "order": 1,
+        "titleKey": "procedures.CI.agrobusiness.step1.title",
+        "descriptionKey": "procedures.CI.agrobusiness.step1.desc",
+        "institution": "RCCM / Guichet Unique CEPICI (Centre de Promotion des Investissements en CI)",
+        "documents": ["Statuts sociaux", "PV AG constitutive", "CNI du gérant", "Casier judiciaire", "Attestation de domiciliation"],
+        "estimatedCostXOF": 200000,
+        "estimatedDays": 7,
+        "tips": ["Le CEPICI simplifie la création d'entreprise en 24-48h", "La CI est le 1er producteur mondial de cacao et 3e de noix de cajou", "Choisir la SARL (capital 100 000 FCFA minimum)"]
+      },
+      {
+        "order": 2,
+        "titleKey": "procedures.CI.agrobusiness.step2.title",
+        "descriptionKey": "procedures.CI.agrobusiness.step2.desc",
+        "institution": "MINADER (Ministère de l'Agriculture) / Conseil du Café-Cacao / FIRCA",
+        "documents": ["Demande d'agrément agricole", "Business plan", "Plan d'exploitation", "Contrat de bail rural ou titre foncier"],
+        "estimatedCostXOF": 150000,
+        "estimatedDays": 21,
+        "tips": ["Le Conseil du Café-Cacao régule la filière cacao-café", "Le FIRCA (Fonds Interprofessionnel) finance la recherche agricole", "Les zones de San Pedro et Soubré sont idéales pour le cacao"]
+      },
+      {
+        "order": 3,
+        "titleKey": "procedures.CI.agrobusiness.step3.title",
+        "descriptionKey": "procedures.CI.agrobusiness.step3.desc",
+        "institution": "Banques agricoles (BNDA, BOA, NSIA Banque) / FDFP",
+        "documents": ["Business plan financier", "Titre foncier ou bail rural", "Garanties", "Bilans si existants"],
+        "estimatedCostXOF": 100000,
+        "estimatedDays": 30,
+        "tips": ["La BNDA (Banque Nationale de Développement Agricole) offre des taux préférentiels", "Explorer les fonds du FIDA et de la BAD pour l'agriculture ivoirienne"]
+      },
+      {
+        "order": 4,
+        "titleKey": "procedures.CI.agrobusiness.step4.title",
+        "descriptionKey": "procedures.CI.agrobusiness.step4.desc",
+        "institution": "Exploitation / Coopérative / Exportateur",
+        "documents": ["Registre de production", "Contrats d'achat", "Certifications (UTZ, Fairtrade, Rainforest Alliance)"],
+        "estimatedCostXOF": 0,
+        "estimatedDays": 0,
+        "tips": ["Le cacao certifié se vend 10-15% plus cher", "Rendement typique : 20-30% pour le cacao bien géré"]
+      }
+    ],
+    "lastUpdated": "2026-01-15",
+    "sourceNotes": "CEPICI / Conseil du Café-Cacao / OHADA"
+  },
+  "CI_mutual_fund": {
+    "countryCode": "CI",
+    "assetClass": "mutual_fund",
+    "steps": [
+      {
+        "order": 1,
+        "titleKey": "procedures.CI.mutual_fund.step1.title",
+        "descriptionKey": "procedures.CI.mutual_fund.step1.desc",
+        "institution": "Société de gestion OPCVM (NSIA Gestion, Sogevalor, Atlantique Asset Management)",
+        "documents": ["CNI ou passeport", "RIB", "Formulaire de souscription"],
+        "estimatedCostXOF": 0,
+        "estimatedDays": 3,
+        "tips": ["Les OPCVM UEMOA sont régulés par le CREPMF", "Choisir entre FCP (Fonds Commun de Placement) et SICAV selon le profil"]
+      },
+      {
+        "order": 2,
+        "titleKey": "procedures.CI.mutual_fund.step2.title",
+        "descriptionKey": "procedures.CI.mutual_fund.step2.desc",
+        "institution": "Société de gestion choisie",
+        "documents": ["Bulletin de souscription", "Preuve de virement initial"],
+        "estimatedCostXOF": 100000,
+        "estimatedDays": 5,
+        "tips": ["Ticket d'entrée : 10 000 à 500 000 FCFA selon le fonds", "Les FCP obligataires offrent 5-7% avec un risque modéré"]
+      },
+      {
+        "order": 3,
+        "titleKey": "procedures.CI.mutual_fund.step3.title",
+        "descriptionKey": "procedures.CI.mutual_fund.step3.desc",
+        "institution": "Société de gestion / DC/BR",
+        "documents": ["Relevé de parts", "Rapport annuel du fonds"],
+        "estimatedCostXOF": 0,
+        "estimatedDays": 0,
+        "tips": ["Les frais de gestion sont typiquement de 1-2% par an", "Possibilité de rachat (retrait) avec un préavis de 2-5 jours"]
+      }
+    ],
+    "lastUpdated": "2026-01-15",
+    "sourceNotes": "CREPMF — OPCVM zone UEMOA"
+  },
+  "SN_savings_account": {
+    "countryCode": "SN",
+    "assetClass": "savings_account",
+    "steps": [
+      {
+        "order": 1,
+        "titleKey": "procedures.SN.savings_account.step1.title",
+        "descriptionKey": "procedures.SN.savings_account.step1.desc",
+        "institution": "Banque commerciale (CBAO, BHS, BOA Sénégal, Société Générale SN, BIS)",
+        "documents": ["Carte nationale d'identité CEDEAO ou passeport", "Justificatif de domicile", "2 photos d'identité"],
+        "estimatedCostXOF": 10000,
+        "estimatedDays": 1,
+        "tips": ["La BHS (Banque de l'Habitat du Sénégal) offre des livrets avantageux", "Les comptes d'épargne BCEAO offrent un taux plancher réglementé de 3,5%"]
+      },
+      {
+        "order": 2,
+        "titleKey": "procedures.SN.savings_account.step2.title",
+        "descriptionKey": "procedures.SN.savings_account.step2.desc",
+        "institution": "Banque choisie",
+        "documents": ["Formulaire d'ouverture de compte", "Dépôt initial (5 000 à 25 000 FCFA)"],
+        "estimatedCostXOF": 10000,
+        "estimatedDays": 1,
+        "tips": ["Le Sénégal a un des réseaux bancaires les plus développés de l'UEMOA"]
+      },
+      {
+        "order": 3,
+        "titleKey": "procedures.SN.savings_account.step3.title",
+        "descriptionKey": "procedures.SN.savings_account.step3.desc",
+        "institution": "Banque choisie",
+        "documents": ["Code mobile banking", "RIB"],
+        "estimatedCostXOF": 0,
+        "estimatedDays": 2,
+        "tips": ["Wave et Orange Money sont très répandus comme compléments bancaires au Sénégal"]
+      }
+    ],
+    "lastUpdated": "2026-01-15",
+    "sourceNotes": "BCEAO — Réglementation bancaire UEMOA"
+  },
+  "SN_government_bonds": {
+    "countryCode": "SN",
+    "assetClass": "government_bonds",
+    "steps": [
+      {
+        "order": 1,
+        "titleKey": "procedures.SN.government_bonds.step1.title",
+        "descriptionKey": "procedures.SN.government_bonds.step1.desc",
+        "institution": "SGI agréée CREPMF (CGF Bourse, Impaxis Securities, Africabourse)",
+        "documents": ["CNI CEDEAO ou passeport", "RIB", "Formulaire KYC"],
+        "estimatedCostXOF": 25000,
+        "estimatedDays": 3,
+        "tips": ["CGF Bourse est la SGI la plus active du Sénégal"]
+      },
+      {
+        "order": 2,
+        "titleKey": "procedures.SN.government_bonds.step2.title",
+        "descriptionKey": "procedures.SN.government_bonds.step2.desc",
+        "institution": "UMOA-Titres / Trésor Public sénégalais",
+        "documents": ["Calendrier des émissions", "Bulletin de souscription", "Preuve de virement"],
+        "estimatedCostXOF": 1000000,
+        "estimatedDays": 7,
+        "tips": ["Le Sénégal est un émetteur très actif — OAT à 5-6% de rendement", "Le minimum est de 1M FCFA"]
+      },
+      {
+        "order": 3,
+        "titleKey": "procedures.SN.government_bonds.step3.title",
+        "descriptionKey": "procedures.SN.government_bonds.step3.desc",
+        "institution": "DC/BR / SGI",
+        "documents": ["Avis d'attribution", "Relevé DC/BR"],
+        "estimatedCostXOF": 0,
+        "estimatedDays": 5,
+        "tips": ["Les OAT sénégalaises bénéficient d'une bonne notation (B+ à BB-)"]
+      }
+    ],
+    "lastUpdated": "2026-01-15",
+    "sourceNotes": "UMOA-Titres / CREPMF"
+  },
+  "SN_local_stocks": {
+    "countryCode": "SN",
+    "assetClass": "local_stocks",
+    "steps": [
+      {
+        "order": 1,
+        "titleKey": "procedures.SN.local_stocks.step1.title",
+        "descriptionKey": "procedures.SN.local_stocks.step1.desc",
+        "institution": "SGI agréée CREPMF (CGF Bourse, Impaxis Securities)",
+        "documents": ["CNI CEDEAO ou passeport", "RIB", "Formulaire d'ouverture compte-titres"],
+        "estimatedCostXOF": 50000,
+        "estimatedDays": 3,
+        "tips": ["Sonatel (SNTS) est l'action sénégalaise phare de la BRVM"]
+      },
+      {
+        "order": 2,
+        "titleKey": "procedures.SN.local_stocks.step2.title",
+        "descriptionKey": "procedures.SN.local_stocks.step2.desc",
+        "institution": "BRVM / SGI",
+        "documents": ["Ordre d'achat", "Preuve de fonds"],
+        "estimatedCostXOF": 100000,
+        "estimatedDays": 3,
+        "tips": ["Sonatel verse un dividende régulier — rendement ~5-6%", "La BRVM est accessible depuis tous les pays UEMOA"]
+      },
+      {
+        "order": 3,
+        "titleKey": "procedures.SN.local_stocks.step3.title",
+        "descriptionKey": "procedures.SN.local_stocks.step3.desc",
+        "institution": "SGI / DC/BR",
+        "documents": ["Relevé de portefeuille", "Avis d'opéré"],
+        "estimatedCostXOF": 0,
+        "estimatedDays": 0,
+        "tips": ["Diversifier entre Sonatel, BOA, et d'autres blue chips BRVM"]
+      }
+    ],
+    "lastUpdated": "2026-01-15",
+    "sourceNotes": "BRVM / CREPMF"
+  },
+  "SN_agrobusiness": {
+    "countryCode": "SN",
+    "assetClass": "agrobusiness",
+    "steps": [
+      {
+        "order": 1,
+        "titleKey": "procedures.SN.agrobusiness.step1.title",
+        "descriptionKey": "procedures.SN.agrobusiness.step1.desc",
+        "institution": "APIX (Agence de Promotion des Investissements) / RCCM",
+        "documents": ["Statuts sociaux", "CNI du gérant", "Casier judiciaire", "Business plan"],
+        "estimatedCostXOF": 150000,
+        "estimatedDays": 5,
+        "tips": ["L'APIX offre un guichet unique pour la création d'entreprise", "L'arachide, le riz et l'horticulture sont les filières porteuses au Sénégal"]
+      },
+      {
+        "order": 2,
+        "titleKey": "procedures.SN.agrobusiness.step2.title",
+        "descriptionKey": "procedures.SN.agrobusiness.step2.desc",
+        "institution": "MAER (Ministère de l'Agriculture) / SAED / ANIDA",
+        "documents": ["Agrément agricole", "Plan d'exploitation", "Bail rural ou titre foncier"],
+        "estimatedCostXOF": 100000,
+        "estimatedDays": 21,
+        "tips": ["La vallée du fleuve Sénégal (SAED) offre des terres irriguées", "L'ANIDA accompagne les jeunes entrepreneurs agricoles"]
+      },
+      {
+        "order": 3,
+        "titleKey": "procedures.SN.agrobusiness.step3.title",
+        "descriptionKey": "procedures.SN.agrobusiness.step3.desc",
+        "institution": "CNCAS / LBA / Banques commerciales",
+        "documents": ["Business plan financier", "Garanties", "Titre foncier"],
+        "estimatedCostXOF": 50000,
+        "estimatedDays": 30,
+        "tips": ["La CNCAS (Caisse Nationale de Crédit Agricole) offre des taux agricoles préférentiels"]
+      },
+      {
+        "order": 4,
+        "titleKey": "procedures.SN.agrobusiness.step4.title",
+        "descriptionKey": "procedures.SN.agrobusiness.step4.desc",
+        "institution": "Exploitation / Coopérative",
+        "documents": ["Registre de production", "Contrats d'achat"],
+        "estimatedCostXOF": 0,
+        "estimatedDays": 0,
+        "tips": ["L'horticulture d'export (mangues, haricots verts) peut générer 25-40% de rendement"]
+      }
+    ],
+    "lastUpdated": "2026-01-15",
+    "sourceNotes": "APIX / OHADA / MAER Sénégal"
+  },
+  "ML_savings_account": {
+    "countryCode": "ML",
+    "assetClass": "savings_account",
+    "steps": [
+      {
+        "order": 1,
+        "titleKey": "procedures.ML.savings_account.step1.title",
+        "descriptionKey": "procedures.ML.savings_account.step1.desc",
+        "institution": "Banque commerciale (BDM SA, BOA Mali, Ecobank Mali, BMS)",
+        "documents": ["NINA (Numéro d'Identification Nationale) ou passeport", "Justificatif de domicile", "2 photos d'identité"],
+        "estimatedCostXOF": 10000,
+        "estimatedDays": 2,
+        "tips": ["La BDM SA est la plus grande banque malienne", "Les taux d'épargne suivent le taux directeur BCEAO (3,5% minimum)"]
+      },
+      {
+        "order": 2,
+        "titleKey": "procedures.ML.savings_account.step2.title",
+        "descriptionKey": "procedures.ML.savings_account.step2.desc",
+        "institution": "Banque choisie",
+        "documents": ["Formulaire d'ouverture", "Dépôt initial"],
+        "estimatedCostXOF": 10000,
+        "estimatedDays": 1,
+        "tips": ["Orange Money Mali est très répandu comme complément bancaire"]
+      }
+    ],
+    "lastUpdated": "2026-01-15",
+    "sourceNotes": "BCEAO — Réglementation bancaire UEMOA"
+  },
+  "ML_government_bonds": {
+    "countryCode": "ML",
+    "assetClass": "government_bonds",
+    "steps": [
+      {
+        "order": 1,
+        "titleKey": "procedures.ML.government_bonds.step1.title",
+        "descriptionKey": "procedures.ML.government_bonds.step1.desc",
+        "institution": "SGI agréée CREPMF",
+        "documents": ["NINA ou passeport", "RIB", "Formulaire KYC"],
+        "estimatedCostXOF": 25000,
+        "estimatedDays": 5,
+        "tips": ["Les obligations maliennes sont accessibles via les SGI basées au Mali ou en CI"]
+      },
+      {
+        "order": 2,
+        "titleKey": "procedures.ML.government_bonds.step2.title",
+        "descriptionKey": "procedures.ML.government_bonds.step2.desc",
+        "institution": "UMOA-Titres / Trésor Public malien",
+        "documents": ["Bulletin de souscription", "Preuve de virement"],
+        "estimatedCostXOF": 1000000,
+        "estimatedDays": 7,
+        "tips": ["Les OAT maliennes offrent 6-7,5% — prime de risque plus élevée"]
+      },
+      {
+        "order": 3,
+        "titleKey": "procedures.ML.government_bonds.step3.title",
+        "descriptionKey": "procedures.ML.government_bonds.step3.desc",
+        "institution": "DC/BR",
+        "documents": ["Avis d'attribution", "Relevé DC/BR"],
+        "estimatedCostXOF": 0,
+        "estimatedDays": 5,
+        "tips": ["Diversifier les maturités pour réduire le risque"]
+      }
+    ],
+    "lastUpdated": "2026-01-15",
+    "sourceNotes": "UMOA-Titres / CREPMF"
+  },
+  "BF_savings_account": {
+    "countryCode": "BF",
+    "assetClass": "savings_account",
+    "steps": [
+      {
+        "order": 1,
+        "titleKey": "procedures.BF.savings_account.step1.title",
+        "descriptionKey": "procedures.BF.savings_account.step1.desc",
+        "institution": "Banque commerciale (Coris Bank, BOA Burkina, Ecobank BF, UBA BF)",
+        "documents": ["CNIB (Carte Nationale d'Identité Burkinabè) ou passeport", "Justificatif de domicile", "2 photos d'identité"],
+        "estimatedCostXOF": 10000,
+        "estimatedDays": 1,
+        "tips": ["Coris Bank International est la plus grande banque burkinabè", "Les microfinances (RCPB, Caisse Populaire) offrent aussi des comptes d'épargne"]
+      },
+      {
+        "order": 2,
+        "titleKey": "procedures.BF.savings_account.step2.title",
+        "descriptionKey": "procedures.BF.savings_account.step2.desc",
+        "institution": "Banque choisie",
+        "documents": ["Formulaire d'ouverture", "Dépôt initial"],
+        "estimatedCostXOF": 10000,
+        "estimatedDays": 1,
+        "tips": ["Moov Money et Orange Money sont très utilisés au Burkina Faso"]
+      }
+    ],
+    "lastUpdated": "2026-01-15",
+    "sourceNotes": "BCEAO — Réglementation bancaire UEMOA"
+  },
+  "BF_government_bonds": {
+    "countryCode": "BF",
+    "assetClass": "government_bonds",
+    "steps": [
+      {
+        "order": 1,
+        "titleKey": "procedures.BF.government_bonds.step1.title",
+        "descriptionKey": "procedures.BF.government_bonds.step1.desc",
+        "institution": "SGI agréée CREPMF",
+        "documents": ["CNIB ou passeport", "RIB", "Formulaire KYC"],
+        "estimatedCostXOF": 25000,
+        "estimatedDays": 5,
+        "tips": ["Accéder aux obligations burkinabè via une SGI locale ou ivoirienne"]
+      },
+      {
+        "order": 2,
+        "titleKey": "procedures.BF.government_bonds.step2.title",
+        "descriptionKey": "procedures.BF.government_bonds.step2.desc",
+        "institution": "UMOA-Titres / Trésor Public burkinabè",
+        "documents": ["Bulletin de souscription", "Preuve de virement"],
+        "estimatedCostXOF": 1000000,
+        "estimatedDays": 7,
+        "tips": ["Les OAT burkinabè offrent 6-7% — bon rapport rendement/risque"]
+      },
+      {
+        "order": 3,
+        "titleKey": "procedures.BF.government_bonds.step3.title",
+        "descriptionKey": "procedures.BF.government_bonds.step3.desc",
+        "institution": "DC/BR",
+        "documents": ["Avis d'attribution", "Relevé DC/BR"],
+        "estimatedCostXOF": 0,
+        "estimatedDays": 5,
+        "tips": ["Les titres UEMOA sont négociables sur le marché secondaire"]
+      }
+    ],
+    "lastUpdated": "2026-01-15",
+    "sourceNotes": "UMOA-Titres / CREPMF"
+  },
+  "NE_savings_account": {
+    "countryCode": "NE",
+    "assetClass": "savings_account",
+    "steps": [
+      {
+        "order": 1,
+        "titleKey": "procedures.NE.savings_account.step1.title",
+        "descriptionKey": "procedures.NE.savings_account.step1.desc",
+        "institution": "Banque commerciale (BOA Niger, Ecobank Niger, BIA Niger, Sonibank)",
+        "documents": ["Carte d'identité nigérienne ou passeport", "Justificatif de domicile", "2 photos d'identité"],
+        "estimatedCostXOF": 10000,
+        "estimatedDays": 2,
+        "tips": ["Le taux de bancarisation au Niger est faible — les IMF (microfinances) sont une alternative"]
+      },
+      {
+        "order": 2,
+        "titleKey": "procedures.NE.savings_account.step2.title",
+        "descriptionKey": "procedures.NE.savings_account.step2.desc",
+        "institution": "Banque choisie",
+        "documents": ["Formulaire d'ouverture", "Dépôt initial"],
+        "estimatedCostXOF": 10000,
+        "estimatedDays": 1,
+        "tips": ["Airtel Money Niger peut servir de pont vers le compte bancaire"]
+      }
+    ],
+    "lastUpdated": "2026-01-15",
+    "sourceNotes": "BCEAO — Réglementation bancaire UEMOA"
+  },
+  "TG_savings_account": {
+    "countryCode": "TG",
+    "assetClass": "savings_account",
+    "steps": [
+      {
+        "order": 1,
+        "titleKey": "procedures.TG.savings_account.step1.title",
+        "descriptionKey": "procedures.TG.savings_account.step1.desc",
+        "institution": "Banque commerciale (Ecobank Togo, UTB, BTCI, BOA Togo)",
+        "documents": ["Carte d'identité togolaise ou passeport", "Justificatif de domicile", "2 photos d'identité"],
+        "estimatedCostXOF": 10000,
+        "estimatedDays": 1,
+        "tips": ["Ecobank a son siège régional à Lomé — services de qualité", "Les taux d'épargne suivent le cadre BCEAO"]
+      },
+      {
+        "order": 2,
+        "titleKey": "procedures.TG.savings_account.step2.title",
+        "descriptionKey": "procedures.TG.savings_account.step2.desc",
+        "institution": "Banque choisie",
+        "documents": ["Formulaire d'ouverture", "Dépôt initial"],
+        "estimatedCostXOF": 10000,
+        "estimatedDays": 1,
+        "tips": ["T-Money et Flooz (Moov) sont les leaders du mobile money au Togo"]
+      }
+    ],
+    "lastUpdated": "2026-01-15",
+    "sourceNotes": "BCEAO — Réglementation bancaire UEMOA"
+  },
+  "TG_local_stocks": {
+    "countryCode": "TG",
+    "assetClass": "local_stocks",
+    "steps": [
+      {
+        "order": 1,
+        "titleKey": "procedures.TG.local_stocks.step1.title",
+        "descriptionKey": "procedures.TG.local_stocks.step1.desc",
+        "institution": "SGI agréée CREPMF",
+        "documents": ["Carte d'identité ou passeport", "RIB", "Formulaire d'ouverture compte-titres"],
+        "estimatedCostXOF": 50000,
+        "estimatedDays": 3,
+        "tips": ["Ecobank Transnational (ETI) est l'action togolaise phare cotée à la BRVM"]
+      },
+      {
+        "order": 2,
+        "titleKey": "procedures.TG.local_stocks.step2.title",
+        "descriptionKey": "procedures.TG.local_stocks.step2.desc",
+        "institution": "BRVM / SGI",
+        "documents": ["Ordre d'achat", "Preuve de fonds"],
+        "estimatedCostXOF": 100000,
+        "estimatedDays": 3,
+        "tips": ["ETI est une blue chip BRVM — bonne liquidité et dividendes réguliers"]
+      },
+      {
+        "order": 3,
+        "titleKey": "procedures.TG.local_stocks.step3.title",
+        "descriptionKey": "procedures.TG.local_stocks.step3.desc",
+        "institution": "SGI / DC/BR",
+        "documents": ["Relevé de portefeuille", "Avis d'opéré"],
+        "estimatedCostXOF": 0,
+        "estimatedDays": 0,
+        "tips": ["Diversifier avec d'autres valeurs BRVM au-delà de ETI"]
+      }
+    ],
+    "lastUpdated": "2026-01-15",
+    "sourceNotes": "BRVM / CREPMF"
+  },
+  "BJ_savings_account": {
+    "countryCode": "BJ",
+    "assetClass": "savings_account",
+    "steps": [
+      {
+        "order": 1,
+        "titleKey": "procedures.BJ.savings_account.step1.title",
+        "descriptionKey": "procedures.BJ.savings_account.step1.desc",
+        "institution": "Banque commerciale (BOA Bénin, Ecobank Bénin, UBA Bénin, NSIA Banque Bénin)",
+        "documents": ["Carte d'identité béninoise (CIP) ou passeport", "Justificatif de domicile", "2 photos d'identité"],
+        "estimatedCostXOF": 10000,
+        "estimatedDays": 1,
+        "tips": ["Le Bénin a un système bancaire en croissance rapide", "MTN Mobile Money est très utilisé comme complément"]
+      },
+      {
+        "order": 2,
+        "titleKey": "procedures.BJ.savings_account.step2.title",
+        "descriptionKey": "procedures.BJ.savings_account.step2.desc",
+        "institution": "Banque choisie",
+        "documents": ["Formulaire d'ouverture", "Dépôt initial"],
+        "estimatedCostXOF": 10000,
+        "estimatedDays": 1,
+        "tips": ["Les comptes d'épargne béninois suivent le cadre BCEAO"]
+      }
+    ],
+    "lastUpdated": "2026-01-15",
+    "sourceNotes": "BCEAO — Réglementation bancaire UEMOA"
+  },
+  "BJ_government_bonds": {
+    "countryCode": "BJ",
+    "assetClass": "government_bonds",
+    "steps": [
+      {
+        "order": 1,
+        "titleKey": "procedures.BJ.government_bonds.step1.title",
+        "descriptionKey": "procedures.BJ.government_bonds.step1.desc",
+        "institution": "SGI agréée CREPMF",
+        "documents": ["CIP ou passeport", "RIB", "Formulaire KYC"],
+        "estimatedCostXOF": 25000,
+        "estimatedDays": 5,
+        "tips": ["Le Bénin est un émetteur actif d'obligations sur le marché UEMOA"]
+      },
+      {
+        "order": 2,
+        "titleKey": "procedures.BJ.government_bonds.step2.title",
+        "descriptionKey": "procedures.BJ.government_bonds.step2.desc",
+        "institution": "UMOA-Titres / Trésor Public béninois",
+        "documents": ["Bulletin de souscription", "Preuve de virement"],
+        "estimatedCostXOF": 1000000,
+        "estimatedDays": 7,
+        "tips": ["Les OAT béninoises offrent 5,5-6,5% de rendement", "Le Bénin a une des meilleures notations de la zone UEMOA"]
+      },
+      {
+        "order": 3,
+        "titleKey": "procedures.BJ.government_bonds.step3.title",
+        "descriptionKey": "procedures.BJ.government_bonds.step3.desc",
+        "institution": "DC/BR",
+        "documents": ["Avis d'attribution", "Relevé DC/BR"],
+        "estimatedCostXOF": 0,
+        "estimatedDays": 5,
+        "tips": ["Les obligations béninoises sont bien perçues par les investisseurs régionaux"]
+      }
+    ],
+    "lastUpdated": "2026-01-15",
+    "sourceNotes": "UMOA-Titres / CREPMF"
+  },
+  "GW_savings_account": {
+    "countryCode": "GW",
+    "assetClass": "savings_account",
+    "steps": [
+      {
+        "order": 1,
+        "titleKey": "procedures.GW.savings_account.step1.title",
+        "descriptionKey": "procedures.GW.savings_account.step1.desc",
+        "institution": "Banque commerciale (Ecobank Guinée-Bissau, BAO, BDU)",
+        "documents": ["BI (Bilhete de Identidade) ou passeport", "Justificatif de domicile", "2 photos d'identité"],
+        "estimatedCostXOF": 10000,
+        "estimatedDays": 3,
+        "tips": ["Le système bancaire bissau-guinéen est très limité — principalement à Bissau", "La Guinée-Bissau est le 2e producteur mondial de noix de cajou"]
+      },
+      {
+        "order": 2,
+        "titleKey": "procedures.GW.savings_account.step2.title",
+        "descriptionKey": "procedures.GW.savings_account.step2.desc",
+        "institution": "Banque choisie",
+        "documents": ["Formulaire d'ouverture", "Dépôt initial"],
+        "estimatedCostXOF": 10000,
+        "estimatedDays": 2,
+        "tips": ["Les services bancaires sont basiques — privilégier Ecobank pour l'accès régional"]
+      }
+    ],
+    "lastUpdated": "2026-01-15",
+    "sourceNotes": "BCEAO — Réglementation bancaire UEMOA"
+  }
+}

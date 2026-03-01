@@ -6,6 +6,7 @@ import { useAuthStore } from '../../stores/auth.store';
 import { useAppStore } from '../../stores/app.store';
 import { useEngineStore } from '../../stores/engine-store';
 import { GlassCard } from '../../components/ui/GlassCard';
+import { ErrorBoundary } from '../../components/ui/ErrorBoundary';
 import { ArrowUpRight, TrendingUp, AlertTriangle, Shield, Wallet, RotateCcw, Award, Target } from 'lucide-react-native';
 
 // Dashboard Components
@@ -31,7 +32,7 @@ import { IncomeVsExpenseCard } from '../../components/dashboard/IncomeVsExpenseC
 import { useActiveCompensations } from '../../hooks/useActiveCompensations';
 import { useSavingsGoals } from '../../hooks/useSavingsGoals';
 
-export default function DashboardScreen() {
+function DashboardScreenInner() {
   const { t } = useTranslation('app');
   const router = useRouter();
   const user = useAuthStore((s) => s.user);
@@ -279,6 +280,14 @@ export default function DashboardScreen() {
 
       </ScrollView>
     </View>
+  );
+}
+
+export default function DashboardScreen() {
+  return (
+    <ErrorBoundary>
+      <DashboardScreenInner />
+    </ErrorBoundary>
   );
 }
 

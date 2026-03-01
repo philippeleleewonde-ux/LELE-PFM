@@ -379,7 +379,8 @@
       "courbe": "My Curve",
       "strategie": "My Strategy",
       "mission": "My Mission",
-      "simulateur": "Simulator"
+      "simulateur": "Simulator",
+      "parcours": "Journey"
     },
     "pillars": {
       "croissance": "Growth Engine",
@@ -453,6 +454,184 @@
     "completeProfile": "Complete your investor profile",
     "completeDiagnosis": "Complete the financial diagnosis",
     "noBudget": "Your investment budget is 0. Adjust your profile."
+  },
+  "journey": {
+    "phases": {
+      "recommendation": "Recommendation",
+      "selection": "Selection",
+      "scenarios": "Strategies",
+      "duration": "Duration",
+      "accompaniment": "Tracking"
+    },
+    "phase1": {
+      "title": "Recommended assets",
+      "subtitle": "Based on your investor profile",
+      "viewSteps": "View steps",
+      "stepsCount": "{{count}} steps",
+      "continue": "Continue to selection",
+      "noAssets": "No assets available for your profile",
+      "score": "Score {{score}}/100",
+      "profileBadge": "{{country}} · {{risk}} · {{horizon}}"
+    },
+    "phase2": {
+      "title": "Select your assets",
+      "accept": "Accept",
+      "reject": "Reject",
+      "addCustom": "+ Add an asset",
+      "allocation": "Allocation %",
+      "totalAllocation": "Total allocation",
+      "generateStrategies": "Generate strategies",
+      "summary": "Summary by pillar",
+      "mustBe100": "Allocation must total 100%",
+      "noAccepted": "Accept at least one asset"
+    },
+    "phase3": {
+      "title": "Choose your strategy",
+      "compare": "Comparison",
+      "annualReturn": "Annual return",
+      "finalValue": "Final value",
+      "totalGains": "Total gains",
+      "cagr": "CAGR",
+      "volatility": "Volatility",
+      "chooseHorizon": "Choose my horizon"
+    },
+    "phase4": {
+      "title": "Set your horizon",
+      "quickSelect": "Quick select",
+      "years": "{{n}} years",
+      "months": "{{n}} months",
+      "custom": "Custom",
+      "ageAtMaturity": "Your age at maturity: {{age}} years",
+      "launchJourney": "Validate and launch my journey",
+      "monthlyContribution": "Monthly contribution",
+      "projectedValue": "Projected value"
+    },
+    "phase5": {
+      "title": "Dashboard",
+      "portfolio": "My portfolio",
+      "totalValue": "Total value",
+      "totalInvested": "Total invested",
+      "totalReturns": "Total returns",
+      "performance": "Performance",
+      "vsProjection": "vs Projection",
+      "nextCheckIn": "Next check-in",
+      "daysLeft": "in {{days}} days",
+      "overdue": "Overdue!",
+      "doCheckIn": "Do my check-in",
+      "configure": "Configure",
+      "streak": "Streak: {{count}}",
+      "procedures": "Procedure checklist",
+      "stepsCompleted": "{{done}}/{{total}} steps",
+      "advisories": "Advice",
+      "history": "Check-in history",
+      "noCheckIns": "No check-ins recorded"
+    },
+    "strategies": {
+      "ultraSafe": "Ultra-safe",
+      "safe": "Safe",
+      "balanced": "Balanced",
+      "growth": "Growth",
+      "aggressive": "Aggressive"
+    },
+    "advisory": {
+      "rebalance": {
+        "title": "Rebalancing needed",
+        "message": "The {{pillar}} pillar has drifted {{drift}}% (actual {{actual}}%, target {{target}}%)."
+      },
+      "underperform": {
+        "title": "Underperformance detected",
+        "message": "Your portfolio ({{actual}}) is at {{ratio}}% of projected scenario ({{expected}})."
+      },
+      "overperform": {
+        "title": "Excellent performance!",
+        "message": "Your portfolio ({{actual}}) exceeds the projected scenario by {{ratio}}% (expected {{expected}})."
+      },
+      "firstReturns": {
+        "title": "First returns!",
+        "message": "Congratulations, your portfolio is already generating {{returns}} in returns."
+      },
+      "surplus": {
+        "title": "Surplus available",
+        "message": "You have {{surplus}} surplus this week. Reinforce your positions!"
+      },
+      "missedCheckIns": {
+        "title": "Missed check-ins",
+        "message": "{{count}} recent check-ins missed. Regular tracking is key to success."
+      },
+      "durationMilestone": {
+        "title": "{{percent}}% milestone reached!",
+        "message": "You've covered {{percent}}% of your horizon. Performance: {{performance}}%."
+      },
+      "procedureStale": {
+        "title": "Step pending",
+        "message": "Asset {{assetName}} has a step pending for {{days}} days."
+      }
+    },
+    "checkIn": {
+      "title": "Portfolio check-in",
+      "amountInvested": "Amount invested",
+      "currentValue": "Current value",
+      "performance": "Performance",
+      "notes": "Notes (optional)",
+      "save": "Save"
+    },
+    "rendezVous": {
+      "title": "Check-in configuration",
+      "frequency": "Frequency",
+      "weekly": "Weekly",
+      "biweekly": "Biweekly",
+      "monthly": "Monthly",
+      "quarterly": "Quarterly",
+      "dayOfWeek": "Day of week",
+      "reminder": "Reminder",
+      "hoursBeforeOptions": {
+        "12": "12h before",
+        "24": "24h before",
+        "48": "48h before"
+      },
+      "enabled": "Enabled",
+      "save": "Save"
+    },
+    "customAsset": {
+      "title": "Add custom asset",
+      "name": "Asset name",
+      "assetClass": "Asset class",
+      "returnRate": "Expected return (%)",
+      "volatility": "Volatility (%)",
+      "riskLevel": "Risk level",
+      "liquidity": "Liquidity",
+      "shariaCompliant": "Sharia compliant",
+      "add": "Add"
+    }
+  },
+  "assets": {
+    "savings_account": { "label": "Savings account", "desc": "Secure bank savings" },
+    "term_deposit": { "label": "Term deposit", "desc": "Fixed-term placement with guaranteed rate" },
+    "money_market": { "label": "Money market", "desc": "Very liquid short-term funds" },
+    "tontine": { "label": "Tontine", "desc": "Traditional collective savings" },
+    "government_bonds": { "label": "Government bonds", "desc": "Sovereign debt securities" },
+    "corporate_bonds": { "label": "Corporate bonds", "desc": "Private debt securities" },
+    "sukuk": { "label": "Sukuk", "desc": "Islamic finance compliant bonds" },
+    "stock_index": { "label": "Stock indices", "desc": "Diversified index funds (ETF)" },
+    "local_stocks": { "label": "Local stocks", "desc": "Stocks listed on local exchange" },
+    "mutual_fund": { "label": "Mutual funds", "desc": "Professionally managed portfolios" },
+    "crypto": { "label": "Cryptocurrencies", "desc": "Decentralized digital assets" },
+    "gold": { "label": "Gold", "desc": "Precious metal — historical safe haven" },
+    "real_estate_fund": { "label": "Real estate fund", "desc": "Pooled real estate investment" },
+    "micro_enterprise": { "label": "Micro-enterprise", "desc": "Investment in SMEs" },
+    "municipal_bonds": { "label": "Municipal bonds", "desc": "Local government debt securities" },
+    "private_equity": { "label": "Private equity", "desc": "Stakes in unlisted companies" },
+    "venture_capital": { "label": "Venture capital", "desc": "Funding high-potential startups" },
+    "venture_debt": { "label": "Venture debt", "desc": "Loans to startups alongside equity" },
+    "mezzanine": { "label": "Mezzanine financing", "desc": "Subordinated debt with profit sharing" },
+    "infrastructure": { "label": "Infrastructure", "desc": "Infrastructure projects (roads, energy, telecom)" },
+    "mining_assets": { "label": "Mining assets", "desc": "Investment in resource extraction" },
+    "agrobusiness": { "label": "Agrobusiness", "desc": "Industrial agriculture and food processing" },
+    "commodities": { "label": "Commodities", "desc": "Oil, cocoa, coffee and other commodities" },
+    "derivatives": { "label": "Derivatives", "desc": "Options, futures and complex instruments" },
+    "esg_bonds": { "label": "ESG bonds", "desc": "Green bonds and social impact bonds" },
+    "carbon_credits": { "label": "Carbon credits", "desc": "Emissions market and carbon offsets" },
+    "tokenized_assets": { "label": "Tokenized assets", "desc": "Traditional assets fractionalized on blockchain" }
   },
   "categories": {
     "food": "Food",

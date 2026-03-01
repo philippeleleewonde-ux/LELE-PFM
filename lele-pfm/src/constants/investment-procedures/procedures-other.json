@@ -1,0 +1,268 @@
+{
+  "NG_savings_account": {
+    "countryCode": "NG",
+    "assetClass": "savings_account",
+    "steps": [
+      {
+        "order": 1,
+        "titleKey": "procedures.NG.savings_account.step1.title",
+        "descriptionKey": "procedures.NG.savings_account.step1.desc",
+        "institution": "CBN-licensed bank (GTBank, Zenith, Access, etc.)",
+        "documents": ["Valid ID (National ID, passport, driver's license)", "BVN (Bank Verification Number)", "Utility bill"],
+        "estimatedCostUSD": 0,
+        "estimatedDays": 1,
+        "tips": ["BVN registration is mandatory since 2015", "Digital banks like Kuda and Opay offer faster onboarding"]
+      },
+      {
+        "order": 2,
+        "titleKey": "procedures.NG.savings_account.step2.title",
+        "descriptionKey": "procedures.NG.savings_account.step2.desc",
+        "institution": "Bank",
+        "documents": [],
+        "estimatedCostUSD": 0,
+        "estimatedDays": 0,
+        "tips": ["Interest on savings is subject to 10% withholding tax", "Compare rates between commercial and microfinance banks"]
+      }
+    ]
+  },
+  "NG_government_bonds": {
+    "countryCode": "NG",
+    "assetClass": "government_bonds",
+    "steps": [
+      {
+        "order": 1,
+        "titleKey": "procedures.NG.government_bonds.step1.title",
+        "descriptionKey": "procedures.NG.government_bonds.step1.desc",
+        "institution": "DMO (Debt Management Office)",
+        "documents": ["BVN", "Valid ID", "Bank account details"],
+        "estimatedCostUSD": 0,
+        "estimatedDays": 3,
+        "tips": ["FGN Savings Bond: minimum N5,000", "Available through DMO portal or commercial banks"]
+      },
+      {
+        "order": 2,
+        "titleKey": "procedures.NG.government_bonds.step2.title",
+        "descriptionKey": "procedures.NG.government_bonds.step2.desc",
+        "institution": "SEC Nigeria / DMO",
+        "documents": ["Subscription form"],
+        "estimatedCostUSD": 10,
+        "estimatedDays": 5,
+        "tips": ["FGN Bonds: 2-30 year tenors", "Treasury Bills: 91, 182, 364 days", "Interest is tax-free for individuals"]
+      }
+    ]
+  },
+  "NG_local_stocks": {
+    "countryCode": "NG",
+    "assetClass": "local_stocks",
+    "steps": [
+      {
+        "order": 1,
+        "titleKey": "procedures.NG.local_stocks.step1.title",
+        "descriptionKey": "procedures.NG.local_stocks.step1.desc",
+        "institution": "SEC Nigeria / CSCS",
+        "documents": ["BVN", "Valid ID", "Passport photo", "Utility bill"],
+        "estimatedCostUSD": 5,
+        "estimatedDays": 5,
+        "tips": ["CSCS account (Central Securities Clearing System) required", "Can open through stockbroker"]
+      },
+      {
+        "order": 2,
+        "titleKey": "procedures.NG.local_stocks.step2.title",
+        "descriptionKey": "procedures.NG.local_stocks.step2.desc",
+        "institution": "NGX (Nigerian Exchange)",
+        "documents": ["Brokerage agreement"],
+        "estimatedCostUSD": 0,
+        "estimatedDays": 3,
+        "tips": ["Licensed stockbrokers: Afrinvest, Stanbic IBTC, etc.", "Digital platforms: Bamboo, Chaka, Trove"]
+      },
+      {
+        "order": 3,
+        "titleKey": "procedures.NG.local_stocks.step3.title",
+        "descriptionKey": "procedures.NG.local_stocks.step3.desc",
+        "institution": "NGX",
+        "documents": [],
+        "estimatedCostUSD": 50,
+        "estimatedDays": 1,
+        "tips": ["NGX All-Share Index tracks 154+ listed companies", "Capital gains tax: 10% on disposal proceeds"]
+      }
+    ]
+  },
+  "GH_savings_account": {
+    "countryCode": "GH",
+    "assetClass": "savings_account",
+    "steps": [
+      {
+        "order": 1,
+        "titleKey": "procedures.GH.savings_account.step1.title",
+        "descriptionKey": "procedures.GH.savings_account.step1.desc",
+        "institution": "BoG-licensed bank (Ecobank, GCB, Absa, etc.)",
+        "documents": ["Ghana Card or passport", "Utility bill or reference letter", "TIN (Tax Identification Number)"],
+        "estimatedCostUSD": 0,
+        "estimatedDays": 1,
+        "tips": ["Ghana Card is now the primary ID", "Mobile money (MTN MoMo, Vodafone Cash) is widely used"]
+      }
+    ]
+  },
+  "GH_government_bonds": {
+    "countryCode": "GH",
+    "assetClass": "government_bonds",
+    "steps": [
+      {
+        "order": 1,
+        "titleKey": "procedures.GH.government_bonds.step1.title",
+        "descriptionKey": "procedures.GH.government_bonds.step1.desc",
+        "institution": "Bank of Ghana / SEC Ghana",
+        "documents": ["Ghana Card", "TIN", "Bank account"],
+        "estimatedCostUSD": 0,
+        "estimatedDays": 3,
+        "tips": ["Treasury Bills: 91, 182, 364 days", "Government of Ghana Bonds: 2-15 years", "Interest subject to 8% withholding tax"]
+      },
+      {
+        "order": 2,
+        "titleKey": "procedures.GH.government_bonds.step2.title",
+        "descriptionKey": "procedures.GH.government_bonds.step2.desc",
+        "institution": "Licensed dealer (banks, investment firms)",
+        "documents": ["Subscription form"],
+        "estimatedCostUSD": 100,
+        "estimatedDays": 5,
+        "tips": ["Minimum GHS 100 for T-Bills", "Available through banks and mobile apps"]
+      }
+    ]
+  },
+  "GH_local_stocks": {
+    "countryCode": "GH",
+    "assetClass": "local_stocks",
+    "steps": [
+      {
+        "order": 1,
+        "titleKey": "procedures.GH.local_stocks.step1.title",
+        "descriptionKey": "procedures.GH.local_stocks.step1.desc",
+        "institution": "SEC Ghana / GSE (Ghana Stock Exchange)",
+        "documents": ["Ghana Card", "TIN", "CSD account form"],
+        "estimatedCostUSD": 5,
+        "estimatedDays": 5,
+        "tips": ["CSD (Central Securities Depository) account required", "Licensed brokers: Databank, IC Securities"]
+      },
+      {
+        "order": 2,
+        "titleKey": "procedures.GH.local_stocks.step2.title",
+        "descriptionKey": "procedures.GH.local_stocks.step2.desc",
+        "institution": "GSE",
+        "documents": [],
+        "estimatedCostUSD": 50,
+        "estimatedDays": 1,
+        "tips": ["GSE Composite Index tracks 30+ listed companies", "Capital gains tax: 15%"]
+      }
+    ]
+  },
+  "US_stock_index": {
+    "countryCode": "US",
+    "assetClass": "stock_index",
+    "steps": [
+      {
+        "order": 1,
+        "titleKey": "procedures.US.stock_index.step1.title",
+        "descriptionKey": "procedures.US.stock_index.step1.desc",
+        "institution": "SEC-registered broker (Fidelity, Schwab, Vanguard, etc.)",
+        "documents": ["SSN or ITIN", "Government-issued ID", "Proof of address"],
+        "estimatedCostUSD": 0,
+        "estimatedDays": 3,
+        "tips": ["Most brokers offer $0 commission on ETFs", "Consider Roth IRA for tax-free growth"]
+      },
+      {
+        "order": 2,
+        "titleKey": "procedures.US.stock_index.step2.title",
+        "descriptionKey": "procedures.US.stock_index.step2.desc",
+        "institution": "Broker",
+        "documents": [],
+        "estimatedCostUSD": 0,
+        "estimatedDays": 1,
+        "tips": ["S&P 500 ETFs (VOO, SPY, IVV) are most popular", "Total market funds (VTI, ITOT) for broader exposure", "Fractional shares available at most brokers"]
+      }
+    ]
+  },
+  "AE_savings_account": {
+    "countryCode": "AE",
+    "assetClass": "savings_account",
+    "steps": [
+      {
+        "order": 1,
+        "titleKey": "procedures.AE.savings_account.step1.title",
+        "descriptionKey": "procedures.AE.savings_account.step1.desc",
+        "institution": "CBUAE-licensed bank (Emirates NBD, ADCB, FAB, etc.)",
+        "documents": ["Passport", "Emirates ID", "Visa copy", "Salary certificate or proof of income"],
+        "estimatedCostUSD": 0,
+        "estimatedDays": 1,
+        "tips": ["No income tax in UAE", "Islamic savings accounts (Wakala) available", "Minimum balance requirements vary by bank"]
+      }
+    ]
+  },
+  "AE_sukuk": {
+    "countryCode": "AE",
+    "assetClass": "sukuk",
+    "steps": [
+      {
+        "order": 1,
+        "titleKey": "procedures.AE.sukuk.step1.title",
+        "descriptionKey": "procedures.AE.sukuk.step1.desc",
+        "institution": "SCA (Securities and Commodities Authority)",
+        "documents": ["Emirates ID", "Passport", "Bank account", "NIN (National Investor Number)"],
+        "estimatedCostUSD": 0,
+        "estimatedDays": 5,
+        "tips": ["NIN required for trading on DFM and ADX", "Islamic banks specialize in sukuk distribution"]
+      },
+      {
+        "order": 2,
+        "titleKey": "procedures.AE.sukuk.step2.title",
+        "descriptionKey": "procedures.AE.sukuk.step2.desc",
+        "institution": "DFM / ADX / Nasdaq Dubai",
+        "documents": [],
+        "estimatedCostUSD": 1000,
+        "estimatedDays": 3,
+        "tips": ["UAE government sukuk available", "Corporate sukuk from Islamic banks", "No withholding tax on sukuk returns"]
+      }
+    ]
+  },
+  "CD_savings_account": {
+    "countryCode": "CD",
+    "assetClass": "savings_account",
+    "steps": [
+      {
+        "order": 1,
+        "titleKey": "procedures.CD.savings_account.step1.title",
+        "descriptionKey": "procedures.CD.savings_account.step1.desc",
+        "institution": "BCC-licensed bank (Rawbank, Equity BCDC, TMB, etc.)",
+        "documents": ["Carte d'identité ou passeport", "Photo d'identité", "Justificatif de domicile"],
+        "estimatedCostUSD": 0,
+        "estimatedDays": 2,
+        "tips": ["Comptes en USD ou CDF disponibles", "Mobile money (M-Pesa, Airtel Money) très répandu", "Taux d'épargne : 1-3% en USD, 3-5% en CDF"]
+      }
+    ]
+  },
+  "CD_micro_enterprise": {
+    "countryCode": "CD",
+    "assetClass": "micro_enterprise",
+    "steps": [
+      {
+        "order": 1,
+        "titleKey": "procedures.CD.micro_enterprise.step1.title",
+        "descriptionKey": "procedures.CD.micro_enterprise.step1.desc",
+        "institution": "Guichet Unique de Création d'Entreprise",
+        "documents": ["Carte d'identité", "Statuts de la société", "PV de constitution"],
+        "estimatedCostUSD": 100,
+        "estimatedDays": 7,
+        "tips": ["RCCM obligatoire", "SARL ou Entreprise Individuelle", "Secteurs porteurs : agriculture, commerce, services"]
+      },
+      {
+        "order": 2,
+        "titleKey": "procedures.CD.micro_enterprise.step2.title",
+        "descriptionKey": "procedures.CD.micro_enterprise.step2.desc",
+        "institution": "DGI (Direction Générale des Impôts)",
+        "documents": ["Numéro impôt", "Attestation fiscale"],
+        "estimatedCostUSD": 50,
+        "estimatedDays": 5,
+        "tips": ["Obtenir le NIF (Numéro d'Identification Fiscale)", "Impôt forfaitaire pour les PME"]
+      }
+    ]
+  }
+}

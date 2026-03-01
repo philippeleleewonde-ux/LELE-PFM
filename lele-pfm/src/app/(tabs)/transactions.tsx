@@ -2,6 +2,7 @@ import React, { useState, useCallback, useRef } from 'react';
 import { View, ScrollView, Text, Pressable, Animated, StyleSheet } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { Plus, X, ArrowUpRight, ArrowDownLeft, Wand2, Shield, Target, Mic } from 'lucide-react-native';
+import { ErrorBoundary } from '@/components/ui/ErrorBoundary';
 import { useEngineStore } from '@/stores/engine-store';
 import { useTransactionStore } from '@/stores/transaction-store';
 import { useWeeklyTracking, CategoryTracking } from '@/hooks/useWeeklyTracking';
@@ -38,7 +39,7 @@ import { ActiveCompensationCard } from '@/components/tracking/ActiveCompensation
 import { VoiceExpenseModal } from '@/components/tracking/VoiceExpenseModal';
 import { usePlanProvisioning } from '@/hooks/usePlanProvisioning';
 
-export default function TransactionsScreen() {
+function TransactionsScreenInner() {
   const { t } = useTranslation('app');
   const engineOutput = useEngineStore((s) => s.engineOutput);
   const currency = useEngineStore((s) => s.currency);
@@ -532,6 +533,14 @@ export default function TransactionsScreen() {
         onClose={() => setShowVoiceModal(false)}
       />
     </View>
+  );
+}
+
+export default function TransactionsScreen() {
+  return (
+    <ErrorBoundary>
+      <TransactionsScreenInner />
+    </ErrorBoundary>
   );
 }
 

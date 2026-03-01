@@ -9,7 +9,6 @@ interface TransactionState {
   transactions: Transaction[];
   currentWeek: number;
   currentYear: number;
-  isLoading: boolean;
 
   addTransaction: (tx: Omit<Transaction, 'id' | 'created_at' | 'updated_at'>) => void;
   updateTransaction: (id: string, updates: Partial<Transaction>) => void;
@@ -30,7 +29,6 @@ export const useTransactionStore = create<TransactionState>()(
       transactions: [],
       currentWeek: initWeek,
       currentYear: initYear,
-      isLoading: false,
 
       addTransaction: (tx) => {
         const now = new Date().toISOString();

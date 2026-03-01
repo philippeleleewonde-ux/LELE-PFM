@@ -1,0 +1,458 @@
+{
+  "MA_savings_account": {
+    "countryCode": "MA",
+    "assetClass": "savings_account",
+    "steps": [
+      {
+        "order": 1,
+        "titleKey": "procedures.MA.savings_account.step1.title",
+        "descriptionKey": "procedures.MA.savings_account.step1.desc",
+        "institution": "Banque commerciale (Attijariwafa Bank, BCP, BMCE Bank of Africa, CIH Bank, Société Générale Maroc)",
+        "documents": ["CIN (Carte d'Identité Nationale) ou passeport", "Justificatif de domicile", "Attestation de travail ou fiche de paie"],
+        "estimatedCostEUR": 0,
+        "estimatedDays": 1,
+        "tips": ["Attijariwafa Bank est la plus grande banque du Maghreb", "Le Livret d'Épargne National (LEN) est réglementé par Bank Al-Maghrib", "Les banques participatives (islamiques) offrent des comptes conformes à la Charia"]
+      },
+      {
+        "order": 2,
+        "titleKey": "procedures.MA.savings_account.step2.title",
+        "descriptionKey": "procedures.MA.savings_account.step2.desc",
+        "institution": "Banque choisie / Al Barid Bank",
+        "documents": ["Formulaire d'ouverture", "Dépôt initial (100-500 MAD)"],
+        "estimatedCostEUR": 0,
+        "estimatedDays": 1,
+        "tips": ["Le taux du LEN est fixé par Bank Al-Maghrib (~2,25%)", "Al Barid Bank (Poste) offre des comptes accessibles sans conditions de revenus", "Les comptes à terme offrent 3-4,5% selon la durée"]
+      },
+      {
+        "order": 3,
+        "titleKey": "procedures.MA.savings_account.step3.title",
+        "descriptionKey": "procedures.MA.savings_account.step3.desc",
+        "institution": "Banque choisie",
+        "documents": ["Code mobile banking", "RIB"],
+        "estimatedCostEUR": 0,
+        "estimatedDays": 1,
+        "tips": ["Le mobile banking est très développé au Maroc (CIH Online, Attijariwafa Mobile)", "Les intérêts du LEN sont exonérés d'impôt jusqu'à un plafond de 400 000 MAD"]
+      }
+    ],
+    "lastUpdated": "2026-01-15",
+    "sourceNotes": "Bank Al-Maghrib / Réglementation bancaire marocaine"
+  },
+  "MA_government_bonds": {
+    "countryCode": "MA",
+    "assetClass": "government_bonds",
+    "steps": [
+      {
+        "order": 1,
+        "titleKey": "procedures.MA.government_bonds.step1.title",
+        "descriptionKey": "procedures.MA.government_bonds.step1.desc",
+        "institution": "Société de bourse agréée AMMC (Attijari Intermédiation, BMCE Capital Bourse, CDG Capital)",
+        "documents": ["CIN ou passeport", "RIB bancaire", "Formulaire KYC", "Justificatif de domicile"],
+        "estimatedCostEUR": 30,
+        "estimatedDays": 3,
+        "tips": ["L'AMMC (Autorité Marocaine du Marché des Capitaux) régule les marchés", "Les BDT (Bons du Trésor) sont émis par adjudication par Bank Al-Maghrib", "Accès via les OPCVM obligataires (plus accessible que l'achat direct)"]
+      },
+      {
+        "order": 2,
+        "titleKey": "procedures.MA.government_bonds.step2.title",
+        "descriptionKey": "procedures.MA.government_bonds.step2.desc",
+        "institution": "Bank Al-Maghrib / Direction du Trésor",
+        "documents": ["Calendrier des adjudications", "Note d'information"],
+        "estimatedCostEUR": 0,
+        "estimatedDays": 5,
+        "tips": ["BDT court terme (13, 26, 52 semaines) : 2,5-3,5%", "BDT moyen/long terme (2-30 ans) : 3-5%", "Minimum direct : 100 000 MAD — via OPCVM : 1 000 MAD"]
+      },
+      {
+        "order": 3,
+        "titleKey": "procedures.MA.government_bonds.step3.title",
+        "descriptionKey": "procedures.MA.government_bonds.step3.desc",
+        "institution": "Société de bourse / Maroclear",
+        "documents": ["Confirmation de souscription", "Relevé Maroclear"],
+        "estimatedCostEUR": 0,
+        "estimatedDays": 3,
+        "tips": ["Maroclear est le dépositaire central marocain", "Les BDT sont exonérés d'IS pour les personnes physiques résidentes"]
+      }
+    ],
+    "lastUpdated": "2026-01-15",
+    "sourceNotes": "Bank Al-Maghrib / AMMC / Direction du Trésor"
+  },
+  "MA_local_stocks": {
+    "countryCode": "MA",
+    "assetClass": "local_stocks",
+    "steps": [
+      {
+        "order": 1,
+        "titleKey": "procedures.MA.local_stocks.step1.title",
+        "descriptionKey": "procedures.MA.local_stocks.step1.desc",
+        "institution": "Société de bourse agréée AMMC (Attijari Intermédiation, BMCE Capital Bourse, CDG Capital Bourse, CFG Marchés)",
+        "documents": ["CIN ou passeport", "RIB bancaire", "Formulaire d'ouverture de compte-titres", "Convention de gestion de portefeuille"],
+        "estimatedCostEUR": 50,
+        "estimatedDays": 3,
+        "tips": ["L'AMMC agrée toutes les sociétés de bourse", "Le PEA (Plan d'Épargne en Actions) offre des avantages fiscaux après 5 ans", "Comparer les frais de courtage (0,1% à 0,8% par transaction)"]
+      },
+      {
+        "order": 2,
+        "titleKey": "procedures.MA.local_stocks.step2.title",
+        "descriptionKey": "procedures.MA.local_stocks.step2.desc",
+        "institution": "Maroclear (Dépositaire Central)",
+        "documents": ["Numéro de compte Maroclear"],
+        "estimatedCostEUR": 0,
+        "estimatedDays": 2,
+        "tips": ["Maroclear gère la conservation dématérialisée des titres", "Le compte est ouvert automatiquement par la société de bourse"]
+      },
+      {
+        "order": 3,
+        "titleKey": "procedures.MA.local_stocks.step3.title",
+        "descriptionKey": "procedures.MA.local_stocks.step3.desc",
+        "institution": "Bourse de Casablanca",
+        "documents": ["Liste des valeurs cotées", "Guide de l'investisseur"],
+        "estimatedCostEUR": 0,
+        "estimatedDays": 1,
+        "tips": ["La Bourse de Casablanca cote ~75 sociétés", "Blue chips : Maroc Telecom (IAM), Attijariwafa Bank, BCP, LafargeHolcim Maroc, Marsa Maroc", "Le MASI est l'indice principal — rendement historique de 8-12% annuel"]
+      },
+      {
+        "order": 4,
+        "titleKey": "procedures.MA.local_stocks.step4.title",
+        "descriptionKey": "procedures.MA.local_stocks.step4.desc",
+        "institution": "Société de bourse / Bourse de Casablanca",
+        "documents": ["Ordre d'achat (en ligne ou par téléphone)", "Avis d'opéré", "Confirmation de transaction"],
+        "estimatedCostEUR": 50,
+        "estimatedDays": 3,
+        "tips": ["Règlement-livraison en T+2 (depuis 2024)", "Frais totaux : ~0,5-1% (courtage + bourse + Maroclear + taxe)"]
+      },
+      {
+        "order": 5,
+        "titleKey": "procedures.MA.local_stocks.step5.title",
+        "descriptionKey": "procedures.MA.local_stocks.step5.desc",
+        "institution": "Société de bourse / DGI (Direction Générale des Impôts)",
+        "documents": ["Relevé de portefeuille", "Attestation de dividendes", "Déclaration IR annuelle"],
+        "estimatedCostEUR": 0,
+        "estimatedDays": 0,
+        "tips": ["Dividendes : retenue à la source de 15%", "Plus-values : 20% (15% si PEA de plus de 5 ans)", "Le PEA marocain exonère les dividendes et plus-values après 5 ans de détention"]
+      }
+    ],
+    "lastUpdated": "2026-01-15",
+    "sourceNotes": "Bourse de Casablanca / AMMC / Maroclear"
+  },
+  "MA_real_estate_fund": {
+    "countryCode": "MA",
+    "assetClass": "real_estate_fund",
+    "steps": [
+      {
+        "order": 1,
+        "titleKey": "procedures.MA.real_estate_fund.step1.title",
+        "descriptionKey": "procedures.MA.real_estate_fund.step1.desc",
+        "institution": "Sociétés de gestion OPCI (CDG Invest, Ajarinvest, Valoris Management)",
+        "documents": ["CIN ou passeport", "RIB", "Formulaire de souscription"],
+        "estimatedCostEUR": 0,
+        "estimatedDays": 5,
+        "tips": ["Les OPCI (Organismes de Placement Collectif Immobilier) sont réglementés depuis 2016", "Le Maroc a introduit les OPCI pour démocratiser l'investissement immobilier", "Les OPCI doivent distribuer 85% minimum des loyers nets"]
+      },
+      {
+        "order": 2,
+        "titleKey": "procedures.MA.real_estate_fund.step2.title",
+        "descriptionKey": "procedures.MA.real_estate_fund.step2.desc",
+        "institution": "Société de gestion / Bourse de Casablanca (pour OPCI cotés)",
+        "documents": ["Bulletin de souscription", "Preuve de virement"],
+        "estimatedCostEUR": 100,
+        "estimatedDays": 7,
+        "tips": ["Ticket d'entrée : 10 000-100 000 MAD selon le fonds", "Rendement locatif typique : 6-9% annuel"]
+      },
+      {
+        "order": 3,
+        "titleKey": "procedures.MA.real_estate_fund.step3.title",
+        "descriptionKey": "procedures.MA.real_estate_fund.step3.desc",
+        "institution": "Société de gestion",
+        "documents": ["Relevé de parts", "Rapport semestriel"],
+        "estimatedCostEUR": 0,
+        "estimatedDays": 0,
+        "tips": ["Frais de gestion : 1-2% par an", "Les OPCI bénéficient d'un régime fiscal avantageux (exonération d'IS)"]
+      }
+    ],
+    "lastUpdated": "2026-01-15",
+    "sourceNotes": "AMMC / Loi OPCI Maroc"
+  },
+  "MA_mutual_fund": {
+    "countryCode": "MA",
+    "assetClass": "mutual_fund",
+    "steps": [
+      {
+        "order": 1,
+        "titleKey": "procedures.MA.mutual_fund.step1.title",
+        "descriptionKey": "procedures.MA.mutual_fund.step1.desc",
+        "institution": "Société de gestion OPCVM (CDG Capital Gestion, Wafa Gestion, BMCE Capital Gestion, CFG Gestion)",
+        "documents": ["CIN ou passeport", "RIB", "Formulaire de souscription"],
+        "estimatedCostEUR": 0,
+        "estimatedDays": 2,
+        "tips": ["Le Maroc dispose de plus de 500 OPCVM agréés par l'AMMC", "Catégories : actions, obligations, monétaires, diversifiés, contractuels"]
+      },
+      {
+        "order": 2,
+        "titleKey": "procedures.MA.mutual_fund.step2.title",
+        "descriptionKey": "procedures.MA.mutual_fund.step2.desc",
+        "institution": "Société de gestion / Banque",
+        "documents": ["Bulletin de souscription", "Preuve de virement"],
+        "estimatedCostEUR": 10,
+        "estimatedDays": 2,
+        "tips": ["Ticket d'entrée : 100-10 000 MAD selon le fonds", "OPCVM monétaires : 2-3% (épargne de précaution)", "OPCVM actions : 8-15% historique (long terme)"]
+      },
+      {
+        "order": 3,
+        "titleKey": "procedures.MA.mutual_fund.step3.title",
+        "descriptionKey": "procedures.MA.mutual_fund.step3.desc",
+        "institution": "Société de gestion / AMMC",
+        "documents": ["Relevé de parts", "Rapport annuel"],
+        "estimatedCostEUR": 0,
+        "estimatedDays": 0,
+        "tips": ["Frais de gestion : 0,3% (monétaire) à 3% (actions)", "Rachat possible à tout moment pour les OPCVM ouverts"]
+      }
+    ],
+    "lastUpdated": "2026-01-15",
+    "sourceNotes": "AMMC / ASFIM Maroc"
+  },
+  "TN_savings_account": {
+    "countryCode": "TN",
+    "assetClass": "savings_account",
+    "steps": [
+      {
+        "order": 1,
+        "titleKey": "procedures.TN.savings_account.step1.title",
+        "descriptionKey": "procedures.TN.savings_account.step1.desc",
+        "institution": "Banque commerciale (BIAT, Amen Bank, Attijari Bank Tunisie, BH Bank, STB)",
+        "documents": ["CIN tunisienne ou passeport", "Justificatif de domicile", "Attestation de travail"],
+        "estimatedCostEUR": 0,
+        "estimatedDays": 1,
+        "tips": ["La BIAT est la plus grande banque privée tunisienne", "Le Livret d'Épargne Nationale est géré par la BTS (Banque Tunisienne de Solidarité)"]
+      },
+      {
+        "order": 2,
+        "titleKey": "procedures.TN.savings_account.step2.title",
+        "descriptionKey": "procedures.TN.savings_account.step2.desc",
+        "institution": "Banque choisie",
+        "documents": ["Formulaire d'ouverture", "Dépôt initial (20-100 TND)"],
+        "estimatedCostEUR": 0,
+        "estimatedDays": 1,
+        "tips": ["Le CEL (Compte d'Épargne Logement) offre des avantages fiscaux pour l'achat immobilier", "Taux d'épargne : 5-7% sur comptes à terme"]
+      }
+    ],
+    "lastUpdated": "2026-01-15",
+    "sourceNotes": "BCT (Banque Centrale de Tunisie)"
+  },
+  "TN_government_bonds": {
+    "countryCode": "TN",
+    "assetClass": "government_bonds",
+    "steps": [
+      {
+        "order": 1,
+        "titleKey": "procedures.TN.government_bonds.step1.title",
+        "descriptionKey": "procedures.TN.government_bonds.step1.desc",
+        "institution": "Intermédiaire en bourse agréé CMF (MAC SA, BNA Capitaux, Tunisie Valeurs)",
+        "documents": ["CIN ou passeport", "RIB", "Formulaire KYC"],
+        "estimatedCostEUR": 20,
+        "estimatedDays": 3,
+        "tips": ["Le CMF (Conseil du Marché Financier) régule le marché tunisien", "Les BTA (Bons du Trésor Assimilables) sont émis par le Trésor tunisien"]
+      },
+      {
+        "order": 2,
+        "titleKey": "procedures.TN.government_bonds.step2.title",
+        "descriptionKey": "procedures.TN.government_bonds.step2.desc",
+        "institution": "BCT / Trésor Public tunisien",
+        "documents": ["Bulletin de souscription", "Preuve de virement"],
+        "estimatedCostEUR": 100,
+        "estimatedDays": 7,
+        "tips": ["BTA : rendements de 7-9% selon la maturité", "Emprunt National obligataire : accessible aux particuliers à partir de 100 TND"]
+      },
+      {
+        "order": 3,
+        "titleKey": "procedures.TN.government_bonds.step3.title",
+        "descriptionKey": "procedures.TN.government_bonds.step3.desc",
+        "institution": "STICODEVAM (Dépositaire Central)",
+        "documents": ["Confirmation de souscription", "Relevé de compte-titres"],
+        "estimatedCostEUR": 0,
+        "estimatedDays": 5,
+        "tips": ["Les intérêts des BTA sont soumis à une retenue à la source de 20%"]
+      }
+    ],
+    "lastUpdated": "2026-01-15",
+    "sourceNotes": "CMF / BCT Tunisie"
+  },
+  "TN_local_stocks": {
+    "countryCode": "TN",
+    "assetClass": "local_stocks",
+    "steps": [
+      {
+        "order": 1,
+        "titleKey": "procedures.TN.local_stocks.step1.title",
+        "descriptionKey": "procedures.TN.local_stocks.step1.desc",
+        "institution": "Intermédiaire en bourse agréé CMF (MAC SA, Tunisie Valeurs, BIAT Capital)",
+        "documents": ["CIN ou passeport", "RIB", "Formulaire d'ouverture de compte-titres"],
+        "estimatedCostEUR": 30,
+        "estimatedDays": 3,
+        "tips": ["La BVMT (Bourse des Valeurs Mobilières de Tunis) cote ~80 sociétés", "Le CEA (Compte d'Épargne en Actions) offre des avantages fiscaux"]
+      },
+      {
+        "order": 2,
+        "titleKey": "procedures.TN.local_stocks.step2.title",
+        "descriptionKey": "procedures.TN.local_stocks.step2.desc",
+        "institution": "BVMT / Intermédiaire en bourse",
+        "documents": ["Ordre d'achat", "Preuve de fonds"],
+        "estimatedCostEUR": 30,
+        "estimatedDays": 3,
+        "tips": ["Blue chips : BIAT, SFBT (Société Frigorifique et Brasserie de Tunis), Poulina, Amen Bank", "Le TUNINDEX est l'indice de référence"]
+      },
+      {
+        "order": 3,
+        "titleKey": "procedures.TN.local_stocks.step3.title",
+        "descriptionKey": "procedures.TN.local_stocks.step3.desc",
+        "institution": "Intermédiaire / STICODEVAM",
+        "documents": ["Relevé de portefeuille", "Avis d'opéré"],
+        "estimatedCostEUR": 0,
+        "estimatedDays": 0,
+        "tips": ["Dividendes : exonérés d'IR pour les personnes physiques résidentes", "Plus-values : exonérées après 1 an de détention (dans le cadre du CEA)"]
+      }
+    ],
+    "lastUpdated": "2026-01-15",
+    "sourceNotes": "BVMT / CMF Tunisie"
+  },
+  "TN_mutual_fund": {
+    "countryCode": "TN",
+    "assetClass": "mutual_fund",
+    "steps": [
+      {
+        "order": 1,
+        "titleKey": "procedures.TN.mutual_fund.step1.title",
+        "descriptionKey": "procedures.TN.mutual_fund.step1.desc",
+        "institution": "Société de gestion OPCVM (BIAT Asset Management, Amen Capital, MAC SA)",
+        "documents": ["CIN ou passeport", "RIB", "Formulaire de souscription"],
+        "estimatedCostEUR": 0,
+        "estimatedDays": 3,
+        "tips": ["Les OPCVM tunisiens sont agréés par le CMF", "Catégories : SICAV et FCP"]
+      },
+      {
+        "order": 2,
+        "titleKey": "procedures.TN.mutual_fund.step2.title",
+        "descriptionKey": "procedures.TN.mutual_fund.step2.desc",
+        "institution": "Société de gestion",
+        "documents": ["Bulletin de souscription", "Preuve de virement"],
+        "estimatedCostEUR": 10,
+        "estimatedDays": 3,
+        "tips": ["OPCVM obligataires : 5-7% de rendement", "OPCVM mixtes : 7-10% historique"]
+      },
+      {
+        "order": 3,
+        "titleKey": "procedures.TN.mutual_fund.step3.title",
+        "descriptionKey": "procedures.TN.mutual_fund.step3.desc",
+        "institution": "Société de gestion / CMF",
+        "documents": ["Relevé de parts", "Rapport annuel"],
+        "estimatedCostEUR": 0,
+        "estimatedDays": 0,
+        "tips": ["Rachat possible sous 5 jours ouvrables"]
+      }
+    ],
+    "lastUpdated": "2026-01-15",
+    "sourceNotes": "CMF Tunisie"
+  },
+  "DZ_savings_account": {
+    "countryCode": "DZ",
+    "assetClass": "savings_account",
+    "steps": [
+      {
+        "order": 1,
+        "titleKey": "procedures.DZ.savings_account.step1.title",
+        "descriptionKey": "procedures.DZ.savings_account.step1.desc",
+        "institution": "Banque commerciale (BNA, BEA, CPA, BADR, BDL) ou Banque privée (Société Générale Algérie, BNP Paribas El Djazair, Gulf Bank Algérie)",
+        "documents": ["Carte d'identité nationale (CNIE) ou passeport", "Justificatif de domicile", "Extrait de naissance n°12"],
+        "estimatedCostEUR": 0,
+        "estimatedDays": 1,
+        "tips": ["Le Livret d'Épargne Populaire (LEP) offre un taux réglementé par la Banque d'Algérie", "La CNEP Banque est spécialisée dans l'épargne logement", "Le système bancaire algérien est dominé par les banques publiques (~85% des dépôts)"]
+      },
+      {
+        "order": 2,
+        "titleKey": "procedures.DZ.savings_account.step2.title",
+        "descriptionKey": "procedures.DZ.savings_account.step2.desc",
+        "institution": "Banque choisie / CNEP Banque",
+        "documents": ["Formulaire d'ouverture", "Dépôt initial (1 000-5 000 DZD)"],
+        "estimatedCostEUR": 0,
+        "estimatedDays": 1,
+        "tips": ["Le LEP offre 3-4% — avantage fiscal pour les petits épargnants", "Les DAT (Dépôts à Terme) offrent 4-6% selon la durée"]
+      }
+    ],
+    "lastUpdated": "2026-01-15",
+    "sourceNotes": "Banque d'Algérie / Réglementation bancaire algérienne"
+  },
+  "DZ_government_bonds": {
+    "countryCode": "DZ",
+    "assetClass": "government_bonds",
+    "steps": [
+      {
+        "order": 1,
+        "titleKey": "procedures.DZ.government_bonds.step1.title",
+        "descriptionKey": "procedures.DZ.government_bonds.step1.desc",
+        "institution": "Banque d'Algérie / Banques commerciales (SVT — Spécialistes en Valeurs du Trésor)",
+        "documents": ["CNIE ou passeport", "RIB", "Formulaire KYC"],
+        "estimatedCostEUR": 0,
+        "estimatedDays": 5,
+        "tips": ["Le marché des valeurs du Trésor est organisé par la Banque d'Algérie", "Les OAT algériennes sont accessibles via les banques SVT"]
+      },
+      {
+        "order": 2,
+        "titleKey": "procedures.DZ.government_bonds.step2.title",
+        "descriptionKey": "procedures.DZ.government_bonds.step2.desc",
+        "institution": "Banque d'Algérie",
+        "documents": ["Bulletin de souscription", "Preuve de virement"],
+        "estimatedCostEUR": 100,
+        "estimatedDays": 7,
+        "tips": ["Rendements : 4-6% pour les OAT algériennes", "Le marché obligataire algérien est en développement"]
+      },
+      {
+        "order": 3,
+        "titleKey": "procedures.DZ.government_bonds.step3.title",
+        "descriptionKey": "procedures.DZ.government_bonds.step3.desc",
+        "institution": "Algérie Clearing / Banque d'Algérie",
+        "documents": ["Confirmation de souscription", "Relevé de compte-titres"],
+        "estimatedCostEUR": 0,
+        "estimatedDays": 5,
+        "tips": ["Algérie Clearing est le dépositaire central des titres"]
+      }
+    ],
+    "lastUpdated": "2026-01-15",
+    "sourceNotes": "Banque d'Algérie / COSOB"
+  },
+  "DZ_local_stocks": {
+    "countryCode": "DZ",
+    "assetClass": "local_stocks",
+    "steps": [
+      {
+        "order": 1,
+        "titleKey": "procedures.DZ.local_stocks.step1.title",
+        "descriptionKey": "procedures.DZ.local_stocks.step1.desc",
+        "institution": "IOB agréé COSOB (Tell Markets, Société de Bourse d'Algérie)",
+        "documents": ["CNIE ou passeport", "RIB", "Formulaire d'ouverture de compte-titres"],
+        "estimatedCostEUR": 20,
+        "estimatedDays": 5,
+        "tips": ["La COSOB (Commission d'Organisation et de Surveillance des Opérations de Bourse) régule le marché", "La Bourse d'Alger est très petite — seulement ~5 sociétés cotées"]
+      },
+      {
+        "order": 2,
+        "titleKey": "procedures.DZ.local_stocks.step2.title",
+        "descriptionKey": "procedures.DZ.local_stocks.step2.desc",
+        "institution": "Bourse d'Alger / IOB",
+        "documents": ["Ordre d'achat", "Preuve de fonds"],
+        "estimatedCostEUR": 50,
+        "estimatedDays": 5,
+        "tips": ["Valeurs cotées : Alliance Assurances, Biopharm, NCA Rouiba, Saidal", "Le marché est peu liquide — investir sur le long terme"]
+      },
+      {
+        "order": 3,
+        "titleKey": "procedures.DZ.local_stocks.step3.title",
+        "descriptionKey": "procedures.DZ.local_stocks.step3.desc",
+        "institution": "IOB / Algérie Clearing",
+        "documents": ["Relevé de portefeuille", "Avis d'opéré"],
+        "estimatedCostEUR": 0,
+        "estimatedDays": 0,
+        "tips": ["L'Algérie encourage les IPO pour dynamiser la Bourse d'Alger", "Les dividendes sont soumis à l'IRG (15%)"]
+      }
+    ],
+    "lastUpdated": "2026-01-15",
+    "sourceNotes": "COSOB / Bourse d'Alger"
+  }
+}

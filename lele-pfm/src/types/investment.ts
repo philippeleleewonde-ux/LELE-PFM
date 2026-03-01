@@ -85,7 +85,20 @@ export type AssetClass =
   | 'micro_enterprise'
   | 'money_market'
   | 'sukuk'
-  | 'mutual_fund';
+  | 'mutual_fund'
+  | 'municipal_bonds'
+  | 'private_equity'
+  | 'venture_capital'
+  | 'venture_debt'
+  | 'mezzanine'
+  | 'infrastructure'
+  | 'mining_assets'
+  | 'agrobusiness'
+  | 'commodities'
+  | 'derivatives'
+  | 'esg_bonds'
+  | 'carbon_credits'
+  | 'tokenized_assets';
 
 // ─── Investment Product ───
 

@@ -14,6 +14,5 @@ export function calculateFlexibilityScore(f1: number, f2: number, f3: number): n
   return ((f1 + f2 + f3) / 63) * 100;
 }
 
-export function capRealToPrevu(actual: number, planned: number): number {
-  return Math.min(actual, planned);
-}
+// capRealToPrevu — use the canonical version from @/domain/utils/math-utils
+export { capRealToPrevu } from '../utils/math-utils';

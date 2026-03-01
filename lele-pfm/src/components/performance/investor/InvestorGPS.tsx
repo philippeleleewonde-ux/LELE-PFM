@@ -3,13 +3,19 @@ import { View, Text, ScrollView, Pressable, StyleSheet } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useInvestmentStore } from '@/stores/investment-store';
 import { useEngineStore } from '@/stores/engine-store';
+import { useJourneyStore } from '@/stores/journey-store';
 import { PF, PerfGlassCard } from '@/components/performance/shared';
 import { MaCourbe } from './MaCourbe';
 import { MaStrategie } from './MaStrategie';
 import { MaMission } from './MaMission';
 import { MonSimulateur } from './MonSimulateur';
+import { Phase1Recommendation } from '@/components/investor-journey/Phase1Recommendation';
+import { Phase2Selection } from '@/components/investor-journey/Phase2Selection';
+import { Phase3Scenarios } from '@/components/investor-journey/Phase3Scenarios';
+import { Phase4Duration } from '@/components/investor-journey/Phase4Duration';
+import { Phase5Dashboard } from '@/components/investor-journey/Phase5Dashboard';
 
-const TABS = ['courbe', 'strategie', 'mission', 'simulateur'] as const;
+const TABS = ['courbe', 'strategie', 'mission', 'simulateur', 'parcours'] as const;
 
 function InvestorGPSInner() {
   const { t } = useTranslation('app');
@@ -76,9 +82,37 @@ function InvestorGPSInner() {
         {activeTab === 1 && <MaStrategie />}
         {activeTab === 2 && <MaMission />}
         {activeTab === 3 && <MonSimulateur />}
+        {activeTab === 4 && <JourneyScreen />}
       </View>
     </View>
   );
+}
+
+/** Journey sub-screen: renders the correct phase component */
+function JourneyScreen() {
+  const currentPhase = useJourneyStore((s) => s.currentPhase);
+  const journeyStartedAt = useJourneyStore((s) => s.journeyStartedAt);
+  const setPhase = useJourneyStore((s) => s.setPhase);
+
+  // If journey is active (started), always show dashboard
+  if (journeyStartedAt && currentPhase === 'accompaniment') {
+    return <Phase5Dashboard />;
+  }
+
+  switch (currentPhase) {
+    case 'recommendation':
+      return <Phase1Recommendation />;
+    case 'selection':
+      return <Phase2Selection />;
+    case 'scenarios':
+      return <Phase3Scenarios onNext={() => setPhase('duration')} />;
+    case 'duration':
+      return <Phase4Duration onLaunch={() => setPhase('accompaniment')} />;
+    case 'accompaniment':
+      return <Phase5Dashboard />;
+    default:
+      return <Phase1Recommendation />;
+  }
 }
 
 export const InvestorGPS = memo(InvestorGPSInner);

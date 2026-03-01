@@ -31,6 +31,7 @@ interface InvestmentState {
   strategyGeneratedAt: string | null;
   setStrategyGeneratedAt: (date: string) => void;
 
+  resetAll: () => void;
   getTotalInvested: () => number;
   getInvestedThisWeek: (week: number, year: number) => number;
 }
@@ -85,6 +86,15 @@ export const useInvestmentStore = create<InvestmentState>()(
       },
 
       setStrategyGeneratedAt: (date) => set({ strategyGeneratedAt: date }),
+
+      resetAll: () => set({
+        investorProfile: null,
+        allocations: [],
+        investmentRecords: [],
+        pillarAllocations: [],
+        missions: [],
+        strategyGeneratedAt: null,
+      }),
 
       addInvestmentRecord: (record) => {
         set((state) => {

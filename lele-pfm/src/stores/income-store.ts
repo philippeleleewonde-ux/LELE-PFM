@@ -18,7 +18,6 @@ export interface IncomeTransaction {
 
 interface IncomeState {
   incomes: IncomeTransaction[];
-  isLoading: boolean;
 
   addIncome: (tx: Omit<IncomeTransaction, 'id' | 'created_at' | 'updated_at'>) => void;
   deleteIncome: (id: string) => void;
@@ -32,7 +31,6 @@ export const useIncomeStore = create<IncomeState>()(
   persist(
     (set, get) => ({
       incomes: [],
-      isLoading: false,
 
       addIncome: (tx) => {
         const now = new Date().toISOString();

@@ -55,8 +55,9 @@ export function useEngineCalculation(): UseEngineCalculationReturn {
     } catch (err) {
       const message = err instanceof Error ? err.message : t('engine.unknownCalcError');
       setError(message);
-      setCalculating(false);
       return null;
+    } finally {
+      setCalculating(false);
     }
   }, [t, setCalculating, setEngineOutput, setIncomeTargets]);
 

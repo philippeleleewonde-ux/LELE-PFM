@@ -380,7 +380,8 @@
       "courbe": "Ma Courbe",
       "strategie": "Ma Stratégie",
       "mission": "Ma Mission",
-      "simulateur": "Simulateur"
+      "simulateur": "Simulateur",
+      "parcours": "Parcours"
     },
     "pillars": {
       "croissance": "Moteur de Croissance",
@@ -454,6 +455,184 @@
     "completeProfile": "Complétez votre profil investisseur",
     "completeDiagnosis": "Complétez le diagnostic financier",
     "noBudget": "Votre budget investissement est à 0. Ajustez votre profil."
+  },
+  "journey": {
+    "phases": {
+      "recommendation": "Recommandation",
+      "selection": "Sélection",
+      "scenarios": "Stratégies",
+      "duration": "Durée",
+      "accompaniment": "Suivi"
+    },
+    "phase1": {
+      "title": "Vos actifs recommandés",
+      "subtitle": "Basé sur votre profil investisseur",
+      "viewSteps": "Voir les étapes",
+      "stepsCount": "{{count}} étapes",
+      "continue": "Continuer vers la sélection",
+      "noAssets": "Aucun actif disponible pour votre profil",
+      "score": "Score {{score}}/100",
+      "profileBadge": "{{country}} · {{risk}} · {{horizon}}"
+    },
+    "phase2": {
+      "title": "Sélectionnez vos actifs",
+      "accept": "Accepter",
+      "reject": "Rejeter",
+      "addCustom": "+ Ajouter un actif",
+      "allocation": "Allocation %",
+      "totalAllocation": "Allocation totale",
+      "generateStrategies": "Générer les stratégies",
+      "summary": "Résumé par pilier",
+      "mustBe100": "L'allocation doit totaliser 100%",
+      "noAccepted": "Acceptez au moins un actif"
+    },
+    "phase3": {
+      "title": "Choisissez votre stratégie",
+      "compare": "Comparaison",
+      "annualReturn": "Rendement annuel",
+      "finalValue": "Valeur finale",
+      "totalGains": "Gains totaux",
+      "cagr": "TCAC",
+      "volatility": "Volatilité",
+      "chooseHorizon": "Choisir mon horizon"
+    },
+    "phase4": {
+      "title": "Définissez votre horizon",
+      "quickSelect": "Sélection rapide",
+      "years": "{{n}} ans",
+      "months": "{{n}} mois",
+      "custom": "Personnalisé",
+      "ageAtMaturity": "Votre âge à l'échéance : {{age}} ans",
+      "launchJourney": "Valider et lancer mon parcours",
+      "monthlyContribution": "Contribution mensuelle",
+      "projectedValue": "Valeur projetée"
+    },
+    "phase5": {
+      "title": "Tableau de bord",
+      "portfolio": "Mon portefeuille",
+      "totalValue": "Valeur totale",
+      "totalInvested": "Total investi",
+      "totalReturns": "Gains totaux",
+      "performance": "Performance",
+      "vsProjection": "vs Projection",
+      "nextCheckIn": "Prochain rendez-vous",
+      "daysLeft": "dans {{days}} jours",
+      "overdue": "En retard !",
+      "doCheckIn": "Faire mon bilan",
+      "configure": "Configurer",
+      "streak": "Série : {{count}}",
+      "procedures": "Checklist procédures",
+      "stepsCompleted": "{{done}}/{{total}} étapes",
+      "advisories": "Conseils",
+      "history": "Historique des bilans",
+      "noCheckIns": "Aucun bilan enregistré"
+    },
+    "strategies": {
+      "ultraSafe": "Ultra-prudent",
+      "safe": "Prudent",
+      "balanced": "Équilibré",
+      "growth": "Croissance",
+      "aggressive": "Agressif"
+    },
+    "advisory": {
+      "rebalance": {
+        "title": "Rééquilibrage nécessaire",
+        "message": "Le pilier {{pillar}} a dérivé de {{drift}}% (actuel {{actual}}%, cible {{target}}%)."
+      },
+      "underperform": {
+        "title": "Sous-performance détectée",
+        "message": "Votre portefeuille ({{actual}}) est à {{ratio}}% du scénario prévu ({{expected}})."
+      },
+      "overperform": {
+        "title": "Excellente performance !",
+        "message": "Votre portefeuille ({{actual}}) dépasse le scénario de {{ratio}}% (prévu {{expected}})."
+      },
+      "firstReturns": {
+        "title": "Premiers gains !",
+        "message": "Bravo, votre portefeuille génère déjà {{returns}} de gains."
+      },
+      "surplus": {
+        "title": "Surplus disponible",
+        "message": "Vous avez {{surplus}} de surplus cette semaine. Renforcez vos positions !"
+      },
+      "missedCheckIns": {
+        "title": "Rendez-vous manqués",
+        "message": "{{count}} bilans manqués récemment. Le suivi régulier est la clé du succès."
+      },
+      "durationMilestone": {
+        "title": "Étape {{percent}}% atteinte !",
+        "message": "Vous avez parcouru {{percent}}% de votre horizon. Performance : {{performance}}%."
+      },
+      "procedureStale": {
+        "title": "Étape en attente",
+        "message": "L'actif {{assetName}} a une étape en attente depuis {{days}} jours."
+      }
+    },
+    "checkIn": {
+      "title": "Bilan de portefeuille",
+      "amountInvested": "Montant investi",
+      "currentValue": "Valeur actuelle",
+      "performance": "Performance",
+      "notes": "Notes (optionnel)",
+      "save": "Enregistrer"
+    },
+    "rendezVous": {
+      "title": "Configuration des rendez-vous",
+      "frequency": "Fréquence",
+      "weekly": "Hebdomadaire",
+      "biweekly": "Bihebdomadaire",
+      "monthly": "Mensuel",
+      "quarterly": "Trimestriel",
+      "dayOfWeek": "Jour de la semaine",
+      "reminder": "Rappel",
+      "hoursBeforeOptions": {
+        "12": "12h avant",
+        "24": "24h avant",
+        "48": "48h avant"
+      },
+      "enabled": "Activé",
+      "save": "Enregistrer"
+    },
+    "customAsset": {
+      "title": "Ajouter un actif personnalisé",
+      "name": "Nom de l'actif",
+      "assetClass": "Classe d'actif",
+      "returnRate": "Rendement attendu (%)",
+      "volatility": "Volatilité (%)",
+      "riskLevel": "Niveau de risque",
+      "liquidity": "Liquidité",
+      "shariaCompliant": "Conforme Sharia",
+      "add": "Ajouter"
+    }
+  },
+  "assets": {
+    "savings_account": { "label": "Compte épargne", "desc": "Épargne bancaire sécurisée" },
+    "term_deposit": { "label": "Dépôt à terme", "desc": "Placement à durée fixe avec taux garanti" },
+    "money_market": { "label": "Marché monétaire", "desc": "Fonds à court terme très liquides" },
+    "tontine": { "label": "Tontine", "desc": "Épargne collective traditionnelle" },
+    "government_bonds": { "label": "Obligations d'État", "desc": "Titres de dette souveraine" },
+    "corporate_bonds": { "label": "Obligations d'entreprise", "desc": "Titres de dette privée" },
+    "sukuk": { "label": "Sukuk", "desc": "Obligations conformes à la finance islamique" },
+    "stock_index": { "label": "Indices boursiers", "desc": "Fonds indiciels (ETF) diversifiés" },
+    "local_stocks": { "label": "Actions locales", "desc": "Actions cotées sur la bourse locale" },
+    "mutual_fund": { "label": "Fonds communs", "desc": "Portefeuilles gérés professionnellement" },
+    "crypto": { "label": "Cryptomonnaies", "desc": "Actifs numériques décentralisés" },
+    "gold": { "label": "Or", "desc": "Métal précieux — valeur refuge historique" },
+    "real_estate_fund": { "label": "Fonds immobilier", "desc": "Investissement immobilier mutualisé" },
+    "micro_enterprise": { "label": "Micro-entreprise", "desc": "Investissement dans les PME/PMI" },
+    "municipal_bonds": { "label": "Obligations municipales", "desc": "Titres de dette des collectivités locales" },
+    "private_equity": { "label": "Capital-investissement", "desc": "Prise de participation dans des entreprises non cotées" },
+    "venture_capital": { "label": "Capital-risque", "desc": "Financement de startups à fort potentiel" },
+    "venture_debt": { "label": "Dette venture", "desc": "Prêts aux startups en complément de l'equity" },
+    "mezzanine": { "label": "Financement mezzanine", "desc": "Dette subordonnée avec participation aux bénéfices" },
+    "infrastructure": { "label": "Infrastructure", "desc": "Projets d'infrastructures (routes, énergie, télécoms)" },
+    "mining_assets": { "label": "Actifs miniers", "desc": "Investissement dans l'extraction de ressources" },
+    "agrobusiness": { "label": "Agrobusiness", "desc": "Agriculture industrielle et transformation alimentaire" },
+    "commodities": { "label": "Matières premières", "desc": "Pétrole, cacao, café et autres commodités" },
+    "derivatives": { "label": "Dérivés", "desc": "Options, futures et instruments complexes" },
+    "esg_bonds": { "label": "Obligations ESG", "desc": "Obligations vertes et à impact social" },
+    "carbon_credits": { "label": "Crédits carbone", "desc": "Marché des émissions et compensation carbone" },
+    "tokenized_assets": { "label": "Actifs tokenisés", "desc": "Actifs traditionnels fractionnés sur blockchain" }
   },
   "categories": {
     "food": "Alimentation",

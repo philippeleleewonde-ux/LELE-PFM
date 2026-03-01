@@ -1,0 +1,872 @@
+{
+  "CM_savings_account": {
+    "countryCode": "CM",
+    "assetClass": "savings_account",
+    "steps": [
+      {
+        "order": 1,
+        "titleKey": "procedures.CM.savings_account.step1.title",
+        "descriptionKey": "procedures.CM.savings_account.step1.desc",
+        "institution": "Banque commerciale (Afriland First Bank, Ecobank, Société Générale CM, UBA, BICEC)",
+        "documents": ["Carte nationale d'identité (CNI) ou passeport", "Justificatif de domicile (facture CamWater/ENEO < 3 mois)", "2 photos d'identité 4x4"],
+        "estimatedCostXOF": 10000,
+        "estimatedDays": 1,
+        "tips": ["Comparer les taux entre banques — Afriland et CCA Bank offrent souvent les meilleurs taux d'épargne", "Vérifier si le compte est rémunéré ou simple"]
+      },
+      {
+        "order": 2,
+        "titleKey": "procedures.CM.savings_account.step2.title",
+        "descriptionKey": "procedures.CM.savings_account.step2.desc",
+        "institution": "Banque choisie",
+        "documents": ["Formulaire d'ouverture de compte", "Versement initial minimum (varie selon la banque, 25 000 à 100 000 FCFA)"],
+        "estimatedCostXOF": 50000,
+        "estimatedDays": 1,
+        "tips": ["Demander un livret d'épargne physique ET un accès mobile banking", "Négocier la suppression des frais de tenue de compte"]
+      },
+      {
+        "order": 3,
+        "titleKey": "procedures.CM.savings_account.step3.title",
+        "descriptionKey": "procedures.CM.savings_account.step3.desc",
+        "institution": "Banque choisie",
+        "documents": ["Code PIN mobile banking", "Numéro de compte RIB"],
+        "estimatedCostXOF": 0,
+        "estimatedDays": 3,
+        "tips": ["Activer les alertes SMS pour suivre les mouvements", "Mettre en place un virement automatique mensuel depuis le compte courant"]
+      }
+    ],
+    "lastUpdated": "2026-01-15",
+    "sourceNotes": "Réglementation COBAC / BEAC zone CEMAC"
+  },
+  "CM_government_bonds": {
+    "countryCode": "CM",
+    "assetClass": "government_bonds",
+    "steps": [
+      {
+        "order": 1,
+        "titleKey": "procedures.CM.government_bonds.step1.title",
+        "descriptionKey": "procedures.CM.government_bonds.step1.desc",
+        "institution": "Société de bourse agréée COSUMAF (Afriland Bourse, Société Générale Capital Securities)",
+        "documents": ["CNI ou passeport", "RIB compte bancaire", "Justificatif de domicile", "Formulaire KYC (Know Your Customer)"],
+        "estimatedCostXOF": 50000,
+        "estimatedDays": 5,
+        "tips": ["La COSUMAF (Commission de Surveillance du Marché Financier) régule les marchés en zone CEMAC", "Choisir un intermédiaire agréé COSUMAF pour éviter les arnaques"]
+      },
+      {
+        "order": 2,
+        "titleKey": "procedures.CM.government_bonds.step2.title",
+        "descriptionKey": "procedures.CM.government_bonds.step2.desc",
+        "institution": "BEAC (Banque des États de l'Afrique Centrale) / Trésor Public camerounais",
+        "documents": ["Calendrier des émissions OTA/BTA du Trésor", "Note d'information de l'émission"],
+        "estimatedCostXOF": 0,
+        "estimatedDays": 7,
+        "tips": ["Les OTA (Obligations du Trésor Assimilables) ont des maturités de 2 à 10 ans", "Les BTA (Bons du Trésor Assimilables) sont à court terme (13, 26, 52 semaines)", "Le minimum de souscription est généralement 1 000 000 FCFA"]
+      },
+      {
+        "order": 3,
+        "titleKey": "procedures.CM.government_bonds.step3.title",
+        "descriptionKey": "procedures.CM.government_bonds.step3.desc",
+        "institution": "Intermédiaire agréé / BEAC",
+        "documents": ["Bulletin de souscription signé", "Preuve de virement des fonds"],
+        "estimatedCostXOF": 1000000,
+        "estimatedDays": 3,
+        "tips": ["Les souscriptions se font lors des adjudications organisées par la BEAC", "Rendement typique : 4-7% pour les OTA camerounaises"]
+      },
+      {
+        "order": 4,
+        "titleKey": "procedures.CM.government_bonds.step4.title",
+        "descriptionKey": "procedures.CM.government_bonds.step4.desc",
+        "institution": "COSUMAF / Intermédiaire",
+        "documents": ["Avis d'attribution", "Relevé de compte-titres"],
+        "estimatedCostXOF": 0,
+        "estimatedDays": 5,
+        "tips": ["Conserver l'avis d'attribution comme preuve d'investissement", "Les coupons sont versés semestriellement ou annuellement selon l'émission"]
+      }
+    ],
+    "lastUpdated": "2026-01-15",
+    "sourceNotes": "BEAC — Marché des titres publics CEMAC"
+  },
+  "CM_corporate_bonds": {
+    "countryCode": "CM",
+    "assetClass": "corporate_bonds",
+    "steps": [
+      {
+        "order": 1,
+        "titleKey": "procedures.CM.corporate_bonds.step1.title",
+        "descriptionKey": "procedures.CM.corporate_bonds.step1.desc",
+        "institution": "Société de bourse agréée COSUMAF",
+        "documents": ["CNI ou passeport", "RIB bancaire", "Formulaire d'ouverture de compte-titres"],
+        "estimatedCostXOF": 50000,
+        "estimatedDays": 5,
+        "tips": ["Ouvrir un compte-titres chez un intermédiaire agréé par la COSUMAF"]
+      },
+      {
+        "order": 2,
+        "titleKey": "procedures.CM.corporate_bonds.step2.title",
+        "descriptionKey": "procedures.CM.corporate_bonds.step2.desc",
+        "institution": "COSUMAF / DSX (Douala Stock Exchange) / BVMAC",
+        "documents": ["Prospectus d'émission visé par la COSUMAF", "Note d'information sur l'émetteur"],
+        "estimatedCostXOF": 0,
+        "estimatedDays": 7,
+        "tips": ["Vérifier la notation de l'émetteur si disponible", "Privilégier les émissions de grandes entreprises camerounaises (SCDP, AES-SONEL, etc.)"]
+      },
+      {
+        "order": 3,
+        "titleKey": "procedures.CM.corporate_bonds.step3.title",
+        "descriptionKey": "procedures.CM.corporate_bonds.step3.desc",
+        "institution": "Intermédiaire agréé",
+        "documents": ["Bulletin de souscription", "Preuve de virement"],
+        "estimatedCostXOF": 500000,
+        "estimatedDays": 3,
+        "tips": ["Le minimum de souscription varie : 100 000 à 1 000 000 FCFA", "Rendement typique : 5,5-8% pour les obligations corporate CEMAC"]
+      },
+      {
+        "order": 4,
+        "titleKey": "procedures.CM.corporate_bonds.step4.title",
+        "descriptionKey": "procedures.CM.corporate_bonds.step4.desc",
+        "institution": "Dépositaire central / COSUMAF",
+        "documents": ["Confirmation de souscription", "Relevé de portefeuille"],
+        "estimatedCostXOF": 0,
+        "estimatedDays": 5,
+        "tips": ["Les coupons sont généralement versés annuellement", "Possibilité de revente sur le marché secondaire via la DSX/BVMAC"]
+      }
+    ],
+    "lastUpdated": "2026-01-15",
+    "sourceNotes": "COSUMAF — Marché obligataire CEMAC"
+  },
+  "CM_local_stocks": {
+    "countryCode": "CM",
+    "assetClass": "local_stocks",
+    "steps": [
+      {
+        "order": 1,
+        "titleKey": "procedures.CM.local_stocks.step1.title",
+        "descriptionKey": "procedures.CM.local_stocks.step1.desc",
+        "institution": "COSUMAF (Commission de Surveillance du Marché Financier de l'Afrique Centrale)",
+        "documents": ["CNI ou passeport", "Justificatif de domicile", "Formulaire d'identification investisseur"],
+        "estimatedCostXOF": 0,
+        "estimatedDays": 7,
+        "tips": ["L'enregistrement COSUMAF est nécessaire pour investir sur les marchés CEMAC", "La BVMAC (Bourse des Valeurs Mobilières de l'Afrique Centrale) à Douala est la bourse régionale"]
+      },
+      {
+        "order": 2,
+        "titleKey": "procedures.CM.local_stocks.step2.title",
+        "descriptionKey": "procedures.CM.local_stocks.step2.desc",
+        "institution": "Société de bourse agréée (Afriland Bourse, CBC Bourse, SOGEBOURSE)",
+        "documents": ["Convention d'ouverture de compte-titres", "RIB bancaire", "Formulaire KYC complet", "Déclaration fiscale si montant > 5M FCFA"],
+        "estimatedCostXOF": 100000,
+        "estimatedDays": 5,
+        "tips": ["Comparer les frais de courtage entre sociétés de bourse (0,5% à 1,5% par transaction)", "Vérifier que la société est bien agréée par la COSUMAF"]
+      },
+      {
+        "order": 3,
+        "titleKey": "procedures.CM.local_stocks.step3.title",
+        "descriptionKey": "procedures.CM.local_stocks.step3.desc",
+        "institution": "BVMAC (Bourse des Valeurs Mobilières de l'Afrique Centrale)",
+        "documents": ["Code d'accès plateforme de trading", "Guide des valeurs cotées"],
+        "estimatedCostXOF": 0,
+        "estimatedDays": 3,
+        "tips": ["La BVMAC cote des actions de sociétés camerounaises et de la sous-région CEMAC", "Le marché est peu liquide — privilégier les blue chips (SEMC, SAFACAM, SOCAPALM)"]
+      },
+      {
+        "order": 4,
+        "titleKey": "procedures.CM.local_stocks.step4.title",
+        "descriptionKey": "procedures.CM.local_stocks.step4.desc",
+        "institution": "Société de bourse",
+        "documents": ["Ordre d'achat signé", "Confirmation de transaction", "Preuve de règlement"],
+        "estimatedCostXOF": 200000,
+        "estimatedDays": 3,
+        "tips": ["Commencer avec des montants modestes pour se familiariser", "Le règlement-livraison se fait en T+3 (3 jours après la transaction)"]
+      },
+      {
+        "order": 5,
+        "titleKey": "procedures.CM.local_stocks.step5.title",
+        "descriptionKey": "procedures.CM.local_stocks.step5.desc",
+        "institution": "Société de bourse / COSUMAF",
+        "documents": ["Relevé de portefeuille mensuel", "Avis d'opéré"],
+        "estimatedCostXOF": 0,
+        "estimatedDays": 0,
+        "tips": ["Suivre les assemblées générales des sociétés cotées pour les dividendes", "Diversifier sur au moins 3-5 valeurs différentes"]
+      }
+    ],
+    "lastUpdated": "2026-01-15",
+    "sourceNotes": "BVMAC / COSUMAF — Marché boursier de l'Afrique Centrale"
+  },
+  "CM_real_estate_fund": {
+    "countryCode": "CM",
+    "assetClass": "real_estate_fund",
+    "steps": [
+      {
+        "order": 1,
+        "titleKey": "procedures.CM.real_estate_fund.step1.title",
+        "descriptionKey": "procedures.CM.real_estate_fund.step1.desc",
+        "institution": "Sociétés de gestion immobilière / COSUMAF",
+        "documents": ["Prospectus du fonds immobilier", "Règlement du fonds visé COSUMAF"],
+        "estimatedCostXOF": 0,
+        "estimatedDays": 7,
+        "tips": ["Les fonds immobiliers en zone CEMAC sont encore rares — SCI ou OPCI", "Vérifier que le fonds est agréé par la COSUMAF"]
+      },
+      {
+        "order": 2,
+        "titleKey": "procedures.CM.real_estate_fund.step2.title",
+        "descriptionKey": "procedures.CM.real_estate_fund.step2.desc",
+        "institution": "Société de gestion du fonds",
+        "documents": ["Formulaire de souscription", "CNI ou passeport", "RIB bancaire", "Justificatif de revenus"],
+        "estimatedCostXOF": 50000,
+        "estimatedDays": 5,
+        "tips": ["Le ticket d'entrée minimum est souvent de 500 000 à 2 000 000 FCFA", "Privilégier les fonds investis dans l'immobilier commercial à Douala et Yaoundé"]
+      },
+      {
+        "order": 3,
+        "titleKey": "procedures.CM.real_estate_fund.step3.title",
+        "descriptionKey": "procedures.CM.real_estate_fund.step3.desc",
+        "institution": "Société de gestion",
+        "documents": ["Bulletin de souscription signé", "Preuve de virement"],
+        "estimatedCostXOF": 1000000,
+        "estimatedDays": 10,
+        "tips": ["Rendement typique : 8-12% annuel pour l'immobilier camerounais", "Les revenus locatifs sont distribués trimestriellement"]
+      },
+      {
+        "order": 4,
+        "titleKey": "procedures.CM.real_estate_fund.step4.title",
+        "descriptionKey": "procedures.CM.real_estate_fund.step4.desc",
+        "institution": "Société de gestion",
+        "documents": ["Rapport trimestriel du fonds", "Relevé de parts"],
+        "estimatedCostXOF": 0,
+        "estimatedDays": 0,
+        "tips": ["Vérifier le taux d'occupation des immeubles du portefeuille", "Les frais de gestion sont typiquement de 1,5-2,5% par an"]
+      }
+    ],
+    "lastUpdated": "2026-01-15",
+    "sourceNotes": "COSUMAF — Organismes de placement collectif"
+  },
+  "CM_agrobusiness": {
+    "countryCode": "CM",
+    "assetClass": "agrobusiness",
+    "steps": [
+      {
+        "order": 1,
+        "titleKey": "procedures.CM.agrobusiness.step1.title",
+        "descriptionKey": "procedures.CM.agrobusiness.step1.desc",
+        "institution": "RCCM / Greffe du Tribunal de Première Instance (Douala ou Yaoundé)",
+        "documents": ["Statuts sociaux notariés", "PV d'Assemblée Générale constitutive", "Casier judiciaire bulletin n°3", "CNI du/des gérant(s)", "Plan de localisation du siège social"],
+        "estimatedCostXOF": 250000,
+        "estimatedDays": 14,
+        "tips": ["Choisir la SARL pour les PME agricoles (capital minimum 100 000 FCFA)", "Un notaire est obligatoire pour les SA (capital minimum 10M FCFA)", "Enregistrer au CEPME (Centre de Formalités de Création d'Entreprises) pour accélérer"]
+      },
+      {
+        "order": 2,
+        "titleKey": "procedures.CM.agrobusiness.step2.title",
+        "descriptionKey": "procedures.CM.agrobusiness.step2.desc",
+        "institution": "MINDCAF (Ministère des Domaines, du Cadastre et des Affaires Foncières)",
+        "documents": ["Demande de titre foncier", "Plan cadastral", "Certificat de bornage", "Procès-verbal de constat de mise en valeur"],
+        "estimatedCostXOF": 500000,
+        "estimatedDays": 60,
+        "tips": ["Le titre foncier est indispensable pour sécuriser l'investissement", "Privilégier les zones avec infrastructure routière existante", "Vérifier l'absence de litiges fonciers auprès du chef traditionnel local"]
+      },
+      {
+        "order": 3,
+        "titleKey": "procedures.CM.agrobusiness.step3.title",
+        "descriptionKey": "procedures.CM.agrobusiness.step3.desc",
+        "institution": "MINADER (Ministère de l'Agriculture et du Développement Rural)",
+        "documents": ["Demande d'agrément agricole", "Business plan détaillé", "Étude d'impact environnemental simplifiée", "Plan d'exploitation agricole"],
+        "estimatedCostXOF": 150000,
+        "estimatedDays": 30,
+        "tips": ["Les cultures d'exportation (cacao, café, palmier) bénéficient d'exonérations fiscales", "Le MINADER offre un accompagnement technique gratuit via ses délégations régionales"]
+      },
+      {
+        "order": 4,
+        "titleKey": "procedures.CM.agrobusiness.step4.title",
+        "descriptionKey": "procedures.CM.agrobusiness.step4.desc",
+        "institution": "Banques agricoles (Crédit Foncier, MC², CAMCCUL, Afriland First Bank)",
+        "documents": ["Business plan financier", "Titre foncier ou bail emphytéotique", "Garanties (hypothèque, caution solidaire)", "3 derniers bilans si entreprise existante"],
+        "estimatedCostXOF": 100000,
+        "estimatedDays": 45,
+        "tips": ["Le Crédit Foncier du Cameroun finance l'agriculture à des taux préférentiels (7-9%)", "Les MC² (Mutuelles Communautaires de Croissance) acceptent les petits projets", "Explorer les subventions du FIDA et de la BAD pour l'agriculture"]
+      },
+      {
+        "order": 5,
+        "titleKey": "procedures.CM.agrobusiness.step5.title",
+        "descriptionKey": "procedures.CM.agrobusiness.step5.desc",
+        "institution": "Exploitation agricole / MINADER",
+        "documents": ["Registre de production", "Contrats de vente avec acheteurs", "Certification si applicable (UTZ, Rainforest Alliance)"],
+        "estimatedCostXOF": 0,
+        "estimatedDays": 0,
+        "tips": ["Rejoindre une coopérative pour accéder aux marchés d'export", "Le cacao camerounais Grade I se vend 15-20% au-dessus du cours mondial", "Rendement typique : 15-25% annuel pour une exploitation bien gérée"]
+      }
+    ],
+    "lastUpdated": "2026-01-15",
+    "sourceNotes": "OHADA — Droit des sociétés / MINADER / MINDCAF Cameroun"
+  },
+  "CM_mining_assets": {
+    "countryCode": "CM",
+    "assetClass": "mining_assets",
+    "steps": [
+      {
+        "order": 1,
+        "titleKey": "procedures.CM.mining_assets.step1.title",
+        "descriptionKey": "procedures.CM.mining_assets.step1.desc",
+        "institution": "MINIMIDT (Ministère des Mines, de l'Industrie et du Développement Technologique)",
+        "documents": ["Demande de permis de recherche", "Carte géologique de la zone", "Programme de recherche détaillé", "Preuve de capacité financière (caution bancaire)"],
+        "estimatedCostXOF": 5000000,
+        "estimatedDays": 90,
+        "tips": ["Le permis de recherche est valable 3 ans renouvelable", "Les zones aurifères du Centre, Est et Adamaoua sont les plus prometteuses", "Faire appel à un bureau d'études géologiques agréé"]
+      },
+      {
+        "order": 2,
+        "titleKey": "procedures.CM.mining_assets.step2.title",
+        "descriptionKey": "procedures.CM.mining_assets.step2.desc",
+        "institution": "MINEPDED (Ministère de l'Environnement et du Développement Durable)",
+        "documents": ["Étude d'impact environnemental et social (EIES)", "Plan de gestion environnementale", "Consultation publique avec communautés locales", "Certificat de conformité environnementale"],
+        "estimatedCostXOF": 10000000,
+        "estimatedDays": 120,
+        "tips": ["L'EIES est obligatoire pour tout projet minier au Cameroun", "Budget 10-20M FCFA pour une EIES complète", "Inclure un plan de réhabilitation du site dans l'EIES"]
+      },
+      {
+        "order": 3,
+        "titleKey": "procedures.CM.mining_assets.step3.title",
+        "descriptionKey": "procedures.CM.mining_assets.step3.desc",
+        "institution": "MINIMIDT / Présidence de la République (pour les grands projets)",
+        "documents": ["Résultats de prospection", "Étude de faisabilité technico-économique", "Convention minière", "Demande de permis d'exploitation"],
+        "estimatedCostXOF": 25000000,
+        "estimatedDays": 180,
+        "tips": ["Le permis d'exploitation est accordé par décret présidentiel pour les grandes mines", "Prévoir 15-25% de l'investissement en taxes et redevances minières", "Le Code minier de 2016 prévoit une participation de l'État de 10% minimum"]
+      },
+      {
+        "order": 4,
+        "titleKey": "procedures.CM.mining_assets.step4.title",
+        "descriptionKey": "procedures.CM.mining_assets.step4.desc",
+        "institution": "Banques / Investisseurs internationaux / IFC / BAD",
+        "documents": ["Business plan minier détaillé", "Étude de faisabilité bankable", "Permis d'exploitation", "Accords de partenariat"],
+        "estimatedCostXOF": 0,
+        "estimatedDays": 120,
+        "tips": ["L'IFC et la BAD financent des projets miniers responsables en Afrique", "Prévoir un capital de démarrage de 50-500M FCFA minimum pour l'artisanat minier"]
+      },
+      {
+        "order": 5,
+        "titleKey": "procedures.CM.mining_assets.step5.title",
+        "descriptionKey": "procedures.CM.mining_assets.step5.desc",
+        "institution": "ITIE Cameroun (Initiative pour la Transparence dans les Industries Extractives)",
+        "documents": ["Rapport ITIE annuel", "Déclarations de production", "Paiements de redevances et taxes"],
+        "estimatedCostXOF": 500000,
+        "estimatedDays": 30,
+        "tips": ["L'adhésion à l'ITIE est obligatoire depuis 2018", "Les rapports ITIE renforcent la crédibilité auprès des investisseurs internationaux"]
+      },
+      {
+        "order": 6,
+        "titleKey": "procedures.CM.mining_assets.step6.title",
+        "descriptionKey": "procedures.CM.mining_assets.step6.desc",
+        "institution": "Site minier / MINIMIDT",
+        "documents": ["Registre de production", "Rapports d'audit environnemental", "Rapports de ventes et exportation"],
+        "estimatedCostXOF": 0,
+        "estimatedDays": 0,
+        "tips": ["La redevance minière est de 2,5% du chiffre d'affaires pour l'or", "Exporter via la SNI (Société Nationale d'Investissement) pour les partenariats publics"]
+      }
+    ],
+    "lastUpdated": "2026-01-15",
+    "sourceNotes": "Code minier camerounais 2016 / MINIMIDT / ITIE"
+  },
+  "CM_private_equity": {
+    "countryCode": "CM",
+    "assetClass": "private_equity",
+    "steps": [
+      {
+        "order": 1,
+        "titleKey": "procedures.CM.private_equity.step1.title",
+        "descriptionKey": "procedures.CM.private_equity.step1.desc",
+        "institution": "Fonds de private equity (Investisseurs & Partenaires, AfricInvest, Kréa Capital)",
+        "documents": ["Preuve de patrimoine ou revenus suffisants", "Attestation d'investisseur qualifié", "CNI ou passeport"],
+        "estimatedCostXOF": 0,
+        "estimatedDays": 14,
+        "tips": ["Le ticket d'entrée minimum est souvent de 5-50M FCFA", "Vérifier l'agrément du fonds auprès de la COSUMAF", "I&P et AfricInvest sont les fonds les plus actifs en Afrique Centrale"]
+      },
+      {
+        "order": 2,
+        "titleKey": "procedures.CM.private_equity.step2.title",
+        "descriptionKey": "procedures.CM.private_equity.step2.desc",
+        "institution": "Fonds de private equity sélectionné",
+        "documents": ["Mémorandum d'information du fonds", "Track record du gestionnaire", "Politique d'investissement"],
+        "estimatedCostXOF": 0,
+        "estimatedDays": 21,
+        "tips": ["Étudier le track record : TRI net visé de 15-25% en Afrique Centrale", "Préférer les fonds spécialisés (agro, tech, santé) aux généralistes", "Vérifier la durée de vie du fonds (7-10 ans typiquement)"]
+      },
+      {
+        "order": 3,
+        "titleKey": "procedures.CM.private_equity.step3.title",
+        "descriptionKey": "procedures.CM.private_equity.step3.desc",
+        "institution": "Fonds / Cabinet juridique",
+        "documents": ["Contrat de souscription (LPA)", "Engagement de capital", "Formulaire AML/KYC"],
+        "estimatedCostXOF": 500000,
+        "estimatedDays": 14,
+        "tips": ["Faire réviser le contrat par un avocat spécialisé OHADA", "Négocier les frais de gestion (typiquement 2% + 20% de carried interest)"]
+      },
+      {
+        "order": 4,
+        "titleKey": "procedures.CM.private_equity.step4.title",
+        "descriptionKey": "procedures.CM.private_equity.step4.desc",
+        "institution": "Fonds de private equity",
+        "documents": ["Avis d'appel de fonds", "Relevé de compte investisseur", "Rapports trimestriels"],
+        "estimatedCostXOF": 5000000,
+        "estimatedDays": 0,
+        "tips": ["Les appels de fonds s'étalent sur 3-5 ans", "Prévoir la liquidité nécessaire pour répondre aux appels", "La sortie se fait typiquement en 5-8 ans"]
+      }
+    ],
+    "lastUpdated": "2026-01-15",
+    "sourceNotes": "COSUMAF / Droit OHADA des sociétés"
+  },
+  "CM_infrastructure": {
+    "countryCode": "CM",
+    "assetClass": "infrastructure",
+    "steps": [
+      {
+        "order": 1,
+        "titleKey": "procedures.CM.infrastructure.step1.title",
+        "descriptionKey": "procedures.CM.infrastructure.step1.desc",
+        "institution": "CARPA (Caisse Autonome de Retraite) / MINEPAT (Ministère de l'Économie)",
+        "documents": ["Cadre légal PPP (Loi 2006/012)", "Cahier des charges du projet", "Étude de pré-faisabilité"],
+        "estimatedCostXOF": 0,
+        "estimatedDays": 30,
+        "tips": ["Le cadre PPP camerounais est régi par la loi de 2006 et le décret de 2008", "Les projets éligibles incluent routes, énergie, eau, télécoms, ports"]
+      },
+      {
+        "order": 2,
+        "titleKey": "procedures.CM.infrastructure.step2.title",
+        "descriptionKey": "procedures.CM.infrastructure.step2.desc",
+        "institution": "MINEPAT / Ministère sectoriel concerné",
+        "documents": ["Appel d'offres PPP", "Étude de faisabilité complète", "Analyse financière du projet"],
+        "estimatedCostXOF": 0,
+        "estimatedDays": 60,
+        "tips": ["Suivre les avis d'appels d'offres sur le site du MINMAP", "Les projets du Plan d'Émergence 2035 sont prioritaires"]
+      },
+      {
+        "order": 3,
+        "titleKey": "procedures.CM.infrastructure.step3.title",
+        "descriptionKey": "procedures.CM.infrastructure.step3.desc",
+        "institution": "SPV (Special Purpose Vehicle) / Cabinet juridique",
+        "documents": ["Statuts de la SPV", "Convention de concession", "Accords de financement", "Garanties souveraines si applicable"],
+        "estimatedCostXOF": 5000000,
+        "estimatedDays": 90,
+        "tips": ["La création d'une SPV dédiée est standard pour les projets d'infrastructure", "Prévoir 10-15% de fonds propres, le reste en dette bancaire et DFI"]
+      },
+      {
+        "order": 4,
+        "titleKey": "procedures.CM.infrastructure.step4.title",
+        "descriptionKey": "procedures.CM.infrastructure.step4.desc",
+        "institution": "SPV / Autorité concédante",
+        "documents": ["Rapports d'avancement trimestriels", "Audits techniques et financiers", "Rapports annuels aux parties prenantes"],
+        "estimatedCostXOF": 0,
+        "estimatedDays": 0,
+        "tips": ["Les concessions durent typiquement 20-30 ans", "Le rendement visé est de 10-18% sur la durée de la concession"]
+      }
+    ],
+    "lastUpdated": "2026-01-15",
+    "sourceNotes": "Loi PPP Cameroun 2006/012 / MINEPAT"
+  },
+  "GA_savings_account": {
+    "countryCode": "GA",
+    "assetClass": "savings_account",
+    "steps": [
+      {
+        "order": 1,
+        "titleKey": "procedures.GA.savings_account.step1.title",
+        "descriptionKey": "procedures.GA.savings_account.step1.desc",
+        "institution": "Banque commerciale (BGFI Bank, UGB, Orabank Gabon, Ecobank Gabon)",
+        "documents": ["Carte d'identité gabonaise ou passeport", "Justificatif de domicile", "2 photos d'identité"],
+        "estimatedCostXOF": 15000,
+        "estimatedDays": 2,
+        "tips": ["BGFI Bank est la plus grande banque gabonaise — large réseau d'agences", "Les comptes d'épargne gabonais offrent 2-4% de rendement annuel"]
+      },
+      {
+        "order": 2,
+        "titleKey": "procedures.GA.savings_account.step2.title",
+        "descriptionKey": "procedures.GA.savings_account.step2.desc",
+        "institution": "Banque choisie",
+        "documents": ["Formulaire d'ouverture de compte", "Dépôt initial (minimum 25 000 FCFA)"],
+        "estimatedCostXOF": 25000,
+        "estimatedDays": 1,
+        "tips": ["Demander un compte épargne rémunéré plutôt qu'un simple livret"]
+      },
+      {
+        "order": 3,
+        "titleKey": "procedures.GA.savings_account.step3.title",
+        "descriptionKey": "procedures.GA.savings_account.step3.desc",
+        "institution": "Banque choisie",
+        "documents": ["Code d'accès mobile banking"],
+        "estimatedCostXOF": 0,
+        "estimatedDays": 3,
+        "tips": ["Activer les alertes SMS pour le suivi des opérations"]
+      }
+    ],
+    "lastUpdated": "2026-01-15",
+    "sourceNotes": "COBAC / BEAC zone CEMAC"
+  },
+  "GA_government_bonds": {
+    "countryCode": "GA",
+    "assetClass": "government_bonds",
+    "steps": [
+      {
+        "order": 1,
+        "titleKey": "procedures.GA.government_bonds.step1.title",
+        "descriptionKey": "procedures.GA.government_bonds.step1.desc",
+        "institution": "Intermédiaire agréé COSUMAF (BGFI Bourse, Financia Capital)",
+        "documents": ["CNI ou passeport", "RIB", "Formulaire KYC"],
+        "estimatedCostXOF": 50000,
+        "estimatedDays": 5,
+        "tips": ["BGFI Bourse est le principal intermédiaire au Gabon"]
+      },
+      {
+        "order": 2,
+        "titleKey": "procedures.GA.government_bonds.step2.title",
+        "descriptionKey": "procedures.GA.government_bonds.step2.desc",
+        "institution": "BEAC / Trésor Public gabonais",
+        "documents": ["Calendrier des émissions", "Note d'information"],
+        "estimatedCostXOF": 0,
+        "estimatedDays": 7,
+        "tips": ["Le Gabon émet régulièrement des OTA avec des rendements de 5-7%", "Minimum de souscription : 1M FCFA"]
+      },
+      {
+        "order": 3,
+        "titleKey": "procedures.GA.government_bonds.step3.title",
+        "descriptionKey": "procedures.GA.government_bonds.step3.desc",
+        "institution": "Intermédiaire agréé",
+        "documents": ["Bulletin de souscription", "Preuve de virement"],
+        "estimatedCostXOF": 1000000,
+        "estimatedDays": 5,
+        "tips": ["Le risque souverain gabonais est noté B+ par les agences internationales"]
+      }
+    ],
+    "lastUpdated": "2026-01-15",
+    "sourceNotes": "BEAC — Marché des titres publics CEMAC"
+  },
+  "GA_local_stocks": {
+    "countryCode": "GA",
+    "assetClass": "local_stocks",
+    "steps": [
+      {
+        "order": 1,
+        "titleKey": "procedures.GA.local_stocks.step1.title",
+        "descriptionKey": "procedures.GA.local_stocks.step1.desc",
+        "institution": "COSUMAF / Société de bourse agréée",
+        "documents": ["CNI ou passeport", "RIB", "Formulaire d'ouverture de compte-titres"],
+        "estimatedCostXOF": 100000,
+        "estimatedDays": 7,
+        "tips": ["Les actions gabonaises sont cotées sur la BVMAC à Douala"]
+      },
+      {
+        "order": 2,
+        "titleKey": "procedures.GA.local_stocks.step2.title",
+        "descriptionKey": "procedures.GA.local_stocks.step2.desc",
+        "institution": "BVMAC / Société de bourse",
+        "documents": ["Ordre d'achat", "Preuve de fonds"],
+        "estimatedCostXOF": 200000,
+        "estimatedDays": 5,
+        "tips": ["Peu de valeurs gabonaises cotées — privilégier les valeurs régionales CEMAC"]
+      },
+      {
+        "order": 3,
+        "titleKey": "procedures.GA.local_stocks.step3.title",
+        "descriptionKey": "procedures.GA.local_stocks.step3.desc",
+        "institution": "Société de bourse",
+        "documents": ["Relevé de portefeuille", "Avis d'opéré"],
+        "estimatedCostXOF": 0,
+        "estimatedDays": 0,
+        "tips": ["Suivre les dividendes annuels des sociétés cotées"]
+      }
+    ],
+    "lastUpdated": "2026-01-15",
+    "sourceNotes": "BVMAC / COSUMAF"
+  },
+  "GA_real_estate_fund": {
+    "countryCode": "GA",
+    "assetClass": "real_estate_fund",
+    "steps": [
+      {
+        "order": 1,
+        "titleKey": "procedures.GA.real_estate_fund.step1.title",
+        "descriptionKey": "procedures.GA.real_estate_fund.step1.desc",
+        "institution": "Promoteurs immobiliers / Sociétés de gestion",
+        "documents": ["Prospectus du fonds", "CNI ou passeport"],
+        "estimatedCostXOF": 0,
+        "estimatedDays": 7,
+        "tips": ["L'immobilier à Libreville offre des rendements locatifs de 8-12%"]
+      },
+      {
+        "order": 2,
+        "titleKey": "procedures.GA.real_estate_fund.step2.title",
+        "descriptionKey": "procedures.GA.real_estate_fund.step2.desc",
+        "institution": "Société de gestion",
+        "documents": ["Formulaire de souscription", "RIB", "Preuve de virement"],
+        "estimatedCostXOF": 2000000,
+        "estimatedDays": 14,
+        "tips": ["Privilégier les zones de la Batterie IV et du Boulevard Triomphal à Libreville"]
+      },
+      {
+        "order": 3,
+        "titleKey": "procedures.GA.real_estate_fund.step3.title",
+        "descriptionKey": "procedures.GA.real_estate_fund.step3.desc",
+        "institution": "Société de gestion",
+        "documents": ["Rapport trimestriel", "Relevé de parts"],
+        "estimatedCostXOF": 0,
+        "estimatedDays": 0,
+        "tips": ["Les distributions sont généralement trimestrielles"]
+      }
+    ],
+    "lastUpdated": "2026-01-15",
+    "sourceNotes": "Marché immobilier gabonais"
+  },
+  "CG_savings_account": {
+    "countryCode": "CG",
+    "assetClass": "savings_account",
+    "steps": [
+      {
+        "order": 1,
+        "titleKey": "procedures.CG.savings_account.step1.title",
+        "descriptionKey": "procedures.CG.savings_account.step1.desc",
+        "institution": "Banque commerciale (LCB Bank, BGFI Bank Congo, Ecobank Congo, UBA Congo)",
+        "documents": ["Carte d'identité congolaise ou passeport", "Justificatif de domicile", "2 photos d'identité"],
+        "estimatedCostXOF": 10000,
+        "estimatedDays": 2,
+        "tips": ["LCB Bank et BGFI Bank Congo sont les principaux acteurs bancaires à Brazzaville"]
+      },
+      {
+        "order": 2,
+        "titleKey": "procedures.CG.savings_account.step2.title",
+        "descriptionKey": "procedures.CG.savings_account.step2.desc",
+        "institution": "Banque choisie",
+        "documents": ["Formulaire d'ouverture de compte", "Dépôt initial"],
+        "estimatedCostXOF": 25000,
+        "estimatedDays": 1,
+        "tips": ["Les comptes d'épargne congolais offrent 2-3,5% de rendement"]
+      },
+      {
+        "order": 3,
+        "titleKey": "procedures.CG.savings_account.step3.title",
+        "descriptionKey": "procedures.CG.savings_account.step3.desc",
+        "institution": "Banque choisie",
+        "documents": ["Code d'accès mobile banking"],
+        "estimatedCostXOF": 0,
+        "estimatedDays": 2,
+        "tips": ["Le mobile banking est en développement rapide au Congo-Brazzaville"]
+      }
+    ],
+    "lastUpdated": "2026-01-15",
+    "sourceNotes": "COBAC / BEAC zone CEMAC"
+  },
+  "CG_government_bonds": {
+    "countryCode": "CG",
+    "assetClass": "government_bonds",
+    "steps": [
+      {
+        "order": 1,
+        "titleKey": "procedures.CG.government_bonds.step1.title",
+        "descriptionKey": "procedures.CG.government_bonds.step1.desc",
+        "institution": "Intermédiaire agréé COSUMAF",
+        "documents": ["CNI ou passeport", "RIB", "Formulaire KYC"],
+        "estimatedCostXOF": 50000,
+        "estimatedDays": 5,
+        "tips": ["Les obligations du Trésor congolais offrent 5-7% de rendement"]
+      },
+      {
+        "order": 2,
+        "titleKey": "procedures.CG.government_bonds.step2.title",
+        "descriptionKey": "procedures.CG.government_bonds.step2.desc",
+        "institution": "Intermédiaire agréé / BEAC",
+        "documents": ["Bulletin de souscription", "Preuve de virement"],
+        "estimatedCostXOF": 1000000,
+        "estimatedDays": 7,
+        "tips": ["Minimum 1M FCFA — vérifier le calendrier des adjudications BEAC"]
+      },
+      {
+        "order": 3,
+        "titleKey": "procedures.CG.government_bonds.step3.title",
+        "descriptionKey": "procedures.CG.government_bonds.step3.desc",
+        "institution": "COSUMAF",
+        "documents": ["Avis d'attribution", "Relevé de compte-titres"],
+        "estimatedCostXOF": 0,
+        "estimatedDays": 5,
+        "tips": ["Conserver les avis d'attribution comme preuve fiscale"]
+      }
+    ],
+    "lastUpdated": "2026-01-15",
+    "sourceNotes": "BEAC — Marché des titres publics CEMAC"
+  },
+  "TD_savings_account": {
+    "countryCode": "TD",
+    "assetClass": "savings_account",
+    "steps": [
+      {
+        "order": 1,
+        "titleKey": "procedures.TD.savings_account.step1.title",
+        "descriptionKey": "procedures.TD.savings_account.step1.desc",
+        "institution": "Banque commerciale (Ecobank Tchad, UBA Tchad, BSIC Tchad, SGT)",
+        "documents": ["Carte d'identité tchadienne ou passeport", "Justificatif de domicile", "2 photos d'identité"],
+        "estimatedCostXOF": 10000,
+        "estimatedDays": 3,
+        "tips": ["Le système bancaire tchadien est concentré à N'Djamena", "Les taux d'épargne sont de 2-3,5%"]
+      },
+      {
+        "order": 2,
+        "titleKey": "procedures.TD.savings_account.step2.title",
+        "descriptionKey": "procedures.TD.savings_account.step2.desc",
+        "institution": "Banque choisie",
+        "documents": ["Formulaire d'ouverture de compte", "Dépôt initial (25 000 FCFA minimum)"],
+        "estimatedCostXOF": 25000,
+        "estimatedDays": 1,
+        "tips": ["Vérifier les frais de tenue de compte avant de choisir"]
+      },
+      {
+        "order": 3,
+        "titleKey": "procedures.TD.savings_account.step3.title",
+        "descriptionKey": "procedures.TD.savings_account.step3.desc",
+        "institution": "Banque choisie",
+        "documents": ["Code mobile banking"],
+        "estimatedCostXOF": 0,
+        "estimatedDays": 3,
+        "tips": ["Le mobile money (Tigo Cash, Airtel Money) peut servir de complément"]
+      }
+    ],
+    "lastUpdated": "2026-01-15",
+    "sourceNotes": "COBAC / BEAC zone CEMAC"
+  },
+  "TD_government_bonds": {
+    "countryCode": "TD",
+    "assetClass": "government_bonds",
+    "steps": [
+      {
+        "order": 1,
+        "titleKey": "procedures.TD.government_bonds.step1.title",
+        "descriptionKey": "procedures.TD.government_bonds.step1.desc",
+        "institution": "Intermédiaire agréé COSUMAF / Banque SVT",
+        "documents": ["CNI ou passeport", "RIB", "Formulaire KYC"],
+        "estimatedCostXOF": 50000,
+        "estimatedDays": 7,
+        "tips": ["Le Tchad émet des obligations via le mécanisme BEAC des titres publics"]
+      },
+      {
+        "order": 2,
+        "titleKey": "procedures.TD.government_bonds.step2.title",
+        "descriptionKey": "procedures.TD.government_bonds.step2.desc",
+        "institution": "BEAC / Trésor Public tchadien",
+        "documents": ["Bulletin de souscription", "Preuve de virement"],
+        "estimatedCostXOF": 1000000,
+        "estimatedDays": 7,
+        "tips": ["Les rendements des OTA tchadiennes sont parmi les plus élevés de la zone CEMAC (6-8%)", "Risque souverain plus élevé — diversifier les maturités"]
+      },
+      {
+        "order": 3,
+        "titleKey": "procedures.TD.government_bonds.step3.title",
+        "descriptionKey": "procedures.TD.government_bonds.step3.desc",
+        "institution": "COSUMAF",
+        "documents": ["Avis d'attribution", "Relevé de compte-titres"],
+        "estimatedCostXOF": 0,
+        "estimatedDays": 5,
+        "tips": ["Suivre les remboursements — le Tchad a connu des retards par le passé"]
+      }
+    ],
+    "lastUpdated": "2026-01-15",
+    "sourceNotes": "BEAC — Marché des titres publics CEMAC"
+  },
+  "CF_savings_account": {
+    "countryCode": "CF",
+    "assetClass": "savings_account",
+    "steps": [
+      {
+        "order": 1,
+        "titleKey": "procedures.CF.savings_account.step1.title",
+        "descriptionKey": "procedures.CF.savings_account.step1.desc",
+        "institution": "Banque commerciale (Ecobank RCA, BSIC Centrafrique, BPMC)",
+        "documents": ["Carte d'identité centrafricaine ou passeport", "Justificatif de domicile", "2 photos d'identité"],
+        "estimatedCostXOF": 10000,
+        "estimatedDays": 3,
+        "tips": ["Le système bancaire centrafricain est limité — principalement à Bangui", "Les taux d'épargne sont de 2-3%"]
+      },
+      {
+        "order": 2,
+        "titleKey": "procedures.CF.savings_account.step2.title",
+        "descriptionKey": "procedures.CF.savings_account.step2.desc",
+        "institution": "Banque choisie",
+        "documents": ["Formulaire d'ouverture", "Dépôt initial"],
+        "estimatedCostXOF": 25000,
+        "estimatedDays": 2,
+        "tips": ["Privilégier les banques avec un réseau mobile money"]
+      }
+    ],
+    "lastUpdated": "2026-01-15",
+    "sourceNotes": "COBAC / BEAC zone CEMAC"
+  },
+  "GQ_savings_account": {
+    "countryCode": "GQ",
+    "assetClass": "savings_account",
+    "steps": [
+      {
+        "order": 1,
+        "titleKey": "procedures.GQ.savings_account.step1.title",
+        "descriptionKey": "procedures.GQ.savings_account.step1.desc",
+        "institution": "Banque commerciale (BGFI Bank GE, CCEI Bank GE, BANGE)",
+        "documents": ["DNI (Documento Nacional de Identidad) ou passeport", "Justificatif de domicile", "2 photos d'identité"],
+        "estimatedCostXOF": 15000,
+        "estimatedDays": 2,
+        "tips": ["BANGE (Banco Nacional de Guinea Ecuatorial) est la banque nationale", "La Guinée Équatoriale utilise le FCFA mais la langue officielle est l'espagnol"]
+      },
+      {
+        "order": 2,
+        "titleKey": "procedures.GQ.savings_account.step2.title",
+        "descriptionKey": "procedures.GQ.savings_account.step2.desc",
+        "institution": "Banque choisie",
+        "documents": ["Formulaire d'ouverture de compte", "Dépôt initial (50 000 FCFA minimum)"],
+        "estimatedCostXOF": 50000,
+        "estimatedDays": 1,
+        "tips": ["Les revenus pétroliers font de Malabo une place financière active"]
+      },
+      {
+        "order": 3,
+        "titleKey": "procedures.GQ.savings_account.step3.title",
+        "descriptionKey": "procedures.GQ.savings_account.step3.desc",
+        "institution": "Banque choisie",
+        "documents": ["Code d'accès mobile banking"],
+        "estimatedCostXOF": 0,
+        "estimatedDays": 3,
+        "tips": ["Le mobile banking est en expansion rapide en Guinée Équatoriale"]
+      }
+    ],
+    "lastUpdated": "2026-01-15",
+    "sourceNotes": "COBAC / BEAC zone CEMAC"
+  },
+  "GQ_government_bonds": {
+    "countryCode": "GQ",
+    "assetClass": "government_bonds",
+    "steps": [
+      {
+        "order": 1,
+        "titleKey": "procedures.GQ.government_bonds.step1.title",
+        "descriptionKey": "procedures.GQ.government_bonds.step1.desc",
+        "institution": "Intermédiaire agréé COSUMAF",
+        "documents": ["DNI ou passeport", "RIB", "Formulaire KYC"],
+        "estimatedCostXOF": 50000,
+        "estimatedDays": 5,
+        "tips": ["La Guinée Équatoriale émet des obligations via le mécanisme BEAC"]
+      },
+      {
+        "order": 2,
+        "titleKey": "procedures.GQ.government_bonds.step2.title",
+        "descriptionKey": "procedures.GQ.government_bonds.step2.desc",
+        "institution": "BEAC / Trésor Public équato-guinéen",
+        "documents": ["Bulletin de souscription", "Preuve de virement"],
+        "estimatedCostXOF": 1000000,
+        "estimatedDays": 7,
+        "tips": ["Rendements de 5-7% typiques pour les obligations équato-guinéennes"]
+      },
+      {
+        "order": 3,
+        "titleKey": "procedures.GQ.government_bonds.step3.title",
+        "descriptionKey": "procedures.GQ.government_bonds.step3.desc",
+        "institution": "COSUMAF",
+        "documents": ["Avis d'attribution", "Relevé de compte-titres"],
+        "estimatedCostXOF": 0,
+        "estimatedDays": 5,
+        "tips": ["Les coupons sont versés en FCFA via le compte bancaire"]
+      }
+    ],
+    "lastUpdated": "2026-01-15",
+    "sourceNotes": "BEAC — Marché des titres publics CEMAC"
+  }
+}

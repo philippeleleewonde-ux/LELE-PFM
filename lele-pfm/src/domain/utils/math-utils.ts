@@ -146,50 +146,6 @@ export function calculateVaR95Formula(
 }
 
 /**
- * Calculate contextual coefficient
- */
-export function calculateContextualCoefficient(
-  ekhScore: number,
-  horizonMonths: number,
-  profileType: string
-): number {
-  let coefficient = 1.0;
-
-  if (ekhScore <= 2) {
-    coefficient *= 1.3;
-  } else if (ekhScore >= 4.5) {
-    coefficient *= 0.7;
-  } else if (ekhScore >= 3 && ekhScore < 4.5) {
-    coefficient *= 1.0;
-  }
-
-  if (horizonMonths <= 3) {
-    coefficient *= 1.2;
-  } else if (horizonMonths > 3 && horizonMonths <= 10) {
-    coefficient *= 1.0;
-  } else if (horizonMonths > 10) {
-    coefficient *= 0.8;
-  }
-
-  switch (profileType) {
-    case 'Salarié':
-      coefficient *= 0.9;
-      break;
-    case 'Freelance':
-    case 'Entrepreneur':
-      coefficient *= 1.2;
-      break;
-    case 'Retraité':
-      coefficient *= 0.7;
-      break;
-    default:
-      coefficient *= 1.0;
-  }
-
-  return clamp(coefficient, 0.5, 1.5);
-}
-
-/**
  * Risk score to probability
  */
 export function riskScoreToProbability(riskScore: number): number {

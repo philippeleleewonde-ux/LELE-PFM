@@ -63,6 +63,19 @@ const SENSITIVITY: Record<AssetClass, Record<MacroScenario, number>> = {
   money_market:     { growth_rising:  0, growth_falling: +1, inflation_rising: -1, inflation_falling: +1 },
   sukuk:            { growth_rising:  0, growth_falling: +1, inflation_rising:  0, inflation_falling: +1 },
   mutual_fund:      { growth_rising: +1, growth_falling: -1, inflation_rising:  0, inflation_falling: +1 },
+  municipal_bonds:  { growth_rising:  0, growth_falling: +1, inflation_rising: -1, inflation_falling: +2 },
+  private_equity:   { growth_rising: +2, growth_falling: -2, inflation_rising: +1, inflation_falling:  0 },
+  venture_capital:  { growth_rising: +2, growth_falling: -2, inflation_rising:  0, inflation_falling: -1 },
+  venture_debt:     { growth_rising: +1, growth_falling: -1, inflation_rising:  0, inflation_falling: +1 },
+  mezzanine:        { growth_rising: +1, growth_falling: -1, inflation_rising:  0, inflation_falling:  0 },
+  infrastructure:   { growth_rising: +1, growth_falling:  0, inflation_rising: +1, inflation_falling: +1 },
+  mining_assets:    { growth_rising: +2, growth_falling: -1, inflation_rising: +2, inflation_falling: -1 },
+  agrobusiness:     { growth_rising: +1, growth_falling:  0, inflation_rising: +2, inflation_falling: -1 },
+  commodities:      { growth_rising: +1, growth_falling: -1, inflation_rising: +2, inflation_falling: -1 },
+  derivatives:      { growth_rising: +1, growth_falling: -1, inflation_rising:  0, inflation_falling:  0 },
+  esg_bonds:        { growth_rising:  0, growth_falling: +1, inflation_rising: -1, inflation_falling: +1 },
+  carbon_credits:   { growth_rising:  0, growth_falling:  0, inflation_rising: +1, inflation_falling: +1 },
+  tokenized_assets: { growth_rising: +2, growth_falling: -2, inflation_rising: +1, inflation_falling: -1 },
 };
 
 // ─── Dalio reference portfolio ───

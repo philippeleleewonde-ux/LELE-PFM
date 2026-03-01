@@ -1,0 +1,666 @@
+{
+  "KE_savings_account": {
+    "countryCode": "KE",
+    "assetClass": "savings_account",
+    "steps": [
+      {
+        "order": 1,
+        "titleKey": "procedures.KE.savings_account.step1.title",
+        "descriptionKey": "procedures.KE.savings_account.step1.desc",
+        "institution": "Commercial bank (Equity Bank, KCB, Co-operative Bank, NCBA, Stanbic Kenya)",
+        "documents": ["National ID card or passport", "KRA PIN certificate", "Proof of residence (utility bill < 3 months)", "2 passport photos"],
+        "estimatedCostUSD": 5,
+        "estimatedDays": 1,
+        "tips": ["Equity Bank and KCB have the widest branch network", "M-Shwari (by CBA/M-Pesa) offers instant savings account with interest"]
+      },
+      {
+        "order": 2,
+        "titleKey": "procedures.KE.savings_account.step2.title",
+        "descriptionKey": "procedures.KE.savings_account.step2.desc",
+        "institution": "Chosen bank",
+        "documents": ["Account opening form", "Initial deposit (KES 1,000-5,000 typical)", "Specimen signature"],
+        "estimatedCostUSD": 10,
+        "estimatedDays": 1,
+        "tips": ["Compare rates — some banks offer up to 7% on fixed deposits", "Mobile-first banks like M-Shwari and KCB M-Pesa offer easy access"]
+      },
+      {
+        "order": 3,
+        "titleKey": "procedures.KE.savings_account.step3.title",
+        "descriptionKey": "procedures.KE.savings_account.step3.desc",
+        "institution": "Chosen bank / M-Pesa",
+        "documents": ["Mobile banking PIN", "M-Pesa paybill number for deposits"],
+        "estimatedCostUSD": 0,
+        "estimatedDays": 1,
+        "tips": ["Link your M-Pesa to your bank account for seamless transfers", "Set up standing orders for automatic monthly savings"]
+      }
+    ],
+    "lastUpdated": "2026-01-15",
+    "sourceNotes": "Central Bank of Kenya (CBK) regulations"
+  },
+  "KE_government_bonds": {
+    "countryCode": "KE",
+    "assetClass": "government_bonds",
+    "steps": [
+      {
+        "order": 1,
+        "titleKey": "procedures.KE.government_bonds.step1.title",
+        "descriptionKey": "procedures.KE.government_bonds.step1.desc",
+        "institution": "CDSC (Central Depository & Settlement Corporation)",
+        "documents": ["National ID or passport", "KRA PIN certificate", "Bank account details", "CDSC account opening form"],
+        "estimatedCostUSD": 0,
+        "estimatedDays": 3,
+        "tips": ["Open a CDS account at the CDSC or through a licensed stockbroker", "You need a CDS account to hold Treasury bonds and bills"]
+      },
+      {
+        "order": 2,
+        "titleKey": "procedures.KE.government_bonds.step2.title",
+        "descriptionKey": "procedures.KE.government_bonds.step2.desc",
+        "institution": "Central Bank of Kenya (CBK)",
+        "documents": ["CBK auction calendar", "Information memorandum"],
+        "estimatedCostUSD": 0,
+        "estimatedDays": 7,
+        "tips": ["Treasury bills (91, 182, 364 days) — minimum KES 100,000", "Treasury bonds (2-30 years) — minimum KES 50,000", "Infrastructure bonds are tax-exempt and very popular", "Check the CBK website for upcoming auctions every Thursday"]
+      },
+      {
+        "order": 3,
+        "titleKey": "procedures.KE.government_bonds.step3.title",
+        "descriptionKey": "procedures.KE.government_bonds.step3.desc",
+        "institution": "CBK / Commercial bank / M-Pesa",
+        "documents": ["Completed bid form (competitive or non-competitive)", "Proof of payment"],
+        "estimatedCostUSD": 400,
+        "estimatedDays": 3,
+        "tips": ["Non-competitive bids guarantee allocation at the weighted average rate", "You can bid via M-Akiba (mobile platform) with as little as KES 3,000", "M-Akiba makes government securities accessible to retail investors"]
+      },
+      {
+        "order": 4,
+        "titleKey": "procedures.KE.government_bonds.step4.title",
+        "descriptionKey": "procedures.KE.government_bonds.step4.desc",
+        "institution": "CBK / CDSC",
+        "documents": ["Allotment letter", "CDS account statement"],
+        "estimatedCostUSD": 0,
+        "estimatedDays": 5,
+        "tips": ["Interest on T-bonds is subject to 15% withholding tax (except infrastructure bonds)", "Yields range from 10-16% depending on tenor and market conditions"]
+      }
+    ],
+    "lastUpdated": "2026-01-15",
+    "sourceNotes": "Central Bank of Kenya / Capital Markets Authority"
+  },
+  "KE_local_stocks": {
+    "countryCode": "KE",
+    "assetClass": "local_stocks",
+    "steps": [
+      {
+        "order": 1,
+        "titleKey": "procedures.KE.local_stocks.step1.title",
+        "descriptionKey": "procedures.KE.local_stocks.step1.desc",
+        "institution": "Licensed stockbroker (Genghis Capital, SBG Securities, Dyer & Blair, Faida Investment Bank)",
+        "documents": ["National ID or passport", "KRA PIN certificate", "Bank account details", "Proof of address"],
+        "estimatedCostUSD": 0,
+        "estimatedDays": 3,
+        "tips": ["CMA (Capital Markets Authority) licenses all stockbrokers", "Compare commission rates — typically 1.5-2.1% per trade"]
+      },
+      {
+        "order": 2,
+        "titleKey": "procedures.KE.local_stocks.step2.title",
+        "descriptionKey": "procedures.KE.local_stocks.step2.desc",
+        "institution": "CDSC (Central Depository & Settlement Corporation)",
+        "documents": ["CDS account opening form", "CDS account number"],
+        "estimatedCostUSD": 0,
+        "estimatedDays": 2,
+        "tips": ["The CDS account holds your shares electronically", "One CDS account works for all NSE-listed securities"]
+      },
+      {
+        "order": 3,
+        "titleKey": "procedures.KE.local_stocks.step3.title",
+        "descriptionKey": "procedures.KE.local_stocks.step3.desc",
+        "institution": "NSE (Nairobi Securities Exchange)",
+        "documents": ["Listed companies guide", "Market data access"],
+        "estimatedCostUSD": 0,
+        "estimatedDays": 1,
+        "tips": ["The NSE lists ~65 companies across 13 sectors", "Blue chips include Safaricom, Equity Bank, KCB, EABL, BAT Kenya", "Safaricom is the largest company by market cap in East Africa"]
+      },
+      {
+        "order": 4,
+        "titleKey": "procedures.KE.local_stocks.step4.title",
+        "descriptionKey": "procedures.KE.local_stocks.step4.desc",
+        "institution": "Stockbroker / NSE",
+        "documents": ["Buy order (via phone, email, or online platform)", "Trade confirmation", "Contract note"],
+        "estimatedCostUSD": 50,
+        "estimatedDays": 3,
+        "tips": ["Settlement is T+3 (3 business days after trade)", "Total transaction cost: ~2.5% (broker commission + NSE fees + CDSC fees + CMA levy)"]
+      },
+      {
+        "order": 5,
+        "titleKey": "procedures.KE.local_stocks.step5.title",
+        "descriptionKey": "procedures.KE.local_stocks.step5.desc",
+        "institution": "Stockbroker / CDSC",
+        "documents": ["Portfolio statement", "Dividend notifications", "Annual reports"],
+        "estimatedCostUSD": 0,
+        "estimatedDays": 0,
+        "tips": ["Dividends are subject to 5% withholding tax for residents", "Capital gains tax on shares is 5% (introduced in 2015)", "Use apps like AI Trade (by Genghis) for mobile portfolio tracking"]
+      }
+    ],
+    "lastUpdated": "2026-01-15",
+    "sourceNotes": "NSE / CMA Kenya / CDSC"
+  },
+  "KE_real_estate_fund": {
+    "countryCode": "KE",
+    "assetClass": "real_estate_fund",
+    "steps": [
+      {
+        "order": 1,
+        "titleKey": "procedures.KE.real_estate_fund.step1.title",
+        "descriptionKey": "procedures.KE.real_estate_fund.step1.desc",
+        "institution": "Licensed fund manager (ICEA Lion, Stanlib, Cytonn Investments)",
+        "documents": ["National ID or passport", "KRA PIN", "Bank details"],
+        "estimatedCostUSD": 0,
+        "estimatedDays": 5,
+        "tips": ["Kenya has REITs (Real Estate Investment Trusts) regulated by CMA", "ILAM Fahari I-REIT is listed on the NSE", "Cytonn High Yield Solution is an unlisted real estate fund"]
+      },
+      {
+        "order": 2,
+        "titleKey": "procedures.KE.real_estate_fund.step2.title",
+        "descriptionKey": "procedures.KE.real_estate_fund.step2.desc",
+        "institution": "Fund manager / Stockbroker (for listed REITs)",
+        "documents": ["Subscription form", "KYC documents", "Investment amount proof"],
+        "estimatedCostUSD": 100,
+        "estimatedDays": 5,
+        "tips": ["Listed REITs: buy through your stockbroker like regular shares", "Unlisted funds: minimum investment typically KES 100,000-1,000,000"]
+      },
+      {
+        "order": 3,
+        "titleKey": "procedures.KE.real_estate_fund.step3.title",
+        "descriptionKey": "procedures.KE.real_estate_fund.step3.desc",
+        "institution": "Fund manager / NSE",
+        "documents": ["Unit certificate or CDS statement", "Quarterly reports"],
+        "estimatedCostUSD": 0,
+        "estimatedDays": 0,
+        "tips": ["REIT distributions are subject to 5% withholding tax", "Real estate returns in Nairobi average 5-8% rental yield + capital appreciation"]
+      }
+    ],
+    "lastUpdated": "2026-01-15",
+    "sourceNotes": "CMA Kenya — REIT regulations"
+  },
+  "KE_agrobusiness": {
+    "countryCode": "KE",
+    "assetClass": "agrobusiness",
+    "steps": [
+      {
+        "order": 1,
+        "titleKey": "procedures.KE.agrobusiness.step1.title",
+        "descriptionKey": "procedures.KE.agrobusiness.step1.desc",
+        "institution": "Registrar of Companies / eCitizen portal",
+        "documents": ["National ID", "KRA PIN", "Company registration form (CR1/CR2)", "Memorandum and Articles of Association", "Registered office address"],
+        "estimatedCostUSD": 50,
+        "estimatedDays": 5,
+        "tips": ["Register online via eCitizen — faster than in-person", "Choose a Limited Company for scalability", "Agriculture enjoys VAT exemption on most inputs"]
+      },
+      {
+        "order": 2,
+        "titleKey": "procedures.KE.agrobusiness.step2.title",
+        "descriptionKey": "procedures.KE.agrobusiness.step2.desc",
+        "institution": "County Government / National Land Commission",
+        "documents": ["Title deed or lease agreement", "Land search certificate", "Change of user permit (if needed)", "Environmental license (NEMA)"],
+        "estimatedCostUSD": 200,
+        "estimatedDays": 30,
+        "tips": ["Conduct a land search at the Ministry of Lands to verify ownership", "Agricultural Development Corporation (ADC) leases government farmland", "NEMA license is required for commercial farming"]
+      },
+      {
+        "order": 3,
+        "titleKey": "procedures.KE.agrobusiness.step3.title",
+        "descriptionKey": "procedures.KE.agrobusiness.step3.desc",
+        "institution": "Agricultural Finance Corporation (AFC) / Commercial banks / SACCOs",
+        "documents": ["Business plan", "Title deed as collateral", "Financial projections", "Tax compliance certificate"],
+        "estimatedCostUSD": 100,
+        "estimatedDays": 30,
+        "tips": ["AFC offers agricultural loans at preferential rates (10-14%)", "Kenya Climate Smart Agriculture Project (KCSAP) provides grants", "SACCOs like Mwalimu National offer agricultural credit"]
+      },
+      {
+        "order": 4,
+        "titleKey": "procedures.KE.agrobusiness.step4.title",
+        "descriptionKey": "procedures.KE.agrobusiness.step4.desc",
+        "institution": "Farm / KEPHIS / AFA",
+        "documents": ["Phytosanitary certificates (for export)", "Global GAP certification", "Marketing contracts"],
+        "estimatedCostUSD": 0,
+        "estimatedDays": 0,
+        "tips": ["Kenya is a major exporter of tea, coffee, flowers, and avocados", "Horticulture exports to EU require Global GAP certification", "Returns: 15-35% annual for well-managed commercial farming"]
+      }
+    ],
+    "lastUpdated": "2026-01-15",
+    "sourceNotes": "Kenya Companies Act / AFC / CMA"
+  },
+  "KE_mutual_fund": {
+    "countryCode": "KE",
+    "assetClass": "mutual_fund",
+    "steps": [
+      {
+        "order": 1,
+        "titleKey": "procedures.KE.mutual_fund.step1.title",
+        "descriptionKey": "procedures.KE.mutual_fund.step1.desc",
+        "institution": "Licensed fund manager (CIC Asset Management, Old Mutual, Britam, Sanlam)",
+        "documents": ["National ID or passport", "KRA PIN", "Bank details", "Application form"],
+        "estimatedCostUSD": 0,
+        "estimatedDays": 3,
+        "tips": ["CMA licenses all Collective Investment Schemes (CIS)", "Money market funds offer 8-12% — higher than bank deposits", "Minimum investment can be as low as KES 1,000 for some funds"]
+      },
+      {
+        "order": 2,
+        "titleKey": "procedures.KE.mutual_fund.step2.title",
+        "descriptionKey": "procedures.KE.mutual_fund.step2.desc",
+        "institution": "Fund manager / M-Pesa",
+        "documents": ["Subscription form", "Proof of investment (bank transfer or M-Pesa)"],
+        "estimatedCostUSD": 10,
+        "estimatedDays": 2,
+        "tips": ["Many funds accept M-Pesa deposits (Mali by Old Mutual, Zimele by CIC)", "Money market funds have daily liquidity — withdraw anytime"]
+      },
+      {
+        "order": 3,
+        "titleKey": "procedures.KE.mutual_fund.step3.title",
+        "descriptionKey": "procedures.KE.mutual_fund.step3.desc",
+        "institution": "Fund manager",
+        "documents": ["Unit statement", "Monthly/quarterly reports"],
+        "estimatedCostUSD": 0,
+        "estimatedDays": 0,
+        "tips": ["Management fees range from 1-2.5% per year", "Equity funds have higher returns but more volatility than money market"]
+      }
+    ],
+    "lastUpdated": "2026-01-15",
+    "sourceNotes": "CMA Kenya — Collective Investment Schemes"
+  },
+  "TZ_savings_account": {
+    "countryCode": "TZ",
+    "assetClass": "savings_account",
+    "steps": [
+      {
+        "order": 1,
+        "titleKey": "procedures.TZ.savings_account.step1.title",
+        "descriptionKey": "procedures.TZ.savings_account.step1.desc",
+        "institution": "Commercial bank (CRDB, NMB, Equity Bank TZ, Stanbic, NBC)",
+        "documents": ["National ID (NIDA card) or passport", "TIN (Tax Identification Number)", "Proof of residence", "2 passport photos"],
+        "estimatedCostUSD": 5,
+        "estimatedDays": 1,
+        "tips": ["CRDB and NMB have the widest rural networks", "M-Pesa Tanzania can link to bank savings accounts"]
+      },
+      {
+        "order": 2,
+        "titleKey": "procedures.TZ.savings_account.step2.title",
+        "descriptionKey": "procedures.TZ.savings_account.step2.desc",
+        "institution": "Chosen bank",
+        "documents": ["Account opening form", "Initial deposit (TZS 10,000-50,000)"],
+        "estimatedCostUSD": 5,
+        "estimatedDays": 1,
+        "tips": ["Fixed deposit rates range from 5-10% depending on tenor"]
+      }
+    ],
+    "lastUpdated": "2026-01-15",
+    "sourceNotes": "Bank of Tanzania regulations"
+  },
+  "TZ_government_bonds": {
+    "countryCode": "TZ",
+    "assetClass": "government_bonds",
+    "steps": [
+      {
+        "order": 1,
+        "titleKey": "procedures.TZ.government_bonds.step1.title",
+        "descriptionKey": "procedures.TZ.government_bonds.step1.desc",
+        "institution": "Licensed dealer bank / DSE broker",
+        "documents": ["National ID or passport", "TIN", "Bank account details", "CSD account application"],
+        "estimatedCostUSD": 0,
+        "estimatedDays": 5,
+        "tips": ["The Bank of Tanzania (BoT) issues Treasury bills and bonds", "Minimum investment: TZS 1,000,000 for T-bills"]
+      },
+      {
+        "order": 2,
+        "titleKey": "procedures.TZ.government_bonds.step2.title",
+        "descriptionKey": "procedures.TZ.government_bonds.step2.desc",
+        "institution": "Bank of Tanzania",
+        "documents": ["Bid form", "Proof of payment"],
+        "estimatedCostUSD": 400,
+        "estimatedDays": 7,
+        "tips": ["T-bill yields range from 5-12%", "Bonds up to 25 years available — yields 10-15%"]
+      },
+      {
+        "order": 3,
+        "titleKey": "procedures.TZ.government_bonds.step3.title",
+        "descriptionKey": "procedures.TZ.government_bonds.step3.desc",
+        "institution": "BoT / CSD",
+        "documents": ["Allotment confirmation", "CSD statement"],
+        "estimatedCostUSD": 0,
+        "estimatedDays": 3,
+        "tips": ["Interest income on government bonds is subject to 10% withholding tax"]
+      }
+    ],
+    "lastUpdated": "2026-01-15",
+    "sourceNotes": "Bank of Tanzania / CMSA Tanzania"
+  },
+  "TZ_local_stocks": {
+    "countryCode": "TZ",
+    "assetClass": "local_stocks",
+    "steps": [
+      {
+        "order": 1,
+        "titleKey": "procedures.TZ.local_stocks.step1.title",
+        "descriptionKey": "procedures.TZ.local_stocks.step1.desc",
+        "institution": "Licensed broker (Orbit Securities, Vertex Financial, CORE Securities)",
+        "documents": ["National ID or passport", "TIN", "Bank details", "CSD account"],
+        "estimatedCostUSD": 0,
+        "estimatedDays": 5,
+        "tips": ["The DSE (Dar es Salaam Stock Exchange) lists ~28 companies", "CMSA (Capital Markets and Securities Authority) regulates the market"]
+      },
+      {
+        "order": 2,
+        "titleKey": "procedures.TZ.local_stocks.step2.title",
+        "descriptionKey": "procedures.TZ.local_stocks.step2.desc",
+        "institution": "DSE / Broker",
+        "documents": ["Buy order", "Trade confirmation"],
+        "estimatedCostUSD": 50,
+        "estimatedDays": 3,
+        "tips": ["Key DSE stocks: TBL (Tanzania Breweries), CRDB, NMB, Vodacom Tanzania", "Trading fees: ~1.82% total (broker + DSE + CMSA + CSD)"]
+      },
+      {
+        "order": 3,
+        "titleKey": "procedures.TZ.local_stocks.step3.title",
+        "descriptionKey": "procedures.TZ.local_stocks.step3.desc",
+        "institution": "Broker / CSD",
+        "documents": ["Portfolio statement", "Dividend notifications"],
+        "estimatedCostUSD": 0,
+        "estimatedDays": 0,
+        "tips": ["Dividends subject to 5% withholding tax for residents", "Capital gains tax: 10%"]
+      }
+    ],
+    "lastUpdated": "2026-01-15",
+    "sourceNotes": "DSE / CMSA Tanzania"
+  },
+  "UG_savings_account": {
+    "countryCode": "UG",
+    "assetClass": "savings_account",
+    "steps": [
+      {
+        "order": 1,
+        "titleKey": "procedures.UG.savings_account.step1.title",
+        "descriptionKey": "procedures.UG.savings_account.step1.desc",
+        "institution": "Commercial bank (Stanbic Uganda, DFCU, Centenary Bank, Equity Bank UG)",
+        "documents": ["National ID or passport", "TIN from URA", "Proof of address", "2 passport photos"],
+        "estimatedCostUSD": 5,
+        "estimatedDays": 1,
+        "tips": ["Centenary Bank has the largest branch network in rural Uganda", "Mobile money (MTN MoMo, Airtel Money) is widely used"]
+      },
+      {
+        "order": 2,
+        "titleKey": "procedures.UG.savings_account.step2.title",
+        "descriptionKey": "procedures.UG.savings_account.step2.desc",
+        "institution": "Chosen bank",
+        "documents": ["Account opening form", "Initial deposit (UGX 50,000-200,000)"],
+        "estimatedCostUSD": 5,
+        "estimatedDays": 1,
+        "tips": ["Fixed deposit rates: 8-13% depending on tenor", "Savings account rates: 3-5%"]
+      }
+    ],
+    "lastUpdated": "2026-01-15",
+    "sourceNotes": "Bank of Uganda regulations"
+  },
+  "UG_government_bonds": {
+    "countryCode": "UG",
+    "assetClass": "government_bonds",
+    "steps": [
+      {
+        "order": 1,
+        "titleKey": "procedures.UG.government_bonds.step1.title",
+        "descriptionKey": "procedures.UG.government_bonds.step1.desc",
+        "institution": "Bank of Uganda / Licensed dealer",
+        "documents": ["National ID or passport", "TIN", "Bank account details"],
+        "estimatedCostUSD": 0,
+        "estimatedDays": 5,
+        "tips": ["Treasury bills and bonds are auctioned fortnightly", "Minimum: UGX 100,000 for T-bills, UGX 1,000,000 for bonds"]
+      },
+      {
+        "order": 2,
+        "titleKey": "procedures.UG.government_bonds.step2.title",
+        "descriptionKey": "procedures.UG.government_bonds.step2.desc",
+        "institution": "Bank of Uganda",
+        "documents": ["Bid form", "Proof of payment"],
+        "estimatedCostUSD": 50,
+        "estimatedDays": 5,
+        "tips": ["T-bill yields: 8-15%", "Bond yields: 12-17% for longer tenors"]
+      },
+      {
+        "order": 3,
+        "titleKey": "procedures.UG.government_bonds.step3.title",
+        "descriptionKey": "procedures.UG.government_bonds.step3.desc",
+        "institution": "Bank of Uganda / CSD",
+        "documents": ["Allotment confirmation", "CSD statement"],
+        "estimatedCostUSD": 0,
+        "estimatedDays": 3,
+        "tips": ["Government securities are exempt from withholding tax in Uganda", "Secondary market trading available through USE"]
+      }
+    ],
+    "lastUpdated": "2026-01-15",
+    "sourceNotes": "Bank of Uganda / CMA Uganda"
+  },
+  "UG_local_stocks": {
+    "countryCode": "UG",
+    "assetClass": "local_stocks",
+    "steps": [
+      {
+        "order": 1,
+        "titleKey": "procedures.UG.local_stocks.step1.title",
+        "descriptionKey": "procedures.UG.local_stocks.step1.desc",
+        "institution": "Licensed broker (SBG Securities, Crested Capital, African Alliance Uganda)",
+        "documents": ["National ID or passport", "TIN", "Bank details", "SCD account"],
+        "estimatedCostUSD": 0,
+        "estimatedDays": 5,
+        "tips": ["The USE (Uganda Securities Exchange) lists ~17 companies", "CMA Uganda regulates the market"]
+      },
+      {
+        "order": 2,
+        "titleKey": "procedures.UG.local_stocks.step2.title",
+        "descriptionKey": "procedures.UG.local_stocks.step2.desc",
+        "institution": "USE / Broker",
+        "documents": ["Buy order", "Trade confirmation"],
+        "estimatedCostUSD": 50,
+        "estimatedDays": 3,
+        "tips": ["Key stocks: Stanbic Uganda, DFCU, Umeme, MTN Uganda", "Cross-listed East African stocks available (Safaricom, EABL, KCB)"]
+      }
+    ],
+    "lastUpdated": "2026-01-15",
+    "sourceNotes": "USE / CMA Uganda"
+  },
+  "RW_savings_account": {
+    "countryCode": "RW",
+    "assetClass": "savings_account",
+    "steps": [
+      {
+        "order": 1,
+        "titleKey": "procedures.RW.savings_account.step1.title",
+        "descriptionKey": "procedures.RW.savings_account.step1.desc",
+        "institution": "Commercial bank (Bank of Kigali, Equity Bank RW, I&M Bank Rwanda, BPR)",
+        "documents": ["National ID or passport", "TIN from RRA", "Proof of residence"],
+        "estimatedCostUSD": 5,
+        "estimatedDays": 1,
+        "tips": ["Bank of Kigali is the largest commercial bank", "Rwanda has a strong fintech ecosystem — Irembo for digital services"]
+      },
+      {
+        "order": 2,
+        "titleKey": "procedures.RW.savings_account.step2.title",
+        "descriptionKey": "procedures.RW.savings_account.step2.desc",
+        "institution": "Chosen bank",
+        "documents": ["Account opening form", "Initial deposit (RWF 5,000-20,000)"],
+        "estimatedCostUSD": 5,
+        "estimatedDays": 1,
+        "tips": ["Fixed deposit rates: 7-11%", "MTN MoMo and Airtel Money are widely used"]
+      }
+    ],
+    "lastUpdated": "2026-01-15",
+    "sourceNotes": "National Bank of Rwanda regulations"
+  },
+  "RW_government_bonds": {
+    "countryCode": "RW",
+    "assetClass": "government_bonds",
+    "steps": [
+      {
+        "order": 1,
+        "titleKey": "procedures.RW.government_bonds.step1.title",
+        "descriptionKey": "procedures.RW.government_bonds.step1.desc",
+        "institution": "National Bank of Rwanda / Licensed dealer",
+        "documents": ["National ID or passport", "TIN", "Bank account details", "CSD account"],
+        "estimatedCostUSD": 0,
+        "estimatedDays": 5,
+        "tips": ["T-bills and bonds auctioned regularly via BNR", "Minimum: RWF 100,000"]
+      },
+      {
+        "order": 2,
+        "titleKey": "procedures.RW.government_bonds.step2.title",
+        "descriptionKey": "procedures.RW.government_bonds.step2.desc",
+        "institution": "BNR",
+        "documents": ["Bid form", "Proof of payment"],
+        "estimatedCostUSD": 100,
+        "estimatedDays": 5,
+        "tips": ["T-bill yields: 6-10%", "Rwanda is seen as a stable investment destination in East Africa"]
+      },
+      {
+        "order": 3,
+        "titleKey": "procedures.RW.government_bonds.step3.title",
+        "descriptionKey": "procedures.RW.government_bonds.step3.desc",
+        "institution": "BNR / RSE",
+        "documents": ["Allotment confirmation", "CSD statement"],
+        "estimatedCostUSD": 0,
+        "estimatedDays": 3,
+        "tips": ["Government bonds can be traded on the RSE (Rwanda Stock Exchange)"]
+      }
+    ],
+    "lastUpdated": "2026-01-15",
+    "sourceNotes": "National Bank of Rwanda / CMA Rwanda"
+  },
+  "RW_local_stocks": {
+    "countryCode": "RW",
+    "assetClass": "local_stocks",
+    "steps": [
+      {
+        "order": 1,
+        "titleKey": "procedures.RW.local_stocks.step1.title",
+        "descriptionKey": "procedures.RW.local_stocks.step1.desc",
+        "institution": "Licensed broker (BK Securities, CDH Capital, MBEA Brokerage)",
+        "documents": ["National ID or passport", "TIN", "Bank details", "CSD account"],
+        "estimatedCostUSD": 0,
+        "estimatedDays": 5,
+        "tips": ["The RSE (Rwanda Stock Exchange) lists ~10 companies", "Cross-listed EAC stocks are available"]
+      },
+      {
+        "order": 2,
+        "titleKey": "procedures.RW.local_stocks.step2.title",
+        "descriptionKey": "procedures.RW.local_stocks.step2.desc",
+        "institution": "RSE / Broker",
+        "documents": ["Buy order", "Trade confirmation"],
+        "estimatedCostUSD": 50,
+        "estimatedDays": 3,
+        "tips": ["Key RSE stocks: Bank of Kigali, I&M Bank Rwanda, Bralirwa", "Rwanda is a leading African market for fintech investments"]
+      }
+    ],
+    "lastUpdated": "2026-01-15",
+    "sourceNotes": "RSE / CMA Rwanda"
+  },
+  "ET_savings_account": {
+    "countryCode": "ET",
+    "assetClass": "savings_account",
+    "steps": [
+      {
+        "order": 1,
+        "titleKey": "procedures.ET.savings_account.step1.title",
+        "descriptionKey": "procedures.ET.savings_account.step1.desc",
+        "institution": "Commercial bank (Commercial Bank of Ethiopia, Awash Bank, Dashen Bank, Abyssinia Bank)",
+        "documents": ["Kebele ID or passport", "TIN from ERCA", "Proof of residence", "2 passport photos"],
+        "estimatedCostUSD": 5,
+        "estimatedDays": 1,
+        "tips": ["Commercial Bank of Ethiopia is the largest bank in Ethiopia and East Africa", "Ethiopia's banking sector is opening to private and foreign investment"]
+      },
+      {
+        "order": 2,
+        "titleKey": "procedures.ET.savings_account.step2.title",
+        "descriptionKey": "procedures.ET.savings_account.step2.desc",
+        "institution": "Chosen bank",
+        "documents": ["Account opening form", "Initial deposit (ETB 500-5,000)"],
+        "estimatedCostUSD": 5,
+        "estimatedDays": 1,
+        "tips": ["Savings rates: 7-8% — among the highest in East Africa", "Telebirr (by Ethio Telecom) is the dominant mobile money platform"]
+      }
+    ],
+    "lastUpdated": "2026-01-15",
+    "sourceNotes": "National Bank of Ethiopia regulations"
+  },
+  "ET_government_bonds": {
+    "countryCode": "ET",
+    "assetClass": "government_bonds",
+    "steps": [
+      {
+        "order": 1,
+        "titleKey": "procedures.ET.government_bonds.step1.title",
+        "descriptionKey": "procedures.ET.government_bonds.step1.desc",
+        "institution": "National Bank of Ethiopia / Commercial Bank of Ethiopia",
+        "documents": ["Kebele ID or passport", "TIN", "Bank account"],
+        "estimatedCostUSD": 0,
+        "estimatedDays": 5,
+        "tips": ["Ethiopia issues Treasury bills and Development Bank bonds", "The Ethiopian Securities Exchange (ESX) is being established"]
+      },
+      {
+        "order": 2,
+        "titleKey": "procedures.ET.government_bonds.step2.title",
+        "descriptionKey": "procedures.ET.government_bonds.step2.desc",
+        "institution": "National Bank of Ethiopia",
+        "documents": ["Bid form", "Proof of payment"],
+        "estimatedCostUSD": 100,
+        "estimatedDays": 7,
+        "tips": ["T-bill yields: 8-12%", "Grand Renaissance Dam bonds were popular with diaspora investors"]
+      },
+      {
+        "order": 3,
+        "titleKey": "procedures.ET.government_bonds.step3.title",
+        "descriptionKey": "procedures.ET.government_bonds.step3.desc",
+        "institution": "National Bank of Ethiopia",
+        "documents": ["Allotment confirmation", "Certificate of investment"],
+        "estimatedCostUSD": 0,
+        "estimatedDays": 5,
+        "tips": ["Ethiopia is establishing a capital market — ESX expected to launch fully by 2026-2027"]
+      }
+    ],
+    "lastUpdated": "2026-01-15",
+    "sourceNotes": "National Bank of Ethiopia / Ethiopian Capital Market Authority"
+  },
+  "ET_agrobusiness": {
+    "countryCode": "ET",
+    "assetClass": "agrobusiness",
+    "steps": [
+      {
+        "order": 1,
+        "titleKey": "procedures.ET.agrobusiness.step1.title",
+        "descriptionKey": "procedures.ET.agrobusiness.step1.desc",
+        "institution": "Ministry of Trade and Industry / EIC (Ethiopian Investment Commission)",
+        "documents": ["Business license application", "Kebele ID or passport", "TIN", "Business plan"],
+        "estimatedCostUSD": 100,
+        "estimatedDays": 14,
+        "tips": ["EIC provides one-stop service for investors", "Agriculture is 40% of GDP — coffee, sesame, flowers are key exports"]
+      },
+      {
+        "order": 2,
+        "titleKey": "procedures.ET.agrobusiness.step2.title",
+        "descriptionKey": "procedures.ET.agrobusiness.step2.desc",
+        "institution": "Ministry of Agriculture / Regional Land Administration",
+        "documents": ["Land lease agreement", "Environmental permit", "Agricultural license"],
+        "estimatedCostUSD": 200,
+        "estimatedDays": 30,
+        "tips": ["All land is state-owned — leasehold system", "Industrial park model available for agro-processing"]
+      },
+      {
+        "order": 3,
+        "titleKey": "procedures.ET.agrobusiness.step3.title",
+        "descriptionKey": "procedures.ET.agrobusiness.step3.desc",
+        "institution": "Development Bank of Ethiopia / Commercial banks",
+        "documents": ["Business plan", "Land lease agreement", "Feasibility study"],
+        "estimatedCostUSD": 50,
+        "estimatedDays": 30,
+        "tips": ["DBE provides agricultural project financing at preferential rates", "Ethiopia offers tax holidays for agricultural investments"]
+      }
+    ],
+    "lastUpdated": "2026-01-15",
+    "sourceNotes": "EIC / Ministry of Agriculture Ethiopia"
+  }
+}

@@ -17,6 +17,19 @@ export const ASSET_TO_PILLAR: Record<AssetClass, InvestmentPillar> = {
   term_deposit: 'base_arriere',
   money_market: 'base_arriere',
   tontine: 'base_arriere',
+  private_equity: 'croissance',
+  venture_capital: 'croissance',
+  agrobusiness: 'croissance',
+  mining_assets: 'croissance',
+  tokenized_assets: 'croissance',
+  municipal_bonds: 'amortisseur',
+  venture_debt: 'amortisseur',
+  mezzanine: 'amortisseur',
+  esg_bonds: 'amortisseur',
+  infrastructure: 'refuge',
+  commodities: 'refuge',
+  carbon_credits: 'refuge',
+  derivatives: 'croissance',
 };
 
 export const PILLAR_CONFIG: Record<InvestmentPillar, PillarConfig> = {

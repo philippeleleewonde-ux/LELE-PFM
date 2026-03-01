@@ -38,9 +38,8 @@ export function validateFlexibilityParams(f1: number, f2: number, f3: number): {
   return { valid: true };
 }
 
-export function capRealToPrevu(actual: number, planned: number): number {
-  return Math.min(actual, planned);
-}
+// capRealToPrevu — use the canonical version from @/domain/utils/math-utils
+export { capRealToPrevu } from '../utils/math-utils';
 
 export function validateWeekNumber(week: number): { valid: boolean; error?: string } {
   if (!Number.isInteger(week)) {

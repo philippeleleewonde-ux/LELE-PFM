@@ -1,19 +1,42 @@
-import React, { useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, Animated } from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import { View, Text, StyleSheet, Animated, Platform } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useTranslation } from 'react-i18next';
 import { OB, FadeInView, OBGlassCard, neonGlow } from '../shared';
 
 function AnimatedBar({ pct, color, isActive, delay }: { pct: number; color: string; isActive: boolean; delay: number }) {
+  const isWeb = Platform.OS === 'web';
+  const [animate, setAnimate] = useState(false);
   const width = useRef(new Animated.Value(0)).current;
+
   useEffect(() => {
-    if (isActive) {
-      width.setValue(0);
-      Animated.timing(width, { toValue: pct, duration: 1000, delay, useNativeDriver: false }).start();
+    if (isWeb) {
+      if (isActive) {
+        const raf = requestAnimationFrame(() => setAnimate(true));
+        return () => cancelAnimationFrame(raf);
+      }
     } else {
-      width.setValue(0);
+      if (isActive) {
+        width.setValue(0);
+        Animated.timing(width, { toValue: pct, duration: 1000, delay, useNativeDriver: false }).start();
+      } else {
+        width.setValue(0);
+      }
     }
   }, [isActive]);
+
+  if (isWeb) {
+    return (
+      <View style={styles.barTrack}>
+        <View style={[styles.barFill, {
+          width: animate ? `${pct}%` : '0%',
+          transition: `width 1000ms ease ${delay}ms`,
+        } as any]}>
+          <LinearGradient colors={[OB.blue, color]} style={StyleSheet.absoluteFill} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} />
+        </View>
+      </View>
+    );
+  }
 
   const widthInterp = width.interpolate({ inputRange: [0, 100], outputRange: ['0%', '100%'] });
 
@@ -37,55 +60,51 @@ export default function Slide5Calendar({ isActive }: { isActive: boolean }) {
 
   return (
     <LinearGradient colors={[OB.darkBg, '#12131A']} style={styles.container}>
-      {isActive && (
-        <>
-          {/* Pactole Card */}
-          <FadeInView active={isActive} delay={100}>
-          <OBGlassCard style={styles.card}>
-            <Text style={styles.cardTitle}>{t('slide5.cardTitle')}</Text>
+      {/* Pactole Card */}
+      <FadeInView active={isActive} delay={100}>
+      <OBGlassCard style={styles.card}>
+        <Text style={styles.cardTitle}>{t('slide5.cardTitle')}</Text>
 
-            {years.map((y, i) => (
-              <FadeInView key={y.label} active={isActive} delay={200 + i * 100} duration={400} from="left" style={styles.yearRow}>
-                <View style={styles.yearHeader}>
-                  <View style={styles.yearLabelRow}>
-                    <Text style={styles.yearLabel}>{y.label}</Text>
-                    <View style={[styles.pctBadge, { backgroundColor: y.color + '20' }]}>
-                      <Text style={[styles.pctText, { color: y.color }]}>{y.pct}%</Text>
-                    </View>
-                  </View>
-                  <Text style={[styles.yearAmount, { color: y.color, ...neonGlow(y.color) }]}>{y.amount}</Text>
+        {years.map((y, i) => (
+          <FadeInView key={y.label} active={isActive} delay={200 + i * 100} duration={400} from="left" style={styles.yearRow}>
+            <View style={styles.yearHeader}>
+              <View style={styles.yearLabelRow}>
+                <Text style={styles.yearLabel}>{y.label}</Text>
+                <View style={[styles.pctBadge, { backgroundColor: y.color + '20' }]}>
+                  <Text style={[styles.pctText, { color: y.color }]}>{y.pct}%</Text>
                 </View>
-                <AnimatedBar pct={y.pct} color={y.color} isActive={isActive} delay={y.delay} />
-              </FadeInView>
-            ))}
-
-            {/* Treasure reveal */}
-            <FadeInView active={isActive} delay={900} duration={400} from="top" style={styles.treasureBox}>
-              <Text style={styles.treasureIcon}>{'\u{1F4B0}'}</Text>
-              <View style={{ flex: 1 }}>
-                <Text style={styles.treasureTitle}>{t('slide5.treasureTitle')}</Text>
-                <Text style={styles.treasureSub}>{t('slide5.treasureSub')}</Text>
               </View>
-            </FadeInView>
-          </OBGlassCard>
+              <Text style={[styles.yearAmount, { color: y.color, ...neonGlow(y.color) }]}>{y.amount}</Text>
+            </View>
+            <AnimatedBar pct={y.pct} color={y.color} isActive={isActive} delay={y.delay} />
           </FadeInView>
+        ))}
 
-          {/* Text */}
-          <FadeInView active={isActive} delay={400}>
-            <Text style={[styles.tagline, neonGlow(OB.accent)]}>{t('slide5.tagline')}</Text>
-          </FadeInView>
-          <FadeInView active={isActive} delay={500}>
-            <Text style={styles.heading}>
-              {t('slide5.heading')}
-            </Text>
-          </FadeInView>
-          <FadeInView active={isActive} delay={600}>
-            <Text style={styles.body}>
-              <Text style={{ color: '#fff', fontWeight: '700' }}>{t('slide5.bodyBold')}</Text>{t('slide5.bodyEnd')}
-            </Text>
-          </FadeInView>
-        </>
-      )}
+        {/* Treasure reveal */}
+        <FadeInView active={isActive} delay={900} duration={400} from="top" style={styles.treasureBox}>
+          <Text style={styles.treasureIcon}>{'\u{1F4B0}'}</Text>
+          <View style={{ flex: 1 }}>
+            <Text style={styles.treasureTitle}>{t('slide5.treasureTitle')}</Text>
+            <Text style={styles.treasureSub}>{t('slide5.treasureSub')}</Text>
+          </View>
+        </FadeInView>
+      </OBGlassCard>
+      </FadeInView>
+
+      {/* Text */}
+      <FadeInView active={isActive} delay={400}>
+        <Text style={[styles.tagline, neonGlow(OB.accent)]}>{t('slide5.tagline')}</Text>
+      </FadeInView>
+      <FadeInView active={isActive} delay={500}>
+        <Text style={styles.heading}>
+          {t('slide5.heading')}
+        </Text>
+      </FadeInView>
+      <FadeInView active={isActive} delay={600}>
+        <Text style={styles.body}>
+          <Text style={{ color: '#fff', fontWeight: '700' }}>{t('slide5.bodyBold')}</Text>{t('slide5.bodyEnd')}
+        </Text>
+      </FadeInView>
     </LinearGradient>
   );
 }

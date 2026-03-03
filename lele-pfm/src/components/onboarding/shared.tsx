@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Animated, StyleProp, ViewStyle, View, StyleSheet, Platform, TextStyle } from 'react-native';
 import { BlurView } from 'expo-blur';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -116,26 +116,50 @@ interface FadeInViewProps {
 }
 
 export function FadeInView({ active, delay = 0, duration = 600, from = 'bottom', distance = 20, style, children }: FadeInViewProps) {
-  const initialTranslate = (from === 'top' || from === 'left') ? -distance : distance;
+  const isWeb = Platform.OS === 'web';
+  const dir = (from === 'top' || from === 'left') ? -1 : 1;
+  const prop = from === 'left' ? 'translateX' : from === 'none' ? '' : 'translateY';
+  const initialTranslate = from === 'none' ? 0 : distance * dir;
+
+  // Web: CSS transition state
+  const [animate, setAnimate] = useState(false);
+
+  // Native: Animated values
   const opacity = useRef(new Animated.Value(0)).current;
   const translate = useRef(new Animated.Value(initialTranslate)).current;
 
   useEffect(() => {
-    if (active) {
-      opacity.setValue(0);
-      translate.setValue(initialTranslate);
-
-      const anim = Animated.parallel([
-        Animated.timing(opacity, { toValue: 1, duration, delay, useNativeDriver: false }),
-        Animated.timing(translate, { toValue: 0, duration, delay, useNativeDriver: false }),
-      ]);
-      anim.start();
-      return () => anim.stop();
+    if (isWeb) {
+      if (active) {
+        const raf = requestAnimationFrame(() => setAnimate(true));
+        return () => cancelAnimationFrame(raf);
+      }
     } else {
-      opacity.setValue(0);
-      translate.setValue(initialTranslate);
+      if (active) {
+        opacity.setValue(0);
+        translate.setValue(initialTranslate);
+        const anim = Animated.parallel([
+          Animated.timing(opacity, { toValue: 1, duration, delay, useNativeDriver: false }),
+          Animated.timing(translate, { toValue: 0, duration, delay, useNativeDriver: false }),
+        ]);
+        anim.start();
+        return () => anim.stop();
+      } else {
+        opacity.setValue(0);
+        translate.setValue(initialTranslate);
+      }
     }
   }, [active]);
+
+  if (isWeb) {
+    const webStyle: any = {
+      opacity: animate ? 1 : 0,
+      transform: animate || !prop ? 'none' : `${prop}(${distance * dir}px)`,
+      transition: `opacity ${duration}ms ease ${delay}ms, transform ${duration}ms ease ${delay}ms`,
+      willChange: 'opacity, transform',
+    };
+    return <View style={[style, webStyle]}>{children}</View>;
+  }
 
   const transformStyle = from === 'left'
     ? { transform: [{ translateX: translate }] }
@@ -158,28 +182,50 @@ interface ZoomInViewProps {
 }
 
 export function ZoomInView({ active, delay = 0, style, children }: ZoomInViewProps) {
+  const isWeb = Platform.OS === 'web';
+
+  // Web: CSS transition state
+  const [animate, setAnimate] = useState(false);
+
+  // Native: Animated values
   const scale = useRef(new Animated.Value(0)).current;
   const opacity = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    if (active) {
-      scale.setValue(0);
-      opacity.setValue(0);
-
-      const anim = Animated.parallel([
-        Animated.sequence([
-          Animated.delay(delay),
-          Animated.spring(scale, { toValue: 1, friction: 6, tension: 40, useNativeDriver: false }),
-        ]),
-        Animated.timing(opacity, { toValue: 1, duration: 300, delay, useNativeDriver: false }),
-      ]);
-      anim.start();
-      return () => anim.stop();
+    if (isWeb) {
+      if (active) {
+        const raf = requestAnimationFrame(() => setAnimate(true));
+        return () => cancelAnimationFrame(raf);
+      }
     } else {
-      scale.setValue(0);
-      opacity.setValue(0);
+      if (active) {
+        scale.setValue(0);
+        opacity.setValue(0);
+        const anim = Animated.parallel([
+          Animated.sequence([
+            Animated.delay(delay),
+            Animated.spring(scale, { toValue: 1, friction: 6, tension: 40, useNativeDriver: false }),
+          ]),
+          Animated.timing(opacity, { toValue: 1, duration: 300, delay, useNativeDriver: false }),
+        ]);
+        anim.start();
+        return () => anim.stop();
+      } else {
+        scale.setValue(0);
+        opacity.setValue(0);
+      }
     }
   }, [active]);
+
+  if (isWeb) {
+    const webStyle: any = {
+      opacity: animate ? 1 : 0,
+      transform: animate ? 'scale(1)' : 'scale(0)',
+      transition: `opacity 300ms ease ${delay}ms, transform 400ms cubic-bezier(0.175, 0.885, 0.32, 1.275) ${delay}ms`,
+      willChange: 'opacity, transform',
+    };
+    return <View style={[style, webStyle]}>{children}</View>;
+  }
 
   return (
     <Animated.View style={[style, { opacity, transform: [{ scale }] } as any]}>

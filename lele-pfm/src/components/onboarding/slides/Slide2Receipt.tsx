@@ -16,53 +16,49 @@ export default function Slide2Receipt({ isActive }: { isActive: boolean }) {
 
   return (
     <LinearGradient colors={[OB.darkBg, '#12131A']} style={styles.container}>
-      {isActive && (
-        <>
-          {/* Steps Card */}
-          <FadeInView active={isActive} delay={100}>
-          <OBGlassCard style={styles.card}>
-            <Text style={styles.cardTitle}>{t('slide2.cardTitle')}</Text>
+      {/* Steps Card */}
+      <FadeInView active={isActive} delay={100}>
+      <OBGlassCard style={styles.card}>
+        <Text style={styles.cardTitle}>{t('slide2.cardTitle')}</Text>
 
-            {steps.map((s, i) => (
-              <FadeInView key={s.num} active={isActive} delay={200 + i * 120} duration={400} from="left" style={[styles.stepRow, i < steps.length - 1 && styles.stepRowBorder]}>
-                <View style={[styles.stepNum, { backgroundColor: s.color + '20' }]}>
-                  <Text style={[styles.stepNumText, { color: s.color }]}>{s.icon}</Text>
-                </View>
-                <View style={styles.stepInfo}>
-                  <Text style={styles.stepLabel}>{s.label}</Text>
-                  <Text style={styles.stepDesc}>{s.desc}</Text>
-                </View>
-                <Text style={[styles.stepCheck, { color: s.color }]}>{'\u2713'}</Text>
-              </FadeInView>
-            ))}
+        {steps.map((s, i) => (
+          <FadeInView key={s.num} active={isActive} delay={200 + i * 120} duration={400} from="left" style={[styles.stepRow, i < steps.length - 1 && styles.stepRowBorder]}>
+            <View style={[styles.stepNum, { backgroundColor: s.color + '20' }]}>
+              <Text style={[styles.stepNumText, { color: s.color }]}>{s.icon}</Text>
+            </View>
+            <View style={styles.stepInfo}>
+              <Text style={styles.stepLabel}>{s.label}</Text>
+              <Text style={styles.stepDesc}>{s.desc}</Text>
+            </View>
+            <Text style={[styles.stepCheck, { color: s.color }]}>{'\u2713'}</Text>
+          </FadeInView>
+        ))}
 
-            {/* Result reveal */}
-            <ZoomInView active={isActive} delay={800} style={styles.resultBox}>
-              <Text style={styles.resultIcon}>{'\u{1F9E0}'}</Text>
-              <View style={{ flex: 1 }}>
-                <Text style={styles.resultTitle}>{t('slide2.resultTitle')}</Text>
-                <Text style={styles.resultSub}>{t('slide2.resultSub')}</Text>
-              </View>
-            </ZoomInView>
-          </OBGlassCard>
-          </FadeInView>
+        {/* Result reveal */}
+        <ZoomInView active={isActive} delay={800} style={styles.resultBox}>
+          <Text style={styles.resultIcon}>{'\u{1F9E0}'}</Text>
+          <View style={{ flex: 1 }}>
+            <Text style={styles.resultTitle}>{t('slide2.resultTitle')}</Text>
+            <Text style={styles.resultSub}>{t('slide2.resultSub')}</Text>
+          </View>
+        </ZoomInView>
+      </OBGlassCard>
+      </FadeInView>
 
-          {/* Text */}
-          <FadeInView active={isActive} delay={400}>
-            <Text style={[styles.tagline, neonGlow(OB.accent)]}>{t('slide2.tagline')}</Text>
-          </FadeInView>
-          <FadeInView active={isActive} delay={500}>
-            <Text style={styles.heading}>
-              {t('slide2.heading')}
-            </Text>
-          </FadeInView>
-          <FadeInView active={isActive} delay={600}>
-            <Text style={styles.body}>
-              <Text style={{ color: '#fff', fontWeight: '700' }}>{t('slide2.bodyBold')}</Text>{t('slide2.bodyEnd')}
-            </Text>
-          </FadeInView>
-        </>
-      )}
+      {/* Text */}
+      <FadeInView active={isActive} delay={400}>
+        <Text style={[styles.tagline, neonGlow(OB.accent)]}>{t('slide2.tagline')}</Text>
+      </FadeInView>
+      <FadeInView active={isActive} delay={500}>
+        <Text style={styles.heading}>
+          {t('slide2.heading')}
+        </Text>
+      </FadeInView>
+      <FadeInView active={isActive} delay={600}>
+        <Text style={styles.body}>
+          <Text style={{ color: '#fff', fontWeight: '700' }}>{t('slide2.bodyBold')}</Text>{t('slide2.bodyEnd')}
+        </Text>
+      </FadeInView>
     </LinearGradient>
   );
 }

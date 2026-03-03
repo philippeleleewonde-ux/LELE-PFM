@@ -33,20 +33,20 @@ export default function OnboardingScreen({ onComplete }: Props) {
   };
 
   const goTo = useCallback((index: number) => {
-    if (containerWidth <= 0) return;
+    if (contentHeight <= 0) return;
     const clamped = Math.max(0, Math.min(SLIDE_COUNT - 1, index));
     setCurrent(clamped);
-    scrollRef.current?.scrollTo({ x: clamped * containerWidth, animated: true });
-  }, [containerWidth]);
+    scrollRef.current?.scrollTo({ y: clamped * contentHeight, animated: true });
+  }, [contentHeight]);
 
   const handleScroll = useCallback((e: NativeSyntheticEvent<NativeScrollEvent>) => {
-    if (containerWidth <= 0) return;
-    const offsetX = e.nativeEvent.contentOffset.x;
-    const page = Math.round(offsetX / containerWidth);
+    if (contentHeight <= 0) return;
+    const offsetY = e.nativeEvent.contentOffset.y;
+    const page = Math.round(offsetY / contentHeight);
     if (page !== current && page >= 0 && page < SLIDE_COUNT) {
       setCurrent(page);
     }
-  }, [current, containerWidth]);
+  }, [current, contentHeight]);
 
   const handleNext = () => {
     if (current === SLIDE_COUNT - 1) {
@@ -62,34 +62,30 @@ export default function OnboardingScreen({ onComplete }: Props) {
     <View style={styles.root} onLayout={onRootLayout}>
       <AmbientSpotlights />
 
-      {/* Content area — flex: 1 takes all space above controls */}
+      {/* Content area — vertical paging */}
       <View style={styles.contentArea} onLayout={onContentLayout}>
         {containerWidth > 0 && contentHeight > 0 && (
           <ScrollView
             ref={scrollRef}
-            horizontal
             pagingEnabled
-            showsHorizontalScrollIndicator={false}
+            snapToInterval={contentHeight}
+            decelerationRate="fast"
+            showsVerticalScrollIndicator={false}
             onMomentumScrollEnd={handleScroll}
+            onScrollEndDrag={handleScroll}
             scrollEventThrottle={16}
             style={styles.scrollView}
           >
             {SLIDES.map((SlideComponent, i) => (
               <View key={i} style={{ width: containerWidth, height: contentHeight }}>
-                <ScrollView
-                  showsVerticalScrollIndicator={false}
-                  contentContainerStyle={styles.slideContent}
-                  nestedScrollEnabled
-                >
-                  <SlideComponent isActive={i === current} />
-                </ScrollView>
+                <SlideComponent isActive={i === current} />
               </View>
             ))}
           </ScrollView>
         )}
       </View>
 
-      {/* Bottom controls — normal flow, not absolute */}
+      {/* Bottom controls */}
       <View style={styles.controls}>
         {/* Dots */}
         <View style={styles.dotsRow}>
@@ -131,7 +127,6 @@ const styles = StyleSheet.create({
   },
   contentArea: { flex: 1 },
   scrollView: { flex: 1 },
-  slideContent: { flexGrow: 1 },
   controls: {
     paddingBottom: Platform.OS === 'web' ? 24 : 40,
     paddingTop: 12,

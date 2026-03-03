@@ -299,7 +299,7 @@ const styles = StyleSheet.create({
   content: {
     padding: 20,
     paddingTop: 40,
-    paddingBottom: 120,
+    paddingBottom: 24,
     alignItems: 'center',
   },
   // Confetti

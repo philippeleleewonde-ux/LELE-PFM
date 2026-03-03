@@ -1,5 +1,5 @@
-import React, { useState, useRef, useCallback } from 'react';
-import { View, Text, StyleSheet, Pressable, ScrollView, NativeScrollEvent, NativeSyntheticEvent, LayoutChangeEvent } from 'react-native';
+import React, { useState, useCallback } from 'react';
+import { View, Text, StyleSheet, Pressable, Platform, LayoutChangeEvent } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useTranslation } from 'react-i18next';
 import { OB, SLIDE_COUNT, AmbientSpotlights } from './shared';
@@ -20,28 +20,11 @@ interface Props {
 export default function OnboardingScreen({ onComplete }: Props) {
   const { t } = useTranslation('onboarding');
   const [current, setCurrent] = useState(0);
-  const [containerWidth, setContainerWidth] = useState(0);
-  const scrollRef = useRef<ScrollView>(null);
-
-  const onRootLayout = (e: LayoutChangeEvent) => {
-    setContainerWidth(e.nativeEvent.layout.width);
-  };
 
   const goTo = useCallback((index: number) => {
-    if (containerWidth <= 0) return;
     const clamped = Math.max(0, Math.min(SLIDE_COUNT - 1, index));
     setCurrent(clamped);
-    scrollRef.current?.scrollTo({ x: clamped * containerWidth, animated: true });
-  }, [containerWidth]);
-
-  const handleScroll = useCallback((e: NativeSyntheticEvent<NativeScrollEvent>) => {
-    if (containerWidth <= 0) return;
-    const offsetX = e.nativeEvent.contentOffset.x;
-    const page = Math.round(offsetX / containerWidth);
-    if (page !== current && page >= 0 && page < SLIDE_COUNT) {
-      setCurrent(page);
-    }
-  }, [current, containerWidth]);
+  }, []);
 
   const handleNext = () => {
     if (current === SLIDE_COUNT - 1) {
@@ -52,30 +35,18 @@ export default function OnboardingScreen({ onComplete }: Props) {
   };
 
   const isLast = current === SLIDE_COUNT - 1;
+  const CurrentSlide = SLIDES[current];
 
   return (
-    <View style={styles.root} onLayout={onRootLayout}>
+    <View style={styles.root}>
       <AmbientSpotlights />
-      {/* Horizontal paging ScrollView */}
-      {containerWidth > 0 && (
-      <ScrollView
-        ref={scrollRef}
-        horizontal
-        pagingEnabled
-        showsHorizontalScrollIndicator={false}
-        onMomentumScrollEnd={handleScroll}
-        scrollEventThrottle={16}
-        style={styles.scrollView}
-      >
-        {SLIDES.map((SlideComponent, i) => (
-          <View key={i} style={[styles.slide, { width: containerWidth }]}>
-            <SlideComponent isActive={i === current} />
-          </View>
-        ))}
-      </ScrollView>
-      )}
 
-      {/* Bottom controls - no entering animation (always visible) */}
+      {/* Current slide — only render the active one */}
+      <View style={styles.contentArea}>
+        <CurrentSlide key={current} isActive={true} />
+      </View>
+
+      {/* Bottom controls */}
       <View style={styles.controls}>
         {/* Dots */}
         <View style={styles.dotsRow}>
@@ -110,16 +81,26 @@ export default function OnboardingScreen({ onComplete }: Props) {
 }
 
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: OB.darkBg },
-  scrollView: { flex: 1 },
-  slide: { flex: 1, overflow: 'hidden' },
-  controls: { position: 'absolute', bottom: 0, left: 0, right: 0, paddingBottom: 40, paddingTop: 16, alignItems: 'center', backgroundColor: 'rgba(15,16,20,0.9)' },
-  dotsRow: { flexDirection: 'row', gap: 8, marginBottom: 16 },
+  root: {
+    flex: 1,
+    backgroundColor: OB.darkBg,
+    ...(Platform.OS === 'web' ? { maxHeight: '100dvh' as any, height: '100dvh' as any } : {}),
+  },
+  contentArea: { flex: 1 },
+  controls: {
+    paddingBottom: Platform.OS === 'web' ? 24 : 40,
+    paddingTop: 12,
+    alignItems: 'center',
+    backgroundColor: OB.darkBg,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(255,255,255,0.06)',
+  },
+  dotsRow: { flexDirection: 'row', gap: 8, marginBottom: 12 },
   dot: { width: 8, height: 8, borderRadius: 4, backgroundColor: 'rgba(148,163,184,0.3)' },
   dotActive: { width: 24, backgroundColor: OB.accent, borderRadius: 4 },
-  buttonWrap: { width: '80%', maxWidth: 320, marginBottom: 12 },
+  buttonWrap: { width: '80%', maxWidth: 320, marginBottom: 8 },
   buttonWrapLast: { shadowColor: '#FBBF24', shadowOpacity: 0.4, shadowRadius: 16, shadowOffset: { width: 0, height: 0 }, elevation: 8 },
-  button: { paddingVertical: 16, borderRadius: 14, alignItems: 'center' },
+  button: { paddingVertical: 14, borderRadius: 14, alignItems: 'center' },
   buttonNonLast: { borderWidth: 1, borderColor: 'rgba(251,189,35,0.2)' },
   buttonText: { color: '#fff', fontSize: 17, fontWeight: '700' },
   skipText: { fontSize: 14, color: OB.textMuted },

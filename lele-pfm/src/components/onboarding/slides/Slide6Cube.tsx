@@ -64,7 +64,7 @@ export default function Slide6Cube({ isActive }: { isActive: boolean }) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 32, paddingBottom: 120, paddingTop: 60 },
+  container: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 24, paddingBottom: 24, paddingTop: 48 },
   card: { width: '100%', maxWidth: 300, borderRadius: 16, padding: 16, marginBottom: 28 },
   iconCenter: { alignItems: 'center', marginBottom: 12 },
   treasureBadge: { width: 56, height: 56, borderRadius: 16, backgroundColor: 'rgba(255,215,0,0.12)', alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: 'rgba(255,215,0,0.3)' },

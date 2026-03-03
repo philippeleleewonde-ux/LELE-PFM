@@ -1,5 +1,5 @@
-import React, { useRef, useEffect, useState } from 'react';
-import { View, Text, StyleSheet, Pressable, Animated, ScrollView, Platform, LayoutChangeEvent } from 'react-native';
+import React, { useRef, useEffect } from 'react';
+import { View, Text, StyleSheet, Pressable, Animated, Platform } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { WZ, WIZARD_STEP_COUNT, AmbientSpotlights, neonGlow } from './shared';
 import { useWizardStore } from '@/stores/wizard-store';
@@ -21,13 +21,7 @@ export default function SetupWizardScreen({ onComplete }: Props) {
   const { t } = useTranslation('wizard');
   const { currentStep, setStep } = useWizardStore();
   const { isInvestor } = useViewMode();
-  const scrollRef = useRef<ScrollView>(null);
-  const [containerWidth, setContainerWidth] = useState(0);
   const progressAnim = useRef(new Animated.Value(0)).current;
-
-  const onRootLayout = (e: LayoutChangeEvent) => {
-    setContainerWidth(e.nativeEvent.layout.width);
-  };
 
   // Animate progress bar
   useEffect(() => {
@@ -37,13 +31,6 @@ export default function SetupWizardScreen({ onComplete }: Props) {
       useNativeDriver: false,
     }).start();
   }, [currentStep]);
-
-  // Scroll to current step
-  useEffect(() => {
-    if (containerWidth > 0) {
-      scrollRef.current?.scrollTo({ x: currentStep * containerWidth, animated: true });
-    }
-  }, [currentStep, containerWidth]);
 
   const goNext = () => {
     if (currentStep < WIZARD_STEP_COUNT - 1) {
@@ -65,7 +52,7 @@ export default function SetupWizardScreen({ onComplete }: Props) {
   });
 
   return (
-    <View style={styles.root} onLayout={onRootLayout}>
+    <View style={styles.root}>
       <AmbientSpotlights />
       {/* Header with progress */}
       <View style={styles.header}>
@@ -88,30 +75,17 @@ export default function SetupWizardScreen({ onComplete }: Props) {
         </View>
       </View>
 
-      {/* Steps content - horizontal scrolling */}
-      {containerWidth > 0 && (
-      <ScrollView
-        ref={scrollRef}
-        horizontal
-        pagingEnabled
-        scrollEnabled={false}
-        showsHorizontalScrollIndicator={false}
-        style={styles.scrollView}
-      >
-        {[0, 1, 2, 3, 4, 5, 6, 7].map((i) => (
-          <View key={i} style={[styles.stepContainer, { width: containerWidth }]}>
-            {i === 0 && <Step1Profile isActive={currentStep === 0} />}
-            {i === 1 && <Step2Flows isActive={currentStep === 1} />}
-            {i === 2 && <Step3History isActive={currentStep === 2} />}
-            {i === 3 && <Step4Risks isActive={currentStep === 3} />}
-            {i === 4 && <Step5SelfEval isActive={currentStep === 4} />}
-            {i === 5 && <Step6Levers isActive={currentStep === 5} />}
-            {i === 6 && <Step7InvestorProfile isActive={currentStep === 6} />}
-            {i === 7 && <Step7Final isActive={currentStep === 7} onComplete={onComplete} />}
-          </View>
-        ))}
-      </ScrollView>
-      )}
+      {/* Current step — render only the active one */}
+      <View style={styles.contentArea}>
+        {currentStep === 0 && <Step1Profile isActive={true} />}
+        {currentStep === 1 && <Step2Flows isActive={true} />}
+        {currentStep === 2 && <Step3History isActive={true} />}
+        {currentStep === 3 && <Step4Risks isActive={true} />}
+        {currentStep === 4 && <Step5SelfEval isActive={true} />}
+        {currentStep === 5 && <Step6Levers isActive={true} />}
+        {currentStep === 6 && <Step7InvestorProfile isActive={true} />}
+        {currentStep === 7 && <Step7Final isActive={true} onComplete={onComplete} />}
+      </View>
 
       {/* Bottom navigation (hidden on last step) */}
       {!isLast && (
@@ -149,6 +123,7 @@ const styles = StyleSheet.create({
   root: {
     flex: 1,
     backgroundColor: WZ.darkBg,
+    ...(Platform.OS === 'web' ? { maxHeight: '100dvh' as any, height: '100dvh' as any } : {}),
   },
   header: {
     paddingTop: 56,
@@ -202,10 +177,7 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     shadowOffset: { width: 0, height: 0 },
   },
-  scrollView: {
-    flex: 1,
-  },
-  stepContainer: {
+  contentArea: {
     flex: 1,
   },
   bottomNav: {

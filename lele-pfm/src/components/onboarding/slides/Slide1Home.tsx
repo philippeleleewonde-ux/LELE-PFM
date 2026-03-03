@@ -63,7 +63,7 @@ export default function Slide1Home({ isActive }: { isActive: boolean }) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 32, paddingBottom: 120, paddingTop: 60 },
+  container: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 24, paddingBottom: 24, paddingTop: 48 },
   logoWrap: { marginBottom: 16 },
   logo: { width: 80, height: 80, borderRadius: 22, alignItems: 'center', justifyContent: 'center' },
   logoText: { color: '#fff', fontSize: 28, fontWeight: '800' },

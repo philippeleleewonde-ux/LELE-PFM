@@ -1,19 +1,41 @@
-import React, { useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, Animated } from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import { View, Text, StyleSheet, Animated, Platform } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useTranslation } from 'react-i18next';
 import { OB, FadeInView, OBGlassCard, neonGlow } from '../shared';
 
 function AnimatedBar({ potentiel, color, isActive, delay }: { potentiel: number; color: string; isActive: boolean; delay: number }) {
+  const isWeb = Platform.OS === 'web';
+  const [animate, setAnimate] = useState(false);
   const width = useRef(new Animated.Value(0)).current;
+
   useEffect(() => {
-    if (isActive) {
-      width.setValue(0);
-      Animated.timing(width, { toValue: potentiel, duration: 800, delay, useNativeDriver: false }).start();
+    if (isWeb) {
+      if (isActive) {
+        const raf = requestAnimationFrame(() => setAnimate(true));
+        return () => cancelAnimationFrame(raf);
+      }
     } else {
-      width.setValue(0);
+      if (isActive) {
+        width.setValue(0);
+        Animated.timing(width, { toValue: potentiel, duration: 800, delay, useNativeDriver: false }).start();
+      } else {
+        width.setValue(0);
+      }
     }
   }, [isActive]);
+
+  if (isWeb) {
+    return (
+      <View style={styles.barTrack}>
+        <View style={[styles.barFill, {
+          width: animate ? `${potentiel}%` : '0%',
+          backgroundColor: color,
+          transition: `width 800ms ease ${delay}ms`,
+        } as any]} />
+      </View>
+    );
+  }
 
   const widthInterp = width.interpolate({ inputRange: [0, 100], outputRange: ['0%', '100%'] });
 
@@ -36,44 +58,40 @@ export default function Slide4Waterfall({ isActive }: { isActive: boolean }) {
 
   return (
     <LinearGradient colors={[OB.darkBg, '#12131A']} style={styles.container}>
-      {isActive && (
-        <>
-          {/* Categories Card */}
-          <FadeInView active={isActive} delay={100}>
-          <OBGlassCard style={styles.card}>
-            <Text style={styles.cardTitle}>{t('slide4.cardTitle')}</Text>
+      {/* Categories Card */}
+      <FadeInView active={isActive} delay={100}>
+      <OBGlassCard style={styles.card}>
+        <Text style={styles.cardTitle}>{t('slide4.cardTitle')}</Text>
 
-            {categories.map((cat, i) => (
-              <FadeInView key={cat.label} active={isActive} delay={200 + i * 100} duration={400} from="left" style={styles.catRow}>
-                <View style={styles.catHeader}>
-                  <Text style={styles.catLabel}>{cat.label}</Text>
-                  <Text style={[styles.catPct, { color: cat.color, ...neonGlow(cat.color) }]}>{cat.potentiel}%</Text>
-                </View>
-                <AnimatedBar potentiel={cat.potentiel} color={cat.color} isActive={isActive} delay={cat.delay} />
-                <Text style={styles.catHint}>
-                  {cat.potentiel >= 60 ? t('slide4.hintHigh') : cat.potentiel >= 30 ? t('slide4.hintMedium') : t('slide4.hintLow')}
-                </Text>
-              </FadeInView>
-            ))}
-          </OBGlassCard>
-          </FadeInView>
-
-          {/* Text */}
-          <FadeInView active={isActive} delay={400}>
-            <Text style={[styles.tagline, neonGlow(OB.accent)]}>{t('slide4.tagline')}</Text>
-          </FadeInView>
-          <FadeInView active={isActive} delay={500}>
-            <Text style={styles.heading}>
-              {t('slide4.heading')}
+        {categories.map((cat, i) => (
+          <FadeInView key={cat.label} active={isActive} delay={200 + i * 100} duration={400} from="left" style={styles.catRow}>
+            <View style={styles.catHeader}>
+              <Text style={styles.catLabel}>{cat.label}</Text>
+              <Text style={[styles.catPct, { color: cat.color, ...neonGlow(cat.color) }]}>{cat.potentiel}%</Text>
+            </View>
+            <AnimatedBar potentiel={cat.potentiel} color={cat.color} isActive={isActive} delay={cat.delay} />
+            <Text style={styles.catHint}>
+              {cat.potentiel >= 60 ? t('slide4.hintHigh') : cat.potentiel >= 30 ? t('slide4.hintMedium') : t('slide4.hintLow')}
             </Text>
           </FadeInView>
-          <FadeInView active={isActive} delay={600}>
-            <Text style={styles.body}>
-              <Text style={{ color: '#fff', fontWeight: '700' }}>{t('slide4.bodyBold')}</Text>{t('slide4.bodyEnd')}
-            </Text>
-          </FadeInView>
-        </>
-      )}
+        ))}
+      </OBGlassCard>
+      </FadeInView>
+
+      {/* Text */}
+      <FadeInView active={isActive} delay={400}>
+        <Text style={[styles.tagline, neonGlow(OB.accent)]}>{t('slide4.tagline')}</Text>
+      </FadeInView>
+      <FadeInView active={isActive} delay={500}>
+        <Text style={styles.heading}>
+          {t('slide4.heading')}
+        </Text>
+      </FadeInView>
+      <FadeInView active={isActive} delay={600}>
+        <Text style={styles.body}>
+          <Text style={{ color: '#fff', fontWeight: '700' }}>{t('slide4.bodyBold')}</Text>{t('slide4.bodyEnd')}
+        </Text>
+      </FadeInView>
     </LinearGradient>
   );
 }

@@ -16,48 +16,44 @@ export default function Slide1Home({ isActive }: { isActive: boolean }) {
 
   return (
     <LinearGradient colors={[OB.darkBg, OB.darkBgAlt]} style={styles.container}>
-      {isActive && (
-        <>
-          {/* Logo */}
-          <ZoomInView active={isActive} delay={100} style={styles.logoWrap}>
-            <LinearGradient colors={[OB.blue, OB.purple]} style={styles.logo} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}>
-              <Text style={styles.logoText}>PFM</Text>
-            </LinearGradient>
-          </ZoomInView>
+      {/* Logo */}
+      <ZoomInView active={isActive} delay={100} style={styles.logoWrap}>
+        <LinearGradient colors={[OB.blue, OB.purple]} style={styles.logo} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}>
+          <Text style={styles.logoText}>PFM</Text>
+        </LinearGradient>
+      </ZoomInView>
 
-          {/* Title */}
-          <FadeInView active={isActive} delay={300}>
-            <Text style={styles.title}>
-              {t('slide1.title')}{'\n'}
-              <Text style={styles.titleGradient}>{t('slide1.titleHighlight')}</Text>
-            </Text>
-          </FadeInView>
+      {/* Title */}
+      <FadeInView active={isActive} delay={300}>
+        <Text style={styles.title}>
+          {t('slide1.title')}{'\n'}
+          <Text style={styles.titleGradient}>{t('slide1.titleHighlight')}</Text>
+        </Text>
+      </FadeInView>
 
-          {/* Subtitle */}
-          <FadeInView active={isActive} delay={500}>
-            <Text style={styles.subtitle}>
-              {t('slide1.subtitle')}
-            </Text>
-          </FadeInView>
+      {/* Subtitle */}
+      <FadeInView active={isActive} delay={500}>
+        <Text style={styles.subtitle}>
+          {t('slide1.subtitle')}
+        </Text>
+      </FadeInView>
 
-          {/* Comparison */}
-          <FadeInView active={isActive} delay={700} style={styles.compBox}>
-            <OBGlassCard style={styles.compBoxInner}>
-            <View style={styles.compHeader}>
-              <Text style={[styles.compHeaderText, { color: OB.textMuted }]}>{t('slide1.headerBefore')}</Text>
-              <Text style={[styles.compHeaderText, { color: OB.blue, ...neonGlow(OB.accent) }]}>{t('slide1.headerAfter')}</Text>
-            </View>
-            {comparisons.map((c, i) => (
-              <FadeInView key={c.icon} active={isActive} delay={800 + i * 100} duration={400} from="top" style={[styles.compRow, i < comparisons.length - 1 && styles.compRowBorder]}>
-                <Text style={styles.compClassic}>{c.avant}</Text>
-                <Text style={styles.compIcon}>{c.icon}</Text>
-                <Text style={styles.compPfm}>{c.apres}</Text>
-              </FadeInView>
-            ))}
-            </OBGlassCard>
+      {/* Comparison */}
+      <FadeInView active={isActive} delay={700} style={styles.compBox}>
+        <OBGlassCard style={styles.compBoxInner}>
+        <View style={styles.compHeader}>
+          <Text style={[styles.compHeaderText, { color: OB.textMuted }]}>{t('slide1.headerBefore')}</Text>
+          <Text style={[styles.compHeaderText, { color: OB.blue, ...neonGlow(OB.accent) }]}>{t('slide1.headerAfter')}</Text>
+        </View>
+        {comparisons.map((c, i) => (
+          <FadeInView key={c.icon} active={isActive} delay={800 + i * 100} duration={400} from="top" style={[styles.compRow, i < comparisons.length - 1 && styles.compRowBorder]}>
+            <Text style={styles.compClassic}>{c.avant}</Text>
+            <Text style={styles.compIcon}>{c.icon}</Text>
+            <Text style={styles.compPfm}>{c.apres}</Text>
           </FadeInView>
-        </>
-      )}
+        ))}
+        </OBGlassCard>
+      </FadeInView>
     </LinearGradient>
   );
 }

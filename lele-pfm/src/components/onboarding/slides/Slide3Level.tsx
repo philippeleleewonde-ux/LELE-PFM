@@ -1,19 +1,42 @@
-import React, { useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, Animated } from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import { View, Text, StyleSheet, Animated, Platform } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useTranslation } from 'react-i18next';
 import { OB, FadeInView, OBGlassCard, neonGlow } from '../shared';
 
 function AnimatedRing({ isActive }: { isActive: boolean }) {
+  const isWeb = Platform.OS === 'web';
+  const [animate, setAnimate] = useState(false);
   const progress = useRef(new Animated.Value(0)).current;
+
   useEffect(() => {
-    if (isActive) {
-      progress.setValue(0);
-      Animated.timing(progress, { toValue: 72, duration: 1500, delay: 400, useNativeDriver: false }).start();
+    if (isWeb) {
+      if (isActive) {
+        const raf = requestAnimationFrame(() => setAnimate(true));
+        return () => cancelAnimationFrame(raf);
+      }
     } else {
-      progress.setValue(0);
+      if (isActive) {
+        progress.setValue(0);
+        Animated.timing(progress, { toValue: 72, duration: 1500, delay: 400, useNativeDriver: false }).start();
+      } else {
+        progress.setValue(0);
+      }
     }
   }, [isActive]);
+
+  if (isWeb) {
+    return (
+      <View style={styles.barTrack}>
+        <View style={[styles.barFill, {
+          width: animate ? '72%' : '0%',
+          transition: 'width 1500ms ease 400ms',
+        } as any]}>
+          <LinearGradient colors={[OB.blue, OB.purple]} style={StyleSheet.absoluteFill} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} />
+        </View>
+      </View>
+    );
+  }
 
   const widthInterp = progress.interpolate({ inputRange: [0, 100], outputRange: ['0%', '100%'] });
 
@@ -37,52 +60,48 @@ export default function Slide3Level({ isActive }: { isActive: boolean }) {
 
   return (
     <LinearGradient colors={[OB.darkBg, '#12131A']} style={styles.container}>
-      {isActive && (
-        <>
-          {/* Score Card */}
-          <FadeInView active={isActive} delay={100}>
-          <OBGlassCard style={styles.card}>
-            <View style={styles.scoreRow}>
-              <View>
-                <Text style={styles.scoreLabel}>{t('slide3.scoreLabel')}</Text>
-                <Text style={styles.scoreValue}>72 <Text style={styles.scoreSuffix}>/ 100</Text></Text>
-              </View>
-              <View style={styles.gradeBadge}>
-                <Text style={styles.gradeText}>B</Text>
-              </View>
-            </View>
+      {/* Score Card */}
+      <FadeInView active={isActive} delay={100}>
+      <OBGlassCard style={styles.card}>
+        <View style={styles.scoreRow}>
+          <View>
+            <Text style={styles.scoreLabel}>{t('slide3.scoreLabel')}</Text>
+            <Text style={styles.scoreValue}>72 <Text style={styles.scoreSuffix}>/ 100</Text></Text>
+          </View>
+          <View style={styles.gradeBadge}>
+            <Text style={styles.gradeText}>B</Text>
+          </View>
+        </View>
 
-            <AnimatedRing isActive={isActive} />
+        <AnimatedRing isActive={isActive} />
 
-            {/* Mini KPIs */}
-            <View style={styles.kpisCol}>
-              {kpis.map((k, i) => (
-                <FadeInView key={k.label} active={isActive} delay={600 + i * 120} duration={400} from="left" style={styles.kpiRow}>
-                  <View style={[styles.kpiDot, { backgroundColor: k.color }]} />
-                  <Text style={styles.kpiLabel}>{k.label}</Text>
-                  <Text style={[styles.kpiValue, { color: k.color }]}>{k.value}</Text>
-                </FadeInView>
-              ))}
-            </View>
-          </OBGlassCard>
-          </FadeInView>
+        {/* Mini KPIs */}
+        <View style={styles.kpisCol}>
+          {kpis.map((k, i) => (
+            <FadeInView key={k.label} active={isActive} delay={600 + i * 120} duration={400} from="left" style={styles.kpiRow}>
+              <View style={[styles.kpiDot, { backgroundColor: k.color }]} />
+              <Text style={styles.kpiLabel}>{k.label}</Text>
+              <Text style={[styles.kpiValue, { color: k.color }]}>{k.value}</Text>
+            </FadeInView>
+          ))}
+        </View>
+      </OBGlassCard>
+      </FadeInView>
 
-          {/* Text */}
-          <FadeInView active={isActive} delay={300}>
-            <Text style={[styles.tagline, neonGlow(OB.accent)]}>{t('slide3.tagline')}</Text>
-          </FadeInView>
-          <FadeInView active={isActive} delay={400}>
-            <Text style={styles.heading}>
-              {t('slide3.heading')}
-            </Text>
-          </FadeInView>
-          <FadeInView active={isActive} delay={500}>
-            <Text style={styles.body}>
-              <Text style={{ color: '#fff', fontWeight: '700' }}>{t('slide3.bodyBold')}</Text>{t('slide3.bodyEnd')}
-            </Text>
-          </FadeInView>
-        </>
-      )}
+      {/* Text */}
+      <FadeInView active={isActive} delay={300}>
+        <Text style={[styles.tagline, neonGlow(OB.accent)]}>{t('slide3.tagline')}</Text>
+      </FadeInView>
+      <FadeInView active={isActive} delay={400}>
+        <Text style={styles.heading}>
+          {t('slide3.heading')}
+        </Text>
+      </FadeInView>
+      <FadeInView active={isActive} delay={500}>
+        <Text style={styles.body}>
+          <Text style={{ color: '#fff', fontWeight: '700' }}>{t('slide3.bodyBold')}</Text>{t('slide3.bodyEnd')}
+        </Text>
+      </FadeInView>
     </LinearGradient>
   );
 }

@@ -15,50 +15,46 @@ export default function Slide6Cube({ isActive }: { isActive: boolean }) {
 
   return (
     <LinearGradient colors={[OB.darkBg, '#12131A']} style={styles.container}>
-      {isActive && (
-        <>
-          {/* Benefits Card */}
-          <FadeInView active={isActive} delay={100}>
-          <OBGlassCard style={styles.card}>
-            {/* Treasure icon */}
-            <ZoomInView active={isActive} delay={200} style={styles.iconCenter}>
-              <View style={styles.treasureBadge}>
-                <Text style={styles.treasureEmoji}>{'\u{1F48E}'}</Text>
-              </View>
-            </ZoomInView>
+      {/* Benefits Card */}
+      <FadeInView active={isActive} delay={100}>
+      <OBGlassCard style={styles.card}>
+        {/* Treasure icon */}
+        <ZoomInView active={isActive} delay={200} style={styles.iconCenter}>
+          <View style={styles.treasureBadge}>
+            <Text style={styles.treasureEmoji}>{'\u{1F48E}'}</Text>
+          </View>
+        </ZoomInView>
 
-            <Text style={styles.cardTitle}>{t('slide6.cardTitle')}</Text>
+        <Text style={styles.cardTitle}>{t('slide6.cardTitle')}</Text>
 
-            {benefits.map((b, i) => (
-              <FadeInView key={b.title} active={isActive} delay={400 + i * 150} duration={400} from="left" style={[styles.benefitRow, i < benefits.length - 1 && styles.benefitRowBorder]}>
-                <View style={[styles.benefitIcon, { backgroundColor: b.color + '15' }]}>
-                  <Text style={{ fontSize: 16 }}>{b.icon}</Text>
-                </View>
-                <View style={styles.benefitInfo}>
-                  <Text style={[styles.benefitTitle, { color: b.color }]}>{b.title}</Text>
-                  <Text style={styles.benefitDesc}>{b.desc}</Text>
-                </View>
-              </FadeInView>
-            ))}
-          </OBGlassCard>
+        {benefits.map((b, i) => (
+          <FadeInView key={b.title} active={isActive} delay={400 + i * 150} duration={400} from="left" style={[styles.benefitRow, i < benefits.length - 1 && styles.benefitRowBorder]}>
+            <View style={[styles.benefitIcon, { backgroundColor: b.color + '15' }]}>
+              <Text style={{ fontSize: 16 }}>{b.icon}</Text>
+            </View>
+            <View style={styles.benefitInfo}>
+              <Text style={[styles.benefitTitle, { color: b.color }]}>{b.title}</Text>
+              <Text style={styles.benefitDesc}>{b.desc}</Text>
+            </View>
           </FadeInView>
+        ))}
+      </OBGlassCard>
+      </FadeInView>
 
-          {/* Text */}
-          <FadeInView active={isActive} delay={500}>
-            <Text style={[styles.tagline, neonGlow(OB.accent)]}>{t('slide6.tagline')}</Text>
-          </FadeInView>
-          <FadeInView active={isActive} delay={600}>
-            <Text style={styles.heading}>
-              {t('slide6.heading')}
-            </Text>
-          </FadeInView>
-          <FadeInView active={isActive} delay={700}>
-            <Text style={styles.body}>
-              <Text style={{ color: '#fff', fontWeight: '700' }}>{t('slide6.bodyBold')}</Text>{t('slide6.bodyEnd')}
-            </Text>
-          </FadeInView>
-        </>
-      )}
+      {/* Text */}
+      <FadeInView active={isActive} delay={500}>
+        <Text style={[styles.tagline, neonGlow(OB.accent)]}>{t('slide6.tagline')}</Text>
+      </FadeInView>
+      <FadeInView active={isActive} delay={600}>
+        <Text style={styles.heading}>
+          {t('slide6.heading')}
+        </Text>
+      </FadeInView>
+      <FadeInView active={isActive} delay={700}>
+        <Text style={styles.body}>
+          <Text style={{ color: '#fff', fontWeight: '700' }}>{t('slide6.bodyBold')}</Text>{t('slide6.bodyEnd')}
+        </Text>
+      </FadeInView>
     </LinearGradient>
   );
 }

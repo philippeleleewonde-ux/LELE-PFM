@@ -17,49 +17,45 @@ export default function Slide7Final({ isActive }: { isActive: boolean }) {
 
   return (
     <LinearGradient colors={[OB.darkBg, OB.darkBgAlt]} style={styles.container}>
-      {isActive && (
-        <>
-          {/* Logo */}
-          <ZoomInView active={isActive} delay={100} style={styles.logoWrap}>
-            <LinearGradient colors={[OB.blue, OB.purple]} style={styles.logo} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}>
-              <Text style={styles.logoText}>PFM</Text>
-            </LinearGradient>
-          </ZoomInView>
+      {/* Logo */}
+      <ZoomInView active={isActive} delay={100} style={styles.logoWrap}>
+        <LinearGradient colors={[OB.blue, OB.purple]} style={styles.logo} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}>
+          <Text style={styles.logoText}>PFM</Text>
+        </LinearGradient>
+      </ZoomInView>
 
-          {/* Title */}
-          <FadeInView active={isActive} delay={300}>
-            <Text style={styles.heading}>
-              {t('slide7.heading')}
-            </Text>
+      {/* Title */}
+      <FadeInView active={isActive} delay={300}>
+        <Text style={styles.heading}>
+          {t('slide7.heading')}
+        </Text>
+      </FadeInView>
+
+      {/* Steps list */}
+      <View style={styles.stepsList}>
+        {steps.map((s, i) => (
+          <FadeInView
+            key={i}
+            active={isActive}
+            delay={500 + i * 100}
+            duration={400}
+            from="left"
+            style={[styles.stepRow, i < steps.length - 1 && styles.stepRowBorder]}
+          >
+            <View style={styles.stepIcon}>
+              <Text style={{ fontSize: 14 }}>{s.icon}</Text>
+            </View>
+            <Text style={styles.stepText}>{s.text}</Text>
           </FadeInView>
+        ))}
+      </View>
 
-          {/* Steps list */}
-          <View style={styles.stepsList}>
-            {steps.map((s, i) => (
-              <FadeInView
-                key={i}
-                active={isActive}
-                delay={500 + i * 100}
-                duration={400}
-                from="left"
-                style={[styles.stepRow, i < steps.length - 1 && styles.stepRowBorder]}
-              >
-                <View style={styles.stepIcon}>
-                  <Text style={{ fontSize: 14 }}>{s.icon}</Text>
-                </View>
-                <Text style={styles.stepText}>{s.text}</Text>
-              </FadeInView>
-            ))}
-          </View>
-
-          {/* Bottom tagline */}
-          <FadeInView active={isActive} delay={1100}>
-            <Text style={[styles.bottomTagline, neonGlow(OB.gold)]}>
-              {t('slide7.bottomTagline')}
-            </Text>
-          </FadeInView>
-        </>
-      )}
+      {/* Bottom tagline */}
+      <FadeInView active={isActive} delay={1100}>
+        <Text style={[styles.bottomTagline, neonGlow(OB.gold)]}>
+          {t('slide7.bottomTagline')}
+        </Text>
+      </FadeInView>
     </LinearGradient>
   );
 }

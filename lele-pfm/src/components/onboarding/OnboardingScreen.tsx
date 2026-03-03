@@ -1,5 +1,5 @@
-import React, { useState, useRef, useCallback } from 'react';
-import { View, Text, StyleSheet, Pressable, ScrollView, NativeScrollEvent, NativeSyntheticEvent, LayoutChangeEvent, Platform } from 'react-native';
+import React, { useState, useCallback } from 'react';
+import { View, Text, StyleSheet, Pressable, Platform, LayoutChangeEvent } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useTranslation } from 'react-i18next';
 import { OB, SLIDE_COUNT, AmbientSpotlights } from './shared';
@@ -20,33 +20,11 @@ interface Props {
 export default function OnboardingScreen({ onComplete }: Props) {
   const { t } = useTranslation('onboarding');
   const [current, setCurrent] = useState(0);
-  const [containerWidth, setContainerWidth] = useState(0);
-  const [contentHeight, setContentHeight] = useState(0);
-  const scrollRef = useRef<ScrollView>(null);
-
-  const onRootLayout = (e: LayoutChangeEvent) => {
-    setContainerWidth(e.nativeEvent.layout.width);
-  };
-
-  const onContentLayout = (e: LayoutChangeEvent) => {
-    setContentHeight(e.nativeEvent.layout.height);
-  };
 
   const goTo = useCallback((index: number) => {
-    if (contentHeight <= 0) return;
     const clamped = Math.max(0, Math.min(SLIDE_COUNT - 1, index));
     setCurrent(clamped);
-    scrollRef.current?.scrollTo({ y: clamped * contentHeight, animated: true });
-  }, [contentHeight]);
-
-  const handleScroll = useCallback((e: NativeSyntheticEvent<NativeScrollEvent>) => {
-    if (contentHeight <= 0) return;
-    const offsetY = e.nativeEvent.contentOffset.y;
-    const page = Math.round(offsetY / contentHeight);
-    if (page !== current && page >= 0 && page < SLIDE_COUNT) {
-      setCurrent(page);
-    }
-  }, [current, contentHeight]);
+  }, []);
 
   const handleNext = () => {
     if (current === SLIDE_COUNT - 1) {
@@ -57,32 +35,15 @@ export default function OnboardingScreen({ onComplete }: Props) {
   };
 
   const isLast = current === SLIDE_COUNT - 1;
+  const CurrentSlide = SLIDES[current];
 
   return (
-    <View style={styles.root} onLayout={onRootLayout}>
+    <View style={styles.root}>
       <AmbientSpotlights />
 
-      {/* Content area — vertical paging */}
-      <View style={styles.contentArea} onLayout={onContentLayout}>
-        {containerWidth > 0 && contentHeight > 0 && (
-          <ScrollView
-            ref={scrollRef}
-            pagingEnabled
-            snapToInterval={contentHeight}
-            decelerationRate="fast"
-            showsVerticalScrollIndicator={false}
-            onMomentumScrollEnd={handleScroll}
-            onScrollEndDrag={handleScroll}
-            scrollEventThrottle={16}
-            style={styles.scrollView}
-          >
-            {SLIDES.map((SlideComponent, i) => (
-              <View key={i} style={{ width: containerWidth, height: contentHeight }}>
-                <SlideComponent isActive={i === current} />
-              </View>
-            ))}
-          </ScrollView>
-        )}
+      {/* Current slide — only render the active one */}
+      <View style={styles.contentArea}>
+        <CurrentSlide key={current} isActive={true} />
       </View>
 
       {/* Bottom controls */}
@@ -126,7 +87,6 @@ const styles = StyleSheet.create({
     ...(Platform.OS === 'web' ? { maxHeight: '100dvh' as any, height: '100dvh' as any } : {}),
   },
   contentArea: { flex: 1 },
-  scrollView: { flex: 1 },
   controls: {
     paddingBottom: Platform.OS === 'web' ? 24 : 40,
     paddingTop: 12,

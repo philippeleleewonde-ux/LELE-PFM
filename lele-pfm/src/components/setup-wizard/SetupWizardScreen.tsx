@@ -23,10 +23,15 @@ export default function SetupWizardScreen({ onComplete }: Props) {
   const { isInvestor } = useViewMode();
   const scrollRef = useRef<ScrollView>(null);
   const [containerWidth, setContainerWidth] = useState(0);
+  const [contentHeight, setContentHeight] = useState(0);
   const progressAnim = useRef(new Animated.Value(0)).current;
 
   const onRootLayout = (e: LayoutChangeEvent) => {
     setContainerWidth(e.nativeEvent.layout.width);
+  };
+
+  const onContentLayout = (e: LayoutChangeEvent) => {
+    setContentHeight(e.nativeEvent.layout.height);
   };
 
   // Animate progress bar
@@ -88,30 +93,32 @@ export default function SetupWizardScreen({ onComplete }: Props) {
         </View>
       </View>
 
-      {/* Steps content - horizontal scrolling */}
-      {containerWidth > 0 && (
-      <ScrollView
-        ref={scrollRef}
-        horizontal
-        pagingEnabled
-        scrollEnabled={false}
-        showsHorizontalScrollIndicator={false}
-        style={styles.scrollView}
-      >
-        {[0, 1, 2, 3, 4, 5, 6, 7].map((i) => (
-          <View key={i} style={[styles.stepContainer, { width: containerWidth }]}>
-            {i === 0 && <Step1Profile isActive={currentStep === 0} />}
-            {i === 1 && <Step2Flows isActive={currentStep === 1} />}
-            {i === 2 && <Step3History isActive={currentStep === 2} />}
-            {i === 3 && <Step4Risks isActive={currentStep === 3} />}
-            {i === 4 && <Step5SelfEval isActive={currentStep === 4} />}
-            {i === 5 && <Step6Levers isActive={currentStep === 5} />}
-            {i === 6 && <Step7InvestorProfile isActive={currentStep === 6} />}
-            {i === 7 && <Step7Final isActive={currentStep === 7} onComplete={onComplete} />}
-          </View>
-        ))}
-      </ScrollView>
-      )}
+      {/* Steps content - explicit height for web compatibility */}
+      <View style={styles.contentArea} onLayout={onContentLayout}>
+        {containerWidth > 0 && contentHeight > 0 && (
+        <ScrollView
+          ref={scrollRef}
+          horizontal
+          pagingEnabled
+          scrollEnabled={false}
+          showsHorizontalScrollIndicator={false}
+          style={styles.scrollView}
+        >
+          {[0, 1, 2, 3, 4, 5, 6, 7].map((i) => (
+            <View key={i} style={{ width: containerWidth, height: contentHeight }}>
+              {i === 0 && <Step1Profile isActive={currentStep === 0} />}
+              {i === 1 && <Step2Flows isActive={currentStep === 1} />}
+              {i === 2 && <Step3History isActive={currentStep === 2} />}
+              {i === 3 && <Step4Risks isActive={currentStep === 3} />}
+              {i === 4 && <Step5SelfEval isActive={currentStep === 4} />}
+              {i === 5 && <Step6Levers isActive={currentStep === 5} />}
+              {i === 6 && <Step7InvestorProfile isActive={currentStep === 6} />}
+              {i === 7 && <Step7Final isActive={currentStep === 7} onComplete={onComplete} />}
+            </View>
+          ))}
+        </ScrollView>
+        )}
+      </View>
 
       {/* Bottom navigation (hidden on last step) */}
       {!isLast && (
@@ -149,6 +156,7 @@ const styles = StyleSheet.create({
   root: {
     flex: 1,
     backgroundColor: WZ.darkBg,
+    ...(Platform.OS === 'web' ? { maxHeight: '100dvh' as any, height: '100dvh' as any } : {}),
   },
   header: {
     paddingTop: 56,
@@ -202,10 +210,10 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     shadowOffset: { width: 0, height: 0 },
   },
-  scrollView: {
+  contentArea: {
     flex: 1,
   },
-  stepContainer: {
+  scrollView: {
     flex: 1,
   },
   bottomNav: {

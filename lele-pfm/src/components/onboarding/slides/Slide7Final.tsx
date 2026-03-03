@@ -65,7 +65,7 @@ export default function Slide7Final({ isActive }: { isActive: boolean }) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 32, paddingBottom: 120, paddingTop: 60 },
+  container: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 24, paddingBottom: 24, paddingTop: 48 },
   logoWrap: { marginBottom: 16 },
   logo: { width: 72, height: 72, borderRadius: 20, alignItems: 'center', justifyContent: 'center' },
   logoText: { color: '#fff', fontSize: 26, fontWeight: '800' },

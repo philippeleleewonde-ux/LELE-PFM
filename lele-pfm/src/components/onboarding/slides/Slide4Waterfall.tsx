@@ -79,7 +79,7 @@ export default function Slide4Waterfall({ isActive }: { isActive: boolean }) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 32, paddingBottom: 120, paddingTop: 60 },
+  container: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 24, paddingBottom: 24, paddingTop: 48 },
   card: { width: '100%', maxWidth: 300, borderRadius: 16, padding: 16, marginBottom: 28 },
   cardTitle: { fontSize: 13, fontWeight: '700', color: OB.textPrimary, textAlign: 'center', marginBottom: 14 },
   catRow: { marginBottom: 12 },

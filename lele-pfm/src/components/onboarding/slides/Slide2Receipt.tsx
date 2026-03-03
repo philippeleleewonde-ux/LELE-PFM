@@ -68,7 +68,7 @@ export default function Slide2Receipt({ isActive }: { isActive: boolean }) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 32, paddingBottom: 120, paddingTop: 60 },
+  container: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 24, paddingBottom: 24, paddingTop: 48 },
   card: { width: '100%', maxWidth: 300, borderRadius: 16, padding: 16, marginBottom: 28 },
   cardTitle: { fontSize: 14, fontWeight: '700', color: OB.textPrimary, textAlign: 'center', marginBottom: 14 },
   stepRow: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 10 },

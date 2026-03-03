@@ -88,7 +88,7 @@ export default function Slide3Level({ isActive }: { isActive: boolean }) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 32, paddingBottom: 120, paddingTop: 60 },
+  container: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 24, paddingBottom: 24, paddingTop: 48 },
   card: { width: '100%', maxWidth: 300, borderRadius: 16, padding: 16, marginBottom: 28 },
   scoreRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
   scoreLabel: { fontSize: 11, color: OB.textMuted, marginBottom: 4 },

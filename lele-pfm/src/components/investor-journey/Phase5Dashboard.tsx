@@ -358,7 +358,17 @@ function CheckInHistory() {
 // ─── Main Dashboard ───
 
 function Phase5DashboardInner() {
-  const { acceptedAssets, rendezVousConfig, setRendezVousConfig, addCheckIn } = useInvestorJourney();
+  const {
+    acceptedAssets,
+    rendezVousConfig,
+    setRendezVousConfig,
+    addCheckIn,
+    chosenStrategy,
+    activeStrategies,
+    checkIns,
+    investmentDuration,
+  } = useInvestorJourney();
+  const perf = usePortfolioPerformance();
   const [showCheckIn, setShowCheckIn] = useState(false);
   const [showConfig, setShowConfig] = useState(false);
 
@@ -403,6 +413,11 @@ function Phase5DashboardInner() {
         onClose={() => setShowCheckIn(false)}
         assets={acceptedAssets}
         onSubmit={handleCheckInSubmit}
+        chosenStrategy={chosenStrategy}
+        allStrategies={activeStrategies}
+        previousCheckIns={checkIns}
+        projectedValue={perf?.projectedValue}
+        durationMonths={investmentDuration?.months}
       />
 
       <RendezVousConfigModal

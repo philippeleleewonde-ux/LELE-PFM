@@ -1,13 +1,15 @@
-import React, { memo, useEffect } from 'react';
+import React, { memo, useEffect, useMemo } from 'react';
 import { View, Text, ScrollView, Pressable, StyleSheet } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { TrendingUp, Shield, Zap, BarChart3, AlertTriangle, Star } from 'lucide-react-native';
+import { TrendingUp, Shield, Zap, BarChart3, AlertTriangle, Star, DollarSign, ArrowDown, ArrowUp, Minus } from 'lucide-react-native';
 import { PF, PerfGlassCard } from '@/components/performance/shared';
 import { JourneyProgressBar } from '@/components/investor-journey/JourneyProgressBar';
 import { StrategyComparisonChart } from '@/components/investor-journey/StrategyComparisonChart';
 import { useInvestorJourney } from '@/hooks/useInvestorJourney';
-import { InvestmentStrategy, StrategyId } from '@/types/investor-journey';
+import { InvestmentStrategy, StrategyId, InvestmentAmountGuidance } from '@/types/investor-journey';
 import { InvestmentPillar } from '@/types/investment';
+import { computeInvestmentGuidance } from '@/domain/calculators/strategy-generator';
+import { useEngineStore } from '@/stores/engine-store';
 
 // ─── Constants ───
 
@@ -399,6 +401,150 @@ const tableStyles = StyleSheet.create({
   },
 });
 
+// ─── Investment Budget Card ───
+
+interface InvestmentBudgetCardProps {
+  guidance: InvestmentAmountGuidance;
+  strategyName: string;
+  color: string;
+}
+
+function InvestmentBudgetCard({ guidance, strategyName, color }: InvestmentBudgetCardProps) {
+  return (
+    <PerfGlassCard style={budgetStyles.card}>
+      <View style={budgetStyles.headerRow}>
+        <DollarSign size={18} color={color} />
+        <Text style={[budgetStyles.title, { color }]}>Budget d'investissement</Text>
+      </View>
+      <Text style={budgetStyles.subtitle}>
+        Montants recommandes pour la strategie {strategyName}
+      </Text>
+
+      {/* Min / Recommended / Max amounts */}
+      <View style={budgetStyles.amountsRow}>
+        <View style={budgetStyles.amountItem}>
+          <View style={budgetStyles.amountIconRow}>
+            <ArrowDown size={12} color={PF.orange} />
+            <Text style={budgetStyles.amountLabel}>Minimum</Text>
+          </View>
+          <Text style={[budgetStyles.amountValue, { color: PF.orange }]}>
+            {guidance.minimumMonthly.toLocaleString()}
+          </Text>
+          <Text style={budgetStyles.amountUnit}>{guidance.currency}/mois</Text>
+        </View>
+        <View style={[budgetStyles.amountItem, budgetStyles.amountItemHighlight]}>
+          <View style={budgetStyles.amountIconRow}>
+            <Minus size={12} color={PF.green} />
+            <Text style={budgetStyles.amountLabel}>Recommande</Text>
+          </View>
+          <Text style={[budgetStyles.amountValue, { color: PF.green }]}>
+            {guidance.recommendedMonthly.toLocaleString()}
+          </Text>
+          <Text style={budgetStyles.amountUnit}>{guidance.currency}/mois</Text>
+        </View>
+        <View style={budgetStyles.amountItem}>
+          <View style={budgetStyles.amountIconRow}>
+            <ArrowUp size={12} color={PF.blue} />
+            <Text style={budgetStyles.amountLabel}>Maximum</Text>
+          </View>
+          <Text style={[budgetStyles.amountValue, { color: PF.blue }]}>
+            {guidance.maximumMonthly.toLocaleString()}
+          </Text>
+          <Text style={budgetStyles.amountUnit}>{guidance.currency}/mois</Text>
+        </View>
+      </View>
+
+      {/* Capital initial */}
+      <View style={budgetStyles.capitalRow}>
+        <Text style={budgetStyles.capitalLabel}>Capital initial recommande</Text>
+        <Text style={budgetStyles.capitalValue}>
+          {guidance.recommendedInitial.toLocaleString()} {guidance.currency}
+        </Text>
+        <Text style={budgetStyles.capitalMin}>
+          (min. {guidance.minimumInitial.toLocaleString()} {guidance.currency})
+        </Text>
+      </View>
+
+      {/* Gain Simulation */}
+      <Text style={budgetStyles.simTitle}>Simulation des gains potentiels</Text>
+      <View style={budgetStyles.simGrid}>
+        {/* Pessimistic */}
+        <View style={[budgetStyles.simItem, { borderColor: PF.red + '30' }]}>
+          <Text style={[budgetStyles.simLabel, { color: PF.red }]}>Pessimiste</Text>
+          <Text style={[budgetStyles.simReturn, { color: PF.red }]}>
+            {guidance.gainSimulation.pessimistic.annualReturn.toFixed(1)}%/an
+          </Text>
+          <Text style={budgetStyles.simValue}>
+            {formatAmount(guidance.gainSimulation.pessimistic.finalValue)} {guidance.currency}
+          </Text>
+          <Text style={[budgetStyles.simGains, { color: PF.red }]}>
+            {guidance.gainSimulation.pessimistic.totalReturns >= 0 ? '+' : ''}
+            {formatAmount(guidance.gainSimulation.pessimistic.totalReturns)}
+          </Text>
+        </View>
+        {/* Expected */}
+        <View style={[budgetStyles.simItem, budgetStyles.simItemHighlight, { borderColor: PF.green + '30' }]}>
+          <Text style={[budgetStyles.simLabel, { color: PF.green }]}>Attendu</Text>
+          <Text style={[budgetStyles.simReturn, { color: PF.green }]}>
+            {guidance.gainSimulation.expected.annualReturn.toFixed(1)}%/an
+          </Text>
+          <Text style={budgetStyles.simValue}>
+            {formatAmount(guidance.gainSimulation.expected.finalValue)} {guidance.currency}
+          </Text>
+          <Text style={[budgetStyles.simGains, { color: PF.green }]}>
+            +{formatAmount(guidance.gainSimulation.expected.totalReturns)}
+          </Text>
+        </View>
+        {/* Optimistic */}
+        <View style={[budgetStyles.simItem, { borderColor: PF.accent + '30' }]}>
+          <Text style={[budgetStyles.simLabel, { color: PF.accent }]}>Optimiste</Text>
+          <Text style={[budgetStyles.simReturn, { color: PF.accent }]}>
+            {guidance.gainSimulation.optimistic.annualReturn.toFixed(1)}%/an
+          </Text>
+          <Text style={budgetStyles.simValue}>
+            {formatAmount(guidance.gainSimulation.optimistic.finalValue)} {guidance.currency}
+          </Text>
+          <Text style={[budgetStyles.simGains, { color: PF.accent }]}>
+            +{formatAmount(guidance.gainSimulation.optimistic.totalReturns)}
+          </Text>
+        </View>
+      </View>
+    </PerfGlassCard>
+  );
+}
+
+const budgetStyles = StyleSheet.create({
+  card: { padding: 16, marginBottom: 16 },
+  headerRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 4 },
+  title: { fontSize: 16, fontWeight: '700' },
+  subtitle: { color: PF.textSecondary, fontSize: 12, marginBottom: 14, lineHeight: 18 },
+  amountsRow: { flexDirection: 'row', gap: 6, marginBottom: 14 },
+  amountItem: {
+    flex: 1, backgroundColor: 'rgba(255,255,255,0.03)', borderRadius: 10, padding: 10, alignItems: 'center', gap: 4,
+  },
+  amountItemHighlight: {
+    backgroundColor: 'rgba(74,222,128,0.06)', borderWidth: 1, borderColor: 'rgba(74,222,128,0.15)',
+  },
+  amountIconRow: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+  amountLabel: { color: PF.textMuted, fontSize: 9, fontWeight: '600', textTransform: 'uppercase' },
+  amountValue: { fontSize: 16, fontWeight: '800' },
+  amountUnit: { color: PF.textMuted, fontSize: 9 },
+  capitalRow: { backgroundColor: 'rgba(255,255,255,0.03)', borderRadius: 10, padding: 12, marginBottom: 16, alignItems: 'center' },
+  capitalLabel: { color: PF.textSecondary, fontSize: 11, fontWeight: '500' },
+  capitalValue: { color: PF.accent, fontSize: 18, fontWeight: '800', marginTop: 4 },
+  capitalMin: { color: PF.textMuted, fontSize: 10, marginTop: 2 },
+  simTitle: { color: PF.textPrimary, fontSize: 14, fontWeight: '700', marginBottom: 10 },
+  simGrid: { flexDirection: 'row', gap: 6 },
+  simItem: {
+    flex: 1, backgroundColor: 'rgba(255,255,255,0.03)', borderRadius: 10, padding: 10, alignItems: 'center', gap: 3, borderWidth: 1,
+  },
+  simItemHighlight: { backgroundColor: 'rgba(74,222,128,0.05)' },
+  simLabel: { fontSize: 10, fontWeight: '700', textTransform: 'uppercase' },
+  simReturn: { fontSize: 11, fontWeight: '600' },
+  simValue: { color: PF.textPrimary, fontSize: 13, fontWeight: '700' },
+  simGains: { fontSize: 11, fontWeight: '600' },
+});
+
 // ─── Main Component ───
 
 interface Phase3ScenariosProps {
@@ -413,7 +559,10 @@ function Phase3ScenariosInner({ onNext }: Phase3ScenariosProps) {
     chooseStrategy,
     generateAllStrategies,
     investmentDuration,
+    monthlyBudget,
+    capitalInitial,
   } = useInvestorJourney();
+  const currency = useEngineStore((s) => s.currency) || 'FCFA';
 
   // Generate strategies on mount if not yet generated
   useEffect(() => {
@@ -433,6 +582,14 @@ function Phase3ScenariosInner({ onNext }: Phase3ScenariosProps) {
   }, [activeStrategies, chosenStrategyId, chooseStrategy]);
 
   const durationMonths = investmentDuration?.months ?? 60;
+
+  // Compute investment guidance for the selected strategy
+  const selectedGuidance = useMemo(() => {
+    if (!chosenStrategyId || activeStrategies.length === 0) return null;
+    const strategy = activeStrategies.find((s) => s.id === chosenStrategyId);
+    if (!strategy) return null;
+    return computeInvestmentGuidance(strategy, monthlyBudget, capitalInitial, durationMonths, currency);
+  }, [chosenStrategyId, activeStrategies, monthlyBudget, capitalInitial, durationMonths, currency]);
 
   return (
     <ScrollView
@@ -458,6 +615,15 @@ function Phase3ScenariosInner({ onNext }: Phase3ScenariosProps) {
           onSelect={() => chooseStrategy(strategy.id)}
         />
       ))}
+
+      {/* Investment Budget & Gain Simulation for selected strategy */}
+      {chosenStrategyId && selectedGuidance && (
+        <InvestmentBudgetCard
+          guidance={selectedGuidance}
+          strategyName={STRATEGY_NAMES[chosenStrategyId]}
+          color={STRATEGY_COLORS[chosenStrategyId]}
+        />
+      )}
 
       {/* Comparison chart */}
       {activeStrategies.length > 0 && (

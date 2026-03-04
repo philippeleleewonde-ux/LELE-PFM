@@ -98,6 +98,57 @@ export interface CheckInRecord {
   totalInvested: number;
   overallPerformance: number;
   notes?: string;
+  marketIndicators?: MarketIndicators;
+  strategyRecommendation?: StrategyRecommendationResult;
+}
+
+// ─── Market Indicators (user-reported at each check-in) ───
+
+export type MarketSentiment = 'very_bearish' | 'bearish' | 'neutral' | 'bullish' | 'very_bullish';
+export type MarketEventImpact = 'very_negative' | 'negative' | 'neutral' | 'positive' | 'very_positive';
+
+export interface MarketEvent {
+  description: string;
+  impact: MarketEventImpact;
+}
+
+export interface MarketIndicators {
+  sentiment: MarketSentiment;
+  inflationTrend: 'rising' | 'stable' | 'falling';
+  interestRateTrend: 'rising' | 'stable' | 'falling';
+  currencyStrength: 'weakening' | 'stable' | 'strengthening';
+  events: MarketEvent[];
+}
+
+// ─── Strategy Re-evaluation Result ───
+
+export interface StrategyRecommendationResult {
+  shouldRebalance: boolean;
+  currentStrategyStillValid: boolean;
+  suggestedStrategyId?: StrategyId;
+  adjustmentReasons: string[];
+  riskScore: number; // 0-100, higher = more risk detected
+  projectedImpact: {
+    optimistic: number; // % change
+    expected: number;
+    pessimistic: number;
+  };
+}
+
+// ─── Investment Amount Guidance ───
+
+export interface InvestmentAmountGuidance {
+  minimumMonthly: number;
+  recommendedMonthly: number;
+  maximumMonthly: number;
+  minimumInitial: number;
+  recommendedInitial: number;
+  currency: string;
+  gainSimulation: {
+    pessimistic: { finalValue: number; totalReturns: number; annualReturn: number };
+    expected: { finalValue: number; totalReturns: number; annualReturn: number };
+    optimistic: { finalValue: number; totalReturns: number; annualReturn: number };
+  };
 }
 
 // ─── Advisory Messages ───
@@ -108,7 +159,8 @@ export type AdvisoryType =
   | 'milestone'
   | 'savings_opportunity'
   | 'risk_warning'
-  | 'procedure_nudge';
+  | 'procedure_nudge'
+  | 'strategy_update';
 
 export type AdvisorySeverity = 'info' | 'warning' | 'success' | 'urgent';
 

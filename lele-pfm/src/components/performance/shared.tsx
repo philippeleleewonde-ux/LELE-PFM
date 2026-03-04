@@ -1,6 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Animated, View, Text, Pressable, StyleSheet, StyleProp, ViewStyle } from 'react-native';
-import { BlurView } from 'expo-blur';
 import { LinearGradient } from 'expo-linear-gradient';
 import { ChevronDown, LucideIcon } from 'lucide-react-native';
 
@@ -8,8 +7,8 @@ import { ChevronDown, LucideIcon } from 'lucide-react-native';
 export const PF = {
   darkBg: '#0F1014',
   darkBgAlt: '#1A1C23',
-  border: 'rgba(255,255,255,0.08)',
-  cardBg: 'rgba(255,255,255,0.04)',
+  border: 'rgba(255,255,255,0.12)',
+  cardBg: 'rgba(255,255,255,0.07)',
   accent: '#FBBF24',
   accentDark: '#D9A11B',
   green: '#4ADE80',
@@ -24,8 +23,8 @@ export const PF = {
   gold: '#FFD700',
   blue: '#60A5FA',
   textPrimary: '#FFFFFF',
-  textSecondary: '#A1A1AA',
-  textMuted: '#52525B',
+  textSecondary: '#D4D4D8',
+  textMuted: '#8B8B94',
   neonCyan: '#FBBF24',
   neonPurple: '#D9A11B',
   neonLime: '#4ADE80',
@@ -154,8 +153,8 @@ const collapsibleStyles = StyleSheet.create({
     borderRadius: 20,
     overflow: 'hidden',
     borderWidth: 1,
-    borderColor: PF.border,
-    backgroundColor: PF.cardBg,
+    borderColor: 'rgba(255,255,255,0.12)',
+    backgroundColor: 'rgba(30,32,40,0.85)',
   },
   header: {
     flexDirection: 'row',
@@ -179,9 +178,8 @@ interface PerfGlassCardProps {
 export function PerfGlassCard({ children, style }: PerfGlassCardProps) {
   return (
     <View style={[perfGlassStyles.card, style]}>
-      <BlurView intensity={20} tint="dark" style={StyleSheet.absoluteFill} pointerEvents="none" />
       <LinearGradient
-        colors={['rgba(255,255,255,0.04)', 'rgba(255,255,255,0.01)']}
+        colors={['rgba(255,255,255,0.07)', 'rgba(255,255,255,0.02)']}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
         style={StyleSheet.absoluteFill}
@@ -196,9 +194,10 @@ const perfGlassStyles = StyleSheet.create({
   card: {
     overflow: 'hidden',
     borderWidth: 1,
-    borderColor: PF.border,
+    borderColor: 'rgba(255,255,255,0.12)',
     borderRadius: 16,
     padding: 16,
+    backgroundColor: 'rgba(30,32,40,0.90)',
   },
 });
 

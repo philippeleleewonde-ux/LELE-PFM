@@ -1,7 +1,7 @@
 import React, { memo, useEffect } from 'react';
 import { View, Text, ScrollView, Pressable, StyleSheet } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { TrendingUp, Shield, Zap, BarChart3, AlertTriangle } from 'lucide-react-native';
+import { TrendingUp, Shield, Zap, BarChart3, AlertTriangle, Star } from 'lucide-react-native';
 import { PF, PerfGlassCard } from '@/components/performance/shared';
 import { JourneyProgressBar } from '@/components/investor-journey/JourneyProgressBar';
 import { StrategyComparisonChart } from '@/components/investor-journey/StrategyComparisonChart';
@@ -97,9 +97,15 @@ function StrategyCard({ strategy, isSelected, onSelect }: StrategyCardProps) {
           </View>
           <View style={{ flex: 1 }}>
             <Text style={[cardStyles.name, { color }]}>
-              {STRATEGY_NAMES[strategy.id]}
+              {strategy.displayName || STRATEGY_NAMES[strategy.id]}
             </Text>
           </View>
+          {strategy.isRecommended && !isSelected && (
+            <View style={[cardStyles.recommendedBadge]}>
+              <Star size={10} color="#FBBF24" />
+              <Text style={cardStyles.recommendedText}>Recommande</Text>
+            </View>
+          )}
           {isSelected && (
             <View style={[cardStyles.selectedBadge, { backgroundColor: color + '25', borderColor: color + '50' }]}>
               <Text style={[cardStyles.selectedText, { color }]}>Selectionne</Text>
@@ -200,6 +206,22 @@ const cardStyles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '700',
   },
+  recommendedBadge: {
+    flexDirection: 'row' as const,
+    alignItems: 'center' as const,
+    gap: 4,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 10,
+    backgroundColor: '#FBBF2420',
+    borderWidth: 1,
+    borderColor: '#FBBF2450',
+  },
+  recommendedText: {
+    fontSize: 10,
+    fontWeight: '700' as const,
+    color: '#FBBF24',
+  },
   selectedBadge: {
     paddingHorizontal: 8,
     paddingVertical: 3,
@@ -293,7 +315,7 @@ function ComparisonTable({ strategies }: { strategies: InvestmentStrategy[] }) {
           <View key={s.id} style={tableStyles.valueCell}>
             <View style={[tableStyles.headerDot, { backgroundColor: STRATEGY_COLORS[s.id] }]} />
             <Text style={[tableStyles.headerText, { color: STRATEGY_COLORS[s.id] }]} numberOfLines={1}>
-              {STRATEGY_NAMES[s.id].slice(0, 6)}
+              {(s.displayName || STRATEGY_NAMES[s.id]).slice(0, 8)}
             </Text>
           </View>
         ))}
@@ -400,6 +422,16 @@ function Phase3ScenariosInner({ onNext }: Phase3ScenariosProps) {
     }
   }, []);
 
+  // Auto-select recommended strategy if none chosen yet
+  useEffect(() => {
+    if (!chosenStrategyId && activeStrategies.length > 0) {
+      const recommended = activeStrategies.find((s) => s.isRecommended);
+      if (recommended) {
+        chooseStrategy(recommended.id);
+      }
+    }
+  }, [activeStrategies, chosenStrategyId, chooseStrategy]);
+
   const durationMonths = investmentDuration?.months ?? 60;
 
   return (
@@ -414,7 +446,7 @@ function Phase3ScenariosInner({ onNext }: Phase3ScenariosProps) {
       {/* Header */}
       <Text style={styles.header}>Choisissez votre strategie</Text>
       <Text style={styles.subtitle}>
-        Comparez 5 profils d'investissement adaptes a vos actifs selectionnes
+        5 strategies adaptees a votre profil et vos actifs selectionnes
       </Text>
 
       {/* Strategy cards */}

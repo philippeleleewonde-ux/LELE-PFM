@@ -57,6 +57,8 @@ export interface PillarWeight {
 export interface InvestmentStrategy {
   id: StrategyId;
   labelKey: string;
+  displayName: string;
+  isRecommended: boolean;
   pillarWeights: PillarWeight[];
   projections: StrategyProjection[];
   finalValue: number;

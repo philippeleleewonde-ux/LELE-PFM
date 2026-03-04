@@ -1,5 +1,5 @@
-import React, { useState, useEffect, memo } from 'react';
-import { View, Text, ScrollView, Pressable, StyleSheet } from 'react-native';
+import React, { useState, useEffect, useMemo, memo } from 'react';
+import { View, Text, ScrollView, Pressable, TextInput, StyleSheet } from 'react-native';
 import {
   Briefcase,
   CalendarCheck,
@@ -10,6 +10,8 @@ import {
   TrendingUp,
   TrendingDown,
   Flame,
+  Info,
+  Wallet,
 } from 'lucide-react-native';
 import { PF, PerfGlassCard, SectionHeader } from '@/components/performance/shared';
 import { JourneyProgressBar } from '@/components/investor-journey/JourneyProgressBar';
@@ -161,7 +163,32 @@ function RendezVousSection({ onOpenCheckIn, onOpenConfig }: RendezVousSectionPro
 // ─── Procedure Checklist Section ───
 
 function ProcedureChecklist() {
-  const { acceptedAssets, procedureProgress, toggleStepComplete, initProcedureProgress } = useInvestorJourney();
+  const {
+    acceptedAssets,
+    procedureProgress,
+    toggleStepComplete,
+    initProcedureProgress,
+    chosenStrategy,
+    monthlyBudget,
+    capitalInitial,
+    investedAmounts,
+    setInvestedAmount,
+  } = useInvestorJourney();
+
+  // Local state for text inputs (string) — synced to store as numbers
+  const [localAmounts, setLocalAmounts] = useState<Record<string, string>>({});
+
+  // Initialize local amounts from store on mount
+  useEffect(() => {
+    const initial: Record<string, string> = {};
+    for (const asset of acceptedAssets) {
+      const stored = investedAmounts[asset.id];
+      if (stored && stored > 0) {
+        initial[asset.id] = String(stored);
+      }
+    }
+    setLocalAmounts(initial);
+  }, []);
 
   // Initialize procedure progress for each accepted asset (needed for toggleStepComplete)
   useEffect(() => {
@@ -172,6 +199,59 @@ function ProcedureChecklist() {
     }
   }, [acceptedAssets, procedureProgress, initProcedureProgress]);
 
+  // Compute per-asset allocation guidance
+  const assetGuidance = useMemo(() => {
+    if (!chosenStrategy || acceptedAssets.length === 0) return {};
+
+    const totalWeight = chosenStrategy.pillarWeights.reduce((s, pw) => s + pw.weight, 0);
+    const result: Record<string, { allocation: number; minInitial: number; maxInitial: number; recommendedInitial: number; minMonthly: number; maxMonthly: number; recommendedMonthly: number }> = {};
+
+    for (const asset of acceptedAssets) {
+      // Find asset's pillar weight
+      const pillarWeight = chosenStrategy.pillarWeights.find(
+        (pw) => pw.pillar === asset.pillar,
+      );
+      const pillarPct = pillarWeight ? pillarWeight.weight : 0;
+
+      // Count assets in same pillar for equal distribution
+      const samePillarCount = acceptedAssets.filter(
+        (a) => a.pillar === asset.pillar,
+      ).length;
+      const assetPct = samePillarCount > 0 ? pillarPct / samePillarCount : 0;
+      const ratio = totalWeight > 0 ? assetPct / 100 : 0;
+
+      // Per-asset amounts based on allocation %
+      const recInitial = Math.round(capitalInitial * ratio);
+      const minInitial = Math.round(Math.max(recInitial * 0.3, 5000));
+      const maxInitial = Math.round(recInitial * 1.5);
+
+      const recMonthly = Math.round(monthlyBudget * ratio);
+      const minMonthly = Math.round(Math.max(recMonthly * 0.3, 2000));
+      const maxMonthly = Math.round(recMonthly * 1.5);
+
+      result[asset.id] = {
+        allocation: Math.round(assetPct),
+        minInitial,
+        maxInitial,
+        recommendedInitial: recInitial,
+        minMonthly,
+        maxMonthly,
+        recommendedMonthly: recMonthly,
+      };
+    }
+
+    return result;
+  }, [chosenStrategy, acceptedAssets, capitalInitial, monthlyBudget]);
+
+  const handleAmountChange = (assetId: string, value: string) => {
+    const cleaned = value.replace(/[^0-9]/g, '');
+    setLocalAmounts((prev) => ({ ...prev, [assetId]: cleaned }));
+    const num = parseInt(cleaned) || 0;
+    if (num > 0) {
+      setInvestedAmount(assetId, num);
+    }
+  };
+
   if (acceptedAssets.length === 0) return null;
 
   return (
@@ -181,8 +261,9 @@ function ProcedureChecklist() {
       {acceptedAssets.map((asset) => {
         const progress = procedureProgress[asset.id];
         const completedSteps = progress?.completedSteps ?? [];
+        const guidance = assetGuidance[asset.id];
+
         // Build a simple placeholder steps list based on asset class
-        // In production, these would come from the procedures knowledge base
         const mockSteps: ProcedureStep[] = [
           {
             order: 1,
@@ -219,12 +300,19 @@ function ProcedureChecklist() {
 
         return (
           <View key={asset.id} style={styles.procedureAsset}>
-            {/* Asset header */}
+            {/* Asset header with allocation % */}
             <View style={styles.procedureHeader}>
               <Text style={styles.procedureAssetName}>{asset.name}</Text>
-              <Text style={styles.procedureProgress}>
-                {completedCount}/{totalSteps}
-              </Text>
+              <View style={styles.procedureHeaderRight}>
+                {guidance && (
+                  <View style={styles.allocationBadge}>
+                    <Text style={styles.allocationBadgeText}>{guidance.allocation}%</Text>
+                  </View>
+                )}
+                <Text style={styles.procedureProgress}>
+                  {completedCount}/{totalSteps}
+                </Text>
+              </View>
             </View>
 
             {/* Progress bar */}
@@ -237,15 +325,89 @@ function ProcedureChecklist() {
               />
             </View>
 
+            {/* Investment guidance card */}
+            {guidance && guidance.recommendedInitial > 0 && (
+              <View style={styles.guidanceCard}>
+                <View style={styles.guidanceHeader}>
+                  <Info size={14} color={PF.blue} />
+                  <Text style={styles.guidanceTitle}>Montant conseille</Text>
+                </View>
+                <View style={styles.guidanceGrid}>
+                  <View style={styles.guidanceItem}>
+                    <Text style={styles.guidanceLabel}>Minimum</Text>
+                    <Text style={styles.guidanceValue}>
+                      {guidance.minInitial.toLocaleString()} FCFA
+                    </Text>
+                  </View>
+                  <View style={[styles.guidanceItem, styles.guidanceItemHighlight]}>
+                    <Text style={styles.guidanceLabelHighlight}>Recommande</Text>
+                    <Text style={styles.guidanceValueHighlight}>
+                      {guidance.recommendedInitial.toLocaleString()} FCFA
+                    </Text>
+                  </View>
+                  <View style={styles.guidanceItem}>
+                    <Text style={styles.guidanceLabel}>Maximum</Text>
+                    <Text style={styles.guidanceValue}>
+                      {guidance.maxInitial.toLocaleString()} FCFA
+                    </Text>
+                  </View>
+                </View>
+                {guidance.recommendedMonthly > 0 && (
+                  <View style={styles.guidanceMonthly}>
+                    <Text style={styles.guidanceMonthlyText}>
+                      Versement mensuel conseille : {guidance.minMonthly.toLocaleString()} - {guidance.maxMonthly.toLocaleString()} FCFA
+                    </Text>
+                  </View>
+                )}
+              </View>
+            )}
+
             {/* Steps */}
             {mockSteps.map((step) => (
-              <ProcedureStepCard
-                key={step.order}
-                step={step}
-                isCompleted={completedSteps.includes(step.order)}
-                onToggle={() => toggleStepComplete(asset.id, step.order)}
-                stepNumber={step.order}
-              />
+              <View key={step.order}>
+                <ProcedureStepCard
+                  step={step}
+                  isCompleted={completedSteps.includes(step.order)}
+                  onToggle={() => toggleStepComplete(asset.id, step.order)}
+                  stepNumber={step.order}
+                />
+                {/* Investment amount input on the "versement" step */}
+                {step.order === 2 && (
+                  <View style={styles.investedInputContainer}>
+                    <View style={styles.investedInputHeader}>
+                      <Wallet size={14} color={PF.accent} />
+                      <Text style={styles.investedInputLabel}>Montant investi</Text>
+                    </View>
+                    <View style={styles.investedInputRow}>
+                      <TextInput
+                        style={styles.investedInput}
+                        value={localAmounts[asset.id] ?? ''}
+                        onChangeText={(v) => handleAmountChange(asset.id, v)}
+                        keyboardType="numeric"
+                        placeholder={guidance ? guidance.recommendedInitial.toLocaleString() : '0'}
+                        placeholderTextColor={PF.textMuted}
+                      />
+                      <Text style={styles.investedInputCurrency}>FCFA</Text>
+                    </View>
+                    {investedAmounts[asset.id] > 0 && guidance && (
+                      <Text style={[
+                        styles.investedFeedback,
+                        {
+                          color: investedAmounts[asset.id] >= guidance.minInitial
+                            ? PF.green
+                            : PF.orange,
+                        },
+                      ]}>
+                        {investedAmounts[asset.id] >= guidance.minInitial
+                          ? investedAmounts[asset.id] >= guidance.recommendedInitial
+                            ? 'Montant dans la fourchette recommandee'
+                            : 'Montant acceptable (au-dessus du minimum)'
+                          : 'Montant en dessous du minimum conseille'}
+                      </Text>
+                    )}
+                  </View>
+                )}
+              </View>
             ))}
           </View>
         );
@@ -367,6 +529,7 @@ function Phase5DashboardInner() {
     activeStrategies,
     checkIns,
     investmentDuration,
+    investedAmounts,
   } = useInvestorJourney();
   const perf = usePortfolioPerformance();
   const [showCheckIn, setShowCheckIn] = useState(false);
@@ -418,6 +581,7 @@ function Phase5DashboardInner() {
         previousCheckIns={checkIns}
         projectedValue={perf?.projectedValue}
         durationMonths={investmentDuration?.months}
+        prefillInvestedAmounts={investedAmounts}
       />
 
       <RendezVousConfigModal
@@ -623,6 +787,144 @@ const styles = StyleSheet.create({
     height: '100%',
     backgroundColor: PF.green,
     borderRadius: 2,
+  },
+  procedureHeaderRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  allocationBadge: {
+    backgroundColor: PF.accent + '20',
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 8,
+  },
+  allocationBadgeText: {
+    color: PF.accent,
+    fontSize: 11,
+    fontWeight: '700',
+  },
+
+  // Investment guidance
+  guidanceCard: {
+    backgroundColor: PF.blue + '10',
+    borderRadius: 12,
+    padding: 12,
+    marginTop: 8,
+    marginBottom: 4,
+    borderWidth: 1,
+    borderColor: PF.blue + '20',
+  },
+  guidanceHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginBottom: 10,
+  },
+  guidanceTitle: {
+    color: PF.blue,
+    fontSize: 12,
+    fontWeight: '700',
+  },
+  guidanceGrid: {
+    flexDirection: 'row',
+    gap: 6,
+  },
+  guidanceItem: {
+    flex: 1,
+    backgroundColor: 'rgba(255,255,255,0.04)',
+    borderRadius: 8,
+    padding: 8,
+    alignItems: 'center',
+    gap: 2,
+  },
+  guidanceItemHighlight: {
+    backgroundColor: PF.accent + '15',
+    borderWidth: 1,
+    borderColor: PF.accent + '30',
+  },
+  guidanceLabel: {
+    color: PF.textMuted,
+    fontSize: 9,
+    fontWeight: '500',
+    textTransform: 'uppercase',
+  },
+  guidanceLabelHighlight: {
+    color: PF.accent,
+    fontSize: 9,
+    fontWeight: '600',
+    textTransform: 'uppercase',
+  },
+  guidanceValue: {
+    color: PF.textPrimary,
+    fontSize: 12,
+    fontWeight: '700',
+  },
+  guidanceValueHighlight: {
+    color: PF.accent,
+    fontSize: 13,
+    fontWeight: '800',
+  },
+  guidanceMonthly: {
+    marginTop: 8,
+    paddingTop: 8,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(255,255,255,0.06)',
+  },
+  guidanceMonthlyText: {
+    color: PF.textSecondary,
+    fontSize: 11,
+    textAlign: 'center',
+  },
+
+  // Invested amount input
+  investedInputContainer: {
+    marginLeft: 36,
+    marginTop: 4,
+    marginBottom: 8,
+    backgroundColor: 'rgba(255,255,255,0.03)',
+    borderRadius: 10,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: PF.accent + '15',
+  },
+  investedInputHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginBottom: 8,
+  },
+  investedInputLabel: {
+    color: PF.accent,
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  investedInputRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  investedInput: {
+    flex: 1,
+    backgroundColor: 'rgba(255,255,255,0.06)',
+    borderRadius: 10,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    color: PF.textPrimary,
+    fontSize: 16,
+    fontWeight: '700',
+    borderWidth: 1,
+    borderColor: PF.border,
+  },
+  investedInputCurrency: {
+    color: PF.textMuted,
+    fontSize: 13,
+    fontWeight: '600',
+  },
+  investedFeedback: {
+    fontSize: 11,
+    fontWeight: '500',
+    marginTop: 6,
   },
 
   // Check-in history

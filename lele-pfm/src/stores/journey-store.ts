@@ -21,7 +21,7 @@ const DEFAULT_RENDEZ_VOUS: RendezVousConfig = {
   enabled: true,
 };
 
-const DEFAULT_STATE: JourneyState = {
+const DEFAULT_STATE: JourneyState & { investedAmounts: Record<string, number> } = {
   currentPhase: 'recommendation',
   recommendedAssets: [],
   selectedAssets: [],
@@ -34,6 +34,7 @@ const DEFAULT_STATE: JourneyState = {
   procedureProgress: {},
   journeyStartedAt: null,
   lastCheckInAt: null,
+  investedAmounts: {},
 };
 
 interface JourneyActions {
@@ -53,6 +54,7 @@ interface JourneyActions {
   dismissAdvisory: (messageId: string) => void;
   toggleStepComplete: (assetId: string, stepOrder: number) => void;
   initProcedureProgress: (assetId: string, assetClass: AssetClass, countryCode: string) => void;
+  setInvestedAmount: (assetId: string, amount: number) => void;
   startJourney: () => void;
   resetJourney: () => void;
   getAcceptedAssets: () => SelectedAsset[];
@@ -62,7 +64,7 @@ interface JourneyActions {
   getStreak: () => number;
 }
 
-type JourneyStore = JourneyState & JourneyActions;
+type JourneyStore = JourneyState & { investedAmounts: Record<string, number> } & JourneyActions;
 
 export const useJourneyStore = create<JourneyStore>()(
   persist(
@@ -195,6 +197,15 @@ export const useJourneyStore = create<JourneyStore>()(
         });
       },
 
+      setInvestedAmount: (assetId, amount) => {
+        set((state) => ({
+          investedAmounts: {
+            ...state.investedAmounts,
+            [assetId]: amount,
+          },
+        }));
+      },
+
       startJourney: () => set({ journeyStartedAt: new Date().toISOString() }),
 
       resetJourney: () => set({ ...DEFAULT_STATE }),
@@ -258,6 +269,7 @@ export const useJourneyStore = create<JourneyStore>()(
         checkIns: state.checkIns,
         advisoryMessages: state.advisoryMessages,
         procedureProgress: state.procedureProgress,
+        investedAmounts: state.investedAmounts,
         journeyStartedAt: state.journeyStartedAt,
         lastCheckInAt: state.lastCheckInAt,
       }),

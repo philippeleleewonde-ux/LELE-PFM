@@ -330,6 +330,187 @@ export function regenerateProjections(
   };
 }
 
+// ─── Investment Amount Guidance & Market Re-evaluation ───
+
+import {
+  InvestmentAmountGuidance,
+  MarketIndicators,
+  StrategyRecommendationResult,
+  CheckInRecord,
+} from '@/types/investor-journey';
+
+/**
+ * Compute min/max/recommended investment amounts with gain simulations
+ * for a given strategy.
+ */
+export function computeInvestmentGuidance(
+  strategy: InvestmentStrategy,
+  monthlyBudget: number,
+  capitalInitial: number,
+  durationMonths: number,
+  currency: string = 'FCFA',
+): InvestmentAmountGuidance {
+  const returnRate = strategy.weightedReturnRate;
+  const volatility = strategy.weightedVolatility;
+
+  // Min = 30% of budget, Recommended = budget, Max = 150% of budget (capped by risk)
+  const riskMultiplier = Math.max(0.5, 1 - volatility / 100);
+  const minimumMonthly = Math.round(Math.max(monthlyBudget * 0.3, 5000));
+  const recommendedMonthly = Math.round(monthlyBudget);
+  const maximumMonthly = Math.round(monthlyBudget * (1 + riskMultiplier));
+
+  // Minimum initial = first product minAmount or 10% of capital
+  const minimumInitial = Math.round(Math.max(capitalInitial * 0.1, 10000));
+  const recommendedInitial = Math.round(capitalInitial);
+
+  // Gain simulation: pessimistic (-1 vol), expected (base), optimistic (+0.5 vol)
+  const pessReturn = Math.max(0, returnRate - volatility * 0.6);
+  const optReturn = returnRate + volatility * 0.3;
+
+  const simulate = (annualReturn: number) => {
+    const r = annualReturn / 100 / 12;
+    let value = recommendedInitial;
+    for (let t = 1; t <= durationMonths; t++) {
+      value = (value + recommendedMonthly) * (1 + r);
+    }
+    const totalInvested = recommendedInitial + recommendedMonthly * durationMonths;
+    return {
+      finalValue: Math.round(value),
+      totalReturns: Math.round(value - totalInvested),
+      annualReturn: Math.round(annualReturn * 100) / 100,
+    };
+  };
+
+  return {
+    minimumMonthly,
+    recommendedMonthly,
+    maximumMonthly,
+    minimumInitial,
+    recommendedInitial,
+    currency,
+    gainSimulation: {
+      pessimistic: simulate(pessReturn),
+      expected: simulate(returnRate),
+      optimistic: simulate(optReturn),
+    },
+  };
+}
+
+// ─── Strategy Re-evaluation based on Market Data ───
+
+const SENTIMENT_SCORES: Record<string, number> = {
+  very_bearish: -2, bearish: -1, neutral: 0, bullish: 1, very_bullish: 2,
+};
+
+const EVENT_IMPACT_SCORES: Record<string, number> = {
+  very_negative: -2, negative: -1, neutral: 0, positive: 1, very_positive: 2,
+};
+
+/**
+ * Evaluate whether the current strategy should be adjusted
+ * based on market indicators and portfolio performance.
+ */
+export function evaluateStrategyAdjustment(
+  currentStrategyId: StrategyId,
+  strategies: InvestmentStrategy[],
+  marketIndicators: MarketIndicators,
+  checkIns: CheckInRecord[],
+  durationMonths: number,
+): StrategyRecommendationResult {
+  const reasons: string[] = [];
+  let riskScore = 50; // baseline
+
+  // 1. Market sentiment impact
+  const sentimentScore = SENTIMENT_SCORES[marketIndicators.sentiment] ?? 0;
+  riskScore -= sentimentScore * 10;
+  if (sentimentScore <= -1) {
+    reasons.push('Sentiment de marche negatif detecte');
+  } else if (sentimentScore >= 1) {
+    reasons.push('Sentiment de marche positif detecte');
+  }
+
+  // 2. Macro trends
+  if (marketIndicators.inflationTrend === 'rising') {
+    riskScore += 10;
+    reasons.push('Inflation en hausse - privilegier les actifs refuges');
+  }
+  if (marketIndicators.interestRateTrend === 'rising') {
+    riskScore += 5;
+    reasons.push('Taux d\'interet en hausse - impact sur les obligations');
+  }
+  if (marketIndicators.currencyStrength === 'weakening') {
+    riskScore += 8;
+    reasons.push('Devise en affaiblissement - diversifier les devises');
+  }
+
+  // 3. Market events
+  for (const event of marketIndicators.events) {
+    const impact = EVENT_IMPACT_SCORES[event.impact] ?? 0;
+    riskScore -= impact * 5;
+    if (Math.abs(impact) >= 2) {
+      reasons.push(event.description);
+    }
+  }
+
+  // 4. Recent performance deviation
+  const recentCheckIns = checkIns
+    .filter((c) => c.status === 'completed')
+    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+    .slice(0, 3);
+
+  if (recentCheckIns.length >= 2) {
+    const avgPerf = recentCheckIns.reduce((s, c) => s + c.overallPerformance, 0) / recentCheckIns.length;
+    if (avgPerf < -5) {
+      riskScore += 15;
+      reasons.push(`Performance moyenne recente negative (${avgPerf.toFixed(1)}%)`);
+    } else if (avgPerf > 10) {
+      riskScore -= 5;
+      reasons.push(`Bonne performance recente (+${avgPerf.toFixed(1)}%)`);
+    }
+  }
+
+  riskScore = Math.max(0, Math.min(100, riskScore));
+
+  // Determine if we should suggest a different strategy
+  const currentIdx = STRATEGY_IDS.indexOf(currentStrategyId);
+  let suggestedIdx = currentIdx;
+  let shouldRebalance = false;
+
+  if (riskScore >= 70 && currentIdx < STRATEGY_IDS.length - 1) {
+    // High risk: suggest more conservative
+    suggestedIdx = Math.max(0, currentIdx - 1);
+    shouldRebalance = true;
+    reasons.push('Recommandation : basculer vers une strategie plus prudente');
+  } else if (riskScore <= 30 && currentIdx > 0) {
+    // Low risk: could go more aggressive
+    suggestedIdx = Math.min(STRATEGY_IDS.length - 1, currentIdx + 1);
+    shouldRebalance = true;
+    reasons.push('Opportunite : conditions favorables pour plus de croissance');
+  }
+
+  const currentStrategy = strategies.find((s) => s.id === currentStrategyId);
+  const baseReturn = currentStrategy?.weightedReturnRate ?? 5;
+  const baseVol = currentStrategy?.weightedVolatility ?? 10;
+
+  // Projected impact on returns based on market conditions
+  const marketAdjustment = (sentimentScore * 1.5) +
+    (marketIndicators.inflationTrend === 'rising' ? -1 : marketIndicators.inflationTrend === 'falling' ? 0.5 : 0) +
+    (marketIndicators.currencyStrength === 'weakening' ? -0.8 : marketIndicators.currencyStrength === 'strengthening' ? 0.5 : 0);
+
+  return {
+    shouldRebalance,
+    currentStrategyStillValid: !shouldRebalance,
+    suggestedStrategyId: shouldRebalance ? STRATEGY_IDS[suggestedIdx] : undefined,
+    adjustmentReasons: reasons,
+    riskScore,
+    projectedImpact: {
+      optimistic: Math.round((baseReturn + baseVol * 0.3 + marketAdjustment) * 100) / 100,
+      expected: Math.round((baseReturn + marketAdjustment) * 100) / 100,
+      pessimistic: Math.round((baseReturn - baseVol * 0.6 + marketAdjustment) * 100) / 100,
+    },
+  };
+}
+
 // ─── Helpers ───
 
 function groupByPillar(assets: SelectedAsset[]): Record<InvestmentPillar, SelectedAsset[]> {

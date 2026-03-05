@@ -1,5 +1,17 @@
 # LELE PFM - Configuration Projet Claude Code
 
+## REGLE OBLIGATOIRE - Memoire persistante
+
+**Au debut de CHAQUE session ou conversation, Claude DOIT :**
+1. Lire le fichier `CORRECTIONS-LOG.md` a la racine du projet
+2. Prendre en compte toutes les corrections EN ATTENTE ou EN COURS
+3. Documenter dans ce fichier toute nouvelle correction demandee par l'utilisateur
+4. Mettre a jour le statut des corrections au fur et a mesure
+
+Ce fichier est la memoire persistante du projet. Ne JAMAIS ignorer son contenu.
+
+---
+
 ## Projet
 Application mobile de gestion financiere personnelle (Personal Finance Management).
 Nom commercial : **LELE PFM**

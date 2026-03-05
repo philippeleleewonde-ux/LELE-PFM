@@ -34,7 +34,12 @@
       "WebFetch(domain:github.com)",
       "Bash(git checkout main)",
       "Bash(git merge claude/check-status-aE5a6 --no-edit)",
-      "Bash(git checkout claude/check-status-aE5a6)"
+      "Bash(git checkout claude/check-status-aE5a6)",
+      "Bash(test -d /home/user/LELE-PFM/lele-pfm)",
+      "Bash(test -f /home/user/LELE-PFM/package.json)",
+      "Bash(test -f /home/user/LELE-PFM/lele-pfm/package-lock.json)",
+      "Bash(gh run list --limit 3)",
+      "Bash(git checkout -b claude/check-status-aE5a6)"
     ],
     "deny": [],
     "ask": []

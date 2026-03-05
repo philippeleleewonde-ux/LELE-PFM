@@ -174,6 +174,7 @@ export function useInvestorJourney() {
     checkIns: store.checkIns,
     advisoryMessages: store.advisoryMessages,
     procedureProgress: store.procedureProgress,
+    investedAmounts: store.investedAmounts,
     isJourneyActive,
     journeyStartedAt: store.journeyStartedAt,
 
@@ -203,6 +204,7 @@ export function useInvestorJourney() {
     addCheckIn: store.addCheckIn,
     toggleStepComplete: store.toggleStepComplete,
     initProcedureProgress: store.initProcedureProgress,
+    setInvestedAmount: store.setInvestedAmount,
     dismissAdvisory: store.dismissAdvisory,
     resetJourney: store.resetJourney,
   };

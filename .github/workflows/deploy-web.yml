@@ -1,0 +1,88 @@
+name: Deploy LELE PFM Web
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'lele-pfm/**'
+      - '.github/workflows/deploy-web.yml'
+  workflow_dispatch: # Permet le déclenchement manuel depuis GitHub
+
+env:
+  NODE_VERSION: '20'
+
+jobs:
+  build-and-deploy:
+    name: Build & Deploy
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      # ─── Checkout ───
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # ─── Node.js + Cache ───
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: lele-pfm/package-lock.json
+
+      # ─── Install dependencies ───
+      - name: Install dependencies
+        working-directory: lele-pfm
+        run: npm ci
+
+      # ─── Create .env for build ───
+      - name: Create .env
+        working-directory: lele-pfm
+        run: |
+          cat > .env << EOF
+          EXPO_PUBLIC_SUPABASE_URL=${{ secrets.EXPO_PUBLIC_SUPABASE_URL }}
+          EXPO_PUBLIC_SUPABASE_ANON_KEY=${{ secrets.EXPO_PUBLIC_SUPABASE_ANON_KEY }}
+          EOF
+
+      # ─── Build Expo Web ───
+      - name: Build Expo Web
+        working-directory: lele-pfm
+        run: npx expo export --platform web
+
+      # ─── Verify build output ───
+      - name: Verify build
+        working-directory: lele-pfm
+        run: |
+          if [ ! -f dist/index.html ]; then
+            echo "❌ Build failed: dist/index.html not found"
+            exit 1
+          fi
+          echo "✅ Build OK — $(find dist -type f | wc -l) files"
+
+      # ─── Deploy via rsync over SSH ───
+      - name: Deploy to VPS
+        uses: easingthemes/ssh-deploy@v5
+        with:
+          SSH_PRIVATE_KEY: ${{ secrets.VPS_SSH_PRIVATE_KEY }}
+          REMOTE_HOST: ${{ secrets.VPS_HOST }}
+          REMOTE_USER: ${{ secrets.VPS_USER }}
+          REMOTE_PORT: ${{ secrets.VPS_PORT || '22' }}
+          SOURCE: lele-pfm/dist/
+          TARGET: /var/www/pfm/
+          ARGS: -rlgoDzvc --delete
+          SCRIPT_AFTER: |
+            chown -R www-data:www-data /var/www/pfm
+            chmod -R 755 /var/www/pfm
+            systemctl reload nginx
+            echo "✅ Deployed at $(date)"
+
+      # ─── Health check ───
+      - name: Health check
+        run: |
+          sleep 5
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://${{ secrets.DEPLOY_DOMAIN || 'pfm.hcmtechhub.cloud' }}/)
+          if [ "$STATUS" = "200" ]; then
+            echo "✅ Site is live — HTTP $STATUS"
+          else
+            echo "⚠️ Site returned HTTP $STATUS — check Nginx"
+          fi

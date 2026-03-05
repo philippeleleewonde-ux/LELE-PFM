@@ -30,6 +30,7 @@ interface CheckInModalProps {
   previousCheckIns?: CheckInRecord[];
   projectedValue?: number;
   durationMonths?: number;
+  prefillInvestedAmounts?: Record<string, number>;
 }
 
 interface AssetEntry {
@@ -91,15 +92,20 @@ export function CheckInModal({
   previousCheckIns = [],
   projectedValue,
   durationMonths = 60,
+  prefillInvestedAmounts = {},
 }: CheckInModalProps) {
   const [step, setStep] = useState<CheckInStep>('portfolio');
   const [entries, setEntries] = useState<AssetEntry[]>(() =>
-    assets.map((a) => ({
-      assetId: a.id,
-      name: a.name,
-      invested: '',
-      currentValue: '',
-    })),
+    assets.map((a) => {
+      const prefill = prefillInvestedAmounts[a.id];
+      const investedStr = prefill && prefill > 0 ? String(prefill) : '';
+      return {
+        assetId: a.id,
+        name: a.name,
+        invested: investedStr,
+        currentValue: investedStr, // Pre-fill current value = invested for first check-in
+      };
+    }),
   );
   const [notes, setNotes] = useState('');
   const { width } = useWindowDimensions();
@@ -214,8 +220,12 @@ export function CheckInModal({
     };
 
     onSubmit(checkIn);
-    // Reset
-    setEntries(assets.map((a) => ({ assetId: a.id, name: a.name, invested: '', currentValue: '' })));
+    // Reset with prefill values for next check-in
+    setEntries(assets.map((a) => {
+      const prefill = prefillInvestedAmounts[a.id];
+      const investedStr = prefill && prefill > 0 ? String(prefill) : '';
+      return { assetId: a.id, name: a.name, invested: investedStr, currentValue: '' };
+    }));
     setNotes('');
     setSentiment('neutral');
     setInflationTrend('stable');

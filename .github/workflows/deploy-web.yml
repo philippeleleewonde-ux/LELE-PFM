@@ -30,7 +30,7 @@ jobs:
       # ─── Install dependencies ───
       - name: Install dependencies
         working-directory: lele-pfm
-        run: npm ci
+        run: npm ci --legacy-peer-deps
 
       # ─── Create .env for build ───
       - name: Create .env

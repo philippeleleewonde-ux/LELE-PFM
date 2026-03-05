@@ -54,22 +54,28 @@ jobs:
           fi
           echo "✅ Build OK — $(find dist -type f | wc -l) files"
 
+      # ─── Setup SSH ───
+      - name: Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.VPS_SSH_PRIVATE_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -p ${{ secrets.VPS_PORT }} ${{ secrets.VPS_HOST }} >> ~/.ssh/known_hosts 2>/dev/null
+
       # ─── Deploy via rsync over SSH ───
       - name: Deploy to VPS
-        uses: easingthemes/ssh-deploy@v4
-        with:
-          SSH_PRIVATE_KEY: ${{ secrets.VPS_SSH_PRIVATE_KEY }}
-          REMOTE_HOST: ${{ secrets.VPS_HOST }}
-          REMOTE_USER: ${{ secrets.VPS_USER }}
-          REMOTE_PORT: ${{ secrets.VPS_PORT }}
-          SOURCE: lele-pfm/dist/
-          TARGET: /var/www/pfm/
-          ARGS: -rlgoDzvc --delete
-          SCRIPT_AFTER: |
-            chown -R www-data:www-data /var/www/pfm
-            chmod -R 755 /var/www/pfm
-            systemctl reload nginx
-            echo "✅ Deployed at $(date)"
+        run: |
+          rsync -rlgoDzvc --delete \
+            -e "ssh -p ${{ secrets.VPS_PORT }} -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no" \
+            lele-pfm/dist/ \
+            ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:/var/www/pfm/
+
+      # ─── Post-deploy commands ───
+      - name: Post-deploy
+        run: |
+          ssh -p ${{ secrets.VPS_PORT }} -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no \
+            ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} \
+            "chown -R www-data:www-data /var/www/pfm && chmod -R 755 /var/www/pfm && systemctl reload nginx && echo 'Deployed at $(date)'"
 
       # ─── Health check ───
       - name: Health check

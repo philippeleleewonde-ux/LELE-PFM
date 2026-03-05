@@ -40,7 +40,10 @@
       "Bash(test -f /home/user/LELE-PFM/lele-pfm/package-lock.json)",
       "Bash(gh run list --limit 3)",
       "Bash(git checkout -b claude/check-status-aE5a6)",
-      "Bash(gh pr:*)"
+      "Bash(gh pr:*)",
+      "Bash(npx expo export --platform web)",
+      "Bash(npm ci --legacy-peer-deps)",
+      "Bash(git reset --soft HEAD~1)"
     ],
     "deny": [],
     "ask": []

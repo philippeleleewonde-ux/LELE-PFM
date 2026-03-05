@@ -31,7 +31,10 @@
       "Bash(find:*)",
       "Bash(ls:*)",
       "Bash(git fetch origin main)",
-      "WebFetch(domain:github.com)"
+      "WebFetch(domain:github.com)",
+      "Bash(git checkout main)",
+      "Bash(git merge claude/check-status-aE5a6 --no-edit)",
+      "Bash(git checkout claude/check-status-aE5a6)"
     ],
     "deny": [],
     "ask": []

@@ -39,7 +39,8 @@
       "Bash(test -f /home/user/LELE-PFM/package.json)",
       "Bash(test -f /home/user/LELE-PFM/lele-pfm/package-lock.json)",
       "Bash(gh run list --limit 3)",
-      "Bash(git checkout -b claude/check-status-aE5a6)"
+      "Bash(git checkout -b claude/check-status-aE5a6)",
+      "Bash(gh pr:*)"
     ],
     "deny": [],
     "ask": []

@@ -29,7 +29,8 @@
       "Bash(git remote:*)",
       "Bash(gh auth:*)",
       "Bash(find:*)",
-      "Bash(ls:*)"
+      "Bash(ls:*)",
+      "Bash(git fetch origin main)"
     ],
     "deny": [],
     "ask": []

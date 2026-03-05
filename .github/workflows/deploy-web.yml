@@ -3,9 +3,6 @@ name: Deploy LELE PFM Web
 on:
   push:
     branches: [main]
-    paths:
-      - 'lele-pfm/**'
-      - '.github/workflows/deploy-web.yml'
   workflow_dispatch: # Permet le déclenchement manuel depuis GitHub
 
 env:
